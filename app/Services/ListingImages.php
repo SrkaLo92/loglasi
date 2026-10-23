@@ -18,7 +18,7 @@ use Illuminate\Validation\ValidationException;
 /**
  * Listing images: upload (JPEG, PNG, WebP), content check, EXIF removal with the
  * orientation applied, storage on the "public" disk under oglasi/{listing id|tmp}/,
- * variants (sm 320, md 800, lg 1600 px wide; WebP + JPEG), order, cover, delete.
+ * variants (sm 400, md 800, lg 1600 px wide; WebP + JPEG), order, cover, delete.
  *
  * Variants are made by the queued GenerateImageVariants job; `php artisan images:variants`
  * fills in the ones that are missing (imported WordPress images).
@@ -28,7 +28,7 @@ class ListingImages
     public const DISK = 'public';
 
     /** Variant name => width in px. */
-    public const SIZES = ['sm' => 320, 'md' => 800, 'lg' => 1600];
+    public const SIZES = ['sm' => 400, 'md' => 800, 'lg' => 1600];
 
     public const DEFAULT_MAX_IMAGES = 20;
 
@@ -341,12 +341,14 @@ class ListingImages
         $variants = [];
         foreach (self::SIZES as $name => $width) {
             $resized = $this->resizeToWidth($source, $width);
-            $variant = ['width' => imagesx($resized), 'height' => imagesy($resized)];
+            // shape shared with the listing page: {"webp": path, "jpg": path, "width": px}
+            $variant = [];
             foreach (['webp', 'jpg'] as $format) {
                 $file = $base.'-'.$name.'.'.$format;
                 $disk->put($file, $this->encode($resized, $format));
                 $variant[$format] = $file;
             }
+            $variant['width'] = imagesx($resized);
             if ($resized !== $source) {
                 imagedestroy($resized);
             }

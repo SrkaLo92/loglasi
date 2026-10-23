@@ -53,7 +53,8 @@ class ListingImagesTest extends PostingTestCase
         $image = $this->service()->upload($this->image('large.jpg'), $this->user())->refresh();
 
         $this->assertSame(['sm', 'md', 'lg'], array_keys($image->variants));
-        foreach (['sm' => 320, 'md' => 800, 'lg' => 1600] as $name => $width) {
+        foreach (['sm' => 400, 'md' => 800, 'lg' => 1600] as $name => $width) {
+            $this->assertSame(['webp', 'jpg', 'width'], array_keys($image->variants[$name]));
             $variant = $image->variants[$name];
             $this->assertSame($width, $variant['width']);
             foreach (['webp' => IMAGETYPE_WEBP, 'jpg' => IMAGETYPE_JPEG] as $format => $type) {
@@ -75,7 +76,7 @@ class ListingImagesTest extends PostingTestCase
 
         $this->assertStringEndsWith('.webp', $image->path);
         $this->assertSame(320, $image->variants['lg']['width']);
-        $this->assertSame(240, $image->variants['lg']['height']);
+        $this->assertSame(320, $image->variants['sm']['width']);
     }
 
     public function test_png_with_transparency_gets_white_background_in_jpeg(): void

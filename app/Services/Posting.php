@@ -110,6 +110,9 @@ class Posting
     /** @throws PostingRefused */
     public function createDraft(User $user, Category $category, bool $limitDrafts = true): Listing
     {
+        if (! $this->isPostableCategory($category)) {
+            throw new PostingRefused('invalid_category', 'Izaberite kategoriju sa spiska (poslednji nivo).', field: 'category_id');
+        }
         $this->ensureCanCreate($user);
 
         $drafts = Listing::query()->where('user_id', $user->id)->where('status', ListingStatus::Draft)->count();

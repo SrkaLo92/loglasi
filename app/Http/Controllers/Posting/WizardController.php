@@ -347,6 +347,7 @@ class WizardController extends Controller
             'next' => Wizard::next($listing, $step),
             'previous' => Wizard::previous($listing, $step),
             'breadcrumbs' => $this->catalog->breadcrumbs($listing->category_id),
+            'hideMobileNav' => true, // the wizard has its own buttons at the bottom
         ]);
     }
 
