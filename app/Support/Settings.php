@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Support;
+
+use App\Models\Setting;
+use Illuminate\Support\Facades\Cache;
+
+/**
+ * Podešavanja sajta koja se menjaju iz admina (kurs, limiti, tekstovi...).
+ * Sve vrednosti se čitaju iz jednog keširanog niza.
+ */
+class Settings
+{
+    private const CACHE_KEY = 'settings.all';
+
+    /** Podrazumevane vrednosti kad u bazi nema zapisa. */
+    public const DEFAULTS = [
+        'eur_rate' => 117.2,               // 1 € = ... din
+        'private_monthly_limit' => 10,     // novi oglasi mesečno za privatna lica
+        'listing_duration_days' => 30,     // oglas traje mesec dana, obnova besplatna
+        'moderation' => 'new_users',       // all | new_users | none
+        'founding_firms_total' => 30,      // prvih 30 firmi besplatno
+        'contact_email' => 'kontakt.loglasi.rs@gmail.com',
+    ];
+
+    public static function get(string $key, mixed $default = null): mixed
+    {
+        $all = static::all();
+
+        return array_key_exists($key, $all) ? $all[$key] : ($default ?? (self::DEFAULTS[$key] ?? null));
+    }
+
+    public static function set(string $key, mixed $value): void
+    {
+        Setting::updateOrCreate(['key' => $key], ['value' => $value]);
+        Cache::forget(self::CACHE_KEY);
+    }
+
+    /** @return array<string, mixed> */
+    public static function all(): array
+    {
+        return Cache::rememberForever(self::CACHE_KEY, fn () => Setting::query()->pluck('value', 'key')->all());
+    }
+
+    public static function flush(): void
+    {
+        Cache::forget(self::CACHE_KEY);
+    }
+}

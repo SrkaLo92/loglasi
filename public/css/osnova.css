@@ -1,0 +1,48 @@
+/* loglasi.rs: zajednički tokeni i osnova (boje iz odluke 23. 10. 2026) */
+:root {
+	--lg-green: #2b7a64;      /* dugmad (AA kontrast) */
+	--lg-green-dark: #1f5b4a;
+	--lg-brand: #379b7f;      /* logo, akcenti */
+	--lg-orange: #b8501a;     /* dugmad (AA kontrast) */
+	--lg-accent: #ef7a38;     /* akcenti */
+	--lg-mint: #e9f4f0;
+	--lg-peach: #fcebdf;
+	--lg-bg: #f6f7f5;
+	--lg-text: #1d2b26;
+	--lg-muted: #5b6470;
+	--lg-border: #e3e7e4;
+	--lg-radius: 14px;
+	--lg-radius-sm: 12px;
+	--lg-max: 1240px;
+	--lg-font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+	margin: 0;
+	background: var(--lg-bg);
+	color: var(--lg-text);
+	font: 16px/1.5 var(--lg-font);
+}
+
+img { max-width: 100%; height: auto; display: block; }
+
+a { color: var(--lg-green); }
+
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+	outline: 2px solid var(--lg-accent);
+	outline-offset: 2px;
+}
+
+.lg-wrap { max-width: var(--lg-max); margin: 0 auto; padding: 0 16px; }
+
+.lg-skip { position: absolute; left: -9999px; }
+.lg-skip:focus { left: 16px; top: 16px; z-index: 100; background: #fff; padding: 8px 12px; }
+
+.lg-visually-hidden {
+	position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+	overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
