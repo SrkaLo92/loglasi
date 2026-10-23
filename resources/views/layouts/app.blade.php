@@ -3,10 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ $title ?? 'loglasi.rs: besplatni oglasi za Loznicu i okolinu' }}</title>
-@isset($description)<meta name="description" content="{{ $description }}">@endisset
-@isset($canonical)<link rel="canonical" href="{{ $canonical }}">@endisset
-@isset($robots)<meta name="robots" content="{{ $robots }}">@endisset
+@include('partials.seo-head')
 <link rel="stylesheet" href="{{ asset_v('css/osnova.css') }}">
 @stack('head')
 </head>
