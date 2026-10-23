@@ -51,7 +51,8 @@
 								<p class="lgx-cena__ponuda">{{ Cenovnik::offerShort() }}</p>
 								@include('stranice.partials.brojac', ['counter' => $counter, 'mali' => true])
 							@endif
-							<a class="lgx-btn lgx-btn--green" href="{{ Navigacija::link('za_firme') }}">Saznajte više {{ Ikonice::svg('arrow', 18) }}</a>
+							<a class="lgx-btn lgx-btn--green" href="{{ url_slash('moj-nalog/narudzbine/nova') }}?usluga={{ $product->code }}">Naručite Biznis paket</a>
+							<a class="lgx-btn lgx-btn--outline" href="{{ Navigacija::link('za_firme') }}">Saznajte više {{ Ikonice::svg('arrow', 18) }}</a>
 						@else
 							<a class="lgx-btn lgx-btn--outline" href="#uplata">Kako da platim</a>
 						@endif

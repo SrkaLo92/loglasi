@@ -91,4 +91,11 @@ class Listing extends Model
     {
         return url('/oglas/'.$this->slug.'/');
     }
+
+    // Payments
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
 }
