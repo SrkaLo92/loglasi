@@ -30,6 +30,8 @@ jobs:
       - run: composer install --no-interaction --prefer-dist --no-progress
       - run: cp .env.example .env && php artisan key:generate
       - run: vendor/bin/pint --test
+      - name: Baza za test uvoza iz WordPress-a
+        run: mysql -h127.0.0.1 -uroot -proot -e "CREATE DATABASE loglasi_wp_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL ON loglasi_wp_test.* TO 'loglasi'@'%';"
       - run: php artisan test
         env:
           DB_HOST: 127.0.0.1
