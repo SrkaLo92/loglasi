@@ -1,0 +1,58 @@
+<?php
+
+namespace App\Support\Auth;
+
+use App\Enums\UserStatus;
+use App\Models\Conversation;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
+/**
+ * Brisanje naloga na zahtev korisnika (sajt i aplikacija).
+ *
+ * Brišu se oglasi (meko, da stari URL-ovi vrate 410), razgovori i poruke, omiljeni, sačuvane
+ * pretrage, uređaji, tokeni, profil firme i slika. Red korisnika ostaje bez ličnih podataka
+ * (ime, email, telefon, lozinka), da bi narudžbine i knjigovodstvo ostali tačni.
+ * Isti email posle može ponovo da se registruje.
+ */
+class AccountDeletion
+{
+    public static function delete(User $user): void
+    {
+        DB::transaction(function () use ($user) {
+            ApiTokens::revokeAll($user);
+            $user->devices()->delete();
+            $user->favorites()->detach();
+            DB::table('saved_searches')->where('user_id', $user->id)->delete();
+
+            Conversation::query()
+                ->where('buyer_id', $user->id)
+                ->orWhere('seller_id', $user->id)
+                ->delete();
+
+            $user->listings()->delete();
+            $user->firm()->delete();
+            DB::table('password_reset_tokens')->where('email', $user->email)->delete();
+            DB::table('sessions')->where('user_id', $user->id)->delete();
+
+            Avatar::delete($user);
+
+            $user->forceFill([
+                'name' => 'Obrisan korisnik',
+                'email' => 'obrisan-'.$user->id.'-'.Str::lower(Str::random(8)).'@obrisan.invalid',
+                'phone' => null,
+                'phone_verified_at' => null,
+                'password' => Str::random(64),
+                'remember_token' => null,
+                'two_factor_secret' => null,
+                'two_factor_recovery_codes' => null,
+                'two_factor_confirmed_at' => null,
+                'notification_settings' => null,
+                'status' => UserStatus::Blocked,
+            ])->save();
+
+            $user->delete();
+        });
+    }
+}
