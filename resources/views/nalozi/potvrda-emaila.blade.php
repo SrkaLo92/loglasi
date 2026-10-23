@@ -2,7 +2,7 @@
 @include('nalozi.partials.head')
 @php
 	$title = 'Potvrda email adrese | loglasi.rs';
-	$robots = 'noindex,follow';
+	$robots = 'noindex, follow';
 @endphp
 
 @section('content')

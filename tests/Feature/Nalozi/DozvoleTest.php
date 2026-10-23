@@ -14,7 +14,7 @@ class DozvoleTest extends TestCase
     {
         parent::setUp();
 
-        Route::middleware(['web', 'auth', 'staff'])->get('/test-osoblje', fn () => 'osoblje');
+        Route::middleware(['web', 'auth', 'staff'])->get('/test-osoblje/', fn () => 'osoblje');
         Route::middleware(['web', 'auth', 'staff:admin'])->get('/test-admin', fn () => 'admin');
         Route::middleware(['api', 'auth:sanctum', 'staff'])->get('/api/v1/test-osoblje', fn () => ['ok' => true]);
     }
@@ -35,11 +35,11 @@ class DozvoleTest extends TestCase
 
     public function test_staff_middleware(): void
     {
-        $this->get('/test-osoblje')->assertRedirect(url_slash('prijava'));
-        $this->actingAs(User::factory()->create())->get('/test-osoblje')->assertForbidden();
-        $this->actingAs(User::factory()->moderator()->create())->get('/test-osoblje')->assertOk()->assertSee('osoblje');
-        $this->actingAs(User::factory()->moderator()->create())->get('/test-admin')->assertForbidden();
-        $this->actingAs(User::factory()->admin()->create())->get('/test-admin')->assertOk();
+        $this->get('/test-osoblje/')->assertRedirect(url_slash('prijava'));
+        $this->actingAs(User::factory()->create())->get('/test-osoblje/')->assertForbidden();
+        $this->actingAs(User::factory()->moderator()->create())->get('/test-osoblje/')->assertOk()->assertSee('osoblje');
+        $this->actingAs(User::factory()->moderator()->create())->get('/test-admin/')->assertForbidden();
+        $this->actingAs(User::factory()->admin()->create())->get('/test-admin/')->assertOk();
     }
 
     public function test_staff_middleware_on_api(): void
@@ -93,7 +93,7 @@ class DozvoleTest extends TestCase
         $user = User::factory()->create();
         $user->forceFill(['status' => UserStatus::Blocked])->save();
 
-        $this->actingAs($user)->getJson('/test-blok')
+        $this->actingAs($user)->getJson('/test-blok/')
             ->assertForbidden()
             ->assertJsonPath('code', 'account_blocked');
     }

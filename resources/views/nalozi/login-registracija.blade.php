@@ -2,7 +2,7 @@
 @include('nalozi.partials.head')
 @php
 	$title = 'Prijava i registracija | loglasi.rs';
-	$robots = 'noindex,follow';
+	$robots = 'noindex, follow';
 @endphp
 
 @section('content')

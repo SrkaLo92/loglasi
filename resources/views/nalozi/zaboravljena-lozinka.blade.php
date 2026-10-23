@@ -2,7 +2,7 @@
 @include('nalozi.partials.head')
 @php
 	$title = 'Zaboravljena lozinka | loglasi.rs';
-	$robots = 'noindex,follow';
+	$robots = 'noindex, follow';
 @endphp
 
 @section('content')

@@ -2,7 +2,7 @@
 @include('nalozi.partials.head')
 @php
 	$title = 'Brisanje naloga | loglasi.rs';
-	$robots = 'noindex,follow';
+	$robots = 'noindex, follow';
 	$bag = $errors->getBag('brisanje');
 @endphp
 

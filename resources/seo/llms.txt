@@ -1,0 +1,21 @@
+# loglasi.rs
+
+> loglasi.rs je besplatni sajt za male oglase iz Loznice i okoline (Banja Koviljača, Lešnica, Tršić i ostala mesta u Podrinju). Ljudi i lokalne firme ovde kupuju, prodaju i nude usluge: automobile, nekretnine, mobilne telefone, poslove, usluge i besplatne stvari. Postavljanje oglasa je besplatno, bez skrivenih troškova.
+
+Kome je namenjen: stanovnicima Loznice i okoline koji traže ili prodaju nešto u svom gradu, i lokalnim firmama koje žele da ih kupci iz Loznice nađu.
+
+## Kategorije
+
+- [Automobili](https://loglasi.rs/oglasi/automobili/): polovni automobili u Loznici i okolini
+- [Nekretnine](https://loglasi.rs/oglasi/nekretnine/): stanovi, kuće, placevi, izdavanje
+- [Mobilni telefoni](https://loglasi.rs/oglasi/mobilni-telefoni/)
+- [Poslovi](https://loglasi.rs/oglasi/poslovi/): oglasi za posao u Loznici
+- [Usluge](https://loglasi.rs/oglasi/usluge/): majstori, servisi i lokalne usluge
+- [Besplatne stvari](https://loglasi.rs/oglasi/besplatne-stvari/): poklanjam
+
+## O sajtu
+
+- [O nama](https://loglasi.rs/o-nama/)
+- [Česta pitanja](https://loglasi.rs/faq/)
+- [Kontakt](https://loglasi.rs/kontakt/)
+- [Postavite oglas](https://loglasi.rs/login-registracija/)

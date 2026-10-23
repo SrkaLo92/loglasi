@@ -2,6 +2,9 @@
 
 use App\Exceptions\ApiExceptionRenderer;
 use App\Http\Api\ApiResponse;
+use App\Http\Middleware\Gone;
+use App\Http\Middleware\Redirects;
+use App\Http\Middleware\TrailingSlash;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,7 +19,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // SEO: pre rutiranja, da važi i za adrese koje više ne postoje.
+        // Redosled: preusmerenja (jedan skok), pa 410, pa kosa crta na kraju.
+        $middleware->append([
+            Redirects::class,
+            Gone::class,
+            TrailingSlash::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

@@ -30,7 +30,7 @@ class NalogTest extends TestCase
 
         $this->actingAs($user)->get('/moj-nalog/')
             ->assertOk()
-            ->assertSee('<meta name="robots" content="noindex,follow">', false)
+            ->assertSee('<meta name="robots" content="noindex, follow">', false)
             ->assertSee('Moj nalog')
             ->assertSee('Petar Petrović')
             ->assertSee('Privatno lice')

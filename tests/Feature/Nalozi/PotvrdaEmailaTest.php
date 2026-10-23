@@ -47,7 +47,7 @@ class PotvrdaEmailaTest extends TestCase
     {
         $user = User::factory()->unverified()->create();
 
-        $this->get('/potvrda-emaila/'.$user->id.'/'.sha1($user->email))->assertForbidden();
+        $this->get('/potvrda-emaila/'.$user->id.'/'.sha1($user->email).'/')->assertForbidden();
     }
 
     public function test_verification_mail_is_in_serbian(): void

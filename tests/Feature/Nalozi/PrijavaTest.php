@@ -14,7 +14,7 @@ class PrijavaTest extends TestCase
         foreach (['/prijava/' => 'Prijavi se', '/registracija/' => 'Napravi nalog', '/login-registracija/' => 'Prijava i registracija', '/zaboravljena-lozinka/' => 'Pošalji link'] as $url => $text) {
             $this->get($url)
                 ->assertOk()
-                ->assertSee('<meta name="robots" content="noindex,follow">', false)
+                ->assertSee('<meta name="robots" content="noindex, follow">', false)
                 ->assertSee($text)
                 ->assertSee('css/nalozi.css', false);
         }

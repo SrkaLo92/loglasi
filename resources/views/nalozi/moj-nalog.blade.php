@@ -2,7 +2,7 @@
 @include('nalozi.partials.head')
 @php
 	$title = 'Moj nalog | loglasi.rs';
-	$robots = 'noindex,follow';
+	$robots = 'noindex, follow';
 	$podaci = $errors->getBag('podaci');
 	$lozinka = $errors->getBag('lozinka');
 	$slika = $errors->getBag('slika');
