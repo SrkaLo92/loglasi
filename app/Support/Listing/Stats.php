@@ -132,6 +132,13 @@ class Stats
      */
     public static function totalsForUser(int $userId, int $days = 30): array
     {
+        // A firm with thousands of listings reads tens of thousands of daily rows: cache it.
+        return Cache::remember('listing.user_totals.'.$userId.'.'.$days, 600, fn () => static::sumForUser($userId, $days));
+    }
+
+    /** @return array{views: int, phone_reveals: int, messages: int, favorites: int} */
+    private static function sumForUser(int $userId, int $days): array
+    {
         $from = now(Text::TIMEZONE)->subDays($days - 1)->toDateString();
         $row = DB::table('listing_daily_stats as s')
             ->join('listings as l', 'l.id', '=', 's.listing_id')
