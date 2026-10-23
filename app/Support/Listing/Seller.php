@@ -24,6 +24,9 @@ class Seller
         public readonly string $messageUrl,
     ) {}
 
+    /** Cache key prefix of the per-category counts on the profile page. */
+    public const TABS_KEY = 'listing.profile_tabs.';
+
     public static function forListing(Listing $listing): self
     {
         $user = $listing->user;
@@ -60,6 +63,7 @@ class Seller
     public static function forgetCount(int $userId): void
     {
         Cache::forget('listing.seller_count.'.$userId);
+        Cache::forget(self::TABS_KEY.$userId);
     }
 
     /** Messages module: /moj-nalog/poruke/novo/?oglas=ID */

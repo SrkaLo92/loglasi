@@ -9,9 +9,10 @@ use App\Services\Catalog;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 /**
- * Similar active listings, featured first, then the newest.
+ * Similar active listings, featured first, then the newest (indexed queries, cached 10 minutes).
  * API: up to 10, same category (with subcategories), then the parent category.
  * Site: 4–8 cards; the parent levels are used only while the category itself has fewer than 4.
  */
@@ -24,6 +25,8 @@ class SimilarListings
     public const WEB_MAX = 8;
 
     private const TTL = 600;
+
+    private const UNION_MAX = 12;
 
     /** @return Collection<int, Listing> */
     public static function for(Listing $listing, int $limit = self::LIMIT): Collection
@@ -97,16 +100,54 @@ class SimilarListings
         return $ids;
     }
 
-    /** @return list<int> */
+    /**
+     * Featured first, then the newest by bumped_at. Built so every part runs on an index:
+     * featured listings are few (featured_until index), the rest is one LIMITed index
+     * scan per category on (status, category_id, bumped_at), merged in a UNION ALL.
+     *
+     * @return list<int>
+     */
     private static function idsIn(array $categoryIds, array $exclude, int $limit): array
     {
-        return static::ordered(Listing::query()->active())
+        $categoryIds = array_values(array_unique(array_map('intval', $categoryIds)));
+        if ($categoryIds === [] || $limit <= 0) {
+            return [];
+        }
+
+        $featured = Listing::query()->active()
             ->whereIn('category_id', $categoryIds)
+            ->where('featured_until', '>', now())
             ->whereNotIn('id', $exclude)
+            ->orderByDesc('bumped_at')->orderByDesc('id')
             ->limit($limit)
-            ->pluck('id')
-            ->map(fn ($id) => (int) $id)
-            ->all();
+            ->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        $need = $limit - count($featured);
+        if ($need <= 0) {
+            return $featured;
+        }
+        $exclude = array_merge($exclude, $featured);
+
+        // A big parent has many subcategories; past this, one range scan + filesort is cheaper.
+        $perCategory = count($categoryIds) <= self::UNION_MAX ? $categoryIds : [null];
+        $union = null;
+        foreach ($perCategory as $categoryId) {
+            $part = Listing::query()->active()
+                ->select(['id', 'bumped_at'])
+                ->when($categoryId === null, fn ($q) => $q->whereIn('category_id', $categoryIds), fn ($q) => $q->where('category_id', $categoryId))
+                ->whereNotIn('id', $exclude)
+                ->orderByDesc('bumped_at')->orderByDesc('id')
+                ->limit($need)
+                ->toBase();
+            $union = $union === null ? $part : $union->unionAll($part);
+        }
+
+        $rest = DB::query()->fromSub($union, 'u')
+            ->orderByDesc('u.bumped_at')->orderByDesc('u.id')
+            ->limit($need)
+            ->pluck('u.id')->map(fn ($id) => (int) $id)->all();
+
+        return array_merge($featured, $rest);
     }
 
     /** @return Collection<int, Listing> in the given order */
@@ -120,12 +161,12 @@ class SimilarListings
         return new Collection(array_values(array_filter(array_map(fn ($id) => $found[$id] ?? null, $ids))));
     }
 
-    /** Featured first, then the most recently bumped or published. */
+    /**
+     * Newest first (bumped_at is set on publish and on every bump), id as a tiebreaker.
+     * Matches the (user_id, status, bumped_at) and (status, category_id, bumped_at) indexes.
+     */
     public static function ordered(Builder $query): Builder
     {
-        return $query
-            ->orderByRaw('CASE WHEN listings.featured_until IS NOT NULL AND listings.featured_until > ? THEN 1 ELSE 0 END DESC', [now()])
-            ->orderByRaw('COALESCE(listings.bumped_at, listings.published_at, listings.created_at) DESC')
-            ->orderByDesc('listings.id');
+        return $query->orderByDesc('listings.bumped_at')->orderByDesc('listings.id');
     }
 }
