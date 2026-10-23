@@ -147,6 +147,12 @@
 			</form>
 		</section>
 
+		<section class="lgn-card" aria-labelledby="lgn-obavestenja">
+			<h2 id="lgn-obavestenja">Obaveštenja i pretrage</h2>
+			<p><a href="{{ url_slash('moj-nalog/obavestenja') }}">Podešavanja obaveštenja</a></p>
+			<p><a href="{{ url_slash('moj-nalog/pretrage') }}">Sačuvane pretrage</a></p>
+		</section>
+
 		<section class="lgn-card lgn-danger" aria-labelledby="lgn-brisanje">
 			<h2 id="lgn-brisanje">Brisanje naloga</h2>
 			<p>Brišu se nalog, svi vaši oglasi, poruke i sačuvani oglasi. Ovo ne može da se vrati.</p>

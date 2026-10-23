@@ -153,4 +153,17 @@ class User extends Authenticatable implements MustVerifyEmail
 
         return array_map(fn ($v) => (bool) $v, $settings);
     }
+
+    // Notifications: saved searches, push
+
+    public function savedSearches(): HasMany
+    {
+        return $this->hasMany(SavedSearch::class);
+    }
+
+    /** FCM tokens for App\Notifications\Channels\PushChannel. */
+    public function routeNotificationForPush(): array
+    {
+        return $this->devices()->pluck('token')->all();
+    }
 }

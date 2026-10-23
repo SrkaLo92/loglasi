@@ -1,0 +1,29 @@
+/* loglasi.rs: notification settings and saved searches (prefix lgt-), on top of nalozi.css */
+
+.lgt { max-width: 760px; }
+.lgt-back { display: inline-flex; align-items: center; min-height: 44px; margin-bottom: 4px; font-weight: 600; }
+
+.lgt-toggles { list-style: none; margin: 0 0 20px; padding: 0; }
+.lgt-toggles li { padding: 12px 0; border-bottom: 1px solid var(--lg-border); }
+.lgt-toggles li:last-child { border-bottom: 0; }
+.lgt-toggles .lgn-check { font-weight: 700; }
+.lgt-toggles .lgn-help { margin: 2px 0 0 30px; }
+
+.lgt-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.lgt-item__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+.lgt-item__name { margin: 0; font-size: 17px; font-weight: 800; overflow-wrap: anywhere; }
+.lgt-item__meta { margin: 4px 0 12px; font-size: 14px; color: var(--lg-muted); }
+.lgt-item__actions { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 20px; }
+.lgt-item__actions form { margin: 0; }
+.lgt-rename { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; flex: 1 1 280px; }
+.lgt-rename .lgn-field { flex: 1 1 200px; }
+.lgt-rename .lgn-btn, .lgt-item__actions .lgn-btn { min-height: 44px; padding: 8px 16px; }
+.lgt-badge-off { color: var(--lg-muted); font-weight: 600; }
+
+.lgt-empty { text-align: center; }
+.lgt-done { text-align: center; max-width: 520px; margin: 0 auto; }
+
+@media (max-width: 767px) {
+	.lgt-item__actions { flex-direction: column; align-items: stretch; }
+	.lgt-rename { flex-basis: auto; }
+}
