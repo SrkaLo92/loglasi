@@ -1,0 +1,253 @@
+<?php
+
+namespace App\Filament\Resources\Users;
+
+use App\Enums\AccountType;
+use App\Enums\Role;
+use App\Enums\UserStatus;
+use App\Filament\Resources\Firms\FirmResource;
+use App\Filament\Resources\Users\Pages\EditUser;
+use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Resources\Users\Pages\ViewUser;
+use App\Filament\Resources\Users\RelationManagers\ListingsRelationManager;
+use App\Filament\Resources\Users\RelationManagers\OrdersRelationManager;
+use App\Filament\Support\Options;
+use App\Models\User;
+use App\Rules\PhoneNumber;
+use App\Support\Phone;
+use BackedEnum;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use UnitEnum;
+
+/** Accounts. Authorization comes from App\Policies\UserPolicy (nalozi module). */
+class UserResource extends Resource
+{
+    protected static ?string $model = User::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Moderacija';
+
+    protected static ?int $navigationSort = 2;
+
+    protected static ?string $modelLabel = 'korisnik';
+
+    protected static ?string $pluralModelLabel = 'korisnici';
+
+    protected static ?string $navigationLabel = 'Korisnici';
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return false;
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return false;
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email', 'phone'];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        $count = User::query()->whereNotNull('phone')->where('phone', '!=', '')->whereNull('phone_verified_at')->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Telefoni za proveru';
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema->components([
+            Section::make('Podaci')
+                ->columns(2)
+                ->schema([
+                    TextInput::make('name')->label('Ime i prezime')->required()->maxLength(255),
+                    TextInput::make('email')
+                        ->label('E-pošta')
+                        ->email()->required()->maxLength(255)
+                        ->unique(ignoreRecord: true)
+                        ->dehydrateStateUsing(fn (?string $state) => mb_strtolower(trim((string) $state))),
+                    TextInput::make('phone')
+                        ->label('Telefon')
+                        ->rule(new PhoneNumber)
+                        ->formatStateUsing(fn (?string $state) => $state ? Phone::display($state) : null)
+                        ->dehydrateStateUsing(fn (?string $state) => filled($state) ? Phone::normalize($state) : null)
+                        ->helperText('Promena broja skida potvrdu telefona.'),
+                    TextInput::make('slug')
+                        ->label('Adresa profila (slug)')
+                        ->helperText('/korisnik/{slug}/')
+                        ->required()->maxLength(255)
+                        ->rule('regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/')
+                        ->unique(ignoreRecord: true),
+                    Select::make('location_id')->label('Mesto')->options(fn () => Options::locations())->searchable(),
+                ]),
+        ]);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema->components([
+            Section::make('Nalog')
+                ->columns(3)
+                ->schema([
+                    TextEntry::make('name')->label('Ime i prezime'),
+                    TextEntry::make('email')->label('E-pošta')->copyable(),
+                    TextEntry::make('phone')
+                        ->label('Telefon')
+                        ->formatStateUsing(fn (?string $state) => $state ? Phone::display($state) : null)
+                        ->placeholder('Nije unet')
+                        ->copyable(),
+                    IconEntry::make('phone_verified_at')
+                        ->label('Telefon potvrđen')
+                        ->state(fn (User $record) => $record->isPhoneVerified())
+                        ->boolean(),
+                    TextEntry::make('account_type')
+                        ->label('Vrsta naloga')
+                        ->badge()
+                        ->formatStateUsing(fn (AccountType $state) => $state->label())
+                        ->color(fn (AccountType $state) => $state === AccountType::Firm ? 'warning' : 'gray'),
+                    TextEntry::make('role')->label('Uloga')->formatStateUsing(fn (Role $state) => $state->label()),
+                    TextEntry::make('status')
+                        ->label('Status')
+                        ->badge()
+                        ->formatStateUsing(fn (UserStatus $state) => $state->label())
+                        ->color(fn (UserStatus $state) => $state === UserStatus::Blocked ? 'danger' : 'success'),
+                    TextEntry::make('location.name')->label('Mesto')->placeholder('—'),
+                    TextEntry::make('slug')
+                        ->label('Javni profil')
+                        ->url(fn (User $record) => url_slash('korisnik/'.$record->slug), shouldOpenInNewTab: true)
+                        ->formatStateUsing(fn (string $state) => '/korisnik/'.$state.'/'),
+                    TextEntry::make('created_at')->label('Registrovan')->dateTime('j. n. Y. H:i'),
+                    TextEntry::make('last_login_at')->label('Poslednja prijava')->dateTime('j. n. Y. H:i')->placeholder('—'),
+                    TextEntry::make('email_verified_at')->label('E-pošta potvrđena')->dateTime('j. n. Y.')->placeholder('Nije potvrđena'),
+                ]),
+            Section::make('Firma')
+                ->columns(3)
+                ->visible(fn (User $record) => $record->firm !== null)
+                ->schema([
+                    TextEntry::make('firm.name')
+                        ->label('Naziv')
+                        ->url(fn (User $record) => $record->firm ? FirmResource::getUrl('edit', ['record' => $record->firm]) : null),
+                    TextEntry::make('firm.biznis_until')->label('Biznis paket do')->dateTime('j. n. Y.')->placeholder('Nema paket'),
+                    IconEntry::make('firm.founding_free')->label('Besplatno (prvih 30)')->boolean(),
+                ]),
+        ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->withCount('listings')->with('firm'))
+            // "065 541 5128" is one phone number, not three words.
+            ->splitSearchTerms(false)
+            ->defaultSort('created_at', 'desc')
+            ->columns([
+                TextColumn::make('name')
+                    ->label('Ime')
+                    ->searchable()
+                    ->sortable()
+                    ->description(fn (User $record) => $record->email),
+                TextColumn::make('email')->label('E-pošta')->searchable()->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('phone')
+                    ->label('Telefon')
+                    ->searchable(query: function (Builder $query, string $search) {
+                        // "065 123..." is stored as "+38165123...": search by digits without the leading zero.
+                        $digits = ltrim((string) preg_replace('/\D+/', '', $search), '0');
+
+                        return strlen($digits) < 3 ? $query : $query->where('phone', 'like', '%'.$digits.'%');
+                    })
+                    ->formatStateUsing(fn (?string $state) => $state ? Phone::display($state) : null)
+                    ->placeholder('—'),
+                IconColumn::make('phone_verified')
+                    ->label('Potvrđen')
+                    ->state(fn (User $record) => filled($record->phone) ? $record->isPhoneVerified() : null)
+                    ->boolean(),
+                TextColumn::make('account_type')
+                    ->label('Vrsta')
+                    ->badge()
+                    ->formatStateUsing(fn (AccountType $state) => $state->label())
+                    ->color(fn (AccountType $state) => $state === AccountType::Firm ? 'warning' : 'gray'),
+                TextColumn::make('role')
+                    ->label('Uloga')
+                    ->formatStateUsing(fn (Role $state) => $state->label())
+                    ->toggleable(),
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->formatStateUsing(fn (UserStatus $state) => $state->label())
+                    ->color(fn (UserStatus $state) => $state === UserStatus::Blocked ? 'danger' : 'success'),
+                TextColumn::make('listings_count')->label('Oglasi')->sortable(),
+                TextColumn::make('created_at')->label('Registrovan')->date('j. n. Y.')->sortable(),
+            ])
+            ->filters([
+                SelectFilter::make('account_type')->label('Vrsta naloga')->options(Options::enum(AccountType::class)),
+                SelectFilter::make('role')->label('Uloga')->options(Options::enum(Role::class)),
+                SelectFilter::make('status')->label('Status')->options(Options::enum(UserStatus::class)),
+                TernaryFilter::make('phone_verified')
+                    ->label('Telefon')
+                    ->trueLabel('Potvrđen')
+                    ->falseLabel('Nije potvrđen')
+                    ->queries(
+                        true: fn (Builder $query) => $query->whereNotNull('phone_verified_at'),
+                        false: fn (Builder $query) => $query->whereNotNull('phone')->whereNull('phone_verified_at'),
+                    ),
+            ])
+            ->recordActions([
+                UserActions::verifyPhone(),
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    ...array_slice(UserActions::all(), 1),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            ListingsRelationManager::class,
+            OrdersRelationManager::class,
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListUsers::route('/'),
+            'view' => ViewUser::route('/{record}'),
+            'edit' => EditUser::route('/{record}/edit'),
+        ];
+    }
+}
