@@ -5,7 +5,6 @@ namespace Tests\Feature\Seo;
 use App\Models\GoneUrl;
 use App\Models\Listing;
 use App\Models\User;
-use Illuminate\Support\Facades\File;
 
 class GoneTest extends SeoTestCase
 {
@@ -20,36 +19,14 @@ class GoneTest extends SeoTestCase
         $this->assertSame(3, $gone->fresh()->hits);
     }
 
-    public function test_gone_plain_text_without_view(): void
+    public function test_gone_uses_site_410_page(): void
     {
-        GoneUrl::create(['path' => '/korisnik/spam-nalog/']);
+        GoneUrl::create(['path' => '/oglas/obrisan/']);
 
-        $response = $this->get('/korisnik/spam-nalog/');
-        $response->assertStatus(410);
-        $this->assertStringContainsString('trajno uklonjena', $response->getContent());
-    }
-
-    public function test_gone_uses_site_410_view_when_it_exists(): void
-    {
-        $dir = resource_path('views/errors');
-        $created = ! is_dir($dir);
-        File::ensureDirectoryExists($dir);
-        File::put($dir.'/410.blade.php', '@extends(\'layouts.app\') @section(\'content\')<h1>Oglas je uklonjen</h1>@endsection');
-
-        try {
-            GoneUrl::create(['path' => '/oglas/obrisan/']);
-
-            $this->get('/oglas/obrisan/')
-                ->assertStatus(410)
-                ->assertSee('Oglas je uklonjen')
-                ->assertSee('<meta name="robots" content="noindex, follow">', false);
-        } finally {
-            File::delete($dir.'/410.blade.php');
-
-            if ($created) {
-                File::deleteDirectory($dir);
-            }
-        }
+        $this->get('/oglas/obrisan/')
+            ->assertStatus(410)
+            ->assertSee('<html lang="sr-Latn">', false)
+            ->assertSee('<meta name="robots" content="noindex, follow">', false);
     }
 
     public function test_soft_deleted_listing_returns_410_instead_of_404(): void

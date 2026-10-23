@@ -1,48 +1,487 @@
-/* loglasi.rs: zajednički tokeni i osnova (boje iz odluke 23. 10. 2026) */
+/* loglasi.rs: zajednički tokeni, osnova, zaglavlje, podnožje i donja navigacija (boje iz odluke 23. 10. 2026) */
+
+/* Manrope (OFL, public/fonts/OFL.txt), varijabilni 200–800, sa sajta, bez spoljnih zahteva */
+@font-face {
+	font-family: "Manrope";
+	font-style: normal;
+	font-weight: 200 800;
+	font-display: swap;
+	src: url("../fonts/manrope-latin.woff2") format("woff2");
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+	font-family: "Manrope";
+	font-style: normal;
+	font-weight: 200 800;
+	font-display: swap;
+	src: url("../fonts/manrope-latin-ext.woff2") format("woff2");
+	unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Rezervni font sa istim merama kao Manrope, da zamena fonta ne pomera stranu */
+@font-face {
+	font-family: "Manrope rezerva";
+	src: local("Arial"), local("Liberation Sans"), local("Helvetica");
+	size-adjust: 103%;
+	ascent-override: 103.5%;
+	descent-override: 29.1%;
+	line-gap-override: 0%;
+}
+
 :root {
 	--lg-green: #2b7a64;      /* dugmad (AA kontrast) */
 	--lg-green-dark: #1f5b4a;
 	--lg-brand: #379b7f;      /* logo, akcenti */
 	--lg-orange: #b8501a;     /* dugmad (AA kontrast) */
+	--lg-orange-dark: #9a4215;
 	--lg-accent: #ef7a38;     /* akcenti */
 	--lg-mint: #e9f4f0;
 	--lg-peach: #fcebdf;
 	--lg-bg: #f6f7f5;
 	--lg-text: #1d2b26;
+	--lg-text-2: #3f4a45;
 	--lg-muted: #5b6470;
 	--lg-border: #e3e7e4;
+	--lg-input: #c9d1cc;
+	--lg-error: #b42318;
+	--lg-footer: #1d2b26;
 	--lg-radius: 14px;
 	--lg-radius-sm: 12px;
 	--lg-max: 1240px;
-	--lg-font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	--lg-gutter: 24px;
+	--lg-mnav-h: 68px;
+	--lg-font: "Manrope", "Manrope rezerva", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 body {
 	margin: 0;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
 	background: var(--lg-bg);
 	color: var(--lg-text);
 	font: 16px/1.5 var(--lg-font);
+	overflow-wrap: break-word;
 }
 
-img { max-width: 100%; height: auto; display: block; }
+main { flex: 1 0 auto; }
 
-a { color: var(--lg-green); }
+img, svg { max-width: 100%; }
+img { height: auto; display: block; }
 
-a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+a { color: var(--lg-green); text-underline-offset: 2px; }
+a:hover { color: var(--lg-green-dark); }
+
+:focus-visible {
 	outline: 2px solid var(--lg-accent);
 	outline-offset: 2px;
 }
 
-.lg-wrap { max-width: var(--lg-max); margin: 0 auto; padding: 0 16px; }
+button, input, select, textarea { font: inherit; color: inherit; }
 
-.lg-skip { position: absolute; left: -9999px; }
-.lg-skip:focus { left: 16px; top: 16px; z-index: 100; background: #fff; padding: 8px 12px; }
+.lg-wrap { max-width: var(--lg-max); margin: 0 auto; padding: 0 var(--lg-gutter); }
+
+.lg-skip {
+	position: absolute;
+	top: 8px;
+	left: 8px;
+	z-index: 10000;
+	padding: 10px 14px;
+	border-radius: 10px;
+	background: #fff;
+	color: var(--lg-green-dark);
+	font-weight: 700;
+	transform: translateY(-200%);
+}
+.lg-skip:focus { transform: none; }
 
 .lg-visually-hidden {
-	position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+	position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
 	overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.lg-icon { display: block; flex: none; }
+
+/* Dugmad (zajednička) ------------------------------------------------- */
+
+.lg-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-height: 48px;
+	padding: 12px 22px;
+	border: 2px solid transparent;
+	border-radius: 10px;
+	font-size: 16px;
+	font-weight: 700;
+	line-height: 1.2;
+	text-align: center;
+	text-decoration: none;
+	cursor: pointer;
+	transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+.lg-btn--green, .lg-btn--green:visited { background: var(--lg-green); color: #fff; }
+.lg-btn--green:hover { background: var(--lg-green-dark); color: #fff; }
+.lg-btn--orange, .lg-btn--orange:visited { background: var(--lg-orange); color: #fff; }
+.lg-btn--orange:hover { background: var(--lg-orange-dark); color: #fff; }
+.lg-btn--outline, .lg-btn--outline:visited { background: #fff; border-color: var(--lg-green); color: var(--lg-green); }
+.lg-btn--outline:hover { background: var(--lg-green); color: #fff; }
+
+/* Zaglavlje ----------------------------------------------------------- */
+
+.lg-header {
+	background: #fff;
+	border-bottom: 1px solid var(--lg-border);
+}
+
+.lg-header__in {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 20px;
+	padding-top: 14px;
+	padding-bottom: 14px;
+}
+
+.lg-logo,
+.lg-logo:visited {
+	flex: none;
+	color: var(--lg-text);
+	font-size: 26px;
+	font-weight: 800;
+	line-height: 1.2;
+	letter-spacing: -.5px;
+	text-decoration: none;
+}
+.lg-logo:hover { color: var(--lg-text); }
+.lg-logo span { color: var(--lg-brand); }
+
+.lg-header__mesto { display: none; }
+
+.lg-search {
+	flex: 999 1 560px;
+	min-width: 0;
+	display: flex;
+	align-items: stretch;
+	margin: 0;
+	border: 2px solid var(--lg-brand);
+	border-radius: 12px;
+	overflow: hidden;
+	background: #fff;
+}
+.lg-search:focus-within { outline: 2px solid var(--lg-accent); outline-offset: 2px; }
+.lg-search :focus-visible { outline: none; }
+.lg-search__izbor:focus-visible,
+.lg-search__dugme:focus-visible,
+.lg-search__filteri:focus-visible { box-shadow: inset 0 0 0 2px var(--lg-accent); }
+.lg-search__polje {
+	flex: 1 1 auto;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+	padding: 0 14px;
+	color: var(--lg-muted);
+}
+.lg-search__input {
+	width: 100%;
+	height: 48px;
+	border: 0;
+	background: transparent;
+	color: var(--lg-text);
+	font-size: 16px;
+	outline: none;
+	-webkit-appearance: none;
+	appearance: none;
+}
+.lg-search__input::placeholder { color: var(--lg-muted); opacity: 1; }
+.lg-search__input::-webkit-search-decoration { -webkit-appearance: none; }
+.lg-search__izbor {
+	border: 0;
+	border-left: 1px solid var(--lg-border);
+	border-radius: 0;
+	padding: 0 12px;
+	background: #fff;
+	color: var(--lg-text);
+	font-size: 15px;
+	cursor: pointer;
+}
+.lg-search__izbor--kat { width: 170px; }
+.lg-search__izbor--mesto { width: 172px; }
+.lg-search__dugme {
+	border: 0;
+	padding: 0 22px;
+	background: var(--lg-green);
+	color: #fff;
+	font-size: 16px;
+	font-weight: 700;
+	cursor: pointer;
+}
+.lg-search__dugme:hover { background: var(--lg-green-dark); }
+.lg-search__filteri { display: none; }
+
+.lg-header__nav {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+.lg-header__nalog,
+.lg-header__nalog:visited {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 44px;
+	color: var(--lg-text);
+	font-size: 15px;
+	font-weight: 600;
+	text-decoration: none;
+}
+.lg-header__nalog:hover { color: var(--lg-green); text-decoration: underline; }
+.lg-header__postavi,
+.lg-header__postavi:visited {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 44px;
+	padding: 12px 18px;
+	border-radius: 10px;
+	background: var(--lg-orange);
+	color: #fff;
+	font-size: 15px;
+	font-weight: 700;
+	line-height: 1.2;
+	text-decoration: none;
+	white-space: nowrap;
+}
+.lg-header__postavi:hover { background: var(--lg-orange-dark); color: #fff; }
+
+/* Između tableta i desktopa izbor mesta ne staje u red. */
+@media (max-width: 1100px) {
+	.lg-search__izbor--mesto { display: none; }
+}
+
+/* Podnožje ------------------------------------------------------------ */
+
+.lg-footer {
+	margin-top: 48px;
+	background: var(--lg-footer);
+	color: #c9d3ce;
+}
+.lg-footer__in {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 32px;
+	padding-top: 36px;
+	padding-bottom: 36px;
+}
+.lg-footer__brend {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	max-width: 360px;
+}
+.lg-footer__logo,
+.lg-footer__logo:visited {
+	align-self: flex-start;
+	color: #fff;
+	font-size: 22px;
+	font-weight: 800;
+	line-height: 1.3;
+	text-decoration: none;
+}
+.lg-footer__logo:hover { color: #fff; }
+.lg-footer__logo span { color: #6fcbae; }
+.lg-footer__tekst { margin: 0; font-size: 14px; line-height: 1.55; }
+.lg-footer__nav ul {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: 8px 24px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.lg-footer__nav a,
+.lg-footer__nav a:visited {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	color: #fff;
+	font-size: 15px;
+	text-decoration: none;
+}
+.lg-footer__nav a:hover { color: #fff; text-decoration: underline; }
+.lg-footer__nav a[aria-current="page"] { text-decoration: underline; text-decoration-color: #6fcbae; text-underline-offset: 4px; }
+.lg-footer :focus-visible { outline-color: #fff; box-shadow: 0 0 0 4px var(--lg-accent); }
+.lg-footer__dno { border-top: 1px solid rgba(255, 255, 255, .12); }
+.lg-footer__dno p { margin: 0; padding: 16px 0; font-size: 13px; color: #c9d3ce; }
+
+/* Donja navigacija (samo telefon) -------------------------------------- */
+
+.lg-mnav { display: none; }
+
+/* Telefon --------------------------------------------------------------- */
+
+@media (max-width: 767.98px) {
+	:root { --lg-gutter: 16px; }
+
+	body.lg-has-mnav { padding-bottom: calc(var(--lg-mnav-h) + env(safe-area-inset-bottom, 0px)); }
+
+	.lg-header__in {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: 10px;
+		padding-top: 12px;
+		padding-bottom: 12px;
+	}
+	.lg-logo { justify-self: start; font-size: 22px; }
+	.lg-header__mesto {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		margin: 0;
+		font-size: 13px;
+		color: var(--lg-muted);
+	}
+	.lg-search { grid-column: 1 / -1; }
+	.lg-search__polje { padding: 0 12px; }
+	.lg-search__input { height: 44px; }
+	.lg-search__izbor,
+	.lg-search__dugme { display: none; }
+	.lg-search__filteri,
+	.lg-search__filteri:visited {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex: none;
+		width: 48px;
+		border-left: 1px solid var(--lg-border);
+		color: var(--lg-green);
+	}
+	.lg-search__filteri:hover { color: var(--lg-green-dark); background: var(--lg-mint); }
+	/* Na telefonu su nalog i „Postavi oglas” u donjoj navigaciji. */
+	body.lg-has-mnav .lg-header__nav { display: none; }
+	.lg-header__nav { grid-column: 1 / -1; justify-content: space-between; }
+
+	.lg-footer { margin-top: 32px; }
+	.lg-footer__in { gap: 20px; padding-top: 28px; padding-bottom: 20px; }
+	.lg-footer__nav ul { gap: 0 20px; }
+
+	.lg-mnav {
+		display: block;
+		position: fixed;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		z-index: 9990;
+		padding-bottom: env(safe-area-inset-bottom, 0px);
+		border-top: 1px solid var(--lg-border);
+		background: #fff;
+		box-shadow: 0 -4px 16px rgba(29, 43, 38, .06);
+	}
+	.lg-mnav__lista {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 1fr);
+		height: var(--lg-mnav-h);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.lg-mnav__stavka { display: flex; margin: 0; padding: 0; }
+	.lg-mnav__link,
+	.lg-mnav__link:visited {
+		position: relative;
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 4px;
+		min-width: 44px;
+		min-height: 44px;
+		padding: 6px 2px;
+		color: var(--lg-muted);
+		font-size: 12px;
+		font-weight: 600;
+		line-height: 1.2;
+		text-align: center;
+		text-decoration: none;
+		-webkit-tap-highlight-color: transparent;
+	}
+	.lg-mnav__link:hover { color: var(--lg-text); }
+	.lg-mnav__link:focus-visible { outline-offset: -4px; border-radius: 10px; }
+	.lg-mnav__link[aria-current="page"] { color: var(--lg-green); font-weight: 700; }
+	.lg-mnav__link[aria-current="page"]::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		left: 50%;
+		width: 28px;
+		height: 3px;
+		border-radius: 0 0 3px 3px;
+		background: var(--lg-green);
+		transform: translateX(-50%);
+	}
+	.lg-mnav__ikonica { position: relative; display: flex; }
+	.lg-mnav__naziv { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+	/* Srednje dugme: narandžasti krug izdignut iznad trake. */
+	.lg-mnav__stavka--cta .lg-mnav__link,
+	.lg-mnav__stavka--cta .lg-mnav__link:visited {
+		justify-content: flex-end;
+		padding-bottom: 12px;
+		color: var(--lg-text);
+		font-weight: 700;
+		letter-spacing: -.01em;
+	}
+	.lg-mnav__stavka--cta .lg-mnav__ikonica {
+		position: absolute;
+		top: -20px;
+		left: 50%;
+		align-items: center;
+		justify-content: center;
+		width: 56px;
+		height: 56px;
+		border: 4px solid #fff;
+		border-radius: 50%;
+		background: var(--lg-orange);
+		color: #fff;
+		box-shadow: 0 4px 12px rgba(184, 80, 26, .35);
+		transform: translateX(-50%);
+		transition: transform .15s ease;
+	}
+	.lg-mnav__stavka--cta .lg-mnav__link:active .lg-mnav__ikonica { transform: translateX(-50%) scale(.94); }
+	.lg-mnav__stavka--cta .lg-mnav__link[aria-current="page"]::before { display: none; }
+	.lg-mnav__broj {
+		position: absolute;
+		top: -6px;
+		right: -10px;
+		min-width: 18px;
+		height: 18px;
+		padding: 0 5px;
+		border: 2px solid #fff;
+		border-radius: 9px;
+		background: var(--lg-orange);
+		color: #fff;
+		font-size: 10px;
+		font-weight: 700;
+		line-height: 14px;
+		text-align: center;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+
+@media print {
+	.lg-header__nav, .lg-search, .lg-mnav, .lg-footer__nav { display: none !important; }
+	body { background: #fff; padding-bottom: 0 !important; }
 }

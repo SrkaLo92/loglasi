@@ -1,0 +1,1 @@
+@include('errors.jednostavna', ['kod' => isset($exception) && method_exists($exception, 'getStatusCode') ? $exception->getStatusCode() : 500, 'naslov' => 'Nešto nije u redu', 'tekst' => 'Došlo je do greške na našoj strani. Pokušajte ponovo za nekoliko minuta.'])
