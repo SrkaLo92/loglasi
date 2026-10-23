@@ -1,0 +1,334 @@
+/* Listing card (<x-listing-card>), shared by every list. Prefix lc-. Tokens from osnova.css. */
+
+.lc {
+	position: relative;
+	min-width: 0;
+	margin: 0;
+	background: #fff;
+	border: 1px solid var(--lg-border);
+	border-radius: var(--lg-radius);
+	overflow: hidden;
+	transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.lc:hover {
+	border-color: var(--lg-brand);
+	box-shadow: 0 4px 14px rgba(29, 43, 38, .08);
+}
+
+.lc--featured {
+	border: 2px solid #f3c9ae;
+}
+
+.lc--featured:hover {
+	border-color: var(--lg-accent);
+}
+
+.lc__link,
+.lc__link:visited {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	color: var(--lg-text);
+	text-decoration: none;
+}
+
+.lc__link:focus-visible {
+	outline: 2px solid var(--lg-accent);
+	outline-offset: -2px;
+	border-radius: var(--lg-radius);
+}
+
+.lc-icon {
+	display: block;
+	flex: none;
+}
+
+.lc__media {
+	position: relative;
+	aspect-ratio: 4 / 3;
+	background: #eef2ef;
+	overflow: hidden;
+}
+
+.lc__media picture {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.lc__img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: cover;
+}
+
+.lc__ph {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	background: var(--lg-mint);
+	color: #5f9585;
+}
+
+:nth-child(4n + 2) > .lc .lc__ph,
+.lc:nth-child(4n + 2) .lc__ph {
+	background: #f1eee6;
+	color: #8a7c58;
+}
+
+:nth-child(4n + 3) > .lc .lc__ph,
+.lc:nth-child(4n + 3) .lc__ph {
+	background: #eceff3;
+	color: #6f7886;
+}
+
+.lc__ph-label {
+	font-size: 13px;
+	color: var(--lg-muted);
+	padding: 0 8px;
+	text-align: center;
+}
+
+.lc__badges {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.lc__badge {
+	padding: 5px 9px;
+	border-radius: 6px;
+	color: #fff;
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.lc__badge--featured {
+	background: var(--lg-orange);
+}
+
+.lc__badge--firm {
+	background: var(--lg-green-dark);
+	letter-spacing: .02em;
+}
+
+.lc__body {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 12px 14px 16px;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.lc__title {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 700;
+	line-height: 1.35;
+	color: var(--lg-text);
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	min-height: 2.7em;
+	overflow-wrap: anywhere;
+}
+
+.lc__specs {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.35;
+	color: var(--lg-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.lc__price {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 800;
+	line-height: 1.25;
+	color: var(--lg-green);
+}
+
+.lc__meta {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	margin: auto 0 0;
+	font-size: 13px;
+	line-height: 1.3;
+	color: var(--lg-muted);
+	min-width: 0;
+}
+
+.lc__place {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	min-width: 0;
+}
+
+.lc__meta time {
+	white-space: nowrap;
+}
+
+/* Favourite heart (logged-in users only) */
+
+.lc__fav {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	margin: 0;
+}
+
+.lc__fav-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, .92);
+	color: var(--lg-text-2);
+	cursor: pointer;
+	box-shadow: 0 1px 4px rgba(29, 43, 38, .18);
+}
+
+.lc__fav-btn:hover {
+	color: var(--lg-orange);
+}
+
+.lc__fav-btn[aria-pressed="true"] {
+	color: var(--lg-orange);
+}
+
+.lc__fav-btn[aria-pressed="true"] .lc-icon {
+	fill: currentColor;
+}
+
+.lc__fav-btn:focus-visible {
+	outline: 2px solid var(--lg-accent);
+	outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+	.lc {
+		border-radius: var(--lg-radius-sm);
+	}
+
+	.lc__media {
+		aspect-ratio: auto;
+		height: 116px;
+	}
+
+	.lc__ph .lc-icon {
+		width: 26px;
+		height: 26px;
+	}
+
+	.lc__ph-label {
+		display: none;
+	}
+
+	.lc__badges {
+		top: 8px;
+		left: 8px;
+		gap: 4px;
+	}
+
+	.lc__badge {
+		padding: 4px 7px;
+		font-size: 11px;
+		border-radius: 5px;
+	}
+
+	.lc__body {
+		gap: 3px;
+		padding: 8px 10px 10px;
+	}
+
+	.lc__title {
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 1.3;
+		min-height: 2.6em;
+	}
+
+	.lc__specs {
+		font-size: 12px;
+	}
+
+	.lc__price {
+		font-size: 16px;
+	}
+
+	.lc__meta {
+		font-size: 12px;
+	}
+
+	.lc__fav {
+		top: 2px;
+		right: 2px;
+	}
+
+	/* Row layout on phones (search results): image left, text right. */
+	.lc--list .lc__link {
+		flex-direction: row;
+		min-height: 112px;
+	}
+
+	.lc--list .lc__media {
+		width: 120px;
+		height: auto;
+		min-height: 112px;
+		flex: none;
+	}
+
+	.lc--list .lc__body {
+		padding: 10px 12px;
+	}
+
+	.lc--list .lc__title {
+		font-size: 15px;
+		font-weight: 700;
+		min-height: 0;
+	}
+
+	.lc--list .lc__price {
+		font-size: 17px;
+		margin-top: auto;
+	}
+
+	.lc--list .lc__meta {
+		margin-top: 0;
+	}
+
+	.lc--list .lc__fav {
+		top: auto;
+		bottom: 2px;
+		left: 76px;
+		right: auto;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.lc {
+		transition: none;
+	}
+}
