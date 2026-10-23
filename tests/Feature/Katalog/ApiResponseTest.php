@@ -60,7 +60,7 @@ class ApiResponseTest extends TestCase
 
         $this->postJson('/api/v1/proba/provera')
             ->assertStatus(422)
-            ->assertExactJson(['code' => 'validation_failed', 'message' => 'Proverite unete podatke.', 'fields' => ['naslov' => 'Unesite naslov.']]);
+            ->assertExactJson(['code' => 'validation_failed', 'message' => 'Unesite naslov.', 'fields' => ['naslov' => 'Unesite naslov.']]);
     }
 
     public function test_json_is_not_escaped_and_etag_rules(): void

@@ -151,7 +151,8 @@ class ApiResponse
             return self::error('unauthorized', 'Potrebna je prijava.', 401);
         }
 
-        if ($e instanceof AuthorizationException || $e instanceof AccessDeniedHttpException) {
+        if ($e instanceof AuthorizationException || $e instanceof AccessDeniedHttpException
+            || ($e instanceof HttpExceptionInterface && $e->getStatusCode() === 403)) {
             return self::error('forbidden', 'Nemate pravo pristupa.', 403);
         }
 

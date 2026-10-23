@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\ApiExceptionRenderer;
 use App\Http\Api\ApiResponse;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -21,5 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+        // Prvo prijava i upis (token_expired, 422), zatim opšti oblik grešaka (400 za GET parametre, 404, 405...).
+        ApiExceptionRenderer::register($exceptions);
         ApiResponse::register($exceptions);
     })->create();
