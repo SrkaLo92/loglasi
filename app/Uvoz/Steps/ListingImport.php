@@ -312,6 +312,11 @@ class ListingImport extends Step
             return null;
         }
 
+        $expire = config('uvoz.meta.featured_expire') ? ($meta[config('uvoz.meta.featured_expire')][0] ?? null) : null;
+        if (is_string($expire) && $expire !== '' && strtotime($expire) !== false) {
+            return Carbon::parse($expire);
+        }
+
         if (is_numeric($raw) && (int) $raw > 1_000_000_000) {
             return Carbon::createFromTimestamp((int) $raw);
         }

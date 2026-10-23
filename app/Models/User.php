@@ -153,4 +153,12 @@ class User extends Authenticatable implements MustVerifyEmail
 
         return array_map(fn ($v) => (bool) $v, $settings);
     }
+
+    // Listing page module
+
+    /** Public profile: /korisnik/{slug}/ */
+    public function profileUrl(): string
+    {
+        return url_slash('korisnik/'.$this->slug);
+    }
 }

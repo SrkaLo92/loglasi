@@ -38,4 +38,27 @@ class Firm extends Model
     {
         return $this->biznis_until !== null && $this->biznis_until->isFuture();
     }
+
+    // Listing page module: images and contact preferences
+
+    public function logoUrl(): ?string
+    {
+        return ListingImage::urlFor($this->logo_path);
+    }
+
+    public function coverUrl(): ?string
+    {
+        return ListingImage::urlFor($this->cover_path);
+    }
+
+    /** WhatsApp/Viber button: explicit choice, or automatic for mobile numbers. */
+    public function messengerEnabled(string $app, string $e164): bool
+    {
+        $value = $this->getAttribute($app);
+        if ($value !== null) {
+            return (bool) $value;
+        }
+
+        return str_starts_with($e164, '+3816');
+    }
 }
