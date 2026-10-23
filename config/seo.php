@@ -55,7 +55,7 @@ return [
 
     // Javne strane koje ulaze u /sitemap-strane.xml (i koje skripta provere očekuje kao 200 + index).
     'pages' => [
-        '/', '/oglasi/', '/o-nama/', '/faq/', '/kontakt/', '/cenovnik/', '/za-firme/',
+        '/', '/oglasi/', '/o-nama/', '/faq/', '/kontakt/', '/cenovnik/', '/za-firme/', '/firme/',
         '/uslovi-koriscenja/', '/politika-privatnosti/',
     ],
 
