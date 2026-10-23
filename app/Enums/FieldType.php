@@ -9,6 +9,7 @@ enum FieldType: string
     case Select = 'select';
     case Multiselect = 'multiselect';
     case Checkbox = 'checkbox';
+    case Year = 'year';
 
     public function label(): string
     {
@@ -18,6 +19,7 @@ enum FieldType: string
             self::Select => 'Izbor',
             self::Multiselect => 'Više izbora',
             self::Checkbox => 'Da/ne',
+            self::Year => 'Godina',
         };
     }
 }

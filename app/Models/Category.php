@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Category extends Model
 {
@@ -37,5 +38,22 @@ class Category extends Model
     public function listings(): HasMany
     {
         return $this->hasMany(Listing::class);
+    }
+
+    /** Javna adresa kategorije: /oglasi/{slug}/ */
+    public function url(): string
+    {
+        return url_slash('/oglasi/'.$this->slug);
+    }
+
+    /** URL ikonice: pun URL iz uvoza ili putanja na disku "public"; null kad je nema. */
+    public function iconUrl(): ?string
+    {
+        $path = trim((string) $this->icon_path);
+        if ($path === '') {
+            return null;
+        }
+
+        return preg_match('~^https?://~i', $path) ? $path : Storage::disk('public')->url($path);
     }
 }
