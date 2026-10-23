@@ -38,7 +38,7 @@ class ListingFormatter
             'seller_type' => $listing->user?->isFirm() ? 'firm' : 'private',
             'status' => static::status($listing),
             'published_at' => static::date($listing->published_at),
-            'url' => $listing->url(),
+            'url' => url_slash('oglas/'.$listing->slug),
         ];
     }
 

@@ -34,7 +34,7 @@ class ListingExpiringSoon extends Mailable implements ShouldQueue
                 'name' => $listing->user?->name,
                 'expires' => $listing->expires_at?->copy()->timezone(config('app.timezone'))->format('j. n. Y. \u H:i'),
                 'renewUrl' => url_slash('moj-nalog/oglasi/'.$listing->id.'/obnova'),
-                'listingUrl' => $listing->url(),
+                'listingUrl' => url_slash('oglas/'.$listing->slug),
                 'myListingsUrl' => url_slash('moj-nalog/oglasi'),
             ],
         );

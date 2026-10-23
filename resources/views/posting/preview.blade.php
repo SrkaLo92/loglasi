@@ -80,7 +80,7 @@
 	<div class="pst-actions">
 		<a class="pst-btn" href="{{ url_slash('moj-nalog/oglasi') }}">Gotovo</a>
 		@if ($listing->status === ListingStatus::Published)
-			<a class="pst-btn pst-btn--line" href="{{ $listing->url() }}">Pogledaj oglas na sajtu</a>
+			<a class="pst-btn pst-btn--line" href="{{ url_slash('oglas/'.$listing->slug) }}">Pogledaj oglas na sajtu</a>
 		@endif
 	</div>
 @endif

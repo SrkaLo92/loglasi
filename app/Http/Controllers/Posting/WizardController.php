@@ -144,7 +144,7 @@ class WizardController extends Controller
             try {
                 $this->posting->ensureNotDuplicate($listing, $title);
             } catch (PostingRefused $e) {
-                return back()->withInput()->withErrors(['title' => $e->getMessage()])->with('duplicate', $this->duplicateLink($e));
+                return redirect(Wizard::url($listing, 'basics'))->withInput()->withErrors(['title' => $e->getMessage()])->with('duplicate', $this->duplicateLink($e));
             }
         }
 
@@ -407,7 +407,7 @@ class WizardController extends Controller
 
         return [
             'title' => $existing->title,
-            'url' => $public ? $existing->url() : url_slash('postavi-oglas/'.$existing->id.'/pregled'),
+            'url' => $public ? url_slash('oglas/'.$existing->slug) : url_slash('postavi-oglas/'.$existing->id.'/pregled'),
             'renew' => $this->posting->canRenew($existing) ? url_slash('moj-nalog/oglasi/'.$existing->id.'/obnova') : null,
         ];
     }

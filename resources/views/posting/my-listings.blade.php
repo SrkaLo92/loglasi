@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="{{ asset_v('css/posting.css') }}">
 @endpush
 
-@php($svc = app(\App\Services\ListingImages::class))
+@php $svc = app(\App\Services\ListingImages::class); @endphp
 
 @section('content')
 <div class="pst lg-wrap">
@@ -34,15 +34,13 @@
 
 	@if ($listings->isEmpty())
 		<div class="pst-card pst-empty">
-			<p>
-				@switch($tab)
-					@case('na-cekanju') Nemate oglase koji čekaju odobrenje. @break
-					@case('istekli') Nemate istekle oglase. @break
-					@case('odbijeni') Nemate odbijene oglase. @break
-					@case('nacrti') Nemate nezavršene oglase. @break
-					@default Nemate aktivnih oglasa.
-				@endswitch
-			</p>
+			<p>{{ match ($tab) {
+				'na-cekanju' => 'Nemate oglase koji čekaju odobrenje.',
+				'istekli' => 'Nemate istekle oglase.',
+				'odbijeni' => 'Nemate odbijene oglase.',
+				'nacrti' => 'Nemate nezavršene oglase.',
+				default => 'Nemate aktivnih oglasa.',
+			} }}</p>
 			<a class="pst-btn" href="{{ url_slash('postavi-oglas') }}">Postavite oglas</a>
 		</div>
 	@else
@@ -69,7 +67,7 @@
 						<p class="pst-mine__status pst-status--{{ $item->status->value }}{{ $expired ? ' pst-status--expired' : '' }}">{{ $statusLabel }}</p>
 						<h2 class="pst-mine__title">
 							@if ($item->status === ListingStatus::Published && ! $expired)
-								<a href="{{ $item->url() }}">{{ $item->title }}</a>
+								<a href="{{ url_slash('oglas/'.$item->slug) }}">{{ $item->title }}</a>
 							@else
 								{{ $item->title !== '' ? $item->title : 'Oglas bez naslova' }}
 							@endif

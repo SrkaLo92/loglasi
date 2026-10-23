@@ -2,7 +2,7 @@
 @use('App\Support\Posting\Wizard')
 
 @section('step')
-@php($svc = app(\App\Services\ListingImages::class))
+@php $svc = app(\App\Services\ListingImages::class); @endphp
 <section class="pst-card" aria-labelledby="pst-img-title">
 	<h2 id="pst-img-title">Slike</h2>
 	<p class="pst-help">Do {{ $maxImages }} slika, JPG, PNG ili WebP, najviše {{ $maxMb }} MB po slici. Prva slika je naslovna. Podaci iz fotografije (lokacija, uređaj) se brišu.</p>

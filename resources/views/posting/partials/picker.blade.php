@@ -21,7 +21,7 @@
 	@include('posting.partials.error', ['field' => 'category_id', 'id' => 'pst-category'])
 	<ul class="pst-cats" role="list">
 		@foreach ($picker['items'] as $item)
-			@php($cat = $item['category'])
+			@php $cat = $item['category']; @endphp
 			<li>
 				@if ($item['leaf'])
 					<button class="pst-cat{{ $picker['current'] === $cat->id ? ' is-current' : '' }}" type="submit" name="category_id" value="{{ $cat->id }}">
