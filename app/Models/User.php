@@ -6,18 +6,22 @@ use App\Enums\AccountType;
 use App\Enums\Role;
 use App\Enums\UserStatus;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
+use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     protected $fillable = [
         'name', 'email', 'password', 'slug', 'account_type', 'phone', 'avatar_path',
@@ -40,6 +44,7 @@ class User extends Authenticatable
             'account_type' => AccountType::class,
             'role' => Role::class,
             'status' => UserStatus::class,
+            'notification_settings' => 'array',
         ];
     }
 
@@ -81,5 +86,71 @@ class User extends Authenticatable
     public function isPhoneVerified(): bool
     {
         return $this->phone_verified_at !== null;
+    }
+
+    // Nalozi: tokeni, mesto, slika, obaveštenja
+
+    /** Podrazumevana obaveštenja u aplikaciji (NotificationSettings iz ugovora). */
+    public const NOTIFICATION_DEFAULTS = [
+        'messages' => true,
+        'listing_status' => true,
+        'payments' => true,
+        'expiring' => true,
+        'admin_queue' => true,
+    ];
+
+    public function refreshTokens(): HasMany
+    {
+        return $this->hasMany(RefreshToken::class);
+    }
+
+    public function devices(): HasMany
+    {
+        return $this->hasMany(Device::class);
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
+    }
+
+    public function isBlocked(): bool
+    {
+        return $this->status === UserStatus::Blocked;
+    }
+
+    /** Uloga za mobilnu aplikaciju: private, firm ili admin (admin i moderator). */
+    public function apiRole(): string
+    {
+        return match (true) {
+            $this->isStaff() => 'admin',
+            $this->isFirm() => 'firm',
+            default => 'private',
+        };
+    }
+
+    public function avatarUrl(): ?string
+    {
+        return $this->avatar_path ? Storage::disk('public')->url($this->avatar_path) : null;
+    }
+
+    /** Inicijali za krug bez slike: "Marko Petrović" → "MP". */
+    public function initials(): string
+    {
+        $words = preg_split('/\s+/u', trim((string) $this->name), -1, PREG_SPLIT_NO_EMPTY) ?: ['?'];
+        $letters = array_map(fn ($w) => mb_strtoupper(mb_substr($w, 0, 1)), array_slice($words, 0, 2));
+
+        return implode('', $letters);
+    }
+
+    /** @return array<string, bool> */
+    public function notificationSettings(): array
+    {
+        $settings = array_merge(self::NOTIFICATION_DEFAULTS, array_intersect_key((array) $this->notification_settings, self::NOTIFICATION_DEFAULTS));
+        if (! $this->isStaff()) {
+            unset($settings['admin_queue']);
+        }
+
+        return array_map(fn ($v) => (bool) $v, $settings);
     }
 }
