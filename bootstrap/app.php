@@ -19,6 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Only a reverse proxy on the same machine may set X-Forwarded-* headers.
+        $middleware->trustProxies(at: ['127.0.0.1', '::1']);
+
         // SEO: pre rutiranja, da važi i za adrese koje više ne postoje.
         // Redosled: preusmerenja (jedan skok), pa 410, pa kosa crta na kraju.
         $middleware->append([
