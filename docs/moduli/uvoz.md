@@ -51,6 +51,7 @@ Spam nalozi i sav njihov sadržaj (oglasi, slike, poruke, omiljeni) se ne prenos
    ```bash
    php artisan migrate:fresh --force
    php artisan db:seed --class=ProductSeeder
+   php artisan db:seed --class=PayeeSeeder   # podaci primaoca uplate, samo ako su prazni
    ```
 
    (`php artisan migrate --seed` u lokalnom okruženju pravi i nalog `admin@loglasi.rs` sa ID-jem 1, pa bi WordPress nalog #1 dobio drugi ID.)
