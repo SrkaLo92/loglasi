@@ -112,6 +112,20 @@ class CategoryResource extends Resource
                         ->helperText('Do 155 znakova. Prazno = opis po šablonu.')
                         ->rows(2)
                         ->maxLength(320),
+                    TextInput::make('seo_h1')
+                        ->label('Naslov strane (H1)')
+                        ->helperText('Prazno = naziv kategorije.')
+                        ->maxLength(255),
+                    Textarea::make('seo_intro')
+                        ->label('Uvodni tekst iznad oglasa')
+                        ->helperText('Kratak tekst za kupce i pretraživače. Prazno = bez uvoda.')
+                        ->rows(4)
+                        ->maxLength(3000),
+                    Textarea::make('seo_faq')
+                        ->label('Česta pitanja')
+                        ->helperText('Pitanje u jednom redu, odgovor u sledećem; između parova prazan red.')
+                        ->rows(8)
+                        ->maxLength(10000),
                 ]),
         ]);
     }
