@@ -9,7 +9,7 @@
 .pst-head--row { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; }
 .pst-head__sub { margin: 4px 0 0; color: var(--lg-muted); font-weight: 600; overflow-wrap: anywhere; }
 .pst-head__back { margin: 0 0 4px; font-size: 14px; }
-.pst-head__back a { display: inline-flex; align-items: center; min-height: 32px; font-weight: 600; }
+.pst-head__back a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
 
 .pst-card {
 	background: #fff;
@@ -109,7 +109,7 @@ fieldset.pst-field > legend { margin-bottom: 6px; }
 
 .pst-trail ol { display: flex; flex-wrap: wrap; gap: 4px 8px; margin: 0 0 12px; padding: 0; list-style: none; font-size: 14px; }
 .pst-trail li + li::before { content: "›"; margin-right: 8px; color: var(--lg-muted); }
-.pst-trail a { display: inline-flex; align-items: center; min-height: 32px; font-weight: 600; }
+.pst-trail a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
 .pst-trail [aria-current] { font-weight: 700; }
 .pst-cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
 .pst-cat {
@@ -125,7 +125,7 @@ fieldset.pst-field > legend { margin-bottom: 6px; }
 
 .pst-drafts ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .pst-drafts li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
-.pst-drafts a { font-weight: 700; min-height: 32px; display: inline-flex; align-items: center; }
+.pst-drafts a { font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; }
 
 /* Basics with card preview */
 

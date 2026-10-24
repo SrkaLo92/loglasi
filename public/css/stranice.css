@@ -1418,7 +1418,8 @@ main:focus { outline: none; }
 .lgx-putanja ol {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 4px;
+	align-items: center;
+	gap: 0 4px;
 	margin: 0 0 16px;
 	padding: 0;
 	list-style: none;
@@ -1433,6 +1434,9 @@ main:focus { outline: none; }
 
 .lgx-putanja a,
 .lgx-putanja a:visited {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
 	color: var(--lg-muted, #5B6470);
 	text-decoration: none;
 }
@@ -1500,7 +1504,7 @@ main:focus { outline: none; }
 	display: inline-flex;
 	align-items: center;
 	gap: 10px;
-	min-height: 40px;
+	min-height: 44px;
 	color: var(--lg-text, #1D2B26);
 	font-size: 15px;
 	font-weight: 600;

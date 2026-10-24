@@ -45,7 +45,7 @@
 .hm-chip:visited {
 	display: inline-flex;
 	align-items: center;
-	min-height: 40px;
+	min-height: 44px;
 	padding: 8px 14px;
 	border: 1px solid var(--lg-border);
 	border-radius: 999px;

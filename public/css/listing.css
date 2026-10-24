@@ -1357,7 +1357,7 @@ button.lgo-bar__btn--tel {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	min-height: 40px;
+	min-height: 44px;
 	font-size: 15px;
 	cursor: pointer;
 }
