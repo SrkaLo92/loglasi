@@ -45,6 +45,17 @@ class RegistracijaTest extends TestCase
         Notification::assertSentTo($user, VerifyEmail::class);
     }
 
+    public function test_honeypot_blocks_bot_registration(): void
+    {
+        $this->get('/registracija/')->assertSee('name="website"', false);
+
+        $this->post('/registracija/', $this->data(['website' => 'https://spam.example']))
+            ->assertSessionHasErrors(['email' => 'Registracija nije uspela. Pokušajte ponovo malo kasnije.']);
+
+        $this->assertDatabaseCount('users', 0);
+        $this->assertGuest();
+    }
+
     public function test_cannot_register_as_firm_or_admin(): void
     {
         $this->post('/registracija/', $this->data(['account_type' => 'firm', 'role' => 'admin', 'status' => 'active']));

@@ -201,4 +201,25 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     {
         return $this->morphMany(Report::class, 'reportable');
     }
+
+    // Notifications: saved searches, push
+
+    public function savedSearches(): HasMany
+    {
+        return $this->hasMany(SavedSearch::class);
+    }
+
+    /** FCM tokens for App\Notifications\Channels\PushChannel. */
+    public function routeNotificationForPush(): array
+    {
+        return $this->devices()->pluck('token')->all();
+    }
+
+    // Listing page module
+
+    /** Public profile: /korisnik/{slug}/ */
+    public function profileUrl(): string
+    {
+        return url_slash('korisnik/'.$this->slug);
+    }
 }

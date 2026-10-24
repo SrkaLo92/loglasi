@@ -1,0 +1,698 @@
+/* /cenovnik/: sections instead of one row of cards. Prefix lgc-. Tokens from osnova.css. */
+
+.lgc {
+	padding-bottom: 32px;
+}
+
+.lgc-head {
+	max-width: 760px;
+	margin-bottom: 48px;
+}
+
+.lgc-head__uvod {
+	margin: 12px 0 0;
+	color: var(--lg-muted);
+	font-size: 18px;
+	line-height: 1.6;
+}
+
+.lgc-sec {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	margin-bottom: 56px;
+}
+
+.lgc-sec__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 6px 12px;
+}
+
+.lgc-sec__broj {
+	color: var(--lg-green);
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 1px;
+}
+
+.lgc-sec__naslov {
+	margin: 0;
+	color: var(--lg-text);
+	font-size: 28px;
+	font-weight: 800;
+	line-height: 1.2;
+}
+
+.lgc-sec__uvod {
+	color: var(--lg-muted);
+	font-size: 15px;
+}
+
+.lgc-sub {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin-top: 4px;
+}
+
+.lgc-sub__naslov {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 800;
+}
+
+.lgc-sub__uvod {
+	margin: 0;
+	color: var(--lg-muted);
+	font-size: 15px;
+}
+
+/* Free listing */
+
+.lgc-free {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 24px 32px;
+	padding: 32px;
+	border: 1px solid var(--lg-border);
+	border-radius: 16px;
+	background: #fff;
+}
+
+.lgc-free__cena {
+	display: flex;
+	flex: 1 1 240px;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.lgc-free__naziv,
+.lgc-free__opis {
+	color: var(--lg-muted);
+	font-size: 15px;
+}
+
+.lgc-free__naziv {
+	font-weight: 700;
+}
+
+.lgc-free__iznos {
+	color: var(--lg-green);
+	font-size: 44px;
+	font-weight: 800;
+	letter-spacing: -1px;
+	line-height: 1.1;
+}
+
+.lgc-free__stavke,
+.lgc-prvih__stavke,
+.lgc-paket__stavke {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.lgc-free__stavke {
+	display: grid;
+	flex: 2 1 380px;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px 24px;
+	font-size: 16px;
+}
+
+.lgc-free__stavke li,
+.lgc-prvih__stavke li,
+.lgc-paket__stavke li {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+}
+
+.lgc-free__stavke .lg-icon,
+.lgc-paket__stavke .lg-icon {
+	margin-top: 2px;
+	color: var(--lg-green);
+}
+
+.lgc-free__dugme {
+	flex: none;
+}
+
+/* Extra listing slots */
+
+.lgc-slots {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 16px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.lgc-slot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 22px 24px;
+	border: 1px solid var(--lg-border);
+	border-radius: 14px;
+	background: #fff;
+}
+
+.lgc-slot__tekst {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.lgc-slot__naziv {
+	font-size: 20px;
+	font-weight: 800;
+}
+
+.lgc-slot__opis {
+	color: var(--lg-muted);
+	font-size: 14px;
+}
+
+.lgc-slot__cena {
+	flex: none;
+	color: var(--lg-green-dark);
+	font-size: 22px;
+	font-weight: 800;
+}
+
+/* Promotions table */
+
+.lgc-table {
+	overflow: hidden;
+	border: 1px solid var(--lg-border);
+	border-radius: 16px;
+	background: #fff;
+}
+
+.lgc-table table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.lgc-promo + .lgc-promo th,
+.lgc-promo + .lgc-promo td {
+	border-top: 1px solid var(--lg-border);
+}
+
+.lgc-promo th,
+.lgc-promo td {
+	padding: 22px 16px;
+	text-align: left;
+	vertical-align: middle;
+}
+
+.lgc-promo th {
+	padding-left: 32px;
+}
+
+.lgc-promo td:last-child {
+	padding-right: 32px;
+}
+
+.lgc-promo__usluga {
+	width: 30%;
+	font-weight: 400;
+}
+
+.lgc-promo__usluga {
+	white-space: nowrap;
+}
+
+.lgc-promo__ikona {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
+	margin-right: 16px;
+	border-radius: 12px;
+	background: var(--lg-mint);
+	color: var(--lg-green);
+	vertical-align: middle;
+}
+
+.lgc-promo__naziv {
+	font-size: 18px;
+	font-weight: 700;
+	white-space: normal;
+	vertical-align: middle;
+}
+
+.lgc-promo__opis {
+	color: var(--lg-muted);
+	font-size: 15px;
+	line-height: 1.5;
+}
+
+.lgc-promo__trajanje {
+	width: 110px;
+	color: var(--lg-muted);
+	font-size: 14px;
+	white-space: nowrap;
+}
+
+.lgc-promo__cena {
+	width: 130px;
+	font-size: 22px;
+	font-weight: 800;
+	text-align: right !important;
+	white-space: nowrap;
+}
+
+.lgc-table__dno {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px 16px;
+	padding: 18px 32px;
+	border-top: 1px solid var(--lg-border);
+	background: var(--lg-bg);
+	color: var(--lg-muted);
+	font-size: 15px;
+}
+
+.lgc-table__dno a,
+.lgc-dodatno__head a {
+	color: var(--lg-green);
+	font-weight: 700;
+}
+
+/* First 30 firms */
+
+.lgc-prvih {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 28px 36px;
+	padding: 36px;
+	border-radius: 16px;
+	background: var(--lg-green-dark);
+	color: #fff;
+}
+
+.lgc-prvih__tekst {
+	display: flex;
+	flex: 2 1 420px;
+	flex-direction: column;
+	gap: 14px;
+	min-width: 0;
+}
+
+.lgc-prvih__oznaka {
+	align-self: flex-start;
+	padding: 6px 12px;
+	border-radius: 999px;
+	background: #fdf0e7;
+	color: var(--lg-orange-dark);
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.lgc-prvih__naslov {
+	margin: 0;
+	font-size: 30px;
+	font-weight: 800;
+	line-height: 1.2;
+}
+
+.lgc-prvih__stavke {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px 20px;
+	color: #d8ebe4;
+	font-size: 16px;
+}
+
+.lgc-prvih__stavke .lg-icon {
+	margin-top: 2px;
+	color: #9fd9c4;
+}
+
+.lgc-prvih__napomena {
+	margin: 0;
+	color: #d8ebe4;
+	font-size: 15px;
+	line-height: 1.6;
+}
+
+.lgc-prvih__kartica {
+	display: flex;
+	flex: 1 1 280px;
+	flex-direction: column;
+	gap: 12px;
+	padding: 24px;
+	border-radius: 14px;
+	background: #fff;
+	color: var(--lg-text);
+}
+
+.lgc-prvih__mesta {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 800;
+}
+
+.lgc-prvih__traka {
+	height: 10px;
+	overflow: hidden;
+	border-radius: 999px;
+	background: var(--lg-border);
+}
+
+.lgc-prvih__traka span {
+	display: block;
+	height: 100%;
+	background: var(--lg-orange);
+}
+
+.lgc-prvih__zauzeto {
+	margin: 0;
+	color: var(--lg-muted);
+	font-size: 14px;
+}
+
+/* Packages: at most 3 per row */
+
+.lgc-paketi {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 20px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.lgc-paket {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 28px;
+	border: 1px solid var(--lg-border);
+	border-radius: 16px;
+	background: #fff;
+}
+
+.lgc-paket--istaknut {
+	border: 2px solid var(--lg-green);
+}
+
+.lgc-paket__vrh {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.lgc-paket__naziv {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 800;
+}
+
+.lgc-paket__oznaka {
+	flex: none;
+	padding: 5px 10px;
+	border-radius: 999px;
+	background: var(--lg-mint);
+	color: var(--lg-green-dark);
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.lgc-paket__cena {
+	margin: 4px 0 0;
+}
+
+.lgc-paket__iznos {
+	font-size: 34px;
+	font-weight: 800;
+	letter-spacing: -.5px;
+}
+
+.lgc-paket__period,
+.lgc-paket__godisnje {
+	color: var(--lg-muted);
+	font-size: 15px;
+}
+
+.lgc-paket__godisnje {
+	margin: 0;
+	font-size: 14px;
+}
+
+.lgc-paket__stavke {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-top: 4px;
+	padding-top: 16px;
+	border-top: 1px solid var(--lg-border);
+	font-size: 15px;
+}
+
+/* Extras */
+
+.lgc-dodatno {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	margin-bottom: 56px;
+	padding: 28px 32px;
+	border: 1px solid var(--lg-border);
+	border-radius: 16px;
+	background: #fff;
+}
+
+.lgc-dodatno__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.lgc-dodatno__lista {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 16px 32px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.lgc-dodatno__lista li {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding-top: 12px;
+	border-top: 1px solid var(--lg-border);
+}
+
+.lgc-dodatno__naziv {
+	font-size: 16px;
+	font-weight: 700;
+}
+
+.lgc-dodatno__opis {
+	color: var(--lg-muted);
+	font-size: 14px;
+}
+
+.lgc-dodatno__cena {
+	color: var(--lg-green-dark);
+	font-size: 15px;
+	font-weight: 800;
+}
+
+/* Payment */
+
+.lgc-uplata {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 24px;
+	margin-bottom: 56px;
+	scroll-margin-top: 16px;
+}
+
+.lgc-uplata__koraci {
+	display: flex;
+	flex: 1 1 420px;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.lgc-uplata__uvod {
+	margin: 0;
+	color: var(--lg-muted);
+}
+
+.lgc-uplata__lista {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin: 0;
+	padding-left: 20px;
+	font-size: 16px;
+	line-height: 1.6;
+}
+
+.lgc-uplata__kartica {
+	flex: 1 1 380px;
+	padding: 24px;
+	border: 1px solid var(--lg-border);
+	border-radius: 16px;
+	background: #fff;
+}
+
+.lgc-uplata__naslov {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 12px;
+	font-size: 18px;
+	font-weight: 800;
+}
+
+.lgc-faq .lgc-sec__naslov {
+	margin-bottom: 16px;
+}
+
+@media (max-width: 1100px) {
+	.lgc-dodatno__lista {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 900px) {
+	.lgc-slots,
+	.lgc-paketi {
+		grid-template-columns: 1fr;
+	}
+
+	/* Table rows become blocks: name and price on top, description below */
+	.lgc-table table,
+	.lgc-table tbody,
+	.lgc-promo {
+		display: block;
+	}
+
+	.lgc-promo {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: 6px 12px;
+		padding: 18px 20px;
+	}
+
+	.lgc-promo + .lgc-promo {
+		border-top: 1px solid var(--lg-border);
+	}
+
+	.lgc-promo th,
+	.lgc-promo td,
+	.lgc-promo + .lgc-promo th,
+	.lgc-promo + .lgc-promo td {
+		width: auto;
+		padding: 0;
+		border: 0;
+	}
+
+	.lgc-promo td:last-child {
+		padding-right: 0;
+	}
+
+	.lgc-promo__usluga {
+		display: flex;
+		align-items: center;
+		white-space: normal;
+	}
+
+	.lgc-promo__ikona {
+		flex: none;
+		width: 40px;
+		height: 40px;
+		margin-right: 12px;
+	}
+
+	.lgc-promo__cena {
+		grid-column: 2;
+		grid-row: 1;
+		align-self: center;
+		font-size: 20px;
+	}
+
+	.lgc-promo__opis {
+		grid-column: 1 / -1;
+	}
+
+	.lgc-promo__trajanje {
+		grid-column: 1 / -1;
+	}
+
+	.lgc-table__dno {
+		padding: 16px 20px;
+	}
+}
+
+@media (max-width: 767.98px) {
+	.lgc-head {
+		margin-bottom: 32px;
+	}
+
+	.lgc-head__uvod {
+		font-size: 16px;
+	}
+
+	.lgc-sec {
+		margin-bottom: 40px;
+	}
+
+	.lgc-sec__naslov {
+		font-size: 24px;
+	}
+
+	.lgc-free,
+	.lgc-prvih,
+	.lgc-dodatno {
+		padding: 22px 20px;
+	}
+
+	.lgc-free__iznos {
+		font-size: 36px;
+	}
+
+	.lgc-free__stavke,
+	.lgc-prvih__stavke,
+	.lgc-dodatno__lista {
+		grid-template-columns: 1fr;
+		flex-basis: 100%;
+	}
+
+	.lgc-free__dugme {
+		width: 100%;
+	}
+
+	.lgc-prvih__naslov {
+		font-size: 24px;
+	}
+
+	.lgc-slot {
+		padding: 18px 20px;
+	}
+}
+
+/* Payments: order links on sellable products. */
+.lgc-naruci { display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; font-weight: 700; color: var(--lg-green); }
+.lgc-paket__naruci { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }

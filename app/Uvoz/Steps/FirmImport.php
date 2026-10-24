@@ -75,8 +75,16 @@ class FirmImport extends Step
                 $values['cover_path'] = $this->ctx->copyAttachment($coverId, 'firme/'.$userId, 'firms', "#{$wpId} naslovna");
             }
 
-            if ($keys['biznis_until'] !== '' && ($until = $get('biznis_until')) !== '') {
-                $values['biznis_until'] = is_numeric($until) ? Carbon::createFromTimestamp((int) $until) : Carbon::parse($until);
+            // First 30 firms: free first year from the first import (kept on a re-import).
+            // Other firms: an end date stored in WordPress (if any) becomes a Business Start term.
+            if ($values['founding_free']) {
+                if (! ($existing->free_program ?? false)) {
+                    $values += ['free_program' => true, 'package' => null, 'package_period' => null,
+                        'package_starts_at' => now(), 'package_ends_at' => now()->addMonths((int) config('firms.free_program.months', 12))];
+                }
+            } elseif ($keys['biznis_until'] !== '' && ($until = $get('biznis_until')) !== '') {
+                $values += ['package' => 'start', 'package_period' => 'yearly',
+                    'package_ends_at' => is_numeric($until) ? Carbon::createFromTimestamp((int) $until) : Carbon::parse($until)];
             }
 
             if ($activity !== '' && $description !== '') {

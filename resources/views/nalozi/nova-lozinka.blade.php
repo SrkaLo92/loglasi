@@ -13,7 +13,7 @@
 			@csrf
 			<input type="hidden" name="token" value="{{ $token }}">
 			<div class="lgn-field">
-				<label for="nova-email">Email</label>
+				<label for="nova-email">E-pošta</label>
 				<input id="nova-email" type="email" name="email" value="{{ old('email', $email) }}" autocomplete="email" required
 					@if ($errors->has('email')) aria-invalid="true" aria-describedby="nova-email-greska" @endif>
 				@include('nalozi.partials.greska', ['field' => 'email', 'prefix' => 'nova-'])

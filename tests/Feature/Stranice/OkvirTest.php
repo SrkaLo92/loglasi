@@ -14,7 +14,7 @@ class OkvirTest extends TestCase
     {
         $this->get('/')
             ->assertOk()
-            ->assertSee('loglasi<span>.rs</span>', false)
+            ->assertSee('img/brand/logo.svg', false)
             ->assertSee('role="search"', false)
             ->assertSee('action="'.url_slash('oglasi').'"', false)
             ->assertSee('name="keyword"', false)

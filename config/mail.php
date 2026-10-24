@@ -111,8 +111,16 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
+        'address' => env('MAIL_FROM_ADDRESS', 'noreply@loglasi.rs'),
+        'name' => env('MAIL_FROM_NAME', 'loglasi.rs'),
+    ],
+
+    // Branded layout and theme: resources/views/vendor/mail (docs/modules/notifications.md).
+    'markdown' => [
+        'theme' => env('MAIL_MARKDOWN_THEME', 'loglasi'),
+        'paths' => [
+            resource_path('views/vendor/mail'),
+        ],
     ],
 
 ];

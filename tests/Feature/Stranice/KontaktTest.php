@@ -28,11 +28,9 @@ class KontaktTest extends TestCase
     {
         return array_merge([
             'ime' => 'Marko Marković',
-            'email' => 'marko@primer.rs',
-            'telefon' => '065 123 4567',
-            'tema' => 'Pitanje o oglasu',
+            'kontakt' => 'marko@primer.rs',
+            'tema' => 'Plaćanje i isticanje',
             'poruka' => 'Zanima me kako da istaknem oglas za bicikl.',
-            'saglasnost' => '1',
             'sajt' => '',
             '_t' => $this->token(),
         ], $override);
@@ -47,8 +45,12 @@ class KontaktTest extends TestCase
     {
         $this->get('/kontakt/')
             ->assertOk()
-            ->assertSee('<label for="k-ime">Ime i prezime</label>', false)
-            ->assertSee('<label for="k-email">E-pošta</label>', false)
+            ->assertSee('<label for="k-ime">Ime</label>', false)
+            ->assertSee('<label for="k-kontakt">E-mail ili telefon</label>', false)
+            ->assertSee('Odgovaramo na e-mail ili vas zovemo.')
+            ->assertSee('<option value="">— Izaberite —</option>', false)
+            ->assertSee('aria-label="Kontakt forma"', false)
+            ->assertDontSee('name="saglasnost"', false)
             ->assertSee('name="sajt"', false)
             ->assertSee('name="_t"', false)
             ->assertSee('name="_token"', false)
@@ -69,9 +71,9 @@ class KontaktTest extends TestCase
         Mail::assertQueued(KontaktPoruka::class, function (KontaktPoruka $mail) {
             return $mail->hasTo('urednik@loglasi.rs')
                 && $mail->hasReplyTo('marko@primer.rs')
-                && $mail->data['telefon'] === '+381651234567'
-                && $mail->data['tema'] === 'Pitanje o oglasu'
-                && str_contains($mail->envelope()->subject, 'Pitanje o oglasu');
+                && $mail->data['telefon'] === ''
+                && $mail->data['tema'] === 'Plaćanje i isticanje'
+                && str_contains($mail->envelope()->subject, 'Plaćanje i isticanje');
         });
         Mail::assertNothingSent();
     }
@@ -80,58 +82,62 @@ class KontaktTest extends TestCase
     {
         $this->followingRedirects()->send($this->valid())
             ->assertOk()
-            ->assertSee('Hvala na poruci. Poslata je');
+            ->assertSee('Hvala, poruka je poslata. Javićemo vam se uskoro.');
     }
 
     public function test_mail_text_contains_message_without_html_entities(): void
     {
         $mail = new KontaktPoruka([
-            'ime' => 'Ana "Anči" Jovanović', 'email' => 'ana@primer.rs', 'telefon' => '',
+            'ime' => 'Ana "Anči" Jovanović', 'email' => '', 'telefon' => '+381651234567',
             'tema' => 'Nešto drugo', 'poruka' => 'Pitanje & odgovor <b>', 'ip' => '127.0.0.1',
         ]);
 
         $mail->assertSeeInText('Ana "Anči" Jovanović');
         $mail->assertSeeInText('Pitanje & odgovor <b>');
-        $mail->assertSeeInText('Telefon: nije unet');
+        $mail->assertSeeInText('E-mail ili telefon: +381651234567');
+        $mail->assertSeeInText('Pošiljalac je ostavio telefon');
+        $this->assertSame([], $mail->envelope()->replyTo);
     }
 
     public function test_required_fields_are_validated_in_serbian(): void
     {
         $this->send(['_t' => $this->token()])
             ->assertRedirect(url_slash('kontakt'))
-            ->assertSessionHasErrors(['ime', 'email', 'tema', 'poruka', 'saglasnost']);
+            ->assertSessionHasErrors(['ime', 'kontakt', 'tema', 'poruka']);
 
         $errors = session('errors')->getBag('default');
-        $this->assertSame('Polje ime i prezime je obavezno.', $errors->first('ime'));
+        $this->assertSame('Ovo polje je obavezno.', $errors->first('ime'));
         Mail::assertNothingQueued();
     }
 
     public function test_invalid_email_phone_topic_and_short_message(): void
     {
-        $this->send($this->valid(['email' => 'marko@', 'telefon' => '123', 'tema' => 'Bilo šta', 'poruka' => 'Kratko']))
+        $this->send($this->valid(['kontakt' => 'marko@', 'tema' => 'Bilo šta', 'poruka' => 'Kratko']))
             ->assertSessionHasErrors([
-                'email' => 'Unesite ispravnu adresu e-pošte.',
-                'telefon' => 'Unesite ispravan broj telefona, npr. 65 123 4567.',
+                'kontakt' => 'Unesite ispravnu adresu e-pošte ili broj telefona, npr. 65 123 4567.',
                 'tema' => 'Izaberite temu sa liste.',
-            ])
-            ->assertSessionHasErrors('poruka');
+                'poruka' => 'Tekst je prekratak.',
+            ]);
+        $this->send($this->valid(['poruka' => str_repeat('a', 2001)]))->assertSessionHasErrors(['poruka' => 'Tekst je predugačak.']);
+        $this->send($this->valid(['kontakt' => '123']))->assertSessionHasErrors('kontakt');
 
         Mail::assertNothingQueued();
     }
 
     public function test_errors_are_rendered_next_to_fields(): void
     {
-        $this->followingRedirects()->send($this->valid(['email' => 'marko@']))
-            ->assertSee('aria-invalid="true" aria-describedby="greska-email"', false)
+        $this->followingRedirects()->send($this->valid(['kontakt' => 'marko@']))
+            ->assertSee('aria-describedby="pomoc-kontakt greska-kontakt"', false)
+            ->assertSee('id="greska-kontakt"', false)
             ->assertSee('Neka polja nisu dobro popunjena.')
             ->assertSee('value="Marko Marković"', false);
     }
 
-    public function test_phone_is_optional(): void
+    public function test_phone_instead_of_email_is_stored_in_e164(): void
     {
-        $this->send($this->valid(['telefon' => '']))->assertSessionHasNoErrors();
+        $this->send($this->valid(['kontakt' => '065 123 4567']))->assertSessionHasNoErrors();
 
-        Mail::assertQueued(KontaktPoruka::class, fn ($mail) => $mail->data['telefon'] === '');
+        Mail::assertQueued(KontaktPoruka::class, fn ($mail) => $mail->data['telefon'] === '+381651234567' && $mail->data['email'] === '');
     }
 
     public function test_honeypot_pretends_success_and_sends_nothing(): void

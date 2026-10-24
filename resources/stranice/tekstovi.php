@@ -6,7 +6,8 @@
  *
  * Zamene u vitičastim zagradama popunjavaju se iz baze (cene iz tabele products,
  * limiti iz podešavanja), da se cena nikad ne piše ručno u tekstu:
- *   {cena_podizanje} {cena_istaknuto_7} {cena_istaknuto_30} {cena_biznis}
+ *   {cena_podizanje} {cena_istaknuto_7} {cena_istaknuto_30} {cena_paket_podizanja} {cena_prioritet} {cena_top}
+ *   {cena_premium_xl} {cena_start} {cena_pro} {cena_max}
  *   {besplatni_oglasi} {besplatne_firme} {trajanje_oglasa} {email}
  *
  * Dugi tekstovi su Markdown (## naslov, - stavka, [tekst](/putanja/)); HTML se ne prihvata.
@@ -16,14 +17,50 @@ return [
 
     /* Cenovnik ------------------------------------------------------------ */
 
+    'pocetna.zasto.naslov' => 'Zašto izabrati nas',
+    'pocetna.pitanja.naslov' => 'Najčešća pitanja',
+    'pocetna.zasto' => [
+        ['ikonica' => 'pin', 'naslov' => 'Lokalna povezanost', 'tekst' => 'Povezujemo ljude iz Loznice i okolnih mesta. Sve je blizu, pa stvar možete da pogledate uživo pre kupovine.'],
+        ['ikonica' => 'click', 'naslov' => 'Jednostavnost korišćenja', 'tekst' => 'Sajt je pregledan i lak za korišćenje, i onima koji se ne snalaze najbolje sa tehnologijom. Oglas postavljate za par minuta.'],
+        ['ikonica' => 'shield', 'naslov' => 'Sigurnost i poverenje', 'tekst' => 'Kupac i prodavac se dogovaraju direktno, bez posrednika i provizije. Sumnjiv oglas možete da nam prijavite jednim klikom.'],
+        ['ikonica' => 'gift', 'naslov' => 'Besplatno oglašavanje', 'tekst' => 'Privatna lica imaju {besplatni_oglasi} besplatno, bez skrivenih troškova. Plaćate samo ako želite da istaknete oglas.'],
+        ['ikonica' => 'support', 'naslov' => 'Podrška korisnicima', 'tekst' => 'Tu smo kad zapne: pomažemo oko postavljanja oglasa i rešavamo probleme. Pišite nam ili pozovite.'],
+        ['ikonica' => 'search', 'naslov' => 'Brza i efikasna pretraga', 'tekst' => 'Kategorije i filteri po ceni i mestu brzo vas vode do onoga što tražite.'],
+    ],
+
     'cenovnik.naslov' => 'Cenovnik',
-    'cenovnik.podnaslov' => 'Postavljanje je besplatno, plaćate samo dodatke',
-    'cenovnik.uvod' => 'Oglas na loglasi.rs postavljate besplatno. Ako želite da ga vidi više ljudi ili predstavljate firmu, izaberite neku od usluga ispod.',
+    'cenovnik.uvod' => 'Postavljanje oglasa je besplatno. Plaćate samo ako želite da vaš oglas vidi više ljudi, ili ako predstavljate firmu.',
+    'cenovnik.privatni.naslov' => 'Za privatne korisnike',
     'cenovnik.besplatno.naziv' => 'Običan oglas',
     'cenovnik.besplatno.stavke' => [
         'Oglas traje {trajanje_oglasa}',
         'Obnova je besplatna',
         'Bez provizije na prodaju',
+    ],
+    'cenovnik.mesta.naslov' => 'Treba vam više oglasa?',
+    'cenovnik.mesta.uvod' => 'Dodatna mesta za oglase, važe 30 dana',
+    'cenovnik.promocije.naslov' => 'Promocije oglasa',
+    'cenovnik.promocije.uvod' => 'Da vaš oglas vidi više kupaca',
+    'cenovnik.promocije.napomena' => 'Za sada se plaća uplatom na račun, a usluga se uključuje čim uplata stigne.',
+    'cenovnik.firme.naslov' => 'Za firme',
+    'cenovnik.firme.oznaka' => 'Prvih {besplatne_firme} firmi besplatno',
+    'cenovnik.firme.ponuda' => '12 meseci besplatno za prvih {besplatne_firme} firmi',
+    'cenovnik.firme.stavke' => [
+        'Neograničeno standardnih oglasa',
+        'Profil firme i oznaka „Proverena firma”',
+        '5 podizanja i 1 isticanje svakog meseca',
+        'Početni uvoz oglasa i podrška',
+    ],
+    'cenovnik.firme.napomena' => 'Posle 12 meseci nema automatske naplate. Sami birate da li nastavljate i sa kojim paketom.',
+    'cenovnik.paketi.naslov' => 'Paketi posle prve godine',
+    'cenovnik.paketi.uvod' => 'Za ostale firme, i za prvih {besplatne_firme} kad istekne besplatna godina. Godišnje: platite 10 meseci, koristite 12.',
+    'cenovnik.paketi.istaknut' => 'business_pro',
+    'cenovnik.dodatno.naslov' => 'Dodatno oglašavanje za firme',
+    'cenovnik.dodatno' => [
+        ['naziv' => 'Partner nedelje', 'opis' => 'Mesto na početnoj i objave na društvenim mrežama', 'cena' => '3.990 RSD / 7 dana'],
+        ['naziv' => 'Predstavljanje na mrežama', 'opis' => 'Reel ili video konkretnog proizvoda', 'cena' => '5.000–10.000 RSD'],
+        ['naziv' => 'Sponzor kategorije', 'opis' => 'Vaša firma uz celu kategoriju', 'cena' => '7.500–15.000 RSD / mes.'],
+        ['naziv' => 'Promo blok na početnoj', 'opis' => 'Istaknut blok vaše firme', 'cena' => '5.000–10.000 RSD / mes.'],
     ],
     'cenovnik.opis.bump' => 'Oglas se vraća na vrh liste kao da je upravo postavljen. Korisno kad oglas potone ispod novijih.',
     'cenovnik.opis.featured_7' => 'Oglas je izdvojen na početnoj strani i u rezultatima pretrage, sa oznakom „Istaknuto”.',
@@ -41,20 +78,20 @@ return [
     'cenovnik.cta.naslov' => 'Imate nešto za prodaju?',
     'cenovnik.cta.tekst' => 'Postavljanje traje par minuta, a prvi oglasi su besplatni.',
     'cenovnik.pitanja' => [
-        ['uslov' => null, 'pitanje' => 'Da li je postavljanje oglasa besplatno?', 'odgovor' => 'Da. Privatni korisnici mogu besplatno da postave {besplatni_oglasi} mesečno. Oglas traje {trajanje_oglasa}, a obnova je besplatna.'],
+        ['uslov' => null, 'pitanje' => 'Da li je postavljanje oglasa besplatno?', 'odgovor' => 'Da. Privatni korisnici besplatno imaju {besplatni_oglasi}. Oglas traje {trajanje_oglasa}, a obnova je besplatna.'],
         ['uslov' => 'bump', 'pitanje' => 'Šta je podizanje oglasa?', 'odgovor' => 'Za {cena_podizanje} vaš oglas se vraća na vrh liste, kao da je upravo postavljen. Sadržaj oglasa i istorija ostaju isti.'],
-        ['uslov' => 'featured_7', 'pitanje' => 'Šta dobijam kad istaknem oglas?', 'odgovor' => 'Istaknut oglas se prikazuje u izdvojenim oglasima na početnoj strani i u rezultatima pretrage, sa oznakom „Istaknuto”. Isticanje na 7 dana košta {cena_istaknuto_7}, a 30 dana {cena_istaknuto_30}.'],
+        ['uslov' => 'featured_7', 'pitanje' => 'Šta dobijam kad istaknem oglas?', 'odgovor' => 'Istaknut oglas se prikazuje u izdvojenim oglasima na početnoj strani i u rezultatima pretrage, sa oznakom „Istaknuto”. Isticanje na 7 dana košta {cena_istaknuto_7}.'],
         ['uslov' => null, 'pitanje' => 'Kada se usluga uključuje posle uplate?', 'odgovor' => 'Čim vidimo uplatu na računu, obično istog ili sledećeg radnog dana. Ako pošaljete potvrdu o uplati, lakše ćemo je povezati sa vašim oglasom.'],
         ['uslov' => null, 'pitanje' => 'Da li mogu da platim karticom?', 'odgovor' => 'Za sada ne. Plaća se uplatom na račun, u banci, pošti ili kroz mobilno bankarstvo.'],
-        ['uslov' => 'biznis_12m', 'pitanje' => 'Koliko košta Biznis paket za firme?', 'odgovor' => '{ponuda_firme} Detalji su na strani [Za firme](/za-firme/).'],
+        ['pitanje' => 'Koliko košta oglašavanje za firme?', 'odgovor' => 'Prvih {besplatne_firme} firmi koristi loglasi.rs besplatno 12 meseci. Posle toga, kao i za ostale firme, birate jedan od paketa sa ove strane, uz mesečnu ili godišnju uplatu. Detalji su na strani [Za firme](/za-firme/).'],
     ],
 
     /* Za firme ------------------------------------------------------------ */
 
-    'za_firme.oznaka' => 'Biznis paket',
+    'za_firme.oznaka' => 'Za firme',
     'za_firme.naslov' => 'Predstavite svoju firmu kupcima iz Loznice',
     'za_firme.uvod' => 'Profil firme sa logoom, radnim vremenom, mapom i svim vašim oglasima na jednom mestu. Kupci vas pozivaju jednim dodirom, a vi vidite koliko ljudi vas je pronašlo.',
-    'za_firme.prednosti.naslov' => 'Šta dobijate uz Biznis paket',
+    'za_firme.prednosti.naslov' => 'Šta dobija firma uz profil firme',
     'za_firme.prednosti' => [
         ['ikonica' => 'image', 'naslov' => 'Logo i naslovna slika', 'tekst' => 'Profil izgleda kao izlog vaše radnje, a ne kao nalog privatnog lica.'],
         ['ikonica' => 'badge', 'naslov' => 'Oznaka „Proverena firma”', 'tekst' => 'Podatke o firmi proveravamo pre uključenja, pa kupci znaju s kim posluju.'],
@@ -63,6 +100,8 @@ return [
         ['ikonica' => 'phone', 'naslov' => 'Pozovi, WhatsApp, Viber', 'tekst' => 'Dugmad za kontakt su pri vrhu profila i na svakom vašem oglasu.'],
         ['ikonica' => 'chart', 'naslov' => 'Statistika', 'tekst' => 'Pregledi profila i oglasa i broj kontakata, da znate šta donosi kupce.'],
     ],
+    'za_firme.paketi.naslov' => 'Paketi posle besplatnog perioda',
+    'za_firme.paketi.uvod' => 'Posle 12 meseci nema automatske naplate. Sami birate da li želite da nastavite sa nekim od paketa. Godišnje plaćate 10 meseci, a koristite 12.',
     'za_firme.poredjenje.naslov' => 'Privatni nalog ili profil firme',
     'za_firme.koraci.naslov' => 'Kako da se prijavite',
     'za_firme.koraci' => [
@@ -75,19 +114,47 @@ return [
     'za_firme.cta.naslov_popunjeno' => 'Prijavite svoju firmu',
     'za_firme.cta.tekst' => 'Popunite kratku formu i javićemo vam se da dogovorimo uključenje profila.',
 
+    /* Oglas: saveti za bezbednu kupovinu ---------------------------------- */
+
+    'oglas.saveti.naslov' => 'Saveti za bezbednu kupovinu',
+    'oglas.saveti' => [
+        'Pogledajte stvar uživo pre plaćanja i proverite da li odgovara opisu.',
+        'Ne šaljite novac unapred i ne plaćajte preko linkova koje dobijete porukom.',
+        'Nađite se na javnom i prometnom mestu, po danu, a za vozila i nekretnine proverite papire.',
+        'Ne delite lozinke, kodove iz SMS-a ni podatke sa platne kartice.',
+    ],
+
     /* Kontakt ------------------------------------------------------------- */
 
     'kontakt.naslov' => 'Kontakt',
-    'kontakt.uvod' => 'Imate pitanje o oglasu, plaćanju ili Biznis paketu? Pišite nam i odgovorićemo vam što pre, obično istog ili sledećeg radnog dana.',
+    'kontakt.uvod' => 'Imate pitanje o oglasu, plaćanju ili paketima za firme? Pišite nam i odgovorićemo vam što pre, obično istog ili sledećeg radnog dana.',
     'kontakt.forma.naslov' => 'Pišite nam',
-    'kontakt.poslato' => 'Hvala na poruci. Poslata je, a odgovor stiže na adresu e-pošte koju ste uneli.',
+    'kontakt.poslato' => 'Hvala, poruka je poslata. Javićemo vam se uskoro.',
     'kontakt.teme' => [
-        'Pitanje o oglasu',
-        'Prijava firme (Biznis paket)',
-        'Plaćanje i isticanje oglasa',
+        'Postavljanje oglasa',
+        'Plaćanje i isticanje',
+        'Nalog i prijava',
+        'Za firme',
         'Prijava problema',
         'Nešto drugo',
     ],
+    'kontakt.polje.ime' => 'Ime',
+    'kontakt.polje.kontakt' => 'E-mail ili telefon',
+    'kontakt.polje.kontakt_pomoc' => 'Odgovaramo na e-mail ili vas zovemo.',
+    'kontakt.polje.tema' => 'Tema',
+    'kontakt.polje.tema_prazno' => '— Izaberite —',
+    'kontakt.polje.poruka' => 'Poruka',
+    'kontakt.dugme' => 'Pošalji poruku',
+    'kontakt.napomena' => 'Podatke iz forme koristimo samo da vam odgovorimo. Više u [Politici privatnosti](/politika-privatnosti/).',
+    'kontakt.poruka.validacija' => 'Neka polja nisu dobro popunjena. Proverite označena polja i pošaljite ponovo.',
+    'kontakt.poruka.spam' => 'Poruka nije poslata. Pokušajte ponovo malo kasnije.',
+    'kontakt.poruka.istekla' => 'Forma je istekla. Proverite podatke i pošaljite poruku ponovo.',
+    'kontakt.poruka.limit' => 'Poslali ste više poruka za kratko vreme. Pokušajte ponovo za {minuta}.',
+    'kontakt.poruka.obavezno' => 'Ovo polje je obavezno.',
+    'kontakt.poruka.predugacak' => 'Tekst je predugačak.',
+    'kontakt.poruka.prekratak' => 'Tekst je prekratak.',
+    'kontakt.poruka.kontakt' => 'Unesite ispravnu adresu e-pošte ili broj telefona, npr. 65 123 4567.',
+    'kontakt.poruka.tema' => 'Izaberite temu sa liste.',
 
     /* O nama -------------------------------------------------------------- */
 
@@ -101,14 +168,14 @@ Na velikim sajtovima oglas iz Loznice se izgubi među hiljadama oglasa iz cele S
 
 ## Šta možete da radite na sajtu
 
-- Besplatno postavite {besplatni_oglasi} mesečno. Oglas traje {trajanje_oglasa}, a obnova je besplatna.
+- Besplatno imate {besplatni_oglasi}. Oglas traje {trajanje_oglasa}, a obnova je besplatna.
 - Javite se prodavcu pozivom, porukom preko sajta, WhatsApp-om ili Viber-om.
 - Sačuvajte pretragu i vratite se oglasima koji vas zanimaju.
 - Ako imate firmu, otvorite profil firme sa logoom, radnim vremenom i svim oglasima na jednom mestu. Više o tome na strani [Za firme](/za-firme/).
 
 ## Kako zarađujemo
 
-Postavljanje oglasa je besplatno. Plaćaju se samo dodaci koje sami izaberete: podizanje oglasa, isticanje oglasa i Biznis paket za firme. Sve cene su na strani [Cenovnik](/cenovnik/).
+Postavljanje oglasa je besplatno. Plaćaju se samo dodaci koje sami izaberete: podizanje oglasa, isticanje oglasa i paketi za firme. Sve cene su na strani [Cenovnik](/cenovnik/).
 
 ## Kontakt
 
@@ -120,15 +187,15 @@ MD,
     'faq.naslov' => 'Česta pitanja',
     'faq.uvod' => 'Odgovori na pitanja koja nam najčešće postavljate. Ako ne nađete odgovor, [pišite nam](/kontakt/).',
     'faq.pitanja' => [
-        ['pitanje' => 'Da li je postavljanje oglasa besplatno?', 'odgovor' => 'Da. Privatni korisnici mogu besplatno da postave {besplatni_oglasi} mesečno. Plaćaju se samo dodaci koje sami izaberete, kao što su podizanje i isticanje oglasa.'],
+        ['pitanje' => 'Da li je postavljanje oglasa besplatno?', 'odgovor' => 'Da. Privatni korisnici besplatno imaju {besplatni_oglasi}. Plaćaju se samo dodatna mesta za oglase i promocije koje sami izaberete, kao što su podizanje i isticanje.'],
         ['pitanje' => 'Kako da postavim oglas?', 'odgovor' => 'Prijavite se ili napravite nalog, pa kliknite na „Postavite oglas”. Izaberite kategoriju, upišite naslov, opis i cenu, dodajte fotografije i objavite oglas.'],
         ['pitanje' => 'Koliko dugo traje oglas?', 'odgovor' => 'Oglas traje {trajanje_oglasa}. Kad istekne, možete besplatno da ga obnovite iz svog naloga.'],
         ['pitanje' => 'Kako da kontaktiram prodavca?', 'odgovor' => 'Na strani oglasa su dugmad za poziv i poruku preko sajta, a ako je prodavac ostavio broj, i za WhatsApp i Viber.'],
         ['pitanje' => 'Kako da istaknem ili podignem oglas?', 'odgovor' => 'Podizanje oglasa košta {cena_podizanje}, a isticanje {cena_istaknuto_7} za 7 dana ili {cena_istaknuto_30} za 30 dana. Plaća se uplatom na račun, a postupak je opisan na strani [Cenovnik](/cenovnik/).'],
-        ['pitanje' => 'Šta je Biznis paket?', 'odgovor' => 'Biznis paket je profil firme sa logoom, radnim vremenom, mapom i oznakom „Firma” na svakom oglasu. {ponuda_firme} Više na strani [Za firme](/za-firme/).'],
+        ['pitanje' => 'Šta dobija firma uz profil firme?', 'odgovor' => 'Profil firme sa logoom, radnim vremenom, mapom i oznakom „Firma” na svakom oglasu. {ponuda_firme} Više na strani [Za firme](/za-firme/).'],
         ['pitanje' => 'Kako da prijavim sumnjiv oglas?', 'odgovor' => 'Na strani oglasa kliknite na „Prijavi oglas” i ukratko napišite šta nije u redu. Svaku prijavu pregledamo.'],
         ['pitanje' => 'Kako da kupujem bezbedno?', 'odgovor' => 'Robu pogledajte uživo pre plaćanja, ne plaćajte unapred nepoznatim osobama i nikome ne šaljite kodove koje dobijete SMS porukom.'],
-        ['pitanje' => 'Kako da obrišem nalog i svoje podatke?', 'odgovor' => 'Uputstvo je na strani [Brisanje podataka](/brisanje-podataka/). Možete i da nam pišete preko [kontakt forme](/kontakt/).'],
+        ['pitanje' => 'Kako da obrišem nalog i svoje podatke?', 'odgovor' => 'Uputstvo je na strani [Brisanje ličnih podataka](/brisanje-licnih-podataka/). Možete i da nam pišete preko [kontakt forme](/kontakt/).'],
     ],
 
     /* Uslovi korišćenja --------------------------------------------------- */
@@ -149,7 +216,7 @@ loglasi.rs je sajt za oglase za Loznicu i okolinu. Sajt povezuje one koji prodaj
 
 ## 3. Oglasi
 
-- Privatni korisnici mogu besplatno da postave {besplatni_oglasi} mesečno, a firme prema svom paketu.
+- Privatni korisnici besplatno imaju {besplatni_oglasi}, a firme prema svom paketu.
 - Oglas traje {trajanje_oglasa}, a obnova je besplatna.
 - Oglas mora da opisuje stvarnu stvar ili uslugu, sa tačnom cenom i fotografijama na koje imate pravo.
 - Jedna stvar se oglašava jednim oglasom. Isti oglas postavljen više puta se briše.
@@ -170,9 +237,10 @@ Oglase pregledamo i možemo da uklonimo oglas koji krši ove uslove, bez prethod
 
 ## 6. Plaćene usluge
 
-- Podizanje oglasa ({cena_podizanje}), isticanje oglasa ({cena_istaknuto_7} za 7 dana, {cena_istaknuto_30} za 30 dana) i Biznis paket ({cena_biznis} godišnje) plaćaju se uplatom na račun, po cenama sa strane [Cenovnik](/cenovnik/).
-- Usluga se uključuje ručno, kada uplata stigne. Trajanje se računa od dana uključenja.
-- Ako usluga ne može da se uključi, javićemo vam se i dogovoriti povraćaj uplate.
+- Postavljanje oglasa je besplatno. Plaćaju se dodatni oglasi, promocije oglasa (podizanje {cena_podizanje}, paket 10 podizanja {cena_paket_podizanja}, istaknut oglas {cena_istaknuto_7}, prioritetni oglas {cena_prioritet}, TOP oglas {cena_top}, Premium XL kartica {cena_premium_xl}) i paketi za firme (Business Start {cena_start}, Business Pro {cena_pro} i Business Max {cena_max} mesečno, ili godišnje po ceni za 10 meseci), po cenama sa strane [Cenovnik](/cenovnik/).
+- Plaća se uplatom na račun, najlakše skeniranjem IPS QR koda u aplikaciji banke, uz poziv na broj sa predračuna. Ako uplata ne stigne u roku od 7 dana, porudžbina se otkazuje.
+- Usluga počinje odmah posle potvrde uplate i traje koliko piše na Cenovniku. Paket kupljen tokom besplatne prve godine počinje kad ona istekne.
+- Za isticanje, dodatne oglase i pakete, ako odustanete pre isteka, vraćamo srazmeran deo cene za dane koji nisu iskorišćeni; podizanje se izvrši odmah. Ako usluga ne može da se pruži našom greškom, vraćamo ceo iznos.
 
 ## 7. Odgovornost
 
@@ -188,6 +256,33 @@ Pitanja o ovim uslovima pošaljite preko [kontakt forme](/kontakt/) ili na {emai
 MD,
 
     /* Politika privatnosti ------------------------------------------------ */
+
+    'brisanje.naslov' => 'Brisanje ličnih podataka',
+    'brisanje.tekst' => <<<'MD'
+Svoj nalog i lične podatke možete da obrišete u svakom trenutku, bez obrazloženja.
+
+## Sami, iz naloga
+
+1. Prijavite se na loglasi.rs.
+2. Otvorite [Moj nalog](/moj-nalog/) i izaberite „Obriši nalog”.
+3. Upišite lozinku, potvrdite i nalog se briše odmah.
+
+## Na zahtev
+
+Ako ne možete da se prijavite, pišite nam preko [kontakt forme](/kontakt/) ili na {email}, sa adrese e-pošte kojom ste se registrovali. Nalog brišemo najkasnije u roku od 30 dana i javljamo vam kad je gotovo.
+
+## Šta se briše
+
+- ime, adresa e-pošte, broj telefona, lozinka i slika profila
+- svi vaši oglasi, sa slikama
+- razgovori i poruke, omiljeni oglasi i sačuvane pretrage
+- profil firme, ako ste ga imali
+- prijave na aplikaciji i uređaji za obaveštenja
+
+Podatke o plaćenim uslugama čuvamo bez ličnih podataka, onoliko koliko zakon traži za knjigovodstvo. Posle brisanja možete ponovo da se registrujete istom adresom e-pošte.
+
+Više o tome kako postupamo sa podacima piše u [Politici privatnosti](/politika-privatnosti/).
+MD,
 
     'privatnost.naslov' => 'Politika privatnosti',
     'privatnost.tekst' => <<<'MD'
@@ -223,7 +318,7 @@ Sajt koristi kolačiće koji su neophodni za rad: prijavu na nalog i zaštitu fo
 
 ## Vaša prava
 
-Imate pravo da tražite uvid u svoje podatke, ispravku, brisanje i ograničenje obrade, kao i pravo da podnesete pritužbu Povereniku za informacije od javnog značaja i zaštitu podataka o ličnosti. Uputstvo za brisanje naloga je na strani [Brisanje podataka](/brisanje-podataka/).
+Imate pravo da tražite uvid u svoje podatke, ispravku, brisanje i ograničenje obrade, kao i pravo da podnesete pritužbu Povereniku za informacije od javnog značaja i zaštitu podataka o ličnosti. Uputstvo za brisanje naloga je na strani [Brisanje ličnih podataka](/brisanje-licnih-podataka/).
 
 ## Kontakt
 
@@ -236,4 +331,42 @@ MD,
     'greska.404.tekst' => 'Strana koju tražite ne postoji ili je premeštena. Proverite adresu ili potražite oglas pretragom.',
     'greska.410.naslov' => 'Ova strana više ne postoji',
     'greska.410.tekst' => 'Oglas ili strana su trajno uklonjeni. Pogledajte druge oglase iz Loznice i okoline.',
+
+    /* SEO: title i opis po tipu strane (seo-sta-mora-da-ostane.md, odeljak 1) ----
+     * Ručna vrednost ide doslovno; šablon dobija „ | loglasi.rs” ako ga nema.
+     * Zamene: {kategorija} {naslov} {mesto} {cena} {firma} {ime} {upit} */
+
+    'seo.home.title' => 'Besplatni oglasi Loznica – kupovina, prodaja, usluge | loglasi.rs',
+    'seo.home.description' => 'loglasi.rs je lokalni oglasnik za Loznicu i okolinu: automobili, nekretnine, usluge, poslovi, mobilni telefoni i besplatne stvari. Postavite oglas besplatno.',
+    'seo.archive.title' => 'Svi oglasi Loznica',
+    'seo.archive.description' => 'Svi lokalni oglasi za Loznicu i okolinu na jednom mestu: automobili, nekretnine, usluge, poslovi, mobilni telefoni i besplatne stvari.',
+    'seo.archive.h1' => 'Svi oglasi u Loznici',
+    'seo.category.title' => '{kategorija}, oglasi Loznica',
+    'seo.category.description' => 'Pregledajte {kategorija} oglase u Loznici i okolini na loglasi.rs. Kontaktirajte prodavca direktno ili besplatno postavite svoj oglas.',
+    'seo.category.h1' => '{kategorija} u Loznici',
+    'seo.category.faq_title' => 'Česta pitanja – {kategorija} Loznica',
+    'seo.listing.title' => '{naslov}, {kategorija}, {mesto}',
+    'seo.listing.title_short' => '{naslov}, {mesto}',
+    'seo.listing.description' => '{naslov} u mestu {mesto}. {cena}Pogledajte oglas i kontaktirajte prodavca na loglasi.rs.',
+    'seo.business.title' => '{firma}, {mesto}',
+    'seo.business.description' => 'Oglasi i kontakt firme {firma} iz mesta {mesto} na loglasi.rs.',
+    'seo.person.title' => '{ime}, oglasi',
+    'seo.search.title' => 'Pretraga: {upit}',
+    'seo.404.title' => 'Stranica nije pronađena | loglasi.rs',
+    'seo.o_nama.title' => 'O nama – lokalni oglasi za Loznicu i okolinu | loglasi.rs',
+    'seo.o_nama.description' => 'loglasi.rs je besplatan sajt za lokalne oglase u Loznici, Banji Koviljači, Lešnici i okolini. Kupujte i prodajte od ljudi iz svog kraja, bez posrednika.',
+    'seo.kontakt.title' => 'Kontakt – pišite nam | loglasi.rs',
+    'seo.kontakt.description' => 'Imate pitanje o oglasu, nalogu ili oglašavanju firme na loglasi.rs? Pišite nam putem kontakt forme ili emaila, odgovaramo brzo.',
+    'seo.faq.title' => 'Česta pitanja (FAQ) – kako postaviti oglas | loglasi.rs',
+    'seo.faq.description' => 'Odgovori na najčešća pitanja: kako postaviti i obnoviti oglas, koliko traje, šta je besplatno i kako se firme oglašavaju na loglasi.rs.',
+    'seo.uslovi.title' => 'Uslovi korišćenja | loglasi.rs',
+    'seo.uslovi.description' => 'Pravila korišćenja sajta loglasi.rs: šta smete da oglašavate, obaveze oglašivača i kupaca, odgovornost i uklanjanje oglasa.',
+    'seo.privatnost.title' => 'Politika privatnosti | loglasi.rs',
+    'seo.privatnost.description' => 'Kako loglasi.rs prikuplja, koristi i čuva vaše lične podatke, koja su vaša prava i kako nas možete kontaktirati u vezi sa privatnošću.',
+    'seo.brisanje.title' => 'Brisanje ličnih podataka | loglasi.rs',
+    'seo.brisanje.description' => 'Uputstvo kako da zatražite brisanje svog naloga i ličnih podataka sa sajta loglasi.rs.',
+    'seo.cenovnik.title' => 'Cenovnik: promocije oglasa i paketi za firme | loglasi.rs',
+    'seo.cenovnik.description' => 'Postavljanje oglasa je besplatno. Pogledajte cene promocija oglasa i paketa za firme iz Loznice.',
+    'seo.za_firme.title' => 'Za firme: profil firme i paketi | loglasi.rs',
+    'seo.za_firme.description' => 'Predstavite svoju firmu kupcima iz Loznice: profil sa logoom, radnim vremenom, mapom i svim oglasima na jednom mestu. Prvih {besplatne_firme} firmi 12 meseci besplatno.',
 ];

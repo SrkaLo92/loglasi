@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Seo\FeedController;
 use App\Http\Controllers\Seo\RobotsController;
 use App\Http\Controllers\Seo\SitemapController;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -10,7 +9,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-// SEO: sitemap, robots.txt, llms.txt, feed. Preusmerenja, 410 i kosa crta su middleware (bootstrap/app.php).
+// SEO: sitemap, robots.txt, llms.txt. Preusmerenja, 410 i kosa crta su middleware (bootstrap/app.php).
 // Bez sesije i kolačića, da CDN i pregledač mogu da keširaju odgovor.
 
 Route::withoutMiddleware([
@@ -27,5 +26,4 @@ Route::withoutMiddleware([
     Route::get('llms.txt', [RobotsController::class, 'llms'])->name('seo.llms');
     Route::get('stranica-404', [RobotsController::class, 'notFound']);
 
-    Route::get('feed', FeedController::class)->name('seo.feed');
 });

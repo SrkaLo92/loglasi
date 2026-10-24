@@ -37,9 +37,10 @@ return [
     'currency_term_rsd' => 0, // 0 = prepoznaje se po nazivu termina, inače sve što nije EUR je RSD
 
     'meta' => [
-        'featured' => 'listivo_featured',
+        'featured' => 'featured',           // '1' / '0'
+        'featured_expire' => 'featured_expire', // datetime
         'gallery' => 'listivo_145',
-        'views' => 'loglasi_views',
+        'views' => 'views',
         'expires' => '',          // Listivo datum isteka, ako postoji
         'lat' => '',
         'lng' => '',
@@ -47,12 +48,12 @@ return [
     ],
 
     'usermeta' => [
-        'account_type' => 'listivo_account_type',
+        'account_type' => 'account_type',
         'account_business' => 'business',
-        'phone' => 'listivo_phone',
-        'phone_country' => 'listivo_phone_country_code',
+        'phone' => 'phone',
+        'phone_country' => 'phone_country_code', // "&#x1F1F7&#x1F1F8 +381"
         'phone_verified' => 'loglasi_telefon_proveren',
-        'avatar' => 'listivo_user_image',
+        'avatar' => 'image', // attachment ID, 0 = none
         'favorites' => 'listivo_favorites',
         'biznis_until' => '',     // datum isteka Biznis paketa, ako se negde čuva
         // Polja firme (loglasi-core, inc/profil/profil.php)

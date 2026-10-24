@@ -1,0 +1,1180 @@
+/* loglasi.rs user and firm profile (prefix lgp-), ported from the WordPress profile module. */
+
+.lgp {
+	--lgp-green: #2b7a64;
+	--lgp-green-dark: #1f5b4a;
+	--lgp-brand: #379b7f;
+	--lgp-orange: #b8501a;
+	--lgp-orange-dark: #9a4215;
+	--lgp-accent: #ef7a38;
+	--lgp-mint: #e9f4f0;
+	--lgp-peach: #fcebdf;
+	--lgp-text: #1d2b26;
+	--lgp-muted: #5b6470;
+	--lgp-border: #e3e7e4;
+	--lgp-radius: 14px;
+	box-sizing: border-box;
+	color: var(--lgp-text);
+	font-family: inherit;
+	font-size: 15px;
+	line-height: 1.5;
+}
+
+.lgp *,
+.lgp *::before,
+.lgp *::after {
+	box-sizing: border-box;
+}
+
+.lgp a:focus-visible,
+.lgp button:focus-visible,
+.lgp [tabindex]:focus-visible {
+	outline: 2px solid var(--lgp-accent);
+	outline-offset: 2px;
+}
+
+.lgp [hidden] {
+	display: none !important;
+}
+
+.lgp-sr {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.lgp-icon {
+	display: block;
+	flex-shrink: 0;
+}
+
+.lgp ul,
+.lgp dl,
+.lgp p {
+	margin: 0;
+	padding: 0;
+}
+
+.lgp ul {
+	list-style: none;
+}
+
+/* Buttons */
+
+.lgp .lgp-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-height: 48px;
+	padding: 8px 16px;
+	border: 1px solid transparent;
+	border-radius: 10px;
+	background: #fff;
+	color: var(--lgp-text);
+	font: inherit;
+	font-size: 15px;
+	font-weight: 700;
+	line-height: 1.2;
+	text-align: center;
+	text-decoration: none;
+	cursor: pointer;
+	transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.lgp-btn__text {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	min-width: 0;
+}
+
+.lgp-btn__sub {
+	font-size: 12px;
+	font-weight: 600;
+	opacity: 0.92;
+	white-space: nowrap;
+}
+
+.lgp .lgp-btn--call {
+	background: var(--lgp-green);
+	color: #fff;
+}
+
+.lgp .lgp-btn--call:hover {
+	background: var(--lgp-green-dark);
+	color: #fff;
+}
+
+.lgp .lgp-btn--line {
+	border-color: var(--lgp-border);
+	background: #fff;
+	color: var(--lgp-text);
+}
+
+.lgp .lgp-btn--line:hover {
+	border-color: var(--lgp-brand);
+	color: var(--lgp-text);
+}
+
+.lgp .lgp-btn--line .lgp-icon {
+	color: var(--lgp-green);
+}
+
+.lgp .lgp-btn--icon {
+	width: 48px;
+	padding: 0;
+}
+
+.lgp-actions {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 8px;
+}
+
+.lgp-actions .lgp-btn--call {
+	grid-column: 1 / -1;
+}
+
+/* Without Viber or WhatsApp, "Poruka" takes the whole row. */
+.lgp-actions .lgp-btn:last-child:nth-child(even) {
+	grid-column: 1 / -1;
+}
+
+/* Badges */
+
+.lgp-badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	max-width: 100%;
+}
+
+.lgp-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	max-width: 100%;
+	padding: 4px 10px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 1.3;
+	white-space: normal;
+}
+
+.lgp-badge--firm {
+	background: var(--lgp-mint);
+	color: var(--lgp-green-dark);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.lgp-badge--ok {
+	background: var(--lgp-green);
+	color: #fff;
+}
+
+.lgp-badge--soft {
+	background: #f1f3f2;
+	color: var(--lgp-muted);
+}
+
+/* Opening hours status */
+
+.lgp-status {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-weight: 700;
+}
+
+.lgp-status::before {
+	content: "";
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: currentColor;
+	flex-shrink: 0;
+}
+
+.lgp-status.is-open {
+	color: var(--lgp-green);
+}
+
+.lgp-status.is-closed {
+	color: var(--lgp-orange);
+}
+
+.lgp-status--block {
+	display: flex;
+	margin-bottom: 10px;
+	padding: 8px 12px;
+	border-radius: 10px;
+}
+
+.lgp-status--block.is-open {
+	background: var(--lgp-mint);
+	color: var(--lgp-green-dark);
+}
+
+.lgp-status--block.is-closed {
+	background: var(--lgp-peach);
+	color: #8a3a12;
+}
+
+/* Hint for the owner about an empty field */
+
+.lgp .lgp-hint {
+	display: flex;
+	gap: 8px;
+	margin-top: 10px;
+	padding: 10px 12px;
+	border: 1px dashed #f0b48e;
+	border-radius: 10px;
+	background: #fff8f2;
+	color: #6b3412;
+	font-size: 14px;
+}
+
+.lgp-hint .lgp-icon {
+	margin-top: 2px;
+}
+
+.lgp-hint a {
+	color: var(--lgp-orange);
+	font-weight: 700;
+}
+
+/* ------------------------------------------------------------------------
+ * Firm page
+ * --------------------------------------------------------------------- */
+
+.lgp-firma-strana {
+	max-width: 1240px;
+	margin: 0 auto;
+	padding: 24px 24px 48px;
+}
+
+.lgp-firma {
+	position: relative;
+	background: #fff;
+	border: 1px solid var(--lgp-border);
+	border-radius: var(--lgp-radius);
+	overflow: hidden;
+}
+
+.lgp-firma__cover {
+	position: relative;
+	height: 220px;
+	background: #dfe9e5;
+}
+
+.lgp-firma__cover--empty {
+	background:
+		radial-gradient(circle at 85% 20%, rgba(239, 122, 56, 0.55) 0, rgba(239, 122, 56, 0) 38%),
+		radial-gradient(circle at 10% 110%, rgba(255, 255, 255, 0.18) 0, rgba(255, 255, 255, 0) 45%),
+		linear-gradient(120deg, #1f5b4a 0%, #2b7a64 45%, #379b7f 100%);
+}
+
+.lgp .lgp-firma__cover-img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: cover;
+	border-radius: 0;
+}
+
+.lgp-firma__head {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) minmax(260px, 340px);
+	gap: 0 20px;
+	align-items: start;
+	padding: 0 24px 24px;
+}
+
+.lgp-firma__logo {
+	width: 120px;
+	height: 120px;
+	margin-top: -56px;
+	border: 4px solid #fff;
+	border-radius: 18px;
+	background: #fff;
+	box-shadow: 0 4px 16px rgba(29, 43, 38, 0.12);
+	overflow: hidden;
+	position: relative;
+}
+
+.lgp .lgp-firma__logo-img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: cover;
+	border-radius: 0;
+}
+
+.lgp-firma__initials {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	background: var(--lgp-mint);
+	color: var(--lgp-green-dark);
+	font-size: 38px;
+	font-weight: 800;
+	letter-spacing: 0.02em;
+}
+
+.lgp-firma__title {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
+	padding-top: 16px;
+}
+
+.lgp .lgp-firma__name {
+	margin: 0;
+	color: var(--lgp-text);
+	font-family: inherit;
+	font-size: 28px;
+	font-weight: 800;
+	line-height: 1.2;
+	overflow-wrap: anywhere;
+}
+
+.lgp .lgp-firma__activity {
+	color: var(--lgp-text);
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.lgp-facts {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 18px;
+	color: var(--lgp-muted);
+	font-size: 14px;
+}
+
+.lgp-facts li {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+}
+
+.lgp-facts .lgp-icon {
+	color: var(--lgp-green);
+}
+
+.lgp .lgp-facts a {
+	color: var(--lgp-text);
+	font-weight: 700;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+.lgp-firma__actions {
+	padding-top: 16px;
+}
+
+/* Columns below the header */
+
+.lgp-firma__cols {
+	display: grid;
+	grid-template-columns: 340px minmax(0, 1fr);
+	gap: 24px;
+	align-items: start;
+	margin-top: 24px;
+}
+
+.lgp-firma__cols--solo {
+	grid-template-columns: minmax(0, 1fr);
+}
+
+/* Listings come before the firm details in the HTML (for phones); on desktop the details sit on the left. */
+.lgp-firma__side {
+	grid-column: 1;
+	grid-row: 1;
+	min-width: 0;
+}
+
+.lgp-firma__main {
+	grid-column: 2;
+	grid-row: 1;
+	min-width: 0;
+}
+
+.lgp-firma__more-in {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+/* On desktop the block is always open and has no title. */
+.lgp-firma__more-sum {
+	display: none;
+}
+
+.lgp-box {
+	padding: 18px 20px 20px;
+	background: #fff;
+	border: 1px solid var(--lgp-border);
+	border-radius: var(--lgp-radius);
+	min-width: 0;
+}
+
+.lgp .lgp-box__title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 12px;
+	color: var(--lgp-text);
+	font-family: inherit;
+	font-size: 17px;
+	font-weight: 800;
+	line-height: 1.3;
+}
+
+.lgp-box__title .lgp-icon {
+	color: var(--lgp-green);
+}
+
+.lgp .lgp-box__lead {
+	margin-bottom: 6px;
+	font-weight: 700;
+}
+
+.lgp-box__text {
+	color: var(--lgp-text);
+	overflow-wrap: anywhere;
+}
+
+.lgp .lgp-box__text p + p {
+	margin-top: 8px;
+}
+
+.lgp-list {
+	display: flex;
+	flex-direction: column;
+}
+
+.lgp-list li {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-height: 44px;
+	border-top: 1px solid var(--lgp-border);
+	min-width: 0;
+}
+
+.lgp-list li:first-child {
+	border-top: 0;
+}
+
+.lgp-list .lgp-icon {
+	color: var(--lgp-green);
+}
+
+.lgp .lgp-list a {
+	display: flex;
+	align-items: center;
+	min-height: 44px;
+	flex: 1 1 auto;
+	min-width: 0;
+	color: var(--lgp-text);
+	font-weight: 600;
+	text-decoration: none;
+	overflow-wrap: anywhere;
+}
+
+.lgp .lgp-list a:hover {
+	color: var(--lgp-green);
+	text-decoration: underline;
+}
+
+/* Opening hours */
+
+.lgp-hours__table {
+	width: 100%;
+	margin: 0;
+	border: 0;
+	border-collapse: collapse;
+	font-size: 14px;
+}
+
+.lgp .lgp-hours__table th,
+.lgp .lgp-hours__table td {
+	padding: 7px 8px;
+	border: 0;
+	border-bottom: 1px solid var(--lgp-border);
+	background: none;
+	color: var(--lgp-text);
+	font-weight: 500;
+	text-align: left;
+	vertical-align: top;
+}
+
+.lgp .lgp-hours__table td {
+	text-align: right;
+	color: var(--lgp-muted);
+}
+
+.lgp .lgp-hours__table tr:last-child th,
+.lgp .lgp-hours__table tr:last-child td {
+	border-bottom: 0;
+}
+
+.lgp .lgp-hours__table tr.is-today th,
+.lgp .lgp-hours__table tr.is-today td {
+	background: var(--lgp-mint);
+	color: var(--lgp-green-dark);
+	font-weight: 800;
+}
+
+/* Map (no API key: a styled area that opens Google Maps) */
+
+.lgp .lgp-map {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	height: 140px;
+	margin-top: 12px;
+	border: 1px solid var(--lgp-border);
+	border-radius: 12px;
+	background-color: #eef3f0;
+	background-image:
+		linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0 3px, transparent 3px),
+		linear-gradient(rgba(255, 255, 255, 0.9) 0 3px, transparent 3px),
+		linear-gradient(35deg, transparent 46%, rgba(55, 155, 127, 0.18) 46% 54%, transparent 54%);
+	background-size: 46px 46px, 46px 46px, 100% 100%;
+	color: var(--lgp-text);
+	text-decoration: none;
+	overflow: hidden;
+}
+
+.lgp-map__pin {
+	color: var(--lgp-orange);
+}
+
+.lgp-map__label {
+	padding: 6px 12px;
+	border-radius: 999px;
+	background: #fff;
+	box-shadow: 0 2px 8px rgba(29, 43, 38, 0.12);
+	font-size: 14px;
+	font-weight: 700;
+}
+
+.lgp .lgp-map:hover .lgp-map__label {
+	color: var(--lgp-green);
+}
+
+/* Social networks */
+
+.lgp-socials {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.lgp .lgp-social {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 44px;
+	padding: 8px 14px;
+	border: 1px solid var(--lgp-border);
+	border-radius: 999px;
+	color: var(--lgp-text);
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.lgp .lgp-social:hover {
+	border-color: var(--lgp-brand);
+}
+
+.lgp-social .lgp-icon {
+	color: var(--lgp-green);
+}
+
+/* ------------------------------------------------------------------------
+ * User listings
+ * --------------------------------------------------------------------- */
+
+.lgp-oglasi {
+	min-width: 0;
+}
+
+.lgp-oglasi__head {
+	margin-bottom: 12px;
+}
+
+.lgp .lgp-oglasi__title {
+	margin: 0;
+	color: var(--lgp-text);
+	font-family: inherit;
+	font-size: 22px;
+	font-weight: 800;
+	line-height: 1.25;
+}
+
+.lgp-oglasi__count {
+	color: var(--lgp-muted);
+	font-weight: 600;
+}
+
+.lgp-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 16px;
+}
+
+.lgp .lgp-tab {
+	display: inline-flex;
+	text-decoration: none;
+	align-items: center;
+	gap: 6px;
+	min-height: 44px;
+	padding: 8px 14px;
+	border: 1px solid var(--lgp-border);
+	border-radius: 999px;
+	background: #fff;
+	color: var(--lgp-text);
+	font: inherit;
+	font-size: 14px;
+	font-weight: 700;
+	line-height: 1.2;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+.lgp .lgp-tab:hover {
+	border-color: var(--lgp-brand);
+}
+
+.lgp .lgp-tab[aria-current="true"] {
+	border-color: var(--lgp-green);
+	background: var(--lgp-green);
+	color: #fff;
+}
+
+.lgp-tab__count {
+	font-weight: 600;
+	opacity: 0.8;
+}
+
+.lgp-oglasi__panel:focus-visible {
+	outline: 2px solid var(--lgp-accent);
+	outline-offset: 4px;
+	border-radius: 6px;
+}
+
+.lgp-firma__main .lgp-grid {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.lgp-item {
+	min-width: 0;
+}
+
+.lgp-more {
+	display: flex;
+	justify-content: center;
+	margin-top: 18px;
+}
+
+.lgp .lgp-empty {
+	padding: 28px 20px;
+	border: 1px dashed var(--lgp-border);
+	border-radius: var(--lgp-radius);
+	background: #fff;
+	color: var(--lgp-muted);
+	text-align: center;
+}
+
+/* Listing cards (<x-listing-card>) */
+
+.lgp-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: 16px;
+}
+
+/* Sticky "Pozovi firmu" bar (mobile only) */
+
+.lgp-sticky {
+	display: none;
+}
+
+/* ------------------------------------------------------------------------
+ * Private person (intentionally plainer)
+ * --------------------------------------------------------------------- */
+
+.lgp-privatni {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 16px 20px;
+	max-width: 1192px;
+	margin: 24px max(24px, calc((100% - 1192px) / 2));
+	padding: 20px 24px;
+	background: #fff;
+	border: 1px solid var(--lgp-border);
+	border-radius: var(--lgp-radius);
+}
+
+.lgp-privatni__avatar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 64px;
+	height: 64px;
+	border-radius: 50%;
+	background: #eef1ef;
+	color: var(--lgp-muted);
+	font-size: 22px;
+	font-weight: 800;
+	flex-shrink: 0;
+}
+
+.lgp-privatni__main {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	flex: 1 1 260px;
+	min-width: 0;
+}
+
+.lgp .lgp-privatni__name {
+	margin: 0;
+	color: var(--lgp-text);
+	font-family: inherit;
+	font-size: 22px;
+	font-weight: 800;
+	line-height: 1.25;
+	overflow-wrap: anywhere;
+}
+
+.lgp .lgp-privatni__type {
+	align-self: flex-start;
+	padding: 2px 10px;
+	border-radius: 999px;
+	background: #f1f3f2;
+	color: var(--lgp-muted);
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.lgp-privatni__meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px 0;
+	color: var(--lgp-muted);
+	font-size: 14px;
+}
+
+.lgp-privatni__meta li + li::before {
+	content: "·";
+	margin: 0 8px;
+}
+
+.lgp-actions--compact {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.lgp-actions--compact .lgp-btn {
+	min-width: 140px;
+}
+
+.lgp-privatni + .lgp-oglasi {
+	max-width: 1240px;
+	margin: 0 auto 48px;
+	padding: 0 24px;
+}
+
+.lgp-placeholder {
+	padding: 24px;
+	border: 2px dashed var(--lgp-border);
+	border-radius: var(--lgp-radius);
+	background: #fff;
+	color: var(--lgp-muted);
+	text-align: center;
+}
+
+/* ------------------------------------------------------------------------
+ * Tablet
+ * --------------------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+	.lgp-firma__head {
+		grid-template-columns: auto minmax(0, 1fr);
+	}
+
+	.lgp-firma__actions {
+		grid-column: 1 / -1;
+	}
+
+	.lgp-firma__actions .lgp-actions {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
+
+	.lgp-firma__actions .lgp-actions .lgp-btn {
+		grid-column: auto;
+	}
+
+	.lgp-firma__cols {
+		grid-template-columns: 300px minmax(0, 1fr);
+	}
+
+	.lgp-firma__main .lgp-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+/* ------------------------------------------------------------------------
+ * Mobile
+ * --------------------------------------------------------------------- */
+
+@media (max-width: 767px) {
+	.lgp-firma-strana {
+		padding: 12px 16px 32px;
+	}
+
+	.lgp-firma-strana.has-sticky {
+		padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.lgp-firma__cover {
+		height: 128px;
+	}
+
+	.lgp-firma__head {
+		grid-template-columns: minmax(0, 1fr);
+		padding: 0 16px 16px;
+	}
+
+	.lgp-firma__logo {
+		width: 88px;
+		height: 88px;
+		margin-top: -44px;
+		border-radius: 14px;
+	}
+
+	.lgp-firma__initials {
+		font-size: 30px;
+	}
+
+	.lgp-firma__title {
+		padding-top: 10px;
+	}
+
+	.lgp .lgp-firma__name {
+		font-size: 22px;
+	}
+
+	.lgp-firma__actions .lgp-actions {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.lgp-firma__actions .lgp-actions .lgp-btn--call,
+	.lgp-firma__actions .lgp-actions .lgp-btn:last-child:nth-child(even) {
+		grid-column: 1 / -1;
+	}
+
+	.lgp-firma__cols {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 16px;
+		margin-top: 16px;
+	}
+
+	/* Phone: header, buttons, listings, then the collapsed "O firmi i kontakt". */
+	.lgp-firma__side,
+	.lgp-firma__main {
+		grid-column: auto;
+		grid-row: auto;
+	}
+
+	.lgp-firma__more {
+		background: #fff;
+		border: 1px solid var(--lgp-border);
+		border-radius: var(--lgp-radius);
+		overflow: hidden;
+	}
+
+	.lgp .lgp-firma__more-sum {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		min-height: 56px;
+		padding: 12px 16px;
+		color: var(--lgp-text);
+		font-size: 17px;
+		font-weight: 800;
+		line-height: 1.3;
+		list-style: none;
+		cursor: pointer;
+	}
+
+	.lgp-firma__more-sum::-webkit-details-marker {
+		display: none;
+	}
+
+	.lgp-firma__more-sum:focus-visible {
+		outline: 2px solid var(--lgp-accent);
+		outline-offset: -2px;
+	}
+
+	.lgp-firma__more-sum .lgp-icon {
+		color: var(--lgp-green);
+	}
+
+	.lgp-firma__more-chev {
+		width: 10px;
+		height: 10px;
+		margin-left: auto;
+		border-right: 2px solid var(--lgp-muted);
+		border-bottom: 2px solid var(--lgp-muted);
+		transform: translateY(-3px) rotate(45deg);
+		transition: transform 0.15s ease;
+	}
+
+	.lgp-firma__more[open] .lgp-firma__more-chev {
+		transform: translateY(2px) rotate(-135deg);
+	}
+
+	.lgp-firma__more-in {
+		gap: 0;
+		border-top: 1px solid var(--lgp-border);
+	}
+
+	/* Boxes inside the collapsed block are plain sections. */
+	.lgp-firma__more-in .lgp-box {
+		border: 0;
+		border-radius: 0;
+	}
+
+	.lgp-firma__more-in .lgp-box + .lgp-box {
+		border-top: 1px solid var(--lgp-border);
+	}
+
+	.lgp-box {
+		padding: 16px;
+	}
+
+	.lgp-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px;
+	}
+
+	.lgp .lgp-oglasi__title {
+		font-size: 20px;
+	}
+
+	/* Tabs in one row with horizontal scrolling. */
+	.lgp-tabs {
+		flex-wrap: nowrap;
+		margin: 0 -16px 14px;
+		padding: 0 16px 2px;
+		overflow-x: auto;
+		scrollbar-width: none;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.lgp-tabs::-webkit-scrollbar {
+		display: none;
+	}
+
+	.lgp .lgp-tab {
+		flex: 0 0 auto;
+	}
+
+	.lgp-sticky {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 90;
+		display: flex;
+		gap: 8px;
+		padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+		background: #fff;
+		border-top: 1px solid var(--lgp-border);
+		box-shadow: 0 -4px 16px rgba(29, 43, 38, 0.08);
+	}
+
+	.lgp-sticky .lgp-btn--call {
+		flex: 1 1 auto;
+	}
+
+	/* With JS the bar shows only once the header buttons leave the screen. */
+	.lgp-sticky.is-js {
+		transform: translateY(calc(100% + 80px));
+		visibility: hidden;
+		transition: transform 0.2s ease, visibility 0s linear 0.2s;
+	}
+
+	.lgp-sticky.is-js.is-visible {
+		transform: none;
+		visibility: visible;
+		transition: transform 0.2s ease;
+	}
+
+	/* Above the site bottom navigation (68 px); the "Postavi oglas" button sticks out
+	   ~20 px above it, so the bar has a larger bottom padding. */
+	body.lg-has-mnav .lgp-sticky {
+		bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+		z-index: 9980;
+		padding-bottom: 28px;
+		border-radius: 14px 14px 0 0;
+	}
+
+	.lgp-privatni {
+		margin: 12px 16px;
+		padding: 16px;
+		gap: 12px 14px;
+	}
+
+	.lgp-privatni__avatar {
+		width: 52px;
+		height: 52px;
+		font-size: 18px;
+	}
+
+	.lgp-privatni__main {
+		flex-basis: calc(100% - 70px);
+	}
+
+	.lgp .lgp-privatni__name {
+		font-size: 20px;
+	}
+
+	.lgp-actions--compact {
+		width: 100%;
+	}
+
+	.lgp-actions--compact .lgp-btn {
+		flex: 1 1 0;
+		min-width: 0;
+	}
+
+	.lgp-privatni + .lgp-oglasi {
+		padding: 0 16px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.lgp * {
+		transition: none !important;
+	}
+}
+
+/* ------------------------------------------------------------------------
+ * Additions for the Laravel site: server-side tabs, pagination, statistics
+ * --------------------------------------------------------------------- */
+
+.lgp .lgp-tab:focus-visible {
+	outline: 2px solid var(--lgp-accent);
+	outline-offset: 2px;
+}
+
+.lgp-pager {
+	margin-top: 22px;
+}
+
+.lgp-pager__list {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 6px;
+}
+
+.lgp .lgp-pager__link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 44px;
+	min-height: 44px;
+	padding: 0 12px;
+	border: 1px solid var(--lgp-border);
+	border-radius: 10px;
+	background: #fff;
+	color: var(--lgp-text);
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.lgp .lgp-pager__link:hover {
+	border-color: var(--lgp-brand);
+}
+
+.lgp .lgp-pager__link[aria-current="page"] {
+	border-color: var(--lgp-green);
+	background: var(--lgp-green);
+	color: #fff;
+}
+
+.lgp-pager__gap {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 0 4px;
+	color: var(--lgp-muted);
+}
+
+.lgp-stats__grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+}
+
+.lgp-stats__item {
+	padding: 10px 12px;
+	border-radius: 10px;
+	background: var(--lgp-mint);
+}
+
+.lgp-stats__num {
+	display: block;
+	color: var(--lgp-green);
+	font-size: 20px;
+	font-weight: 800;
+	line-height: 1.2;
+}
+
+.lgp-stats__label {
+	color: var(--lgp-muted);
+	font-size: 13px;
+}
+
+.lgp-stats__note {
+	margin-top: 10px !important;
+	color: var(--lgp-muted);
+	font-size: 13px;
+}
+
+.lgp-grid > .lgp-item {
+	display: flex;
+}
+
+.lgp-grid > .lgp-item > * {
+	flex: 1 1 auto;
+	min-width: 0;
+}

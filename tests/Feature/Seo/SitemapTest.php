@@ -96,15 +96,22 @@ class SitemapTest extends SeoTestCase
         $this->get('/sitemap-mesta.xml')->assertNotFound();
     }
 
-    public function test_firms_sitemap_has_only_firms_with_biznis(): void
+    public function test_firms_sitemap_has_firms_with_a_listing_or_a_filled_profile(): void
     {
-        $firm = User::factory()->firm()->create(['slug' => 'firma-sa-paketom']);
-        $expired = User::factory()->firm()->create(['slug' => 'firma-bez-paketa']);
-        $expired->firm->forceFill(['biznis_until' => now()->subDay()])->save();
+        $empty = ['package' => null, 'package_ends_at' => null, 'description' => null, 'logo_path' => null];
+        User::factory()->firm()->create(['slug' => 'firma-sa-paketom']);
+        User::factory()->firm()->create(['slug' => 'firma-sa-opisom'])->firm->forceFill(['package' => null, 'package_ends_at' => null])->save();
+        $withListing = User::factory()->firm()->create(['slug' => 'firma-sa-oglasom']);
+        $withListing->firm->forceFill($empty)->save();
+        Listing::factory()->for($withListing)->create();
+        User::factory()->firm()->create(['slug' => 'prazna-firma'])->firm->forceFill($empty)->save();
         User::factory()->create(['slug' => 'privatni']);
 
-        $this->assertSame(['https://loglasi.rs/korisnik/firma-sa-paketom/'], $this->locs($this->get('/sitemap-firme.xml')));
-        $this->assertNotNull($firm);
+        $this->assertEqualsCanonicalizing([
+            'https://loglasi.rs/korisnik/firma-sa-oglasom/',
+            'https://loglasi.rs/korisnik/firma-sa-opisom/',
+            'https://loglasi.rs/korisnik/firma-sa-paketom/',
+        ], $this->locs($this->get('/sitemap-firme.xml')));
     }
 
     public function test_pages_sitemap_has_configured_pages(): void

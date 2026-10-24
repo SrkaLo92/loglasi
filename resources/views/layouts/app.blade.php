@@ -8,6 +8,10 @@
 <link rel="preload" href="{{ asset('fonts/manrope-latin-ext.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ asset_v('css/osnova.css') }}">
 <meta name="theme-color" content="#ffffff">
+<link rel="icon" href="{{ asset_v('img/brand/icon.svg') }}" type="image/svg+xml">
+<link rel="icon" href="{{ asset_v('img/brand/favicon-32.png') }}" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="{{ asset_v('img/brand/apple-touch-icon.png') }}">
+@include('partials.google')
 @stack('head')
 </head>
 @php
@@ -23,6 +27,7 @@
 @if ($mnav)
 @include('partials.bottom-nav')
 @endif
+@include('partials.cookie-bar')
 @stack('scripts')
 </body>
 </html>
