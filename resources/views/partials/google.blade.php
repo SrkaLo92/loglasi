@@ -17,6 +17,12 @@ gtag('consent', 'default', {analytics_storage: 'denied', ad_storage: 'denied', a
 try { if (localStorage.getItem('lg-kolacici') === 'da') { gtag('consent', 'update', {analytics_storage: 'granted'}); } } catch (e) {}
 gtag('js', new Date());
 gtag('config', '{{ $lgTag }}');
+// The tag (~180 KB) loads after the page, so it never delays the first paint; queued calls run then.
+window.addEventListener('load', function () {
+	var s = document.createElement('script');
+	s.async = true;
+	s.src = 'https://www.googletagmanager.com/gtag/js?id={{ $lgTag }}';
+	document.head.appendChild(s);
+});
 </script>
-<script async src="https://www.googletagmanager.com/gtag/js?id={{ $lgTag }}"></script>
 @endif
