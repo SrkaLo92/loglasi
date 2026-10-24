@@ -8,6 +8,8 @@ use App\Models\Category;
 use App\Models\Listing;
 use App\Models\ListingImage;
 use App\Models\User;
+use App\Support\Settings;
+use App\Support\Stranice\PageText;
 use Tests\TestCase;
 
 class ListingPageTest extends TestCase
@@ -39,6 +41,18 @@ class ListingPageTest extends TestCase
             ->assertSee('/moj-nalog/poruke/novo/?oglas='.$listing->id, false)
             ->assertSee('Kreditni kalkulator (informativno)')
             ->assertDontSee('noindex');
+    }
+
+    public function test_safety_tips_come_from_page_texts(): void
+    {
+        $listing = Listing::factory()->create();
+
+        $this->get($this->url($listing))
+            ->assertSee('Saveti za bezbednu kupovinu')
+            ->assertSee('Ne delite lozinke, kodove iz SMS-a ni podatke sa platne kartice.');
+
+        Settings::set(PageText::PREFIX.'oglas.saveti.naslov', 'Kupujte bezbedno');
+        $this->get($this->url($listing))->assertSee('Kupujte bezbedno');
     }
 
     public function test_firm_seller_shows_badge_and_profile_link(): void

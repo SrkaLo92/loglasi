@@ -113,6 +113,16 @@ return [
     'za_firme.cta.naslov_popunjeno' => 'Prijavite svoju firmu',
     'za_firme.cta.tekst' => 'Popunite kratku formu i javićemo vam se da dogovorimo uključenje profila.',
 
+    /* Oglas: saveti za bezbednu kupovinu ---------------------------------- */
+
+    'oglas.saveti.naslov' => 'Saveti za bezbednu kupovinu',
+    'oglas.saveti' => [
+        'Pogledajte stvar uživo pre plaćanja i proverite da li odgovara opisu.',
+        'Ne šaljite novac unapred i ne plaćajte preko linkova koje dobijete porukom.',
+        'Nađite se na javnom i prometnom mestu, po danu, a za vozila i nekretnine proverite papire.',
+        'Ne delite lozinke, kodove iz SMS-a ni podatke sa platne kartice.',
+    ],
+
     /* Kontakt ------------------------------------------------------------- */
 
     'kontakt.naslov' => 'Kontakt',
