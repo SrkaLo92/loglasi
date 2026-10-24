@@ -43,6 +43,70 @@ class Cenovnik
             ->get());
     }
 
+    /** Codes of the /cenovnik/ sections, in order (shown when the product exists). */
+    public const SLOTS = ['listing_slots_3', 'listing_slots_10', 'listing_slots_30'];
+
+    public const PROMOTIONS = ['bump', 'bump_10', 'featured_7', 'priority_3', 'top_7', 'premium_xl_7', 'premium_xl_home_7'];
+
+    public const PACKAGES = ['business_start', 'business_pro', 'business_max'];
+
+    /**
+     * Products for the price list: active ones and display-only ones (listed, not sold yet), by code.
+     *
+     * @return Collection<string, Product>
+     */
+    public static function listed(): Collection
+    {
+        return once(fn () => Product::query()
+            ->where(fn ($q) => $q->where('is_active', true)->orWhere('display_only', true))
+            ->orderBy('sort')->orderBy('id')
+            ->get()->keyBy('code'));
+    }
+
+    /** @return list<Product> listed products of the given codes, in that order */
+    public static function listedOf(array $codes): array
+    {
+        $listed = self::listed();
+
+        return array_values(array_filter(array_map(fn (string $code) => $listed->get($code), $codes)));
+    }
+
+    /**
+     * Business packages: monthly product (required) and yearly product (optional).
+     *
+     * @return list<array{code: string, monthly: Product, yearly: ?Product, features: list<string>}>
+     */
+    public static function packages(): array
+    {
+        $listed = self::listed();
+        $packages = [];
+        foreach (self::PACKAGES as $code) {
+            $monthly = $listed->get($code.'_monthly');
+            if ($monthly === null) {
+                continue;
+            }
+            $packages[] = [
+                'code' => $code,
+                'monthly' => $monthly,
+                'yearly' => $listed->get($code.'_yearly'),
+                'features' => array_values(array_filter(array_map('trim', preg_split('/\R/', (string) $monthly->description) ?: []), 'strlen')),
+            ];
+        }
+
+        return $packages;
+    }
+
+    /** Duration column of the promotions table: „jednom”, „10 puta”, „7 dana”. */
+    public static function promotionDuration(Product $product): string
+    {
+        if (preg_match('/_(\d+)$/', $product->code, $m) && $product->duration_days === null) {
+            return $m[1].' puta';
+        }
+        $days = (int) $product->duration_days;
+
+        return $days > 0 ? $days.' '.self::plural($days, 'dan', 'dana', 'dana') : 'jednom';
+    }
+
     public static function product(string $code): ?Product
     {
         return self::products()->firstWhere('code', $code);
@@ -93,15 +157,15 @@ class Cenovnik
 
     public static function freeListings(): int
     {
-        return max(0, (int) Settings::get('private_monthly_limit'));
+        return max(0, (int) Settings::get('private_active_limit'));
     }
 
-    /** „do 10 novih oglasa” */
+    /** „do 5 aktivnih oglasa” */
     public static function freeListingsText(): string
     {
         $n = self::freeListings();
 
-        return 'do '.$n.' '.self::plural($n, 'novog oglasa', 'nova oglasa', 'novih oglasa');
+        return 'do '.$n.' '.self::plural($n, 'aktivnog oglasa', 'aktivna oglasa', 'aktivnih oglasa');
     }
 
     /** „mesec dana” ili „45 dana” */
@@ -139,22 +203,30 @@ class Cenovnik
         return self::foundingTotal() > 0 && self::foundingLeft() > 0;
     }
 
-    /** „Prvih 30 firmi dobija Biznis paket besplatno prvu godinu, a posle toga 6.000 RSD godišnje.” */
+    /** Monthly price of the cheapest business package (Business Start), null when it is not listed. */
+    public static function packagesFrom(): ?int
+    {
+        $start = self::listed()->get(self::PACKAGES[0].'_monthly');
+
+        return $start && $start->price_rsd > 0 ? (int) $start->price_rsd : null;
+    }
+
+    /** „Prvih 30 firmi: 12 meseci besplatno. Posle toga paketi počinju od 1.490 RSD mesečno, bez automatske naplate.” */
     public static function offerText(): string
     {
-        $biznis = self::product(Product::BIZNIS_12M);
-        $price = $biznis ? self::price($biznis->price_rsd) : null;
+        $from = self::packagesFrom();
+        $price = $from !== null ? self::price($from) : null;
 
         if (! self::offerOpen()) {
-            return $price ? 'Biznis paket košta '.$price.' godišnje.' : '';
+            return $price ? 'Paketi za firme počinju od '.$price.' mesečno.' : '';
         }
 
         $free = self::foundingTotal();
-        $lead = sprintf(self::plural($free, 'Prva %d firma dobija', 'Prve %d firme dobijaju', 'Prvih %d firmi dobija'), $free);
+        $lead = sprintf(self::plural($free, 'Prva %d firma', 'Prve %d firme', 'Prvih %d firmi'), $free).': 12 meseci besplatno.';
 
         return $price
-            ? $lead.' Biznis paket besplatno prvu godinu, a posle toga '.$price.' godišnje.'
-            : $lead.' Biznis paket besplatno prvu godinu.';
+            ? $lead.' Posle toga paketi počinju od '.$price.' mesečno, bez automatske naplate.'
+            : $lead.' Posle toga nema automatske naplate.';
     }
 
     /** „Prvih 30 firmi besplatno prvu godinu” (kratko, za karticu). */

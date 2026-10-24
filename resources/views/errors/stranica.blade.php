@@ -1,5 +1,5 @@
 {{-- Zajednički sadržaj strane greške (404, 410) u punom izgledu sajta. --}}
-@extends('layouts.app', ['title' => $naslov.' | loglasi.rs', 'robots' => 'noindex, follow'])
+@extends('layouts.app', ['title' => ($seoTitle ?? '') !== '' ? $seoTitle : $naslov.' | loglasi.rs', 'robots' => 'noindex, follow'])
 @use('App\Support\Stranice\Ikonice')
 @use('App\Support\Stranice\Navigacija')
 

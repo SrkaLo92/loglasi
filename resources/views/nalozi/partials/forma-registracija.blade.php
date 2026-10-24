@@ -7,7 +7,7 @@
 		@include('nalozi.partials.greska', ['field' => 'name', 'prefix' => 'reg-'])
 	</div>
 	<div class="lgn-field">
-		<label for="reg-email">Email</label>
+		<label for="reg-email">E-pošta</label>
 		<input id="reg-email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" inputmode="email" required
 			@if ($errors->has('email')) aria-invalid="true" aria-describedby="reg-email-greska" @endif>
 		@include('nalozi.partials.greska', ['field' => 'email', 'prefix' => 'reg-'])
@@ -37,6 +37,10 @@
 			<span>Prihvatam <a href="{{ url_slash('uslovi-koriscenja') }}">uslove korišćenja</a> i <a href="{{ url_slash('politika-privatnosti') }}">politiku privatnosti</a>.</span>
 		</label>
 		@include('nalozi.partials.greska', ['field' => 'accept_terms', 'prefix' => 'reg-'])
+	</div>
+	<div class="lgn-hp" aria-hidden="true">
+		<label for="reg-website">Sajt</label>
+		<input id="reg-website" type="text" name="website" value="" tabindex="-1" autocomplete="off">
 	</div>
 	<button class="lgn-btn lgn-btn--orange" type="submit">Napravi nalog</button>
 	<p class="lgn-note">Registracijom dobijate nalog privatnog lica. Za nalog firme pišite nam preko <a href="{{ url_slash('za-firme') }}">strane za firme</a>.</p>

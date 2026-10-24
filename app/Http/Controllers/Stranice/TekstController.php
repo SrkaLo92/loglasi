@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Stranice;
 
 use App\Http\Controllers\Controller;
+use App\Support\Seo;
 use App\Support\Stranice\PageText;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -13,6 +14,7 @@ class TekstController extends Controller
     private const PAGES = [
         'o_nama' => ['putanja' => 'o-nama', 'opis' => 'loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu. Ko smo, šta nudimo i kako da nas kontaktirate.'],
         'uslovi' => ['putanja' => 'uslovi-koriscenja', 'opis' => 'Uslovi korišćenja sajta loglasi.rs: nalog, oglasi, zabranjen sadržaj, plaćene usluge i odgovornost.'],
+        'brisanje' => ['putanja' => 'brisanje-licnih-podataka', 'opis' => 'Kako da obrišete nalog i lične podatke sa loglasi.rs: sami iz naloga ili na zahtev, i šta se tačno briše.'],
         'privatnost' => ['putanja' => 'politika-privatnosti', 'opis' => 'Koje podatke o ličnosti prikuplja loglasi.rs, zašto ih koristimo, koliko ih čuvamo i koja su vaša prava.'],
     ];
 
@@ -27,9 +29,9 @@ class TekstController extends Controller
             'page' => $page,
             'heading' => $heading,
             'body' => PageText::html($page.'.tekst'),
-            'title' => $heading.' | loglasi.rs',
-            'description' => self::PAGES[$page]['opis'],
-            'canonical' => url_slash(self::PAGES[$page]['putanja']),
+            'title' => PageText::get('seo.'.$page.'.title') ?: $heading.' | loglasi.rs',
+            'description' => PageText::get('seo.'.$page.'.description') ?: self::PAGES[$page]['opis'],
+            'canonical' => '/'.trim(self::PAGES[$page]['putanja'], '/').'/',
         ]);
     }
 
@@ -40,11 +42,17 @@ class TekstController extends Controller
             fn ($item) => is_array($item) && ! empty($item['pitanje']) && ! empty($item['odgovor']),
         ));
 
+        // FAQPage schema from the same questions (plain text: Markdown links and variables resolved).
+        Seo::get()->faq(array_map(fn (array $item) => [
+            'q' => PageText::replace((string) $item['pitanje']),
+            'a' => strip_tags((string) PageText::inline((string) $item['odgovor'])),
+        ], $items));
+
         return view('stranice.faq', [
             'items' => $items,
-            'title' => 'Česta pitanja | loglasi.rs',
-            'description' => 'Odgovori na česta pitanja o postavljanju oglasa, ceni, isticanju, Biznis paketu i bezbednoj kupovini na loglasi.rs.',
-            'canonical' => url_slash('faq'),
+            'title' => PageText::get('seo.faq.title'),
+            'description' => PageText::get('seo.faq.description'),
+            'canonical' => '/faq/',
         ]);
     }
 }

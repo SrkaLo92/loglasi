@@ -23,6 +23,11 @@ class Gone
             return $next($request);
         }
 
+        // The site has no feeds: every old WordPress feed URL is gone for good.
+        if (preg_match('#(^|/)feed/?$#', $request->getPathInfo())) {
+            return static::response();
+        }
+
         if ($id = UrlTables::findGone($request->getPathInfo())) {
             Hits::gone($id);
 

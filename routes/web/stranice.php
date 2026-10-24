@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Stranice\CenovnikController;
+use App\Http\Controllers\Stranice\FooterController;
 use App\Http\Controllers\Stranice\KontaktController;
 use App\Http\Controllers\Stranice\TekstController;
 use App\Http\Controllers\Stranice\ZaFirmeController;
@@ -17,4 +18,7 @@ Route::post('/kontakt', [KontaktController::class, 'send'])->middleware('throttl
 Route::get('/o-nama', [TekstController::class, 'show'])->defaults('strana', 'o_nama')->name('stranice.o-nama');
 Route::get('/faq', [TekstController::class, 'faq'])->name('stranice.faq');
 Route::get('/uslovi-koriscenja', [TekstController::class, 'show'])->defaults('strana', 'uslovi')->name('stranice.uslovi');
+Route::get('/brisanje-licnih-podataka', [TekstController::class, 'show'])->defaults('strana', 'brisanje')->name('stranice.brisanje');
 Route::get('/politika-privatnosti', [TekstController::class, 'show'])->defaults('strana', 'privatnost')->name('stranice.privatnost');
+
+Route::get('/podnozje/najnoviji-oglasi', [FooterController::class, 'latest'])->middleware('throttle:60,1')->name('stranice.podnozje.najnoviji');

@@ -22,9 +22,10 @@ class KontaktPoruka extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
+        // Reply-to only when the sender left an e-mail; a phone number is called back.
         return new Envelope(
-            replyTo: [new Address($this->data['email'], $this->data['ime'])],
-            subject: 'loglasi.rs kontakt: '.$this->data['tema'],
+            replyTo: $this->data['email'] !== '' ? [new Address($this->data['email'], $this->data['ime'])] : [],
+            subject: 'loglasi.rs: '.$this->data['tema'],
         );
     }
 

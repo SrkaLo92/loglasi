@@ -16,7 +16,28 @@ class FirmFactory extends Factory
             'name' => fake()->company(),
             'description' => fake()->paragraph(),
             'address' => fake()->streetAddress().', Loznica',
-            'biznis_until' => now()->addYear(),
         ];
+    }
+
+    /** Firm with an active package (default: Business Start, monthly, ends in a month). Attributes given to create() win. */
+    public function package(string $package = 'start', string $period = 'monthly'): static
+    {
+        return $this->state(fn () => [
+            'package' => $package,
+            'package_period' => $period,
+            'package_starts_at' => now(),
+            'package_ends_at' => $period === 'yearly' ? now()->addYear() : now()->addMonth(),
+        ]);
+    }
+
+    /** One of the first 30 firms in its free year. */
+    public function freeYear(): static
+    {
+        return $this->state(fn () => [
+            'free_program' => true,
+            'founding_free' => true,
+            'package_starts_at' => now(),
+            'package_ends_at' => now()->addYear(),
+        ]);
     }
 }

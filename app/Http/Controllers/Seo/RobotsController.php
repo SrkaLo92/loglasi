@@ -3,15 +3,19 @@
 namespace App\Http\Controllers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Services\Catalog;
 use Illuminate\Http\Response;
 
 /** robots.txt, llms.txt i /stranica-404/. */
 class RobotsController extends Controller
 {
-    /** Botovi pretraživača koji eksplicitno smeju sve (09-deploy-seo.md, odeljak 5). */
+    /** Paths no crawler needs (seo-sta-mora-da-ostane.md, section 5). */
+    public const DISALLOW = ['/admin', '/api/', '/panel/', '/nalog/', '/naplata/'];
+
+    /** Crawlers with their own group: they ignore the `*` group, so the Disallow lines are repeated. */
     public const ALLOWED_BOTS = [
-        'Googlebot', 'Bingbot', 'GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'ClaudeBot', 'Claude-SearchBot',
-        'Claude-User', 'PerplexityBot', 'Perplexity-User', 'Google-Extended', 'Applebot', 'Applebot-Extended',
+        'Googlebot', 'Bingbot', 'OAI-SearchBot', 'ChatGPT-User', 'GPTBot', 'ClaudeBot', 'Claude-SearchBot',
+        'Claude-User', 'PerplexityBot', 'Google-Extended', 'Applebot-Extended',
     ];
 
     public function robots(): Response
@@ -20,14 +24,12 @@ class RobotsController extends Controller
             // Probna i lokalna verzija: ništa se ne indeksira.
             $body = "User-agent: *\nDisallow: /\n";
         } else {
-            // Filteri, paginacija i strane naloga se NE blokiraju: Google mora da vidi noindex.
-            $lines = ['User-agent: *', 'Disallow: /admin/', ''];
-
-            foreach (self::ALLOWED_BOTS as $bot) {
-                array_push($lines, 'User-agent: '.$bot, 'Allow: /', '');
-            }
-
-            $lines[] = 'Sitemap: '.config('seo.base_url').'/sitemap.xml';
+            $disallow = array_map(fn ($path) => 'Disallow: '.$path, self::DISALLOW);
+            $lines = array_merge(
+                ['User-agent: *'], $disallow, ['Disallow: /uporedite-oglase/', 'Disallow: /*?*kljucna-rec=', ''],
+                array_map(fn ($bot) => 'User-agent: '.$bot, self::ALLOWED_BOTS), ['Allow: /'], $disallow, [''],
+                ['Sitemap: '.config('seo.base_url').'/sitemap.xml'],
+            );
             $body = implode("\n", $lines)."\n";
         }
 
@@ -37,9 +39,25 @@ class RobotsController extends Controller
         ]);
     }
 
+    /**
+     * llms.txt from the approved text; a category line stays only while that category exists
+     * and is active, and every link uses the canonical domain.
+     */
     public function llms(): Response
     {
-        return response((string) file_get_contents(resource_path('seo/llms.txt')), 200, [
+        $lines = [];
+
+        foreach (preg_split('/\R/', (string) file_get_contents(resource_path('seo/llms.txt'))) as $line) {
+            if (preg_match('#\(https://loglasi\.rs/oglasi/([a-z0-9-]+)/\)#', $line, $m)) {
+                $category = app(Catalog::class)->categoryBySlug($m[1]);
+                if ($category === null || ! app(Catalog::class)->isVisible($category)) {
+                    continue;
+                }
+            }
+            $lines[] = str_replace('https://loglasi.rs', (string) config('seo.base_url'), $line);
+        }
+
+        return response(implode("\n", $lines), 200, [
             'Content-Type' => 'text/plain; charset=utf-8',
             'Cache-Control' => 'public, max-age=86400',
         ]);

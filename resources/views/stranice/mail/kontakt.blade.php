@@ -2,12 +2,11 @@
 Nova poruka sa kontakt forme na loglasi.rs
 
 Ime: {!! $data['ime'] !!}
-E-pošta: {!! $data['email'] !!}
-Telefon: {!! $data['telefon'] !== '' ? $data['telefon'] : 'nije unet' !!}
+E-mail ili telefon: {!! $data['email'] !== '' ? $data['email'] : $data['telefon'] !!}
 Tema: {!! $data['tema'] !!}
 
 {!! $data['poruka'] !!}
 
 --
 IP adresa: {!! $data['ip'] ?? 'nepoznata' !!}
-Odgovorom na ovu poruku pišete pošiljaocu.
+{!! $data['email'] !== '' ? 'Odgovorom na ovu poruku pišete pošiljaocu.' : 'Pošiljalac je ostavio telefon, pozovite ga.' !!}

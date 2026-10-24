@@ -7,6 +7,7 @@ use App\Support\Auth\Accounts;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -20,6 +21,14 @@ class RegistracijaController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        // Honeypot: people never see the "website" field, bots fill it in. No account, no hint why.
+        if (trim((string) $request->input('website', '')) !== '') {
+            Log::info('Registration rejected (honeypot).', ['ip' => $request->ip()]);
+
+            return back()->withInput($request->except('password', 'password_confirmation', 'website'))
+                ->withErrors(['email' => 'Registracija nije uspela. Pokušajte ponovo malo kasnije.']);
+        }
+
         $rules = Accounts::registrationRules(phoneRequired: true);
         $rules['password'][] = 'confirmed';
 

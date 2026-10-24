@@ -153,3 +153,12 @@
 	.lgn-btn { width: 100%; }
 	.lgn-head__logout { width: 100%; }
 }
+
+/* Honeypot field: off screen for people, visible to bots */
+.lgn-hp {
+	position: absolute !important;
+	left: -10000px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}

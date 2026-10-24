@@ -59,14 +59,14 @@ Tekstovi strana 500 i 503 su u samom šablonu, jer se prikazuju i kad baza ne ra
 
 ## Kontakt forma
 
-Sopstvena forma umesto Contact Form 7: ime i prezime, e-pošta, telefon (nije obavezan, prefiks +381, čuva se kao E.164), tema, poruka, saglasnost. Zaštita:
+Sopstvena forma umesto Contact Form 7, sa poljima i porukama stare forme „Pomoć”: Ime (do 80), E-mail ili telefon (do 120; telefon se čuva kao E.164), Tema (prazna opcija „— Izaberite —”), Poruka (do 2000), dugme „Pošalji poruku”. Svi tekstovi i poruke su u `kontakt.*` u `tekstovi.php`. Zaštita:
 
 1. CSRF token.
 2. Polje-zamka `sajt` (van ekrana, van tabulatora): ako je popunjeno, botu se pokaže uspeh, a ništa se ne šalje.
 3. Vremenska zamka `_t` (šifrovano vreme otvaranja forme): poslato za manje od 3 s → tiho odbačeno; nema tokena, lažan ili stariji od 12 h → „Forma je istekla…”.
 4. Limit: 3 poruke na 10 minuta po IP adresi (poruka na srpskom) + opšti `throttle:20,1` na ruti.
 
-Poruka ide kao `KontaktPoruka` (ShouldQueue) na `contact_email`, „Odgovori na” je adresa pošiljaoca. Vrednosti su u `config/stranice.php` → `kontakt`. Link „Prijavite firmu” sa strane Za firme vodi na `/kontakt/?tema=firma#forma` i bira temu „Prijava firme (Biznis paket)”.
+Poruka ide kao `KontaktPoruka` (ShouldQueue) na `contact_email`, „Odgovori na” je adresa pošiljaoca kad je ostavio e-mail (za telefon nema). Vrednosti su u `config/stranice.php` → `kontakt`. Link „Prijavite firmu” sa strane Za firme vodi na `/kontakt/?tema=firma#forma` i bira temu „Za firme”.
 
 ## Izgled i pristupačnost
 

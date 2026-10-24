@@ -11,6 +11,6 @@ class PocetnaTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('<html lang="sr-Latn">', false)
-            ->assertSee('Oglasi Loznica');
+            ->assertSee('Besplatni oglasi Loznica');
     }
 }

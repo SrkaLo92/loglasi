@@ -282,13 +282,22 @@ class Sitemap
         return $rows;
     }
 
-    /** Firme sa aktivnim Biznis paketom. */
+    /** Firms with an active listing, a filled profile or a paid package (same rule as Seo::firmIndexable). */
     private function firmQuery()
     {
         return User::query()
             ->where('account_type', AccountType::Firm)
             ->where('status', UserStatus::Active)
-            ->whereHas('firm', fn ($q) => $q->where('biznis_until', '>', now()));
+            ->whereHas('firm')
+            ->where(fn ($q) => $q
+                ->whereHas('firm', fn ($f) => $f->where('package_ends_at', '>', now())
+                    ->orWhere(fn ($w) => $w->whereNotNull('description')->where('description', '!=', ''))
+                    ->orWhereNotNull('logo_path'))
+                ->orWhereExists(fn ($e) => $e->selectRaw('1')->from('listings')
+                    ->whereColumn('listings.user_id', 'users.id')
+                    ->where('listings.status', 'published')
+                    ->whereNull('listings.deleted_at')
+                    ->where(fn ($x) => $x->whereNull('listings.expires_at')->orWhere('listings.expires_at', '>', now()))));
     }
 
     private function firmRows(): array

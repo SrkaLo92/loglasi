@@ -2,15 +2,19 @@
 
 namespace App\Support;
 
+use App\Enums\ListingStatus;
 use App\Models\Listing;
-use App\Models\Product;
 use App\Models\User;
+use App\Support\Firms\FirmPackage;
 use Carbon\CarbonImmutable;
 
 /**
- * Koliko novih oglasa korisnik može da postavi u ovom kalendarskom mesecu.
- * Privatna lica: podešavanje private_monthly_limit (10). Firme sa paketom: products.listing_limit,
- * a paket bez upisanog limita (Biznis) je neograničen. Firma bez aktivnog paketa ima limit privatnog lica.
+ * How many ACTIVE listings a user may have (pending or published and not expired).
+ * Private users: setting private_active_limit (5). Firms with an active package: the package limit
+ * (Start 20, Pro 100, Max and the free first year unlimited; FirmPackage::listingLimit).
+ * A firm without an active package has the private limit.
+ * A slot frees when a listing expires, is sold, rejected or deleted.
+ * The API keeps the contract names (monthly_limit, used_this_month, resets_at).
  */
 class ListingLimits
 {
@@ -21,7 +25,7 @@ class ListingLimits
     public static function for(User $user): array
     {
         $limit = static::monthlyLimit($user);
-        $used = static::usedThisMonth($user);
+        $used = static::activeCount($user);
         $unlimited = $limit === null;
         $monthly = $unlimited ? self::UNLIMITED : $limit;
 
@@ -39,7 +43,7 @@ class ListingLimits
     {
         $limit = static::monthlyLimit($user);
 
-        return $limit === null || static::usedThisMonth($user) < $limit;
+        return $limit === null || static::activeCount($user) < $limit;
     }
 
     /** null = bez ograničenja. */
@@ -47,22 +51,21 @@ class ListingLimits
     {
         if ($user->isFirm()) {
             $firm = $user->firm;
-            if ($firm !== null && $firm->hasBiznis()) {
-                $limit = Product::query()->where('code', Product::BIZNIS_12M)->value('listing_limit');
-
-                return $limit === null ? null : (int) $limit;
+            if ($firm !== null && FirmPackage::isActive($firm)) {
+                return FirmPackage::listingLimit($firm);
             }
         }
 
-        return (int) Settings::get('private_monthly_limit');
+        return (int) Settings::get('private_active_limit');
     }
 
-    /** Oglasi napravljeni ovog meseca, računaju se i obrisani (brisanje ne vraća mesto). */
-    public static function usedThisMonth(User $user): int
+    /** Listings that use a slot: waiting for review or published and not expired (drafts do not). */
+    public static function activeCount(User $user): int
     {
-        return Listing::withTrashed()
+        return Listing::query()
             ->where('user_id', $user->id)
-            ->where('created_at', '>=', static::monthStart())
+            ->whereIn('status', [ListingStatus::Pending, ListingStatus::Published])
+            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
             ->count();
     }
 
