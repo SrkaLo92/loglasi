@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Stranice;
 
 use App\Http\Controllers\Controller;
+use App\Support\Seo;
 use App\Support\Stranice\PageText;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -39,6 +40,12 @@ class TekstController extends Controller
             PageText::list('faq.pitanja'),
             fn ($item) => is_array($item) && ! empty($item['pitanje']) && ! empty($item['odgovor']),
         ));
+
+        // FAQPage schema from the same questions (plain text: Markdown links and variables resolved).
+        Seo::get()->faq(array_map(fn (array $item) => [
+            'q' => PageText::replace((string) $item['pitanje']),
+            'a' => strip_tags((string) PageText::inline((string) $item['odgovor'])),
+        ], $items));
 
         return view('stranice.faq', [
             'items' => $items,

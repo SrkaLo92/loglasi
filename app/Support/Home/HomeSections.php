@@ -36,6 +36,7 @@ class HomeSections
     public static function flush(): void
     {
         Cache::forget(self::CACHE_KEY);
+        FooterSections::flush();
     }
 
     /**

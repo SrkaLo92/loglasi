@@ -8,7 +8,7 @@
 @endphp
 <header class="lg-header">
 	<div class="lg-wrap lg-header__in">
-		<a class="lg-logo" href="{{ url_slash('/') }}" aria-label="loglasi.rs, početna strana">loglasi<span>.rs</span></a>
+		@include('partials.logo', ['logoClass' => 'lg-logo'])
 		<p class="lg-header__mesto">{{ Ikonice::svg('pin', 14, '2') }}Loznica i okolina</p>
 		<form class="lg-search" role="search" action="{{ Navigacija::link('oglasi') }}" method="get">
 			<label class="lg-visually-hidden" for="lg-q">Šta tražite?</label>

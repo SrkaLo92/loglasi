@@ -7,7 +7,6 @@ use App\Enums\FieldFilter;
 use App\Enums\FieldType;
 use App\Models\Field;
 use App\Models\Firm;
-use App\Models\Listing;
 use App\Models\User;
 use App\Services\Catalog;
 
@@ -38,7 +37,7 @@ class ListingApiTest extends SearchTestCase
     {
         $this->priced('Aktivan', 100);
         $this->listing(['title' => 'Na čekanju'])->forceFill(['status' => 'pending'])->save();
-        Listing::factory()->expired()->create(['title' => 'Istekao', 'category_id' => $this->cars->id]);
+        $this->listing(['title' => 'Istekao', 'status' => 'expired', 'expires_at' => now()->subDay()]);
         $this->listing(['title' => 'Obrisan'])->delete();
 
         $this->assertSame(['Aktivan'], $this->apiTitles(''));

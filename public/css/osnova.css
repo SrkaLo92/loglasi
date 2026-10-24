@@ -161,6 +161,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .lg-logo:hover { color: var(--lg-text); }
 .lg-logo span { color: var(--lg-brand); }
+.lg-logo img { display: block; height: 36px; width: auto; }
 
 .lg-header__mesto { display: none; }
 
@@ -274,22 +275,17 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	color: #c9d3ce;
 }
 .lg-footer__in {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: space-between;
-	gap: 32px;
-	padding-top: 36px;
+	display: grid;
+	grid-template-columns: minmax(0, 1.6fr) repeat(2, minmax(0, 1fr));
+	gap: 32px 40px;
+	padding-top: 44px;
 	padding-bottom: 36px;
 }
-.lg-footer__brend {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-	max-width: 360px;
-}
+.lg-footer__col { min-width: 0; }
+.lg-footer__brend { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
 .lg-footer__logo,
 .lg-footer__logo:visited {
-	align-self: flex-start;
+	display: inline-flex;
 	color: #fff;
 	font-size: 22px;
 	font-weight: 800;
@@ -298,30 +294,58 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .lg-footer__logo:hover { color: #fff; }
 .lg-footer__logo span { color: #6fcbae; }
-.lg-footer__tekst { margin: 0; font-size: 14px; line-height: 1.55; }
-.lg-footer__nav ul {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: flex-start;
-	gap: 8px 24px;
-	margin: 0;
-	padding: 0;
-	list-style: none;
-}
-.lg-footer__nav a,
-.lg-footer__nav a:visited {
+.lg-footer__logo img { display: block; height: 36px; width: auto; }
+.lg-footer__tekst { margin: 0; font-size: 14px; line-height: 1.6; }
+.lg-footer__kontakt { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; font-size: 15px; }
+.lg-footer__kontakt a,
+.lg-footer__kontakt a:visited,
+.lg-footer__kontakt span {
 	display: inline-flex;
 	align-items: center;
-	min-height: 44px;
+	gap: 10px;
+	min-height: 36px;
 	color: #fff;
+	text-decoration: none;
+	overflow-wrap: anywhere;
+}
+.lg-footer__kontakt a:hover { text-decoration: underline; }
+.lg-footer__kontakt .lg-icon { color: #6fcbae; }
+.lg-footer__postavi { margin-top: 2px; }
+.lg-footer__mreze-naslov { margin: 4px 0 8px; font-size: 14px; font-weight: 700; color: #fff; }
+.lg-footer__mreze ul { display: flex; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.lg-footer__mreze a,
+.lg-footer__mreze a:visited {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, .1);
+	color: #fff;
+}
+.lg-footer__mreze a:hover { background: var(--lg-brand); }
+.lg-footer__naslov { margin: 6px 0 12px; color: #fff; font-size: 16px; font-weight: 800; }
+.lg-footer__lista { margin: 0; padding: 0; list-style: none; }
+.lg-footer__lista a,
+.lg-footer__lista a:visited {
+	display: inline-flex;
+	align-items: center;
+	min-height: 40px;
+	color: #c9d3ce;
 	font-size: 15px;
 	text-decoration: none;
 }
-.lg-footer__nav a:hover { color: #fff; text-decoration: underline; }
-.lg-footer__nav a[aria-current="page"] { text-decoration: underline; text-decoration-color: #6fcbae; text-underline-offset: 4px; }
+.lg-footer__lista a:hover { color: #fff; text-decoration: underline; }
+.lg-footer__lista a[aria-current="page"] { color: #fff; text-decoration: underline; text-decoration-color: #6fcbae; text-underline-offset: 4px; }
+.lg-footer__sve, .lg-footer__sve:visited { color: #6fcbae !important; font-weight: 700; }
 .lg-footer :focus-visible { outline-color: #fff; box-shadow: 0 0 0 4px var(--lg-accent); }
 .lg-footer__dno { border-top: 1px solid rgba(255, 255, 255, .12); }
-.lg-footer__dno p { margin: 0; padding: 16px 0; font-size: 13px; color: #c9d3ce; }
+.lg-footer__dno p { margin: 0; padding: 16px 0; font-size: 13px; line-height: 1.5; color: #c9d3ce; }
+
+@media (max-width: 1100px) {
+	.lg-footer__in { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 
 /* Donja navigacija (samo telefon) -------------------------------------- */
 
@@ -371,8 +395,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	.lg-header__nav { grid-column: 1 / -1; justify-content: space-between; }
 
 	.lg-footer { margin-top: 32px; }
-	.lg-footer__in { gap: 20px; padding-top: 28px; padding-bottom: 20px; }
-	.lg-footer__nav ul { gap: 0 20px; }
+	.lg-footer__in { grid-template-columns: 1fr; gap: 24px; padding-top: 32px; padding-bottom: 20px; }
+	.lg-footer__naslov { margin-bottom: 4px; }
 
 	.lg-mnav {
 		display: block;
