@@ -10,6 +10,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(ProductSeeder::class);
+        $this->call(PayeeSeeder::class);
 
         // Samo za lokalni razvoj; pravi podaci dolaze uvozom iz WordPress-a.
         if (app()->isLocal()) {
