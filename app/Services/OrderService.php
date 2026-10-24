@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Enums\BuyerType;
-use App\Enums\ListingStatus;
 use App\Enums\OrderStatus;
 use App\Exceptions\OrderException;
 use App\Mail\OrderPlaced;
@@ -12,7 +11,12 @@ use App\Models\Listing;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Payments\BumpCredits;
 use App\Services\Payments\BuyerDetails;
+use App\Services\Payments\Effects;
+use App\Services\Payments\ProductCatalog;
+use App\Support\Firms\FirmCredits;
+use App\Support\Firms\FirmPackage;
 use App\Support\Payments\PaymentMode;
 use App\Support\Payments\PaymentReference;
 use Carbon\CarbonInterface;
@@ -22,37 +26,21 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 /**
- * Creating and cancelling orders for paid features. Payment is a bank transfer; the admin
- * marks an order paid through OrderFulfillment, which applies the effect.
+ * Orders for the paid features of the price list (config('payments.catalog')), paid by bank
+ * transfer; the admin marks an order paid through OrderFulfillment, which applies the effect.
+ * A firm's monthly included credits and bought bump packs are used before anything is sold.
  */
 class OrderService
 {
-    /** Products bought for one listing. */
-    public const LISTING_PRODUCTS = [Product::BUMP, Product::FEATURED_7, Product::FEATURED_30];
-
-    /** Products bought for the account (firm). */
-    public const ACCOUNT_PRODUCTS = [Product::BIZNIS_12M];
-
-    public static function isOrderable(string $code): bool
-    {
-        return in_array($code, [...self::LISTING_PRODUCTS, ...self::ACCOUNT_PRODUCTS], true);
-    }
-
-    public static function needsListing(Product|string $product): bool
-    {
-        return in_array($product instanceof Product ? $product->code : $product, self::LISTING_PRODUCTS, true);
-    }
-
-    /** Active orderable product by code. */
+    /** Active sellable product by code. */
     public function product(string $code): ?Product
     {
-        if (! self::isOrderable($code)) {
+        if (! ProductCatalog::isSellable($code)) {
             return null;
         }
-
         $product = Product::byCode($code);
 
-        return $product && $product->is_active && $product->price_rsd > 0 ? $product : null;
+        return $product && $product->is_active && ! $product->display_only && $product->price_rsd > 0 ? $product : null;
     }
 
     /**
@@ -67,11 +55,11 @@ class OrderService
         if ($product === null) {
             throw new OrderException('Ova usluga trenutno nije dostupna.', 'product_unavailable');
         }
-        if (! self::needsListing($product)) {
+        if (! ProductCatalog::needsListing($product)) {
             $listing = null;
         }
         $buyer->validate();
-        if ($buyer->type === BuyerType::Private && ! self::privateBuyersEnabled()) {
+        if ($buyer->type === BuyerType::Private && ! PaymentMode::privatePaymentsEnabled()) {
             throw new OrderException('Plaćanje kao fizičko lice trenutno nije moguće. Izaberite plaćanje kao firma ili nam pišite preko strane Kontakt.', 'private_disabled');
         }
 
@@ -87,6 +75,9 @@ class OrderService
             $reason = $this->unavailableReason($user, $product, $listing);
             if ($reason !== null) {
                 throw new OrderException($reason, 'not_allowed');
+            }
+            if ($this->availableCredit($user, $product) !== null) {
+                throw new OrderException('Imate uključenu uslugu koju još niste iskoristili. Iskoristite nju, bez plaćanja.', 'credit_available');
             }
 
             $pending = Order::query()->where('user_id', $user->getKey())->where('status', OrderStatus::Pending)->count();
@@ -105,22 +96,39 @@ class OrderService
     }
 
     /**
-     * Why this user cannot order this product now, or null when the order is allowed.
-     * The text is shown to the user.
+     * Why this user cannot get this product now, or null when it is allowed. The text is shown to the user.
      */
     public function unavailableReason(User $user, Product $product, ?Listing $listing = null): ?string
     {
         if ($user->isBlocked()) {
             return 'Vaš nalog je blokiran.';
         }
-        if (! self::isOrderable($product->code) || ! $product->is_active || $product->price_rsd <= 0) {
+        if (! ProductCatalog::isSellable($product) || ! $product->is_active || $product->display_only || $product->price_rsd <= 0) {
             return 'Ova usluga trenutno nije dostupna.';
         }
 
-        if ($product->code === Product::BIZNIS_12M) {
-            return $this->canBuyBiznis($user)
+        return $this->eligibilityReason($user, $product, $listing);
+    }
+
+    /** Rules of the product itself (who, which listing, bump interval), whether it is sold or included. */
+    public function eligibilityReason(User $user, Product $product, ?Listing $listing = null): ?string
+    {
+        if ($user->isBlocked()) {
+            return 'Vaš nalog je blokiran.';
+        }
+        $type = ProductCatalog::type($product);
+        if ($type === ProductCatalog::FIRM_PACKAGE) {
+            return $this->canBuyFirmPackage($user)
                 ? null
-                : 'Biznis paket je za firme. Nalog firme otvara administrator: pošaljite prijavu firme preko strane Kontakt.';
+                : 'Paketi su za firme. Nalog firme otvara administrator: pošaljite prijavu firme preko strane Kontakt.';
+        }
+        if ($type === ProductCatalog::SLOTS) {
+            return $user->isFirm() && FirmPackage::isActive($user->firm)
+                ? 'Vaš paket za firme već određuje broj aktivnih oglasa.'
+                : null;
+        }
+        if ($type === ProductCatalog::BUMP_PACK) {
+            return null;
         }
 
         if ($listing === null) {
@@ -129,12 +137,10 @@ class OrderService
         if ((int) $listing->user_id !== (int) $user->getKey()) {
             return 'Uslugu možete da naručite samo za svoj oglas.';
         }
-        if ($listing->trashed() || $listing->status !== ListingStatus::Published
-            || ($listing->expires_at !== null && $listing->expires_at->isPast())) {
+        if (! $listing->isActive()) {
             return 'Usluga je dostupna samo za aktivne oglase.';
         }
-
-        if ($product->code === Product::BUMP) {
+        if ($type === ProductCatalog::BUMP) {
             $next = $this->bumpAvailableAt($listing);
             if ($next !== null) {
                 return 'Oglas je nedavno podignut. Ponovo može da se podigne od '.$next->format('j. n. Y. \u H:i').'.';
@@ -144,10 +150,76 @@ class OrderService
         return null;
     }
 
-    /** Biznis is for firm accounts, or for a firm profile the admin has set up. */
-    public function canBuyBiznis(User $user): bool
+    /** Firm packages are for firm accounts, or for a firm profile the admin has set up. */
+    public function canBuyFirmPackage(User $user): bool
     {
         return $user->isFirm() || $user->firm()->exists();
+    }
+
+    /**
+     * Credit that covers this product without paying: the firm's monthly included credit
+     * ("firm:bumps", "firm:highlights", "firm:premium_xl") or a bought bump pack ("pack:bumps").
+     */
+    public function availableCredit(User $user, Product $product): ?string
+    {
+        $credit = ProductCatalog::credit($product);
+        if ($credit === null) {
+            return null;
+        }
+        $firm = $user->isFirm() ? $user->firm : null;
+        if ($firm !== null && FirmPackage::isActive($firm) && (FirmCredits::remaining($firm)[$credit] ?? 0) > 0) {
+            return 'firm:'.$credit;
+        }
+        if ($credit === 'bumps' && BumpCredits::remaining($user) > 0) {
+            return 'pack:bumps';
+        }
+
+        return null;
+    }
+
+    /**
+     * Uses an included credit for a listing promotion (no order, no payment). Returns the credit
+     * source that was used.
+     *
+     * @throws OrderException when the promotion is not allowed or no credit is left
+     */
+    public function useCredit(User $user, string $code, Listing $listing): string
+    {
+        $product = Product::byCode($code);
+        if ($product === null || ProductCatalog::credit($product) === null) {
+            throw new OrderException('Ova usluga nije uključena u vaš paket.', 'no_credit');
+        }
+
+        return DB::transaction(function () use ($user, $product, $listing) {
+            User::query()->whereKey($user->getKey())->lockForUpdate()->first();
+
+            $reason = $this->eligibilityReason($user, $product, $listing);
+            if ($reason !== null) {
+                throw new OrderException($reason, 'not_allowed');
+            }
+
+            $source = $this->availableCredit($user, $product);
+            $used = match ($source) {
+                'pack:bumps' => BumpCredits::consume($user),
+                null => false,
+                default => FirmCredits::consume($user->firm, substr($source, 5)),
+            };
+            if (! $used) {
+                throw new OrderException('Nema više uključenih usluga ovog meseca.', 'no_credit');
+            }
+
+            $applied = Effects::apply($product, $user, (int) $listing->getKey());
+            AuditLog::create([
+                'user_id' => $user->getKey(),
+                'action' => 'promotion.credit_used',
+                'subject_type' => $listing->getMorphClass(),
+                'subject_id' => $listing->getKey(),
+                'changes' => ['product' => $product->code, 'credit' => $source, 'effect' => $applied['effect']],
+                'ip' => app()->runningInConsole() ? null : request()->ip(),
+            ]);
+
+            return $source;
+        });
     }
 
     /** When the listing can be bumped again, or null when it can be bumped now. */
@@ -158,7 +230,7 @@ class OrderService
             return null;
         }
 
-        $next = $listing->bumped_at->copy()->addHours($this->cooldownHours());
+        $next = $listing->bumped_at->copy()->addHours(max(1, (int) config('payments.bump_cooldown_hours', 24)));
 
         return $next->greaterThan($now) ? $next : null;
     }
@@ -199,10 +271,10 @@ class OrderService
         return $cancelled;
     }
 
-    /** Cancels pending orders older than payments.pending_days. Returns how many were cancelled. */
+    /** Cancels pending orders older than payments.pending_days (7). Returns how many were cancelled. */
     public function cancelStale(?CarbonInterface $now = null): int
     {
-        $cutoff = Carbon::instance($now ?? now())->subDays((int) config('payments.pending_days', 14));
+        $cutoff = Carbon::instance($now ?? now())->subDays((int) config('payments.pending_days', 7));
         $count = 0;
 
         Order::query()
@@ -223,7 +295,7 @@ class OrderService
     /** Date after which a pending order is cancelled automatically. */
     public static function expiresAt(Order $order): ?Carbon
     {
-        return $order->created_at?->copy()->addDays((int) config('payments.pending_days', 14));
+        return $order->created_at?->copy()->addDays((int) config('payments.pending_days', 7));
     }
 
     private function pendingDuplicate(User $user, Product $product, ?Listing $listing): ?Order
@@ -247,21 +319,11 @@ class OrderService
             'amount_rsd' => $product->price_rsd,
             'reference' => 'tmp-'.Str::random(24),
             'status' => OrderStatus::Pending,
+            'is_test' => PaymentMode::testMode(),
             ...$buyer->attributes(),
         ]);
         $order->forceFill(['reference' => PaymentReference::forOrderId((int) $order->getKey())])->save();
 
         return $order;
-    }
-
-    /** Private buyers: always in test mode, for real only once the fiscal register works. */
-    public static function privateBuyersEnabled(): bool
-    {
-        return PaymentMode::privatePaymentsEnabled();
-    }
-
-    private function cooldownHours(): int
-    {
-        return max(1, (int) config('payments.bump_cooldown_hours', 24));
     }
 }

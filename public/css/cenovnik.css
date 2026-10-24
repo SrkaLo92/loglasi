@@ -692,3 +692,7 @@
 		padding: 18px 20px;
 	}
 }
+
+/* Payments: order links on sellable products. */
+.lgc-naruci { display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; font-weight: 700; color: var(--lg-green); }
+.lgc-paket__naruci { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }

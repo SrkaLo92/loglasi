@@ -48,7 +48,7 @@
 	@endunless
 
 	@if ($user->isFirm())
-		<p class="lgn-alert lgn-alert--ok"><a href="{{ url_slash('moj-nalog/firma') }}">Profil firme, Biznis paket i statistika</a></p>
+		<p class="lgn-alert lgn-alert--ok"><a href="{{ url_slash('moj-nalog/firma') }}">Profil firme, paket i statistika</a></p>
 	@endif
 
 	<section class="lgn-card lgn-limit" aria-labelledby="lgn-limit">

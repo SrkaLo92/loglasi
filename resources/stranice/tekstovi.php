@@ -6,7 +6,8 @@
  *
  * Zamene u vitičastim zagradama popunjavaju se iz baze (cene iz tabele products,
  * limiti iz podešavanja), da se cena nikad ne piše ručno u tekstu:
- *   {cena_podizanje} {cena_istaknuto_7} {cena_istaknuto_30} {cena_biznis}
+ *   {cena_podizanje} {cena_istaknuto_7} {cena_istaknuto_30} {cena_paket_podizanja} {cena_prioritet} {cena_top}
+ *   {cena_premium_xl} {cena_start} {cena_pro} {cena_max}
  *   {besplatni_oglasi} {besplatne_firme} {trajanje_oglasa} {email}
  *
  * Dugi tekstovi su Markdown (## naslov, - stavka, [tekst](/putanja/)); HTML se ne prihvata.
@@ -236,9 +237,10 @@ Oglase pregledamo i možemo da uklonimo oglas koji krši ove uslove, bez prethod
 
 ## 6. Plaćene usluge
 
-- Podizanje oglasa ({cena_podizanje}), isticanje oglasa ({cena_istaknuto_7} za 7 dana, {cena_istaknuto_30} za 30 dana) i Biznis paket ({cena_biznis} godišnje) plaćaju se uplatom na račun, po cenama sa strane [Cenovnik](/cenovnik/).
-- Usluga se uključuje ručno, kada uplata stigne. Trajanje se računa od dana uključenja.
-- Ako usluga ne može da se uključi, javićemo vam se i dogovoriti povraćaj uplate.
+- Postavljanje oglasa je besplatno. Plaćaju se dodatni oglasi, promocije oglasa (podizanje {cena_podizanje}, paket 10 podizanja {cena_paket_podizanja}, istaknut oglas {cena_istaknuto_7}, prioritetni oglas {cena_prioritet}, TOP oglas {cena_top}, Premium XL kartica {cena_premium_xl}) i paketi za firme (Business Start {cena_start}, Business Pro {cena_pro} i Business Max {cena_max} mesečno, ili godišnje po ceni za 10 meseci), po cenama sa strane [Cenovnik](/cenovnik/).
+- Plaća se uplatom na račun, najlakše skeniranjem IPS QR koda u aplikaciji banke, uz poziv na broj sa predračuna. Ako uplata ne stigne u roku od 7 dana, porudžbina se otkazuje.
+- Usluga počinje odmah posle potvrde uplate i traje koliko piše na Cenovniku. Paket kupljen tokom besplatne prve godine počinje kad ona istekne.
+- Za isticanje, dodatne oglase i pakete, ako odustanete pre isteka, vraćamo srazmeran deo cene za dane koji nisu iskorišćeni; podizanje se izvrši odmah. Ako usluga ne može da se pruži našom greškom, vraćamo ceo iznos.
 
 ## 7. Odgovornost
 
@@ -364,7 +366,7 @@ MD,
     'seo.brisanje.title' => 'Brisanje ličnih podataka | loglasi.rs',
     'seo.brisanje.description' => 'Uputstvo kako da zatražite brisanje svog naloga i ličnih podataka sa sajta loglasi.rs.',
     'seo.cenovnik.title' => 'Cenovnik: promocije oglasa i paketi za firme | loglasi.rs',
-    'seo.cenovnik.description' => 'Postavljanje oglasa je besplatno. Pogledajte cene isticanja oglasa i Biznis paketa za firme iz Loznice.',
+    'seo.cenovnik.description' => 'Postavljanje oglasa je besplatno. Pogledajte cene promocija oglasa i paketa za firme iz Loznice.',
     'seo.za_firme.title' => 'Za firme: profil firme i paketi | loglasi.rs',
     'seo.za_firme.description' => 'Predstavite svoju firmu kupcima iz Loznice: profil sa logoom, radnim vremenom, mapom i svim oglasima na jednom mestu. Prvih {besplatne_firme} firmi 12 meseci besplatno.',
 ];

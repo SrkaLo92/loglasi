@@ -37,6 +37,8 @@
 		'premium_xl_home_7' => 'M3 11l9-8 9 8M5 10v10h14V10',
 	];
 	$section = 0;
+	// Payments: order page for products that are on sale (display-only rows have no link).
+	$orderUrl = fn ($p) => $p && $p->is_active && ! $p->display_only && \App\Services\Payments\ProductCatalog::isSellable($p) ? url_slash('moj-nalog/narudzbine/nova').'?usluga='.$p->code : null;
 @endphp
 
 @section('content')
@@ -82,6 +84,7 @@
 							<span class="lgc-slot__opis">{{ Cenovnik::description($product) }}</span>
 						</span>
 						<span class="lgc-slot__cena">{{ Cenovnik::price($product->price_rsd) }}</span>
+						@if ($url = $orderUrl($product))<a class="lgc-naruci" href="{{ $url }}">Naruči<span class="lg-visually-hidden"> {{ $product->name }}</span></a>@endif
 					</li>
 				@endforeach
 			</ul>
@@ -111,7 +114,7 @@
 								</th>
 								<td class="lgc-promo__opis">{{ Cenovnik::description($product) }}</td>
 								<td class="lgc-promo__trajanje">{{ Cenovnik::promotionDuration($product) }}</td>
-								<td class="lgc-promo__cena">{{ Cenovnik::price($product->price_rsd) }}</td>
+								<td class="lgc-promo__cena">{{ Cenovnik::price($product->price_rsd) }}@if ($url = $orderUrl($product)) <a class="lgc-naruci" href="{{ $url }}">Naruči<span class="lg-visually-hidden"> {{ $product->name }}</span></a>@endif</td>
 							</tr>
 						@endforeach
 					</tbody>
@@ -172,6 +175,12 @@
 							<p class="lgc-paket__cena"><span class="lgc-paket__iznos">{{ number_format($package['monthly']->price_rsd, 0, ',', '.') }}</span> <span class="lgc-paket__period">RSD / mesec</span></p>
 							@if ($package['yearly'])
 								<p class="lgc-paket__godisnje">ili {{ Cenovnik::price($package['yearly']->price_rsd) }} godišnje</p>
+							@endif
+							@if ($orderUrl($package['monthly']) || $orderUrl($package['yearly']))
+								<p class="lgc-paket__naruci">
+									@if ($url = $orderUrl($package['monthly']))<a class="lg-btn lg-btn--green" href="{{ $url }}">Mesečno<span class="lg-visually-hidden">, {{ $package['monthly']->name }}</span></a>@endif
+									@if ($url = $orderUrl($package['yearly']))<a class="lg-btn lg-btn--outline" href="{{ $url }}">Godišnje<span class="lg-visually-hidden">, {{ $package['monthly']->name }}</span></a>@endif
+								</p>
 							@endif
 							@if ($package['features'])
 								<ul class="lgc-paket__stavke">

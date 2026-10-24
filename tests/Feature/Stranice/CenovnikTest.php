@@ -69,7 +69,12 @@ class CenovnikTest extends TestCase
 
     public function test_display_only_products_are_listed_but_not_sold(): void
     {
-        $this->assertFalse((bool) Product::where('code', 'top_7')->value('is_active'));
+        // The price list sells top_7 (payments); the admin can put it back to display-only.
+        $this->assertTrue((bool) Product::where('code', 'top_7')->value('is_active'));
+        $this->get('/cenovnik/')->assertSee('moj-nalog/narudzbine/nova/?usluga=top_7', false);
+        Product::where('code', 'top_7')->update(['is_active' => false, 'display_only' => true]);
+        Once::flush();
+        $this->get('/cenovnik/')->assertDontSee('moj-nalog/narudzbine/nova/?usluga=top_7', false);
         $this->get('/cenovnik/')->assertSee('data-proizvod="top_7"', false);
         $this->getJson('/api/v1/prices')->assertJsonMissing(['product' => 'top_7']);
 

@@ -22,5 +22,5 @@
 		<div><dt>Usluga</dt><dd>{{ $order->product?->name }}</dd></div>
 		<div class="lgpay-summary__total"><dt>Za uplatu</dt><dd>{{ number_format($order->amount_rsd, 2, ',', '.') }}&nbsp;RSD</dd></div>
 	</dl>
-	<p class="lgpay-help">{{ config('payments.vat_note') }} {{ $order->buyer_type === BuyerType::Firm ? 'Račun na firmu šaljemo e-poštom posle uplate.' : 'Fiskalni račun šaljemo e-poštom istog dana kad vidimo uplatu.' }}</p>
+	<p class="lgpay-help">{{ \App\Support\Payments\PaymentDetails::vatNote() }} {{ $order->buyer_type === BuyerType::Firm ? 'Račun na firmu šaljemo e-poštom posle uplate.' : 'Fiskalni račun šaljemo e-poštom istog dana kad vidimo uplatu.' }}</p>
 </section>

@@ -1,7 +1,6 @@
 @extends('layouts.app')
 @include('payments.partials.head')
 @use('App\Enums\OrderStatus')
-@use('App\Models\Product')
 @use('App\Support\Stranice\PageText')
 @php
 	$title = 'Narudžbina '.$order->reference.' | loglasi.rs';
@@ -22,6 +21,9 @@
 	</header>
 
 	@include('payments.partials.status')
+	@if ($order->is_test)
+		<p class="lgpay-alert lgpay-alert--warn" role="note"><strong>TEST:</strong> probna porudžbina. Uplata se ne knjiži, a račun je probni.</p>
+	@endif
 
 	@if ($pending)
 		<div class="lgpay-grid">
@@ -82,8 +84,11 @@
 				@if ($order->status === OrderStatus::Cancelled && $order->cancelled_at)
 					<div><dt>Otkazano</dt><dd>{{ $order->cancelled_at->format('j. n. Y. \u H:i') }}</dd></div>
 				@endif
-				@if ($order->status === OrderStatus::Activated && $order->listing && ! $order->listing->trashed() && $order->listing->isFeatured() && in_array($order->product?->code, [Product::FEATURED_7, Product::FEATURED_30], true))
-					<div><dt>Istaknut do</dt><dd>{{ $order->listing->featured_until->format('j. n. Y. \u H:i') }}</dd></div>
+				@if ($order->status === OrderStatus::Activated && $order->service_ends_at)
+					<div><dt>Usluga traje do</dt><dd>{{ $order->service_ends_at->format('j. n. Y. \u H:i') }}</dd></div>
+				@endif
+				@if ($order->refund_amount_rsd !== null)
+					<div><dt>Vraćen iznos</dt><dd>{{ number_format($order->refund_amount_rsd, 0, ',', '.') }}&nbsp;RSD</dd></div>
 				@endif
 			</dl>
 			@if ($order->status === OrderStatus::Paid)

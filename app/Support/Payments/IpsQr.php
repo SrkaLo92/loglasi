@@ -32,7 +32,7 @@ final class IpsQr
             'R' => $account,
             'N' => self::recipient($recipient),
             'I' => 'RSD'.number_format($amount, 2, ',', ''),
-            'SF' => (string) config('payments.ips_payment_code', '289'),
+            'SF' => PaymentDetails::paymentCode(),
         ];
 
         $purpose = self::clean($purpose, self::MAX_PURPOSE);

@@ -1,17 +1,25 @@
-@use('App\Models\Product')
+@use('App\Services\Payments\ProductCatalog')
+@php($type = $order->product ? ProductCatalog::type($order->product) : null)
 {{-- Plain text: values are printed raw (no HTML entities). --}}
+@if ($order->is_test)
+[TEST] Ovo je probna porudžbina: uplata se ne knjiži, račun je probni.
+
+@endif
 Zdravo {!! $order->user?->name !!},
 
-uplata za narudžbinu {!! $order->reference !!} je primljena: {!! $order->product?->name !!}@if ($order->listing) za oglas „{!! $order->listing->title !!}”@endif.
-@if (in_array($order->product?->code, [Product::FEATURED_7, Product::FEATURED_30], true) && $order->listing?->featured_until)
-Oglas je istaknut do {!! $order->listing->featured_until->format('j. n. Y. \u H:i') !!}.
-@elseif ($order->product?->code === Product::BUMP)
+uplata za porudžbinu {!! $order->reference !!} je potvrđena i usluga je uključena: {!! $order->product?->name !!}@if ($order->listing) za oglas „{!! $order->listing->title !!}”@endif.
+@if ($type === ProductCatalog::BUMP)
 Oglas je podignut na vrh liste.
-@elseif ($order->product?->code === Product::BIZNIS_12M && $order->user?->firm?->biznis_until)
-Biznis paket važi do {!! $order->user->firm->biznis_until->format('j. n. Y.') !!}.
+@elseif ($type === ProductCatalog::BUMP_PACK)
+Podizanja možete da koristite kad vam odgovara, iz liste svojih oglasa.
+@elseif ($order->service_ends_at)
+Usluga traje do {!! $order->service_ends_at->format('j. n. Y. \u H:i') !!}.
+@endif
+@if ($order->receipt_number)
+Broj računa: {!! $order->receipt_number !!}
 @endif
 
-Vaše narudžbine: {!! url_slash('moj-nalog/narudzbine') !!}
+Vaše porudžbine: {!! url_slash('moj-nalog/narudzbine') !!}
 
 Hvala što koristite loglasi.rs.
 --

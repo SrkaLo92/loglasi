@@ -22,7 +22,7 @@ class OrderPaid extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Uplata je primljena: '.$this->order->product?->name);
+        return new Envelope(subject: ($this->order->is_test ? '[TEST] ' : '').'Usluga je uključena: '.$this->order->product?->name);
     }
 
     public function content(): Content

@@ -11,15 +11,16 @@
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;">
 <tr><td style="padding:24px;">
 	<p style="margin:0 0 16px;font-size:20px;font-weight:bold;">loglasi<span style="color:#379b7f;">.rs</span></p>
+	@if ($order->is_test)<p style="margin:0 0 12px;padding:8px 12px;background:#fcebdf;color:#9a4215;border-radius:8px;"><strong>TEST:</strong> ovo je probna porudžbina, uplata se ne knjiži i račun je probni.</p>@endif
 	<p style="margin:0 0 12px;">Zdravo {{ $order->user?->name }},</p>
-	<p style="margin:0 0 16px;">primili smo vašu narudžbinu: <strong>{{ $order->product?->name }}</strong>@if ($order->listing) za oglas „{{ $order->listing->title }}”@endif. Usluga se uključuje kad stigne uplata.</p>
+	<p style="margin:0 0 16px;">porudžbina je primljena: <strong>{{ $order->product?->name }}</strong>@if ($order->listing) za oglas „{{ $order->listing->title }}”@endif. Usluga se uključuje kad stigne uplata.</p>
 
 	@if ($details->ready())
 		<table role="presentation" width="100%" cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-size:15px;">
 			<tr><td style="color:#5b6470;">Primalac</td><td>{!! nl2br(e($details->recipient)) !!}</td></tr>
 			<tr><td style="color:#5b6470;">Račun primaoca</td><td><strong>{{ $details->accountDisplay }}</strong></td></tr>
 			<tr><td style="color:#5b6470;">Svrha uplate</td><td>{{ $details->purpose }}</td></tr>
-			<tr><td style="color:#5b6470;">Šifra plaćanja</td><td>{{ config('payments.ips_payment_code') }}</td></tr>
+			<tr><td style="color:#5b6470;">Šifra plaćanja</td><td>{{ \App\Support\Payments\PaymentDetails::paymentCode() }}</td></tr>
 			<tr><td style="color:#5b6470;">Iznos</td><td><strong>{{ $details->amountLabel() }}</strong></td></tr>
 			<tr><td style="color:#5b6470;">Model</td><td>{{ $details->model }}</td></tr>
 			<tr><td style="color:#5b6470;">Poziv na broj</td><td><strong>{{ $details->reference }}</strong></td></tr>
@@ -32,8 +33,8 @@
 		<p style="margin:0 0 16px;">Iznos: <strong>{{ $details->amountLabel() }}</strong>, model {{ $details->model }}, poziv na broj <strong>{{ $details->reference }}</strong>. Podatke za uplatu (primalac i račun) šaljemo na zahtev: odgovorite na ovu poruku ili nam pišite preko strane Kontakt.</p>
 	@endif
 
-	<p style="margin:16px 0;">Poziv na broj upišite tačno ovako: po njemu prepoznajemo vašu uplatu.@if ($expiresAt) Ako uplata ne stigne do {{ $expiresAt->format('j. n. Y.') }}, narudžbina se otkazuje.@endif</p>
-	<p style="margin:0 0 16px;color:#5b6470;font-size:14px;">{{ config('payments.vat_note') }}</p>
+	<p style="margin:16px 0;">Obavezno upiši poziv na broj. Usluga se uključuje čim uplata bude potvrđena; račun stiže na mejl.@if ($expiresAt) Ako uplata ne stigne do {{ $expiresAt->format('j. n. Y.') }}, narudžbina se otkazuje.@endif</p>
+	@if (\App\Support\Payments\PaymentDetails::vatNote() !== '')<p style="margin:0 0 16px;color:#5b6470;font-size:14px;">{{ \App\Support\Payments\PaymentDetails::vatNote() }}</p>@endif
 	<p style="margin:0 0 16px;"><a href="{{ $link }}" style="display:inline-block;background:#2b7a64;color:#ffffff;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:bold;">Pogledajte narudžbinu</a></p>
 	<p style="margin:0;color:#5b6470;font-size:13px;">loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu.</p>
 </td></tr>

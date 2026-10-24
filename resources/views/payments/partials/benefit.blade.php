@@ -1,14 +1,20 @@
-{{-- What the buyer gets, by product code. --}}
-@use('App\Models\Product')
-@switch($product->code)
-	@case(Product::BUMP)
-		Oglas se vraća na vrh liste, kao da je upravo postavljen. Oglas može da se podigne jednom u {{ config('payments.bump_cooldown_hours') }} sata.
+{{-- What the buyer gets, by product type (config('payments.catalog')). --}}
+@use('App\Services\Payments\ProductCatalog')
+@php($days = ProductCatalog::days($product))
+@switch(ProductCatalog::type($product))
+	@case(ProductCatalog::BUMP)
+		Oglas se vraća na vrh liste u svojoj kategoriji, kao da je upravo postavljen. Oglas može da se podigne jednom u {{ config('payments.bump_cooldown_hours') }} sata.
 		@break
-	@case(Product::FEATURED_7)
-	@case(Product::FEATURED_30)
-		Oglas je istaknut {{ $product->duration_days ?: ($product->code === Product::FEATURED_30 ? 30 : 7) }} dana od uplate: prikazuje se iznad ostalih i ima oznaku „Istaknuto”. Ako je oglas već istaknut, isticanje se produžava.
+	@case(ProductCatalog::BUMP_PACK)
+		{{ ProductCatalog::definition($product)['bumps'] ?? 10 }} podizanja koja koristite kad vam odgovara, za bilo koji svoj aktivan oglas.
 		@break
-	@case(Product::BIZNIS_12M)
-		Biznis paket važi {{ ($product->duration_days ?: 365) >= 365 ? '12 meseci' : $product->duration_days.' dana' }} od uplate: profil firme, oznaka „Firma” i više oglasa. Ako je paket već aktivan, produžava se.
+	@case(ProductCatalog::PROMOTION)
+		{{ trim((string) $product->description) !== '' ? $product->description : 'Oglas je promovisan.' }} Traje {{ $days }} {{ $days === 1 ? 'dan' : 'dana' }} od uplate; ako je usluga već uključena, produžava se.
+		@break
+	@case(ProductCatalog::SLOTS)
+		Još {{ ProductCatalog::slots($product) }} aktivnih oglasa, pored besplatnih, tokom {{ $days }} dana od uplate.
+		@break
+	@case(ProductCatalog::FIRM_PACKAGE)
+		{{ str_replace("\n", ', ', trim((string) $product->description)) }}. Ako je paket već uključen, produžava se; tokom besplatne prve godine paket počinje kad ona istekne.
 		@break
 @endswitch

@@ -22,7 +22,7 @@ class OrderPlaced extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Uputstvo za uplatu: narudžbina '.$this->order->reference);
+        return new Envelope(subject: ($this->order->is_test ? '[TEST] ' : '').'Predračun i uputstvo za uplatu: porudžbina '.$this->order->reference);
     }
 
     public function content(): Content

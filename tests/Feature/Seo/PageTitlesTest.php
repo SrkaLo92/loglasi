@@ -18,7 +18,7 @@ class PageTitlesTest extends TestCase
             'uslovi' => ['/uslovi-koriscenja/', 'Uslovi korišćenja | loglasi.rs', 'Pravila korišćenja sajta loglasi.rs'],
             'privatnost' => ['/politika-privatnosti/', 'Politika privatnosti | loglasi.rs', 'Kako loglasi.rs prikuplja, koristi i čuva vaše lične podatke'],
             'brisanje' => ['/brisanje-licnih-podataka/', 'Brisanje ličnih podataka | loglasi.rs', 'Uputstvo kako da zatražite brisanje svog naloga'],
-            'cenovnik' => ['/cenovnik/', 'Cenovnik: promocije oglasa i paketi za firme | loglasi.rs', 'Postavljanje oglasa je besplatno. Pogledajte cene isticanja oglasa'],
+            'cenovnik' => ['/cenovnik/', 'Cenovnik: promocije oglasa i paketi za firme | loglasi.rs', 'Postavljanje oglasa je besplatno. Pogledajte cene promocija oglasa'],
         ];
     }
 

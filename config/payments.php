@@ -2,8 +2,8 @@
 
 use App\Services\Payments\ManualReceiptIssuer;
 
-// Paid features (bump, featured listing, Biznis package), paid by bank transfer.
-// Payment details (recipient, account, purpose) are admin settings: payment_* keys.
+// Paid features of the price list of 24 Oct 2026, paid by bank transfer (IPS QR). See docs/modules/payments.md.
+// Prices live in `products` (admin). Payee data and switches are admin settings (payment_*, payments.*), never code.
 
 return [
     // Pending orders older than this are cancelled by `orders:cancel-stale` (daily).
@@ -31,6 +31,7 @@ return [
     'reference_digits' => 6,
 
     // NBS IPS QR: payment code (SF). 221 = trade in goods and services, final consumption.
+    // Admin setting payment_code overrides it.
     'ips_payment_code' => '221',
 
     // Who records receipts and invoices outside test mode (App\Services\Payments\FiscalReceiptIssuer).
@@ -38,19 +39,36 @@ return [
     // Test mode always uses FakeReceiptIssuer.
     'receipt_issuer' => ManualReceiptIssuer::class,
 
-    // Note under every price while the seller is outside the VAT system (legal text).
-    'vat_note' => 'Cena je konačna. PDV nije obračunat jer pružalac usluge nije u sistemu PDV-a.',
+    // Premium XL: at most one bigger card per this many listings in a list (price list: 1 per 8–12).
+    'premium_xl_every' => 10,
 
-    // Invoice note for firm buyers (no SEF while outside the VAT system).
-    'invoice_note' => 'Obveznik nije u sistemu PDV-a.',
-
-    // Legal pages linked from the confirm step and e-mails (texts: Stranice module).
-    'links' => [
-        'terms' => '/uslovi-koriscenja/',
-        'withdrawal' => '/pravo-na-odustanak/',
-        'complaints' => '/reklamacije-i-povracaj/',
+    /*
+     * What each sellable product does (codes from `products`; days from products.duration_days,
+     * slots from products.listing_limit). type:
+     * - bump: listing bumped_at = now (once per 24 h)
+     * - bump_pack: N bumps to use later, one at a time
+     * - promotion: listing columns extended from max(now, current) by the product days
+     * - slots: extra active listings on top of private_active_limit for the product days
+     * - firm_package: FirmPackage::grant(package, period)
+     * credit: the firm's monthly included credit (FirmCredits) used instead of buying, when one is left.
+     */
+    'catalog' => [
+        'bump' => ['type' => 'bump', 'credit' => 'bumps'],
+        'bump_10' => ['type' => 'bump_pack', 'bumps' => 10],
+        'featured_7' => ['type' => 'promotion', 'columns' => ['featured_until'], 'days' => 7, 'credit' => 'highlights'],
+        'featured_30' => ['type' => 'promotion', 'columns' => ['featured_until'], 'days' => 30],
+        'priority_3' => ['type' => 'promotion', 'columns' => ['priority_until'], 'days' => 3],
+        'top_7' => ['type' => 'promotion', 'columns' => ['top_until'], 'days' => 7],
+        'premium_xl_7' => ['type' => 'promotion', 'columns' => ['premium_xl_until'], 'days' => 7, 'credit' => 'premium_xl'],
+        'premium_xl_home_7' => ['type' => 'promotion', 'columns' => ['premium_xl_until', 'premium_home_until'], 'days' => 7],
+        'listing_slots_3' => ['type' => 'slots', 'slots' => 3, 'days' => 30],
+        'listing_slots_10' => ['type' => 'slots', 'slots' => 10, 'days' => 30],
+        'listing_slots_30' => ['type' => 'slots', 'slots' => 30, 'days' => 30],
+        'business_start_monthly' => ['type' => 'firm_package', 'package' => 'start', 'period' => 'monthly'],
+        'business_start_yearly' => ['type' => 'firm_package', 'package' => 'start', 'period' => 'yearly'],
+        'business_pro_monthly' => ['type' => 'firm_package', 'package' => 'pro', 'period' => 'monthly'],
+        'business_pro_yearly' => ['type' => 'firm_package', 'package' => 'pro', 'period' => 'yearly'],
+        'business_max_monthly' => ['type' => 'firm_package', 'package' => 'max', 'period' => 'monthly'],
+        'business_max_yearly' => ['type' => 'firm_package', 'package' => 'max', 'period' => 'yearly'],
     ],
-
-    // Fallback purpose when the payment_purpose setting is empty.
-    'default_purpose' => 'Uplata za oglašavanje',
 ];

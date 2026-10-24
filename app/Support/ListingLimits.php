@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Enums\ListingStatus;
 use App\Models\Listing;
 use App\Models\User;
+use App\Services\Payments\ListingSlots;
 use App\Support\Firms\FirmPackage;
 use Carbon\CarbonImmutable;
 
@@ -12,7 +13,8 @@ use Carbon\CarbonImmutable;
  * How many ACTIVE listings a user may have (pending or published and not expired).
  * Private users: setting private_active_limit (5). Firms with an active package: the package limit
  * (Start 20, Pro 100, Max and the free first year unlimited; FirmPackage::listingLimit).
- * A firm without an active package has the private limit.
+ * A firm without an active package has the private limit. Extra listings bought for 30 days
+ * (ListingSlots, payments module) are added to the private limit.
  * A slot frees when a listing expires, is sold, rejected or deleted.
  * The API keeps the contract names (monthly_limit, used_this_month, resets_at).
  */
@@ -56,7 +58,8 @@ class ListingLimits
             }
         }
 
-        return (int) Settings::get('private_active_limit');
+        // Extra listings bought for 30 days (payments: +3 / +10 / +30) raise the private limit.
+        return (int) Settings::get('private_active_limit') + ListingSlots::extra($user);
     }
 
     /** Listings that use a slot: waiting for review or published and not expired (drafts do not). */

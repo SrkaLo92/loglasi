@@ -19,7 +19,14 @@ class Cenovnik
         'cena_podizanje' => Product::BUMP,
         'cena_istaknuto_7' => Product::FEATURED_7,
         'cena_istaknuto_30' => Product::FEATURED_30,
-        'cena_biznis' => Product::BIZNIS_12M,
+        'cena_biznis' => Product::BIZNIS_12M, // retired; kept so old admin texts do not break
+        'cena_paket_podizanja' => 'bump_10',
+        'cena_prioritet' => 'priority_3',
+        'cena_top' => 'top_7',
+        'cena_premium_xl' => 'premium_xl_7',
+        'cena_start' => 'business_start_monthly',
+        'cena_pro' => 'business_pro_monthly',
+        'cena_max' => 'business_max_monthly',
     ];
 
     /** Podešavanja za uplatu i kontakt (prazno dok ih admin ne unese; račun se nigde ne izmišlja). */

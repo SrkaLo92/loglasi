@@ -2,19 +2,21 @@
 
 namespace App\Services;
 
-use App\Enums\AccountType;
 use App\Enums\OrderStatus;
 use App\Exceptions\OrderException;
 use App\Mail\OrderPaid;
 use App\Models\AuditLog;
 use App\Models\Firm;
-use App\Models\Listing;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Payments\BumpCredits;
+use App\Services\Payments\Effects;
 use App\Services\Payments\FiscalReceiptIssuer;
 use App\Services\Payments\IssuedReceipt;
 use App\Services\Payments\PaymentConfirmation;
+use App\Services\Payments\ProductCatalog;
+use App\Support\Firms\FirmPackage;
 use App\Support\Settings;
 use App\Support\Stranice\Cenovnik;
 use Illuminate\Database\Eloquent\Model;
@@ -26,12 +28,9 @@ use Illuminate\Support\Facades\Mail;
  * with the order row locked and is idempotent: repeating a step that already happened does nothing.
  *
  * pending|cancelled → paid (markPaid: payment recorded, receipt numbers stored)
- * paid → activated (activate, called by markPaid right away):
- * - featured_7 / featured_30: listing featured_until = max(now, featured_until) + product days
- * - bump: listing bumped_at = now (the one-bump-per-24-h rule is checked when ordering)
- * - biznis_12m: firm biznis_until = max(now, biznis_until) + product days (365); the account
- *   becomes a firm account only when the admin has approved the firm (firms.verified_at)
- * paid|activated → refunded (refund: the refund document references the original receipt)
+ * paid → activated (activate, called by markPaid right away): Payments\Effects applies the product
+ *   (bump, bump pack, listing promotion periods, extra listing slots, firm package via FirmPackage::grant)
+ * paid|activated → refunded (refund: pro-rata for unused days, document references the original receipt)
  */
 class OrderFulfillment
 {
@@ -108,12 +107,19 @@ class OrderFulfillment
                 return false;
             }
 
-            $effect = $this->applyEffect($locked);
-            $locked->forceFill(['status' => OrderStatus::Activated, 'activated_at' => now()])->save();
+            $product = Product::query()->findOrFail($locked->product_id);
+            $user = User::withTrashed()->findOrFail($locked->user_id);
+            $applied = Effects::apply($product, $user, $locked->listing_id, (int) $locked->getKey());
+            $locked->forceFill([
+                'status' => OrderStatus::Activated,
+                'activated_at' => now(),
+                'service_starts_at' => $applied['starts'],
+                'service_ends_at' => $applied['ends'],
+            ])->save();
 
             $this->audit($admin, 'order.activated', $locked, [
                 'status' => [OrderStatus::Paid->value, OrderStatus::Activated->value],
-                'effect' => $effect,
+                'effect' => $applied['effect'],
             ]);
 
             return true;
@@ -166,17 +172,46 @@ class OrderFulfillment
     }
 
     /**
-     * Marks a paid order refunded (the money is returned outside the system). The refund document
-     * references the original receipt. The feature itself is not taken back automatically.
-     * Returns false when the order already was refunded.
+     * What a refund of this order returns now: the whole amount before activation; after it, the
+     * share of whole unused days (promotions, extra listings, firm packages) or unused bumps of a
+     * pack; nothing for a single bump (performed at once).
+     */
+    public function refundableAmount(Order $order): int
+    {
+        if ($order->status === OrderStatus::Paid) {
+            return (int) $order->amount_rsd;
+        }
+        if ($order->status !== OrderStatus::Activated) {
+            return 0;
+        }
+        $product = $order->product ?? Product::query()->find($order->product_id);
+        $type = $product ? ProductCatalog::type($product) : null;
+
+        if ($type === ProductCatalog::BUMP_PACK) {
+            $pack = BumpCredits::ofOrder((int) $order->getKey());
+
+            return $pack && $pack['granted'] > 0 ? intdiv((int) $order->amount_rsd * max(0, $pack['granted'] - $pack['used']), $pack['granted']) : 0;
+        }
+        if ($type === ProductCatalog::BUMP || $order->service_starts_at === null || $order->service_ends_at === null) {
+            return 0;
+        }
+
+        return (int) floor($order->amount_rsd * Effects::unusedShare($order->service_starts_at, $order->service_ends_at));
+    }
+
+    /**
+     * Marks a paid order refunded (the money is returned outside the system) and takes back the
+     * unused part of the service. The amount is pro-rata (refundableAmount) unless the admin gives
+     * one (e.g. the whole amount when the service failed on our side). The refund document
+     * references the original receipt. Returns false when the order already was refunded.
      *
      * @throws OrderException when the order was never paid
      */
-    public function refund(Order $order, ?string $refundReceiptNumber = null, ?string $note = null, ?User $admin = null): bool
+    public function refund(Order $order, ?string $refundReceiptNumber = null, ?string $note = null, ?User $admin = null, ?int $amountRsd = null): bool
     {
         $admin ??= self::currentAdmin();
 
-        $refunded = DB::transaction(function () use ($order, $refundReceiptNumber, $note, $admin) {
+        $refunded = DB::transaction(function () use ($order, $refundReceiptNumber, $note, $admin, $amountRsd) {
             $locked = $this->lockOrder($order);
             if ($locked->status === OrderStatus::Refunded) {
                 return false;
@@ -186,11 +221,16 @@ class OrderFulfillment
             }
 
             $previous = $locked->status;
+            $amount = $amountRsd !== null ? max(0, min((int) $locked->amount_rsd, $amountRsd)) : $this->refundableAmount($locked);
+            if ($previous === OrderStatus::Activated) {
+                Effects::revert($locked, Product::query()->findOrFail($locked->product_id));
+            }
             $document = $this->receipts->issueRefund($locked, $refundReceiptNumber);
             $note = trim((string) $note);
 
             $locked->forceFill([
                 'status' => OrderStatus::Refunded,
+                'refund_amount_rsd' => $amount,
                 'refunded_at' => now(),
                 'refunded_by' => $admin?->getKey(),
                 'refund_of_receipt' => $locked->receipt_number ?? $locked->advance_receipt_number,
@@ -203,6 +243,7 @@ class OrderFulfillment
                 'refund_of_receipt' => $locked->refund_of_receipt,
                 'refund_receipt_number' => $locked->refund_receipt_number,
                 'refund_receipt_type' => $document?->type->value,
+                'refund_amount_rsd' => $amount,
             ]);
 
             return true;
@@ -214,12 +255,12 @@ class OrderFulfillment
     }
 
     /**
-     * Free Biznis package for one of the first founding firms (founding_firms_total, 30).
-     * Returns false when the firm already has it; throws when all free places are taken.
+     * The free first year of one of the first firms ("Prvih 30 firmi", founding_firms_total). It is
+     * never sold. Returns false when the firm already took a place; throws when all are taken.
      *
      * @throws OrderException
      */
-    public function grantFoundingBiznis(Firm $firm, ?User $admin = null): bool
+    public function grantFoundingFreeYear(Firm $firm, ?User $admin = null): bool
     {
         $admin ??= self::currentAdmin();
 
@@ -236,10 +277,11 @@ class OrderFulfillment
                 throw new OrderException('Sva besplatna mesta za firme su popunjena.', 'founding_full');
             }
 
-            $locked->forceFill(['founding_free' => true])->save();
-            $effect = $this->extendBiznis($locked, 365);
-
-            $this->audit($admin, 'firm.founding_biznis', $locked, ['founding_free' => [false, true], 'effect' => $effect]);
+            FirmPackage::grantFreeYear($locked);
+            $this->audit($admin, 'firm.free_year', $locked, [
+                'founding_free' => [false, true],
+                'package_ends_at' => $locked->package_ends_at?->toIso8601String(),
+            ]);
 
             return true;
         });
@@ -258,106 +300,6 @@ class OrderFulfillment
     public static function foundingLeft(): int
     {
         return max(0, self::foundingTotal() - Firm::query()->where('founding_free', true)->count());
-    }
-
-    /** @return array<string, mixed> what changed, for the audit log */
-    private function applyEffect(Order $order): array
-    {
-        $product = Product::query()->findOrFail($order->product_id);
-
-        return match ($product->code) {
-            Product::FEATURED_7, Product::FEATURED_30 => $this->feature($order, $product),
-            Product::BUMP => $this->bump($order),
-            Product::BIZNIS_12M => $this->biznis($order, $product),
-            default => throw new OrderException('Za ovu uslugu ne postoji automatska aktivacija.', 'unknown_product'),
-        };
-    }
-
-    /** @return array<string, mixed> */
-    private function feature(Order $order, Product $product): array
-    {
-        $listing = $this->lockListing($order);
-
-        $days = (int) ($product->duration_days ?: ($product->code === Product::FEATURED_30 ? 30 : 7));
-        $before = $listing->featured_until;
-        $from = $before !== null && $before->isFuture() ? $before->copy() : now();
-
-        $listing->forceFill(['featured_until' => $from->addDays($days)])->save();
-
-        return [
-            'listing_id' => $listing->getKey(),
-            'featured_until' => [$before?->toIso8601String(), $listing->featured_until->toIso8601String()],
-        ];
-    }
-
-    /** @return array<string, mixed> */
-    private function bump(Order $order): array
-    {
-        $listing = $this->lockListing($order);
-
-        $before = $listing->bumped_at;
-        $listing->forceFill(['bumped_at' => now()])->save();
-
-        return [
-            'listing_id' => $listing->getKey(),
-            'bumped_at' => [$before?->toIso8601String(), $listing->bumped_at->toIso8601String()],
-        ];
-    }
-
-    /** @return array<string, mixed> */
-    private function biznis(Order $order, Product $product): array
-    {
-        /** @var User|null $user */
-        $user = User::withTrashed()->whereKey($order->user_id)->lockForUpdate()->first();
-        if ($user === null) {
-            throw new OrderException('Korisnik ne postoji.', 'user_missing');
-        }
-
-        $firm = Firm::query()->where('user_id', $user->getKey())->lockForUpdate()->first();
-        if ($firm === null) {
-            if (! $user->isFirm()) {
-                throw new OrderException('Biznis paket može da se aktivira samo za firmu. Prvo otvorite profil firme za ovaj nalog.', 'firm_required');
-            }
-            // Firm account without a profile yet: start one with the account name.
-            $firm = new Firm(['name' => $user->name]);
-            $firm->forceFill(['user_id' => $user->getKey()])->save();
-        }
-
-        return $this->extendBiznis($firm, (int) ($product->duration_days ?: 365), $user);
-    }
-
-    /** @return array<string, mixed> */
-    private function extendBiznis(Firm $firm, int $days, ?User $user = null): array
-    {
-        $before = $firm->biznis_until;
-        $from = $before !== null && $before->isFuture() ? $before->copy() : now();
-        $firm->forceFill(['biznis_until' => $from->addDays($days)])->save();
-
-        $effect = [
-            'firm_id' => $firm->getKey(),
-            'biznis_until' => [$before?->toIso8601String(), $firm->biznis_until->toIso8601String()],
-        ];
-
-        // Only an approved firm turns the account into a firm account.
-        $user ??= User::withTrashed()->find($firm->user_id);
-        if ($user !== null && ! $user->isFirm() && $firm->verified_at !== null) {
-            $user->forceFill(['account_type' => AccountType::Firm])->save();
-            $effect['account_type'] = [AccountType::Private->value, AccountType::Firm->value];
-        }
-
-        return $effect;
-    }
-
-    /** @throws OrderException when the listing was deleted */
-    private function lockListing(Order $order): Listing
-    {
-        /** @var Listing|null $listing */
-        $listing = $order->listing_id === null ? null : Listing::query()->whereKey($order->listing_id)->lockForUpdate()->first();
-        if ($listing === null) {
-            throw new OrderException('Oglas za ovu narudžbinu je obrisan, usluga ne može da se uključi.', 'listing_missing');
-        }
-
-        return $listing;
     }
 
     private function lockOrder(Order $order): Order

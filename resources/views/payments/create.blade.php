@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @include('payments.partials.head')
-@use('App\Models\Product')
+@use('App\Services\Payments\ProductCatalog')
+@use('App\Support\Payments\PaymentDetails')
 @php
 	$title = $product->name.' | loglasi.rs';
 	$robots = 'noindex, follow';
@@ -46,24 +47,30 @@
 				<div><dt>Usluga</dt><dd>{{ $product->name }}</dd></div>
 				@if ($listing)
 					<div><dt>Oglas</dt><dd><a href="{{ $listing->url() }}">{{ $listing->title }}</a></dd></div>
-					@if ($listing->isFeatured())
-						<div><dt>Istaknut do</dt><dd>{{ $listing->featured_until->format('j. n. Y. \u H:i') }}</dd></div>
-					@endif
 				@endif
-				@if ($product->code === Product::BIZNIS_12M && $firm)
+				@if (ProductCatalog::type($product) === ProductCatalog::FIRM_PACKAGE && $firm)
 					<div><dt>Firma</dt><dd>{{ $firm->name }}</dd></div>
-					@if ($firm->hasBiznis())
-						<div><dt>Paket važi do</dt><dd>{{ $firm->biznis_until->format('j. n. Y.') }}</dd></div>
+					@if ($firm->package_ends_at?->isFuture())
+						<div><dt>Trenutni paket važi do</dt><dd>{{ $firm->package_ends_at->format('j. n. Y.') }}</dd></div>
 					@endif
 				@endif
 				<div class="lgpay-summary__total"><dt>Iznos za uplatu</dt><dd>{{ number_format($product->price_rsd, 0, ',', '.') }}&nbsp;RSD</dd></div>
 			</dl>
+			@if ($vat = PaymentDetails::vatNote())<p class="lgpay-help">{{ $vat }}</p>@endif
 
 			@if ($reason)
 				<p class="lgpay-alert lgpay-alert--warn" role="alert">{{ $reason }}</p>
-				@if ($product->code === Product::BIZNIS_12M)
+				@if (ProductCatalog::type($product) === ProductCatalog::FIRM_PACKAGE)
 					<p><a class="lg-btn lg-btn--outline" href="{{ url_slash('kontakt') }}?tema=firma#forma">Prijavite firmu</a></p>
 				@endif
+			@elseif ($credit)
+				<p class="lgpay-alert lgpay-alert--ok">{{ str_starts_with($credit, 'pack:') ? 'Imate kupljena podizanja koja još niste iskoristili.' : 'Ova usluga je uključena u vaš paket za ovaj mesec.' }} Uključite je bez plaćanja.</p>
+				<form method="post" action="{{ url_slash('moj-nalog/narudzbine/iskoristi') }}" class="lgpay-form">
+					@csrf
+					<input type="hidden" name="usluga" value="{{ $product->code }}">
+					<input type="hidden" name="oglas" value="{{ $listing->id }}">
+					<button class="lg-btn lg-btn--green" type="submit">Iskoristi uključenu uslugu</button>
+				</form>
 			@else
 				<form method="post" action="{{ url_slash('moj-nalog/narudzbine') }}" class="lgpay-form">
 					@csrf
@@ -71,39 +78,42 @@
 					@if ($listing)<input type="hidden" name="oglas" value="{{ $listing->id }}">@endif
 					@php($buyer = old('kupac', $privateEnabled && ! $firm ? 'private' : 'firm'))
 					<fieldset class="lgpay-field lgpay-buyer">
-						<legend>Plaćam kao</legend>
+						<legend>Plaćam kao:</legend>
 						@if ($privateEnabled)
-							<label class="lgpay-radio"><input type="radio" name="kupac" value="private" @checked($buyer === 'private')> Fizičko lice <span class="lgpay-help">dobijate fiskalni račun</span></label>
+							<label class="lgpay-radio"><input type="radio" name="kupac" value="private" @checked($buyer === 'private')> fizičko lice</label>
 						@endif
-						<label class="lgpay-radio"><input type="radio" name="kupac" value="firm" @checked($buyer === 'firm' || ! $privateEnabled)> Firma ili preduzetnik, sa računa firme <span class="lgpay-help">dobijate račun na firmu</span></label>
+						<label class="lgpay-radio"><input type="radio" name="kupac" value="firm" @checked($buyer === 'firm' || ! $privateEnabled)> firma ili preduzetnik</label>
 					</fieldset>
-					<div class="lgpay-firm">
-						<p class="lgpay-help">Za plaćanje kao firma upišite podatke za račun. Ako uplaćujete sa ličnog računa, izaberite fizičko lice.</p>
-						<div class="lgpay-field">
-							<label for="lgpay-naziv">Naziv firme</label>
-							<input id="lgpay-naziv" type="text" name="naziv" maxlength="150" value="{{ old('naziv', $firm?->name) }}" autocomplete="organization" @error('naziv') aria-invalid="true" aria-describedby="lgpay-naziv-greska" @enderror>
-							@error('naziv')<p class="lgpay-error" id="lgpay-naziv-greska">{{ $message }}</p>@enderror
-						</div>
-						<div class="lgpay-row">
+					<fieldset class="lgpay-firm">
+						<legend class="lgpay-help">Samo za firmu ili preduzetnika: podaci za račun</legend>
+						@foreach ([
+							['naziv', 'Naziv firme', $firm?->name, 'organization', 150],
+							['pib', 'PIB', $firm?->pib, 'off', 9],
+							['mb', 'Matični broj', $firm?->mb, 'off', 8],
+							['adresa', 'Adresa', $firm?->address, 'street-address', 200],
+							['mejl', 'Mejl za račun', auth()->user()->email, 'email', 150],
+						] as [$name, $label, $value, $auto, $max])
 							<div class="lgpay-field">
-								<label for="lgpay-pib">PIB</label>
-								<input id="lgpay-pib" type="text" name="pib" inputmode="numeric" maxlength="9" value="{{ old('pib', $firm?->pib) }}" @error('pib') aria-invalid="true" aria-describedby="lgpay-pib-greska" @enderror>
-								@error('pib')<p class="lgpay-error" id="lgpay-pib-greska">{{ $message }}</p>@enderror
+								<label for="lgpay-{{ $name }}">{{ $label }}*</label>
+								<input id="lgpay-{{ $name }}" type="{{ $name === 'mejl' ? 'email' : 'text' }}" name="{{ $name }}" maxlength="{{ $max }}" value="{{ old($name, $value) }}" autocomplete="{{ $auto }}" @if (in_array($name, ['pib', 'mb'], true)) inputmode="numeric" @endif @error($name) aria-invalid="true" aria-describedby="lgpay-{{ $name }}-greska" @enderror>
+								@error($name)<p class="lgpay-error" id="lgpay-{{ $name }}-greska">{{ $message }}</p>@enderror
 							</div>
-							<div class="lgpay-field">
-								<label for="lgpay-mb">Matični broj</label>
-								<input id="lgpay-mb" type="text" name="mb" inputmode="numeric" maxlength="8" value="{{ old('mb', $firm?->mb) }}" @error('mb') aria-invalid="true" aria-describedby="lgpay-mb-greska" @enderror>
-								@error('mb')<p class="lgpay-error" id="lgpay-mb-greska">{{ $message }}</p>@enderror
-							</div>
-						</div>
-					</div>
+						@endforeach
+					</fieldset>
+					@php($withdrawal = PaymentDetails::legalLink('withdrawal'))
+					@php($terms = PaymentDetails::legalLink('terms'))
 					<label class="lgpay-check">
-						<input type="checkbox" name="saglasnost" value="1" required @checked(old('saglasnost')) @error('saglasnost') aria-invalid="true" aria-describedby="lgpay-saglasnost-greska" @enderror>
-						<span>Saglasan sam da usluga počne odmah po uplati i znam da time gubim pravo na odustanak od ugovora u roku od 14 dana.</span>
+						<input type="checkbox" name="odmah" value="1" @checked(old('odmah')) @error('odmah') aria-invalid="true" aria-describedby="lgpay-odmah-greska" @enderror>
+						<span>Želim da usluga počne odmah po uplati. Znam da time gubim pravo na odustanak kada usluga bude u potpunosti izvršena (pogledaj @if ($withdrawal)<a href="{{ $withdrawal }}">Pravo na odustanak</a>@else Pravo na odustanak @endif). <span class="lgpay-help">Obavezno za fizička lica.</span></span>
 					</label>
-					@error('saglasnost')<p class="lgpay-error" id="lgpay-saglasnost-greska">{{ $message }}</p>@enderror
-					<p class="lgpay-help">Plaćanje je uplatom na račun. Posle potvrde dobijate predračun sa pozivom na broj i QR kodom za plaćanje telefonom. Narudžbina koja nije plaćena u roku od {{ config('payments.pending_days') }} dana se otkazuje. {{ config('payments.vat_note') }}</p>
-					<button class="lg-btn lg-btn--green" type="submit">Potvrdi narudžbinu</button>
+					@error('odmah')<p class="lgpay-error" id="lgpay-odmah-greska">{{ $message }}</p>@enderror
+					<label class="lgpay-check">
+						<input type="checkbox" name="uslovi" value="1" required @checked(old('uslovi')) @error('uslovi') aria-invalid="true" aria-describedby="lgpay-uslovi-greska" @enderror>
+						<span>Pročitao/la sam @if ($terms)<a href="{{ $terms }}">Uslove korišćenja i plaćanja</a>@else Uslove korišćenja i plaćanja @endif.</span>
+					</label>
+					@error('uslovi')<p class="lgpay-error" id="lgpay-uslovi-greska">{{ $message }}</p>@enderror
+					<p class="lgpay-help">Plaćanje je uplatom na račun. Posle potvrde dobijate predračun sa pozivom na broj i QR kodom za plaćanje telefonom. Porudžbina koja nije plaćena u roku od {{ config('payments.pending_days') }} dana se otkazuje.@if ($testMode) <strong>Probni režim: uplata se ne knjiži, račun je probni.</strong>@endif</p>
+					<button class="lg-btn lg-btn--green" type="submit">Potvrdi porudžbinu</button>
 				</form>
 			@endif
 		@endif

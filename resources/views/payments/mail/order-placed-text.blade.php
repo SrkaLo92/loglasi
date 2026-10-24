@@ -3,16 +3,20 @@
 	$expiresAt = \App\Services\OrderService::expiresAt($order);
 @endphp
 {{-- Plain text: values are printed raw (no HTML entities). --}}
+@if ($order->is_test)
+[TEST] Ovo je probna porudžbina: uplata se ne knjiži, račun je probni.
+
+@endif
 Zdravo {!! $order->user?->name !!},
 
-primili smo vašu narudžbinu: {!! $order->product?->name !!}@if ($order->listing) za oglas „{!! $order->listing->title !!}”@endif.
+porudžbina je primljena: {!! $order->product?->name !!}@if ($order->listing) za oglas „{!! $order->listing->title !!}”@endif.
 Usluga se uključuje kad stigne uplata.
 
 @if ($details->ready())
 Primalac: {!! str_replace(["\r\n", "\n"], ', ', $details->recipient) !!}
 Račun primaoca: {!! $details->accountDisplay !!}
 Svrha uplate: {!! $details->purpose !!}
-Šifra plaćanja: {!! config('payments.ips_payment_code') !!}
+Šifra plaćanja: {!! \App\Support\Payments\PaymentDetails::paymentCode() !!}
 Iznos: {!! $details->amountLabel() !!}
 Model: {!! $details->model !!}
 Poziv na broj: {!! $details->reference !!}
@@ -23,8 +27,10 @@ Poziv na broj: {!! $details->reference !!}
 Podatke za uplatu (primalac i račun) šaljemo na zahtev: odgovorite na ovu poruku ili nam pišite preko strane Kontakt.
 @endif
 
-Poziv na broj upišite tačno ovako: po njemu prepoznajemo vašu uplatu.
-{!! config('payments.vat_note') !!}
+Obavezno upiši poziv na broj. Usluga se uključuje čim uplata bude potvrđena; račun stiže na mejl.
+@if (\App\Support\Payments\PaymentDetails::vatNote() !== '')
+{!! \App\Support\Payments\PaymentDetails::vatNote() !!}
+@endif
 @if ($expiresAt)
 Ako uplata ne stigne do {!! $expiresAt->format('j. n. Y.') !!}, narudžbina se otkazuje.
 @endif

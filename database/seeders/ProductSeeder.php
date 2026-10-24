@@ -7,7 +7,7 @@ use Illuminate\Database\Seeder;
 
 /**
  * Price list of 24 Oct 2026 (replaces 23 Oct); prices are changed in the admin later.
- * Products from data/price-list-2026-10-24.php are display-only until payments can sell them.
+ * Products from data/price-list-2026-10-24.php that payments sells are active, the rest display-only.
  */
 class ProductSeeder extends Seeder
 {
@@ -24,8 +24,10 @@ class ProductSeeder extends Seeder
             Product::updateOrCreate(['code' => $product['code']], $product);
         }
 
+        // Products the payments module sells (config('payments.catalog')) are on sale, the rest display-only.
         foreach (require __DIR__.'/data/price-list-2026-10-24.php' as $product) {
-            Product::updateOrCreate(['code' => $product['code']], $product + ['is_active' => false, 'display_only' => true]);
+            $sellable = config('payments.catalog.'.$product['code']) !== null;
+            Product::updateOrCreate(['code' => $product['code']], $product + ['is_active' => $sellable, 'display_only' => ! $sellable]);
         }
     }
 }
