@@ -104,15 +104,17 @@ class ListingListPageTest extends SearchTestCase
         $this->get('/oglasi/?s=cevapi')->assertOk()->assertSee('Ćevapi roštilj');
     }
 
-    public function test_pagination_pages_and_noindex_self_canonical(): void
+    public function test_pagination_pages_are_indexable_with_self_canonical(): void
     {
         foreach (range(1, 25) as $i) {
             $this->listing(['title' => 'Oglas broj '.$i, 'bumped_at' => now()->subMinutes($i)]);
         }
 
         $this->get('/oglasi/')->assertOk()->assertSee('href="'.url_slash('/oglasi/page/2/').'"', false)->assertDontSee('Oglas broj 25<');
-        $response = $this->get('/oglasi/page/2/')->assertOk()->assertSee('Oglas broj 25');
-        $this->assertSame('noindex, follow', $this->robots($response));
+        // Pages 2+ are indexable with a self canonical (SEO decision, the only change from WordPress).
+        $response = $this->get('/oglasi/page/2/')->assertOk()->assertSee('Oglas broj 25')
+            ->assertSee('<title>Svi oglasi Loznica, strana 2 | loglasi.rs</title>', false);
+        $this->assertStringStartsWith('index, follow', $this->robots($response));
         $this->assertSame('https://loglasi.rs/oglasi/page/2/', $this->canonical($response));
         $this->get('/oglasi/page/3/')->assertNotFound();
     }

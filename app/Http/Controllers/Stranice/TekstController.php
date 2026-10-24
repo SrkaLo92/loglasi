@@ -29,8 +29,8 @@ class TekstController extends Controller
             'page' => $page,
             'heading' => $heading,
             'body' => PageText::html($page.'.tekst'),
-            'title' => $heading.' | loglasi.rs',
-            'description' => self::PAGES[$page]['opis'],
+            'title' => PageText::get('seo.'.$page.'.title') ?: $heading.' | loglasi.rs',
+            'description' => PageText::get('seo.'.$page.'.description') ?: self::PAGES[$page]['opis'],
             'canonical' => '/'.trim(self::PAGES[$page]['putanja'], '/').'/',
         ]);
     }
@@ -50,8 +50,8 @@ class TekstController extends Controller
 
         return view('stranice.faq', [
             'items' => $items,
-            'title' => 'Česta pitanja | loglasi.rs',
-            'description' => 'Odgovori na česta pitanja o postavljanju oglasa, ceni, isticanju, Biznis paketu i bezbednoj kupovini na loglasi.rs.',
+            'title' => PageText::get('seo.faq.title'),
+            'description' => PageText::get('seo.faq.description'),
             'canonical' => '/faq/',
         ]);
     }

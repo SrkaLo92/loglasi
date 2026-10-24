@@ -37,8 +37,8 @@ class KontaktController extends Controller
             'phoneText' => Telefon::display($phone),
             'hours' => array_values(array_filter(array_map('trim', preg_split('/\R/', (string) Settings::get('contact_hours', '')) ?: []))),
             'poslato' => (bool) $request->session()->get('kontakt_poslato'),
-            'title' => 'Kontakt | loglasi.rs',
-            'description' => 'Pišite nam: pitanja o oglasima, plaćanju, isticanju oglasa i Biznis paketu za firme na loglasi.rs.',
+            'title' => PageText::get('seo.kontakt.title'),
+            'description' => PageText::get('seo.kontakt.description'),
             'canonical' => '/kontakt/',
         ]);
     }

@@ -85,6 +85,10 @@ class ListingListController extends Controller
         $total = $results->total();
         $this->seo($filters, $total);
 
+        if ($filters->category && ! $filters->location && $page === 1 && ! $filters->hasFilters()) {
+            Seo::get()->itemList($results->getCollection(), '/oglasi/'.$filters->category->slug.'/');
+        }
+
         return view('search.list', [
             'filters' => $filters,
             'results' => $results,
@@ -137,6 +141,11 @@ class ListingListController extends Controller
             Seo::for($filters->category, ['location' => $filters->location, 'count' => $count]);
         } else {
             Seo::get()->listings($count);
+        }
+
+        $keyword = trim((string) ($filters->params['keyword'] ?? $filters->params['q'] ?? ''));
+        if ($keyword !== '') {
+            Seo::get()->title(Seo::withSuffix(Seo::text('search.title', ['{upit}' => $keyword])));
         }
     }
 

@@ -26,8 +26,8 @@ class CenovnikController extends Controller
         return view('stranice.cenovnik', [
             'faq' => $faq,
             'paymentRows' => Cenovnik::paymentReady() ? Cenovnik::paymentRows() : [],
-            'title' => 'Cenovnik: besplatni oglasi i dodatne usluge | loglasi.rs',
-            'description' => 'Postavljanje oglasa na loglasi.rs je besplatno. Cene dodatnih oglasa, podizanja i isticanja, paketi za firme i kako da platite.',
+            'title' => PageText::get('seo.cenovnik.title'),
+            'description' => PageText::get('seo.cenovnik.description'),
             'canonical' => '/cenovnik/',
         ]);
     }

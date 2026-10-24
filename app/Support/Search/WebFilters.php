@@ -66,8 +66,8 @@ class WebFilters
         $raw = $request->query();
         $query = [];
 
-        // WordPress search (?s=) and the app name (?q=) mean the keyword.
-        foreach (['keyword', 's', 'q'] as $alias) {
+        // WordPress search (?s=, ?kljucna-rec=) and the app name (?q=) mean the keyword.
+        foreach (['keyword', 's', 'q', 'kljucna-rec'] as $alias) {
             if (! isset($query['keyword']) && is_string($raw[$alias] ?? null) && trim($raw[$alias]) !== '') {
                 $query['keyword'] = mb_substr(trim($raw[$alias]), 0, ListingSearch::Q_MAX);
             }

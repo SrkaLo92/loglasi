@@ -16,6 +16,7 @@
 	/** @var WebFilters $filters */
 	$srChips = $filters->chips();
 	$srCount = $filters->count();
+	$srFaq = $category && ! $location ? Seo::faqItems($category->seo_faq) : [];
 @endphp
 
 @section('content')
@@ -45,6 +46,9 @@
 		<h1 class="sr-head__title">{{ Seo::get()->getH1() }}</h1>
 		<p class="sr-head__count" role="status">{{ TimeAgo::listings($total) }}</p>
 	</div>
+	@if ($category && ! $location && $results->currentPage() === 1 && trim((string) $category->seo_intro) !== '')
+		<p class="sr-intro">{{ trim(strip_tags((string) $category->seo_intro)) }}</p>
+	@endif
 
 	<div class="sr-mtools">
 		<a class="sr-mtools__btn{{ $srCount ? ' is-active' : '' }}" href="#filteri">{{ CategoryIcons::svg('filter', 18, '2') }}Filteri{{ $srCount ? ' ('.$srCount.')' : '' }}</a>
@@ -183,7 +187,19 @@
 				@include('search.partials.pagination', ['results' => $results, 'filters' => $filters])
 			@endif
 
-			@if ($category && trim((string) $category->description) !== '' && ! $location)
+			@if ($srFaq)
+				<section class="sr-faq" aria-labelledby="sr-faq-title">
+					<h2 class="sr-faq__title" id="sr-faq-title">{{ Seo::text('category.faq_title', ['{kategorija}' => Seo::categoryName($category)]) }}</h2>
+					@foreach ($srFaq as $item)
+						<details class="sr-faq__item">
+							<summary>{{ $item['q'] }}</summary>
+							<p>{{ $item['a'] }}</p>
+						</details>
+					@endforeach
+				</section>
+			@endif
+
+			@if ($category && trim((string) $category->description) !== '' && ! $location && trim((string) $category->seo_intro) === '')
 				<details class="sr-about">
 					<summary>O kategoriji {{ $category->name }}</summary>
 					<div class="sr-about__text">{!! nl2br(e(strip_tags($category->description))) !!}</div>

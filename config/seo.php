@@ -24,6 +24,9 @@ return [
 
     'organization' => [
         'email' => 'kontakt@loglasi.rs',
+        'postal_code' => '15300',
+        'city' => 'Loznica',
+        'area_served' => ['Loznica', 'Banja Koviljača', 'Lešnica', 'Krupanj', 'Ljubovija', 'Mali Zvornik'],
         'same_as' => [
             'https://www.facebook.com/profile.php?id=61571911496798',
             'https://www.instagram.com/loglasi.rs/',
