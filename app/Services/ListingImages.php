@@ -336,6 +336,10 @@ class ListingImages
         if (! $source instanceof GdImage) {
             return false;
         }
+        if (! imageistruecolor($source)) {
+            // palette PNG/GIF (common in imported uploads): imagewebp() refuses palette images
+            imagepalettetotruecolor($source);
+        }
         imagesavealpha($source, true);
         if (str_ends_with(Str::lower($path), '.jpg') || str_ends_with(Str::lower($path), '.jpeg')) {
             // imported originals may still carry the orientation in EXIF

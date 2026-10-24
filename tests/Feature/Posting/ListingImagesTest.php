@@ -195,6 +195,22 @@ class ListingImagesTest extends PostingTestCase
         $this->assertSame([], $missing->refresh()->variants);
     }
 
+    public function test_palette_png_gets_variants(): void
+    {
+        $listing = $this->draft($this->user());
+        $gd = imagecreate(900, 600);
+        imagecolorallocate($gd, 30, 120, 90);
+        ob_start();
+        imagepng($gd);
+        Storage::disk('public')->put('oglasi/'.$listing->id.'/paleta.png', ob_get_clean());
+        $image = ListingImage::create(['listing_id' => $listing->id, 'path' => 'oglasi/'.$listing->id.'/paleta.png']);
+
+        $this->assertTrue($this->service()->generateVariants($image));
+
+        $this->assertSame(800, $image->refresh()->variants['md']['width']);
+        Storage::disk('public')->assertExists($image->variants['md']['webp']);
+    }
+
     public function test_prune_removes_old_unattached_uploads(): void
     {
         $user = $this->user();
