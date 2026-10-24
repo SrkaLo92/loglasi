@@ -132,7 +132,7 @@ class OrderController extends Controller
         }
 
         return redirect()->to(url_slash('moj-nalog/narudzbine/'.$order->id))->with('status', $order->wasRecentlyCreated
-            ? 'Porudžbina je primljena. Plati skeniranjem QR koda u aplikaciji svoje banke ili uplatom po podacima ispod. Obavezno upiši poziv na broj. Usluga se uključuje čim uplata bude potvrđena; račun stiže na mejl.'
+            ? 'Porudžbina je primljena. Platite skeniranjem QR koda u aplikaciji svoje banke ili uplatom po podacima ispod. Obavezno upišite poziv na broj. Usluga se uključuje čim uplata bude potvrđena; račun stiže na mejl.'
             : 'Ova narudžbina već čeka uplatu. Uputstvo za uplatu je ispod.');
     }
 

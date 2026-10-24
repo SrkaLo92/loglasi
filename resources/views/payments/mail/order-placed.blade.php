@@ -33,7 +33,7 @@
 		<p style="margin:0 0 16px;">Iznos: <strong>{{ $details->amountLabel() }}</strong>, model {{ $details->model }}, poziv na broj <strong>{{ $details->reference }}</strong>. Podatke za uplatu (primalac i račun) šaljemo na zahtev: odgovorite na ovu poruku ili nam pišite preko strane Kontakt.</p>
 	@endif
 
-	<p style="margin:16px 0;">Obavezno upiši poziv na broj. Usluga se uključuje čim uplata bude potvrđena; račun stiže na mejl.@if ($expiresAt) Ako uplata ne stigne do {{ $expiresAt->format('j. n. Y.') }}, narudžbina se otkazuje.@endif</p>
+	<p style="margin:16px 0;">Obavezno upišite poziv na broj. Usluga se uključuje čim uplata bude potvrđena; račun stiže na mejl.@if ($expiresAt) Ako uplata ne stigne do {{ $expiresAt->format('j. n. Y.') }}, narudžbina se otkazuje.@endif</p>
 	@if (\App\Support\Payments\PaymentDetails::vatNote() !== '')<p style="margin:0 0 16px;color:#5b6470;font-size:14px;">{{ \App\Support\Payments\PaymentDetails::vatNote() }}</p>@endif
 	<p style="margin:0 0 16px;"><a href="{{ $link }}" style="display:inline-block;background:#2b7a64;color:#ffffff;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:bold;">Pogledajte narudžbinu</a></p>
 	<p style="margin:0 0 12px;color:#5b6470;font-size:13px;"><a href="{{ \App\Support\Payments\PaymentDetails::legalLink('terms') }}" style="color:#2b7a64;">Uslovi kupovine i plaćanja</a> · <a href="{{ \App\Support\Payments\PaymentDetails::legalLink('withdrawal') }}" style="color:#2b7a64;">Odustanak od ugovora</a> · <a href="{{ \App\Support\Payments\PaymentDetails::legalLink('complaints') }}" style="color:#2b7a64;">Reklamacije i povraćaj novca</a></p>

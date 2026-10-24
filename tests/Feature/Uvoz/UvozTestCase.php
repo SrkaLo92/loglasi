@@ -24,6 +24,7 @@ abstract class UvozTestCase extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        config(['uvoz.gone_file' => '']); // the real list of live URLs is not part of the fixture
 
         $main = (string) config('database.connections.'.config('database.default').'.database');
         $database = env('WP_DB_TEST_DATABASE') ?: (str_ends_with($main, '_test') ? substr($main, 0, -5).'_wp_test' : $main.'_wp');

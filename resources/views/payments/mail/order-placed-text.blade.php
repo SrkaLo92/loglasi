@@ -27,7 +27,7 @@ Poziv na broj: {!! $details->reference !!}
 Podatke za uplatu (primalac i račun) šaljemo na zahtev: odgovorite na ovu poruku ili nam pišite preko strane Kontakt.
 @endif
 
-Obavezno upiši poziv na broj. Usluga se uključuje čim uplata bude potvrđena; račun stiže na mejl.
+Obavezno upišite poziv na broj. Usluga se uključuje čim uplata bude potvrđena; račun stiže na mejl.
 @if (\App\Support\Payments\PaymentDetails::vatNote() !== '')
 {!! \App\Support\Payments\PaymentDetails::vatNote() !!}
 @endif
