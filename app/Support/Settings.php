@@ -20,7 +20,7 @@ class Settings
         'listing_duration_days' => 30,     // oglas traje mesec dana, obnova besplatna
         'moderation' => 'new_users',       // all | new_users | none
         'founding_firms_total' => 30,      // prvih 30 firmi besplatno
-        'contact_email' => 'kontakt.loglasi.rs@gmail.com',
+        'contact_email' => 'kontakt@loglasi.rs',
         'contact_phone' => '+381655415128',     // footer and FAQ, E.164
         'contact_address' => '15300 Loznica, Srbija',
         'new_condition_firms_only' => true,

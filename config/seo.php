@@ -23,7 +23,7 @@ return [
     'logo' => env('SEO_LOGO', '/img/loglasi-logo.png'),
 
     'organization' => [
-        'email' => 'kontakt.loglasi.rs@gmail.com',
+        'email' => 'kontakt@loglasi.rs',
         'same_as' => [
             'https://www.facebook.com/profile.php?id=61571911496798',
             'https://www.instagram.com/loglasi.rs/',
