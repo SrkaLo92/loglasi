@@ -163,7 +163,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .lg-logo:hover { color: var(--lg-text); }
 .lg-logo span { color: var(--lg-brand); }
-.lg-logo img { display: block; height: 36px; width: auto; }
+.lg-logo img { display: block; height: 44px; width: auto; }
 
 .lg-header__mesto { display: none; }
 
@@ -311,7 +311,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	text-decoration: none;
 }
 .lg-footer__logo span { color: #8fd8c1; }
-.lg-footer__logo img { display: block; height: 36px; width: auto; }
+.lg-footer__logo img { display: block; height: 48px; width: auto; }
 .lg-footer__tekst { margin: 0; font-size: 15px; line-height: 1.6; }
 .lg-footer__kontakt { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; font-size: 15px; }
 .lg-footer__kontakt a,
