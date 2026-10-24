@@ -41,8 +41,8 @@ class AccountTest extends TestCase
 
     public function test_guest_is_sent_to_login_and_private_user_gets_403(): void
     {
-        $this->get('/moj-nalog/firma/')->assertRedirect(url_slash('prijava'));
-        $this->get('/moj-nalog/firma/statistika/')->assertRedirect(url_slash('prijava'));
+        $this->get('/moj-nalog/firma/')->assertRedirect(url_slash('login-registracija'));
+        $this->get('/moj-nalog/firma/statistika/')->assertRedirect(url_slash('login-registracija'));
 
         $private = User::factory()->create();
         $this->actingAs($private)->get('/moj-nalog/firma/')->assertForbidden();
@@ -209,8 +209,8 @@ class AccountTest extends TestCase
             ->assertSee('Podaci firme su sačuvani', false)
             ->assertSee('Produžite paket')
             ->assertSee('Business Start')
-            ->assertSee('1.490 din mesečno ili 14.900 din godišnje')
-            ->assertSee('4.990 din mesečno')
+            ->assertSee("1.490\u{00A0}RSD mesečno ili 14.900\u{00A0}RSD godišnje")
+            ->assertSee("4.990\u{00A0}RSD mesečno")
             ->assertDontSee('Founder')
             ->assertSee(url_slash('cenovnik'), false)
             ->assertSee('value="https://firma.rs"', false);

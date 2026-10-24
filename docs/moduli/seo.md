@@ -81,7 +81,7 @@ Ne diraju se `/api/*`, `/admin*`, `/up`.
 1. **Tabela `redirects`** (admin): `from_path` → `to_path`, status iz reda (301, 302, 307, 308; sve drugo = 301). Poređenje bez obzira na kosu crtu na kraju i velika slova. Zapis može da ima i upit (`/?p=123`); tada se upit troši. Zapis samo sa putanjom prenosi ostale parametre (bez praćenja). Tabela ima prednost nad pravilima ispod.
 2. `/wp-json/loglasi/v1/{putanja}` → `/api/v1/{putanja}`, **308** (isti metod i telo), ceo upit ostaje.
 3. Stari sitemapovi → `/sitemap.xml`: `/sitemap_index.xml`, svaki `/{ime}-sitemap{N}.xml` (Yoast: `page-sitemap.xml`, `listivo_listing-sitemap2.xml`, `listivo_14-sitemap.xml`, `listivo_1910…1913`, `4657`, `4661`, `945`, `946`, `9145…9147`, `listivo_template`, `product`, `product_cat`), `/wp-sitemap.xml` i `/wp-sitemap-*.xml`.
-4. `/wp-admin` i sve ispod → `/admin/`; `/wp-login.php` → `/prijava/`.
+4. `/wp-admin` i sve ispod → `/admin/`; `/wp-login.php` → `/login-registracija/`.
 5. WooCommerce (po SEO dokumentu, odeljak 7): proizvodi, `/shop/`, `/cart/`, `/checkout/…`, `/naplata/…` → `/cenovnik/`; `/my-account/…` → `/moj-nalog/`.
 5a. Stari panel: `/panel/…` → `/moj-nalog/`; `?tab=create` → `/postavi-oglas/`, `messages` → `/moj-nalog/poruke/`, `listings` → `/moj-nalog/oglasi/`, `favorites` → `/moj-nalog/omiljeni/`, `business` → `/za-firme/` (`config('seo.panel_tabs')`).
 5b. Kategorije sa zarezom: `/oglasi/a,b/` i `?kategorija=a,b` → poslednja aktivna kategorija (`/oglasi/{slug}/`), inače `/oglasi/`. `?paginacija=N` → `/…/page/N/`.
@@ -180,5 +180,5 @@ php artisan seo:provera raw-indeksirane.tsv https://loglasi.rs --sitemap --gone 
 1. `/oglasi/?marka-automobila=` sada vodi na `/oglasi/automobili/`; ako budu strane marki, menja se `seo.targets.marka_automobila` ili pravilo.
 2. Stari `/product/` URL-ovi vode na `/oglasi/`; kad bude strana „Za firme”, može `seo.targets.woo_product = '/za-firme/'`.
 3. `/cart/`, `/checkout/`, `/my-account/` vode na početnu (Woo se ne prenosi).
-4. `/login-registracija/` (link iz llms.txt): ostaje strana ili 301 na `/prijava/`? Odlučuje modul naloga; ako bude 301, dodati red u `redirects`.
+4. ~~`/login-registracija/`: strana ili 301?~~ Rešeno: `/login-registracija/` je jedina strana za prijavu (stara adresa), `GET /prijava/` i `/registracija/` su 301 na njene tabove.
 5. Tačni slugovi strana uslova i privatnosti (`/uslovi-koriscenja/`, `/politika-privatnosti/` su pretpostavka u `config('seo.pages')`).

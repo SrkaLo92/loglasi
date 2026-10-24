@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\Auth\LoginPage;
 use Closure;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class EnsureStaff
         $user = $request->user();
 
         if ($user === null) {
-            throw new AuthenticationException('Unauthenticated.', [], $request->expectsJson() ? null : url_slash('prijava'));
+            throw new AuthenticationException('Unauthenticated.', [], $request->expectsJson() ? null : LoginPage::url());
         }
 
         abort_unless(Gate::forUser($user)->allows($ability === 'admin' ? 'admin' : 'staff'), 403);

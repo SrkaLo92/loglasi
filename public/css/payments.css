@@ -1,7 +1,7 @@
 /* Payments: orders, payment instructions, IPS QR. Prefix lgpay-. Tokens from osnova.css. */
 .lgpay { padding-top: 24px; padding-bottom: 48px; }
 .lgpay-crumbs { font-size: 14px; color: var(--lg-muted); margin-bottom: 12px; }
-.lgpay-crumbs a { color: var(--lg-green); }
+.lgpay-crumbs a { display: inline-flex; align-items: center; min-height: 44px; color: var(--lg-green); }
 .lgpay-head h1 { font-size: clamp(24px, 4vw, 32px); margin: 0 0 8px; }
 .lgpay-lead { color: var(--lg-text-2); max-width: 70ch; margin: 0 0 20px; }
 .lgpay-card { background: #fff; border: 1px solid var(--lg-border); border-radius: var(--lg-radius); padding: 20px; margin-bottom: 16px; }

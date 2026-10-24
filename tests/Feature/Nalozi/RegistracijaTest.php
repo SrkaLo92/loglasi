@@ -47,7 +47,7 @@ class RegistracijaTest extends TestCase
 
     public function test_honeypot_blocks_bot_registration(): void
     {
-        $this->get('/registracija/')->assertSee('name="website"', false);
+        $this->get('/login-registracija/?tab=registracija')->assertSee('name="website"', false);
 
         $this->post('/registracija/', $this->data(['website' => 'https://spam.example']))
             ->assertSessionHasErrors(['email' => 'Registracija nije uspela. Pokušajte ponovo malo kasnije.']);

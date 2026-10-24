@@ -9,7 +9,8 @@
 .sr-crumbs ol {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 4px;
+	align-items: center;
+	gap: 0 4px;
 	margin: 0 0 14px;
 	padding: 0;
 	list-style: none;
@@ -24,6 +25,9 @@
 
 .sr-crumbs a,
 .sr-crumbs a:visited {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
 	color: var(--lg-muted);
 	text-decoration: none;
 }
@@ -115,8 +119,11 @@
 
 .sr-cats li a,
 .sr-cats li a:visited {
-	display: block;
-	padding: 5px 0;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	min-height: 44px;
+	padding: 4px 0;
 	color: var(--lg-text-2);
 	text-decoration: none;
 }
@@ -133,8 +140,10 @@
 }
 
 .sr-cats__current {
-	display: block;
-	padding: 5px 0;
+	display: flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 4px 0;
 	color: var(--lg-text);
 	font-weight: 800;
 }
@@ -181,8 +190,11 @@
 
 .sr-input:focus {
 	border-color: var(--lg-green);
-	outline: 2px solid rgba(43, 122, 100, .25);
-	outline-offset: 0;
+}
+
+.sr-input:focus-visible {
+	outline: 2px solid var(--lg-orange);
+	outline-offset: 2px;
 }
 
 select.sr-input {
@@ -216,7 +228,7 @@ select.sr-input {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	min-height: 36px;
+	min-height: 44px;
 	color: var(--lg-text-2);
 	font-size: 15px;
 	cursor: pointer;
@@ -250,8 +262,8 @@ select.sr-input {
 .sr-pill span {
 	display: inline-flex;
 	align-items: center;
-	min-height: 36px;
-	padding: 6px 12px;
+	min-height: 44px;
+	padding: 8px 14px;
 	border: 1px solid var(--lg-input);
 	border-radius: 999px;
 	background: #fff;
@@ -284,6 +296,10 @@ select.sr-input {
 
 .sr-form__clear,
 .sr-form__clear:visited {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 44px;
 	color: var(--lg-green);
 	font-size: 15px;
 	font-weight: 600;
@@ -323,8 +339,8 @@ select.sr-input {
 	display: inline-flex;
 	align-items: center;
 	gap: 4px;
-	min-height: 36px;
-	padding: 4px 4px 4px 12px;
+	min-height: 44px;
+	padding: 0 2px 0 14px;
 	border-radius: 999px;
 	background: var(--lg-mint);
 	color: var(--lg-green-dark);
@@ -337,8 +353,8 @@ select.sr-input {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 28px;
-	height: 28px;
+	width: 40px;
+	height: 40px;
 	border-radius: 50%;
 	color: var(--lg-green-dark);
 	font-size: 18px;
@@ -352,6 +368,10 @@ select.sr-input {
 
 .sr-chips__clear,
 .sr-chips__clear:visited {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 0 4px;
 	color: var(--lg-green);
 	font-size: 14px;
 	font-weight: 600;

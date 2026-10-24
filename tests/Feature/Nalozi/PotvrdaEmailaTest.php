@@ -22,7 +22,7 @@ class PotvrdaEmailaTest extends TestCase
     {
         $user = User::factory()->unverified()->create();
 
-        $this->get($this->link($user))->assertRedirect(url_slash('prijava'))->assertSessionHas('status');
+        $this->get($this->link($user))->assertRedirect(url_slash('login-registracija'))->assertSessionHas('status');
 
         $this->assertTrue($user->fresh()->hasVerifiedEmail());
     }
@@ -77,6 +77,6 @@ class PotvrdaEmailaTest extends TestCase
 
     public function test_notice_requires_login(): void
     {
-        $this->get('/potvrda-emaila/')->assertRedirect(url_slash('prijava'));
+        $this->get('/potvrda-emaila/')->assertRedirect(url_slash('login-registracija'));
     }
 }

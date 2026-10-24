@@ -4,7 +4,6 @@
 	$until = $status['until']?->copy()->timezone($tz)->format('j. n. Y.');
 	$days = $status['days_left'];
 	$daysLabel = $days === null ? '' : $days.' '.($days % 10 === 1 && $days % 100 !== 11 ? 'dan' : 'dana');
-	$num = fn ($n) => number_format((int) $n, 0, ',', '.');
 	$active = in_array($status['state'], ['active', 'expiring'], true);
 @endphp
 <section class="lgf-card lgf-status" aria-labelledby="paket-status">
@@ -63,7 +62,7 @@
 			<ul>
 				@foreach ($status['packages'] as $package)
 					@if ($package['monthly'] || $package['yearly'])
-						<li><strong>{{ $package['label'] }}</strong>: {{ implode(' ili ', array_filter([$package['monthly'] ? $num($package['monthly']).' din mesečno' : null, $package['yearly'] ? $num($package['yearly']).' din godišnje' : null])) }}
+						<li><strong>{{ $package['label'] }}</strong>: {{ implode(' ili ', array_filter([$package['monthly'] ? \App\Support\Stranice\Cenovnik::price((int) $package['monthly']).' mesečno' : null, $package['yearly'] ? \App\Support\Stranice\Cenovnik::price((int) $package['yearly']).' godišnje' : null])) }}
 						</li>
 					@endif
 				@endforeach

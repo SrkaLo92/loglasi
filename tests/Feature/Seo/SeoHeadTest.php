@@ -380,7 +380,7 @@ class SeoHeadTest extends SeoTestCase
 
     public function test_account_pages_are_noindex_without_canonical(): void
     {
-        $response = $this->get('/prijava/')->assertOk();
+        $response = $this->get('/login-registracija/')->assertOk();
 
         $this->assertSame('noindex, follow', $this->robots($response));
         $this->assertNull($this->canonical($response));

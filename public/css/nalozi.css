@@ -18,8 +18,34 @@
 
 .lgn-lead { margin: 0 0 16px; color: var(--lg-muted); }
 
-.lgn-dual { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
 .lgn-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; margin-top: 20px; }
+
+/* Prijava / Novi nalog: jedna kartica sa dva taba (bez JS-a tabovi su linkovi) */
+
+.lgn > .lgn-tabs { max-width: 520px; padding-top: 8px; }
+.lgn-tabs__list {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	margin: 0 0 20px;
+	border-bottom: 1px solid var(--lg-border);
+}
+.lgn-tabs__tab,
+.lgn-tabs__tab:visited {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 48px;
+	padding: 10px 12px;
+	margin-bottom: -1px;
+	border-bottom: 3px solid transparent;
+	color: var(--lg-muted);
+	font-weight: 700;
+	text-decoration: none;
+}
+.lgn-tabs__tab:hover { color: var(--lg-green-dark); }
+.lgn-tabs__tab[aria-selected="true"] { border-bottom-color: var(--lg-green); color: var(--lg-text); }
+.lgn-tabs__tab:focus-visible { outline-offset: -2px; border-radius: 8px 8px 0 0; }
+.lgn-tabs__panel[hidden] { display: none; }
 
 /* Forme */
 
@@ -147,7 +173,7 @@
 
 @media (max-width: 767px) {
 	.lgn { padding-top: 16px; }
-	.lgn-dual, .lgn-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+	.lgn-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
 	.lgn-card { padding: 18px 16px; }
 	.lgn h1, .lgn-title { font-size: 24px; }
 	.lgn-btn { width: 100%; }

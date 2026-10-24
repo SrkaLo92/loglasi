@@ -7,6 +7,7 @@ use App\Http\Middleware\EnsureStaff;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Support\ApiError;
+use App\Support\Auth\LoginPage;
 use App\Support\Auth\LoglasiHasher;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
@@ -97,7 +98,7 @@ class NaloziServiceProvider extends ServiceProvider
         $router->aliasMiddleware('not-blocked', EnsureNotBlocked::class);
         $router->pushMiddlewareToGroup('web', EnsureNotBlocked::class);
 
-        Authenticate::redirectUsing(fn () => url_slash('prijava'));
+        Authenticate::redirectUsing(fn () => LoginPage::url());
         RedirectIfAuthenticated::redirectUsing(fn () => url_slash('moj-nalog'));
     }
 

@@ -6,9 +6,9 @@
 
 | Putanja | Šta radi |
 | --- | --- |
-| `/login-registracija/` | stara adresa sa sadašnjeg sajta: prijava i registracija na jednoj strani |
-| `/prijava/` (GET, POST) | prijava emailom i lozinkom, „Zapamti me” |
-| `/registracija/` (GET, POST) | ime, email, telefon, lozinka dva puta, prihvatanje uslova; uvek nalog **privatnog lica** |
+| `/login-registracija/` | jedina strana za prijavu i registraciju (adresa sa starog sajta): jedna kartica, tabovi „Prijava” i „Novi nalog” (`?tab=prijava`, `?tab=registracija`; bez JS-a tabovi su linkovi). Posle neuspele forme otvara se njen tab (skriveno polje `_tab`). Linkovi: `LoginPage::url()` |
+| `POST /prijava/` | prijava emailom i lozinkom, „Zapamti me”; `GET /prijava/` je 301 na `/login-registracija/?tab=prijava` |
+| `POST /registracija/` | ime, email, telefon, lozinka dva puta, prihvatanje uslova; uvek nalog **privatnog lica**; `GET /registracija/` je 301 na `/login-registracija/?tab=registracija` |
 | `POST /odjava/` | odjava |
 | `/zaboravljena-lozinka/` (GET, POST) | šalje link mejlom; isti odgovor i kad nalog ne postoji |
 | `/nova-lozinka/{token}/`, `POST /nova-lozinka/` | nova lozinka; posle promene odjavljuju se svi uređaji |

@@ -110,7 +110,7 @@ return [
             'biznis' => '/za-firme/',
         ],
         'wp_admin' => '/admin/',
-        'wp_login' => '/prijava/',
+        'wp_login' => '/login-registracija/',
     ],
 
 ];

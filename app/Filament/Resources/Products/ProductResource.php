@@ -81,7 +81,7 @@ class ProductResource extends Resource
             ->paginated(false)
             ->columns([
                 TextColumn::make('name')->label('Usluga')->description(fn (Product $r) => $r->code),
-                TextColumn::make('price_rsd')->label('Cena')->formatStateUsing(fn ($state) => number_format((int) $state, 0, ',', '.').' din'),
+                TextColumn::make('price_rsd')->label('Cena')->formatStateUsing(fn ($state) => number_format((int) $state, 0, ',', '.')."\u{00A0}RSD"),
                 TextColumn::make('duration_days')->label('Trajanje')->formatStateUsing(fn ($state) => $state ? $state.' dana' : 'jednokratno')->placeholder('jednokratno'),
                 TextColumn::make('listing_limit')->label('Limit oglasa')->placeholder('—'),
                 IconColumn::make('is_active')->label('Aktivna')->boolean(),

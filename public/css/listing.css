@@ -1357,7 +1357,7 @@ button.lgo-bar__btn--tel {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	min-height: 40px;
+	min-height: 44px;
 	font-size: 15px;
 	cursor: pointer;
 }
@@ -1384,8 +1384,8 @@ button.lgo-bar__btn--tel {
 }
 
 .lgo-report__form textarea:focus-visible {
-	outline: 2px solid var(--lgo-accent);
-	outline-offset: 1px;
+	outline: 2px solid var(--lg-orange, #b8501a);
+	outline-offset: 2px;
 }
 
 .lgo-btn--report {
@@ -1487,8 +1487,8 @@ button.lgo-bar__btn--tel {
 }
 
 .lgo-calc__row input:focus-visible {
-	outline: 2px solid var(--lgo-accent);
-	outline-offset: 1px;
+	outline: 2px solid var(--lg-orange, #b8501a);
+	outline-offset: 2px;
 }
 
 .lgo-calc__result {

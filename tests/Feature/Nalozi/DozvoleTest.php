@@ -35,7 +35,7 @@ class DozvoleTest extends TestCase
 
     public function test_staff_middleware(): void
     {
-        $this->get('/test-osoblje/')->assertRedirect(url_slash('prijava'));
+        $this->get('/test-osoblje/')->assertRedirect(url_slash('login-registracija'));
         $this->actingAs(User::factory()->create())->get('/test-osoblje/')->assertForbidden();
         $this->actingAs(User::factory()->moderator()->create())->get('/test-osoblje/')->assertOk()->assertSee('osoblje');
         $this->actingAs(User::factory()->moderator()->create())->get('/test-admin/')->assertForbidden();

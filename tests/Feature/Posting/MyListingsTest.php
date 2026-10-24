@@ -16,7 +16,7 @@ class MyListingsTest extends PostingTestCase
 {
     public function test_guest_is_sent_to_login(): void
     {
-        $this->get('/moj-nalog/oglasi/')->assertRedirect(url_slash('prijava'));
+        $this->get('/moj-nalog/oglasi/')->assertRedirect(url_slash('login-registracija'));
     }
 
     public function test_tabs_show_listings_by_status(): void

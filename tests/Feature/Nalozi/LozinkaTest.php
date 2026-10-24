@@ -73,7 +73,7 @@ class LozinkaTest extends TestCase
             'email' => 'ana@example.com',
             'password' => 'novalozinka1',
             'password_confirmation' => 'novalozinka1',
-        ])->assertRedirect(url_slash('prijava'))->assertSessionHas('status');
+        ])->assertRedirect(url_slash('login-registracija'))->assertSessionHas('status');
 
         $user->refresh();
         $this->assertTrue(Hash::check('novalozinka1', $user->password));

@@ -42,6 +42,30 @@ class ProfilePageTest extends TestCase
             ->assertDontSee('noindex');
     }
 
+    public function test_firm_profile_has_green_call_button_and_sticky_bar(): void
+    {
+        $user = $this->firm();
+
+        $this->get('/korisnik/'.$user->slug.'/')
+            ->assertOk()
+            ->assertSee('<a class="lgp-btn lgp-btn--call" href="tel:+381641112223">', false)
+            ->assertSee('<span>Pozovi</span>', false)
+            ->assertSee('<div class="lgp-sticky" role="region" aria-label="Brzi kontakt">', false)
+            ->assertSee('lgp-firma-strana has-sticky', false);
+    }
+
+    public function test_firm_profile_without_phone_has_no_call_button(): void
+    {
+        $user = $this->firm(['phone' => null]);
+        $user->forceFill(['phone' => null])->save();
+
+        $this->get('/korisnik/'.$user->slug.'/')
+            ->assertOk()
+            ->assertDontSee('lgp-btn--call', false)
+            ->assertDontSee('Pozovi firmu')
+            ->assertDontSee('lgp-sticky', false);
+    }
+
     public function test_empty_firm_profile_is_noindex(): void
     {
         // Indexed only with an active listing or a filled profile (SEO plan, section 5).
