@@ -195,6 +195,21 @@ class WebMessagesTest extends TestCase
         $this->actingAs($buyer)->get('/moj-nalog/poruke/'.$conversation->id.'/')->assertDontSee('id="lgm-seen" hidden', false)->assertSee('Pročitano');
     }
 
+    public function test_read_receipt_is_hidden_when_the_other_side_wrote_last(): void
+    {
+        $listing = Listing::factory()->create();
+        $buyer = User::factory()->create();
+        $this->send($buyer, $listing);
+        $conversation = Conversation::query()->sole();
+
+        $this->travel(1)->seconds();
+        $this->actingAs($listing->user)->post('/moj-nalog/poruke/'.$conversation->id.'/', ['body' => 'Dostupno je.'])->assertRedirect();
+        $this->travel(1)->seconds();
+
+        // The buyer reads the reply: his own message was read, but the last one is not his.
+        $this->actingAs($buyer)->get('/moj-nalog/poruke/'.$conversation->id.'/')->assertSee('id="lgm-seen" hidden', false);
+    }
+
     public function test_other_users_cannot_see_or_answer_a_conversation(): void
     {
         $conversation = Conversation::factory()->create();

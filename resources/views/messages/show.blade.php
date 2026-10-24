@@ -4,7 +4,9 @@
 	$otherName = $other && ! $other->trashed() ? $other->name : 'Obrisan korisnik';
 	$title = 'Razgovor sa korisnikom '.$otherName.' | loglasi.rs';
 	$robots = 'noindex, follow';
-	$lastMine = $messages->filter(fn ($m) => (int) $m->sender_id === $user->id)->last();
+	// "Pročitano" belongs under my last message, so only when the thread ends with it.
+	$lastMine = $messages->last();
+	$lastMine = $lastMine && (int) $lastMine->sender_id === $user->id ? $lastMine : null;
 	$seen = $lastMine && $otherReadAt && $otherReadAt->greaterThan($lastMine->created_at);
 @endphp
 

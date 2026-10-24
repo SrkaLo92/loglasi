@@ -12,9 +12,10 @@
 	var timer = null;
 	var busy = false;
 
+	// Sent time of the last message when it is mine; "Pročitano" is shown only under it.
 	function lastMineSent() {
-		var mine = thread.querySelectorAll('.lgm-msg--mine');
-		return mine.length ? mine[mine.length - 1].getAttribute('data-sent') : null;
+		var last = thread.querySelector('.lgm-msg:last-child');
+		return last && last.classList.contains('lgm-msg--mine') ? last.getAttribute('data-sent') : null;
 	}
 
 	function poll() {
@@ -29,8 +30,8 @@
 					lastId = data.last_id;
 				}
 				var sent = lastMineSent();
-				if (seen && sent && data.read_until) {
-					seen.hidden = new Date(data.read_until) <= new Date(sent);
+				if (seen) {
+					seen.hidden = !sent || !data.read_until || new Date(data.read_until) <= new Date(sent);
 				}
 			})
 			.catch(function () {})
