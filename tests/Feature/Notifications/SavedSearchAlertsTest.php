@@ -214,7 +214,7 @@ class SavedSearchAlertsTest extends TestCase
             $this->car();
         }
 
-        $this->artisan('notifications:saved-searches')->expectsOutputToContain('5 new listings')->expectsOutputToContain('3 match jobs')->assertSuccessful();
+        $this->artisan('notifications:saved-searches')->expectsOutputToContain('3 match jobs queued')->assertSuccessful();
 
         Notification::assertSentTo($this->user, SavedSearchDigestNotification::class, fn ($n) => $n->total() === 5
             && count($n->searches[0]['listings']) === 5);
