@@ -45,6 +45,18 @@ class ListingApiTest extends TestCase
         $this->assertSame(1, (int) $listing->fresh()->views);
     }
 
+    public function test_signed_in_answers_are_never_publicly_cacheable(): void
+    {
+        $listing = Listing::factory()->create();
+
+        $this->assertStringContainsString('public', $this->getJson('/api/v1/listings/'.$listing->id)->headers->get('Cache-Control'));
+
+        Sanctum::actingAs(User::factory()->create());
+        foreach (['/api/v1/listings/'.$listing->id, '/api/v1/listings', '/api/v1/categories'] as $url) {
+            $this->assertStringContainsString('private', $this->getJson($url)->assertOk()->headers->get('Cache-Control'), $url);
+        }
+    }
+
     public function test_detail_for_owner_is_private_and_shows_pending(): void
     {
         $listing = Listing::factory()->create(['status' => ListingStatus::Rejected, 'rejection_reason' => 'Nejasne slike']);

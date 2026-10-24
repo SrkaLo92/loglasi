@@ -51,7 +51,9 @@ class ApiResponse
         }
 
         if (! array_key_exists('Cache-Control', $headers)) {
-            $response->headers->set('Cache-Control', $cacheControl ?? self::CACHE_DEFAULT);
+            // A signed-in answer (is_mine, is_favorite...) must never be stored by a shared cache.
+            $signedIn = $request->bearerToken() !== null || $request->user() !== null;
+            $response->headers->set('Cache-Control', $signedIn ? self::CACHE_PRIVATE : ($cacheControl ?? self::CACHE_DEFAULT));
         }
 
         if ($status !== 200) {

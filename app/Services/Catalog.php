@@ -49,6 +49,15 @@ class Catalog
     /** @var array<int, int>|null */
     private ?array $counts = null;
 
+    /** Children of each parent (0 = root), in category order; built once per request. @var array<int, list<Category>>|null */
+    private ?array $byParent = null;
+
+    /** @var array<string, Category>|null */
+    private ?array $bySlug = null;
+
+    /** @var array<int, list<int>>|null */
+    private ?array $childIds = null;
+
     /** @var array<int, Collection<int, Field>> */
     private array $fieldsFor = [];
 
@@ -73,7 +82,9 @@ class Catalog
 
     public function categoryBySlug(string $slug): ?Category
     {
-        return $this->categories()->first(fn (Category $c) => $c->slug === $slug);
+        $this->loadStructure();
+
+        return $this->bySlug[$slug] ?? null;
     }
 
     /**
@@ -110,10 +121,10 @@ class Catalog
     public function children(Category|int|null $parent, bool $activeOnly = true): Collection
     {
         $parentId = $parent instanceof Category ? $parent->id : $parent;
+        $this->loadStructure();
+        $children = collect($this->byParent[(int) $parentId] ?? []);
 
-        return $this->categories()
-            ->filter(fn (Category $c) => ($c->parent_id === null ? null : (int) $c->parent_id) === $parentId && (! $activeOnly || $c->is_active))
-            ->values();
+        return $activeOnly ? $children->filter(fn (Category $c) => (bool) $c->is_active)->values() : $children;
     }
 
     /**
@@ -237,13 +248,17 @@ class Catalog
             ->map(fn ($n) => (int) $n)
             ->all());
 
-        $counts = [];
-        foreach ($this->categories() as $category) {
-            $sum = 0;
-            foreach ($this->descendantIds($category) as $id) {
-                $sum += $own[$id] ?? 0;
+        // Each category's own listings are added to it and to every ancestor (one walk up per category).
+        $categories = $this->categories();
+        $counts = array_fill_keys($categories->keys()->all(), 0);
+        foreach ($own as $categoryId => $total) {
+            $seen = [];
+            for ($id = (int) $categoryId, $depth = 0; $id && isset($counts[$id]) && ! isset($seen[$id]) && $depth <= self::MAX_DEPTH; $depth++) {
+                $seen[$id] = true;
+                $counts[$id] += $total;
+                $parentId = $categories[$id]->parent_id;
+                $id = $parentId === null ? 0 : (int) $parentId;
             }
-            $counts[$category->id] = $sum;
         }
 
         return $this->counts = $counts;
@@ -356,7 +371,7 @@ class Catalog
     {
         Cache::forget(self::KEY_STRUCTURE);
         $this->categories = $this->fields = null;
-        $this->pivot = null;
+        $this->pivot = $this->byParent = $this->bySlug = $this->childIds = null;
         $this->fieldsFor = [];
         $this->flushCounts();
     }
@@ -397,6 +412,12 @@ class Catalog
         $this->categories = Category::hydrate($data['categories'])->keyBy('id');
         $this->fields = Field::hydrate($data['fields'])->keyBy('id');
 
+        $this->byParent = $this->bySlug = [];
+        foreach ($this->categories as $category) {
+            $this->byParent[(int) $category->parent_id][] = $category;
+            $this->bySlug[$category->slug] ??= $category;
+        }
+
         $this->pivot = [];
         foreach ($data['pivot'] as $row) {
             $this->pivot[(int) $row['category_id']][] = [
@@ -410,13 +431,17 @@ class Catalog
     /** @return array<int, list<int>> */
     private function childrenMap(): array
     {
+        $this->loadStructure();
+        if ($this->childIds !== null) {
+            return $this->childIds;
+        }
         $map = [];
-        foreach ($this->categories() as $category) {
-            if ($category->parent_id !== null) {
-                $map[(int) $category->parent_id][] = $category->id;
+        foreach ($this->byParent as $parentId => $children) {
+            if ($parentId !== 0) {
+                $map[$parentId] = array_map(fn (Category $c) => (int) $c->id, $children);
             }
         }
 
-        return $map;
+        return $this->childIds = $map;
     }
 }
