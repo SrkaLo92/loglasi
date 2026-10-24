@@ -82,7 +82,7 @@ return [
         ['uslov' => 'featured_7', 'pitanje' => 'Šta dobijam kad istaknem oglas?', 'odgovor' => 'Istaknut oglas se prikazuje u izdvojenim oglasima na početnoj strani i u rezultatima pretrage, sa oznakom „Istaknuto”. Isticanje na 7 dana košta {cena_istaknuto_7}.'],
         ['uslov' => null, 'pitanje' => 'Kada se usluga uključuje posle uplate?', 'odgovor' => 'Čim vidimo uplatu na računu, obično istog ili sledećeg radnog dana. Ako pošaljete potvrdu o uplati, lakše ćemo je povezati sa vašim oglasom.'],
         ['uslov' => null, 'pitanje' => 'Da li mogu da platim karticom?', 'odgovor' => 'Za sada ne. Plaća se uplatom na račun, u banci, pošti ili kroz mobilno bankarstvo.'],
-        ['uslov' => 'biznis_12m', 'pitanje' => 'Koliko košta Biznis paket za firme?', 'odgovor' => '{ponuda_firme} Detalji su na strani [Za firme](/za-firme/).'],
+        ['pitanje' => 'Koliko košta oglašavanje za firme?', 'odgovor' => 'Prvih {besplatne_firme} firmi koristi loglasi.rs besplatno 12 meseci. Posle toga, kao i za ostale firme, birate jedan od paketa sa ove strane, uz mesečnu ili godišnju uplatu. Detalji su na strani [Za firme](/za-firme/).'],
     ],
 
     /* Za firme ------------------------------------------------------------ */
