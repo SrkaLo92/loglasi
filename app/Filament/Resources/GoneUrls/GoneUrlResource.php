@@ -24,6 +24,8 @@ class GoneUrlResource extends Resource
 {
     use StaffAccess;
 
+    protected static bool $adminOnly = true;
+
     protected static ?string $model = GoneUrl::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedNoSymbol;

@@ -29,6 +29,8 @@ class AuditLogResource extends Resource
 {
     use StaffAccess;
 
+    protected static bool $adminOnly = true;
+
     protected static bool $readOnly = true;
 
     protected static ?string $model = AuditLog::class;
@@ -62,13 +64,24 @@ class AuditLogResource extends Resource
         'user.unblock' => 'Nalog odblokiran',
         'user.make_firm' => 'Nalog pretvoren u firmu',
         'user.make_private' => 'Nalog vraćen na privatno lice',
-        'user.grant_biznis' => 'Biznis paket uključen',
-        'user.revoke_biznis' => 'Biznis paket isključen',
+        'user.grant_biznis' => 'Biznis paket uključen (staro)',
+        'user.revoke_biznis' => 'Biznis paket isključen (staro)',
+        'firm.grant_package' => 'Paket firme dodeljen',
+        'firm.free_year' => 'Prvih 30 firmi: besplatna godina',
+        'firm.end_package' => 'Paket firme prekinut',
         'user.change_role' => 'Uloga promenjena',
         'user.update' => 'Nalog izmenjen',
         'firm.update' => 'Firma izmenjena',
-        'order.mark_paid' => 'Narudžbina plaćena',
-        'order.cancel' => 'Narudžbina otkazana',
+        'order.paid' => 'Narudžbina plaćena',
+        'order.activated' => 'Usluga uključena',
+        'order.activation_failed' => 'Usluga nije uključena',
+        'order.receipt' => 'Broj računa upisan',
+        'order.refunded' => 'Novac vraćen',
+        'order.cancelled' => 'Narudžbina otkazana (kupac)',
+        'order.cancelled_by_admin' => 'Narudžbina otkazana (admin)',
+        'order.auto_cancelled' => 'Narudžbina otkazana (rok istekao)',
+        'order.mark_paid' => 'Narudžbina plaćena (staro)',
+        'order.cancel' => 'Narudžbina otkazana (staro)',
         'report.resolve' => 'Prijava rešena',
         'report.dismiss' => 'Prijava odbačena',
         'settings.update' => 'Podešavanja izmenjena',

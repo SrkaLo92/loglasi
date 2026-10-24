@@ -32,6 +32,8 @@ class FieldResource extends Resource
 {
     use StaffAccess;
 
+    protected static bool $adminOnly = true;
+
     protected static ?string $model = Field::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAdjustmentsHorizontal;

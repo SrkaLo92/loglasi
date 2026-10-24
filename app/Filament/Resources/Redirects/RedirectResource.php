@@ -24,6 +24,8 @@ class RedirectResource extends Resource
 {
     use StaffAccess;
 
+    protected static bool $adminOnly = true;
+
     protected static ?string $model = Redirect::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowUturnRight;

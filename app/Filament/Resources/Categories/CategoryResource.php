@@ -37,6 +37,8 @@ class CategoryResource extends Resource
 {
     use StaffAccess;
 
+    protected static bool $adminOnly = true;
+
     protected static ?string $model = Category::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquares2x2;
