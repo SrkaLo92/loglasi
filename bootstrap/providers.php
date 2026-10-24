@@ -1,6 +1,7 @@
 <?php
 
 use App\Providers\AppServiceProvider;
+use App\Providers\Filament\AdminPanelProvider;
 use App\Providers\FirmsServiceProvider;
 use App\Providers\KatalogServiceProvider;
 use App\Providers\ListingServiceProvider;
@@ -14,6 +15,7 @@ use App\Providers\SeoServiceProvider;
 
 return [
     AppServiceProvider::class,
+    AdminPanelProvider::class,
     KatalogServiceProvider::class,
     ListingServiceProvider::class,
     MessagesServiceProvider::class,
