@@ -104,14 +104,15 @@
 					@php($terms = PaymentDetails::legalLink('terms'))
 					<label class="lgpay-check">
 						<input type="checkbox" name="odmah" value="1" @checked(old('odmah')) @error('odmah') aria-invalid="true" aria-describedby="lgpay-odmah-greska" @enderror>
-						<span>Želim da usluga počne odmah po uplati. Znam da time gubim pravo na odustanak kada usluga bude u potpunosti izvršena (pogledaj @if ($withdrawal)<a href="{{ $withdrawal }}">Pravo na odustanak</a>@else Pravo na odustanak @endif). <span class="lgpay-help">Obavezno za fizička lica.</span></span>
+						<span>Saglasan/na sam da usluga počne odmah po evidentiranju uplate i razumem da time gubim pravo na odustanak od ugovora za izvršenu uslugu. Više na strani <a href="{{ $withdrawal }}">Odustanak od ugovora</a>. <span class="lgpay-help">Obavezno za fizička lica.</span></span>
 					</label>
 					@error('odmah')<p class="lgpay-error" id="lgpay-odmah-greska">{{ $message }}</p>@enderror
 					<label class="lgpay-check">
 						<input type="checkbox" name="uslovi" value="1" required @checked(old('uslovi')) @error('uslovi') aria-invalid="true" aria-describedby="lgpay-uslovi-greska" @enderror>
-						<span>Pročitao/la sam @if ($terms)<a href="{{ $terms }}">Uslove korišćenja i plaćanja</a>@else Uslove korišćenja i plaćanja @endif.</span>
+						<span>Pročitao/la sam i prihvatam <a href="{{ $terms }}">Uslove kupovine i plaćanja</a>.</span>
 					</label>
 					@error('uslovi')<p class="lgpay-error" id="lgpay-uslovi-greska">{{ $message }}</p>@enderror
+					<p class="lgpay-help">Reklamacije i povraćaj novca: <a href="{{ PaymentDetails::legalLink('complaints') }}">uslovi i rokovi</a>.</p>
 					<p class="lgpay-help">Plaćanje je uplatom na račun. Posle potvrde dobijate predračun sa pozivom na broj i QR kodom za plaćanje telefonom. Porudžbina koja nije plaćena u roku od {{ config('payments.pending_days') }} dana se otkazuje.@if ($testMode) <strong>Probni režim: uplata se ne knjiži, račun je probni.</strong>@endif</p>
 					<button class="lg-btn lg-btn--green" type="submit">Potvrdi porudžbinu</button>
 				</form>

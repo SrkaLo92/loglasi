@@ -113,8 +113,8 @@ class OrderController extends Controller
             'adresa.required' => 'Upišite adresu firme.',
             'mejl.required' => 'Upišite mejl za račun.',
             'mejl.email' => 'Upišite ispravan mejl za račun.',
-            'odmah.accepted' => 'Potvrdite da želite da usluga počne odmah po uplati.',
-            'uslovi.accepted' => 'Potvrdite da ste pročitali Uslove korišćenja i plaćanja.',
+            'odmah.accepted' => 'Potvrdite saglasnost da usluga počne odmah po evidentiranju uplate.',
+            'uslovi.accepted' => 'Potvrdite da prihvatate Uslove kupovine i plaćanja.',
         ]);
 
         $listing = $this->listingFor($data['usluga'], $data['oglas'] ?? null);

@@ -13,6 +13,13 @@ use App\Support\Settings;
  */
 final class PaymentDetails
 {
+    /** Default legal pages (static pages of the Stranice module) for the payment_page_* settings. */
+    public const LEGAL_PAGES = [
+        'terms' => '/uslovi-placanja/',
+        'withdrawal' => '/odustanak-od-ugovora/',
+        'complaints' => '/reklamacije/',
+    ];
+
     private function __construct(
         public readonly string $recipient,
         public readonly ?string $account,
@@ -72,11 +79,15 @@ final class PaymentDetails
 
     /**
      * Legal page links for the confirm step and e-mails: admin settings payment_page_terms,
-     * payment_page_withdrawal, payment_page_complaints (paths). Empty = no link is shown.
+     * payment_page_withdrawal, payment_page_complaints (paths or full URLs). Empty = the default
+     * page from LEGAL_PAGES; null only for an unknown page.
      */
     public static function legalLink(string $page): ?string
     {
         $path = trim((string) Settings::get('payment_page_'.$page, ''));
+        if ($path === '') {
+            $path = self::LEGAL_PAGES[$page] ?? '';
+        }
 
         return $path === '' ? null : (preg_match('#^https?://#i', $path) ? $path : url_slash($path));
     }

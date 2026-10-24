@@ -7,6 +7,7 @@ use App\Filament\Resources\Orders\Pages\ListOrders;
 use App\Models\AuditLog;
 use App\Models\Order;
 use App\Services\OrderFulfillment;
+use App\Services\Payments\BuyerDetails;
 use App\Support\Payments\PaymentMode;
 use App\Support\Settings;
 use Livewire\Livewire;
@@ -125,6 +126,20 @@ class OrderAdminTest extends PaymentsTestCase
             ->assertHasTableActionErrors(['reason']);
 
         $this->assertSame(OrderStatus::Activated, $order->refresh()->status);
+    }
+
+    public function test_consumer_consent_time_is_shown_in_the_orders_list(): void
+    {
+        $this->travelTo(now()->setDate(2026, 11, 3)->setTime(14, 5));
+        Settings::set(PaymentMode::PRIVATE_PAYMENTS, true);
+        $seller = $this->seller();
+        $order = $this->order($seller, 'featured_7', $this->listingOf($seller), BuyerDetails::private('198.51.100.4'));
+        $this->signIn($this->admin());
+
+        Livewire::test(ListOrders::class)
+            ->assertTableColumnVisible('consent_at')
+            ->assertTableColumnFormattedStateSet('consent_at', '3. 11. 2026. 14:05', $order)
+            ->assertSee('IP 198.51.100.4');
     }
 
     public function test_test_mode_banner(): void

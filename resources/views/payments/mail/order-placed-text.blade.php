@@ -37,5 +37,9 @@ Ako uplata ne stigne do {!! $expiresAt->format('j. n. Y.') !!}, narudžbina se o
 
 Narudžbina i QR kod za plaćanje telefonom: {!! url_slash('moj-nalog/narudzbine/'.$order->id) !!}
 
+Uslovi kupovine i plaćanja: {!! \App\Support\Payments\PaymentDetails::legalLink('terms') !!}
+Odustanak od ugovora: {!! \App\Support\Payments\PaymentDetails::legalLink('withdrawal') !!}
+Reklamacije i povraćaj novca: {!! \App\Support\Payments\PaymentDetails::legalLink('complaints') !!}
+
 --
 loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu.

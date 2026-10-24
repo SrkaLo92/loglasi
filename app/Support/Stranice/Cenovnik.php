@@ -4,6 +4,7 @@ namespace App\Support\Stranice;
 
 use App\Models\Firm;
 use App\Models\Product;
+use App\Services\Payments\ProductCatalog;
 use App\Support\Settings;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -101,6 +102,43 @@ class Cenovnik
         }
 
         return $packages;
+    }
+
+    /**
+     * Markdown list of the services that can be ordered now (active, sellable), grouped like the
+     * price list, with name, price and duration from `products`. For the {usluge_cenovnik} placeholder.
+     */
+    public static function servicesMarkdown(): string
+    {
+        $groups = ['Promocije oglasa' => [], 'Dodatni oglasi' => [], 'Paketi za firme' => []];
+        foreach (self::products() as $product) {
+            $type = ProductCatalog::type($product);
+            if ($type === null || $product->price_rsd <= 0) {
+                continue;
+            }
+            $group = match ($type) {
+                ProductCatalog::SLOTS => 'Dodatni oglasi',
+                ProductCatalog::FIRM_PACKAGE => 'Paketi za firme',
+                default => 'Promocije oglasa',
+            };
+            $days = ProductCatalog::days($product);
+            $duration = match (true) {
+                $type === ProductCatalog::BUMP => 'jednokratno',
+                $type === ProductCatalog::BUMP_PACK => 'podizanja koristite kad želite',
+                $type === ProductCatalog::FIRM_PACKAGE => $days >= 365 ? 'godišnje' : 'mesečno',
+                default => 'traje '.$days.' '.self::plural($days, 'dan', 'dana', 'dana'),
+            };
+            $groups[$group][] = '- **'.Prodavac::escape($product->name).':** '.self::price((int) $product->price_rsd).', '.$duration;
+        }
+
+        $out = [];
+        foreach ($groups as $title => $lines) {
+            if ($lines !== []) {
+                $out[] = '**'.$title.'**'."\n\n".implode("\n", $lines);
+            }
+        }
+
+        return $out === [] ? 'Spisak usluga i cene su na strani [Cenovnik](/cenovnik/).' : implode("\n\n", $out);
     }
 
     /** Duration column of the promotions table: „jednom”, „10 puta”, „7 dana”. */

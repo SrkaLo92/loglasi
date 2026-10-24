@@ -38,8 +38,10 @@ class OrderFlowTest extends PaymentsTestCase
         $this->actingAs($user)->get('/moj-nalog/narudzbine/nova/?usluga=top_7&oglas='.$listing->id)
             ->assertOk()
             ->assertSee('399')
-            ->assertSee('Želim da usluga počne odmah po uplati. Znam da time gubim pravo na odustanak kada usluga bude u potpunosti izvršena')
-            ->assertSee('Pročitao/la sam')
+            ->assertSee('Saglasan/na sam da usluga počne odmah po evidentiranju uplate i razumem da time gubim pravo na odustanak od ugovora za izvršenu uslugu.')
+            ->assertSee('<a href="'.url_slash('odustanak-od-ugovora').'">Odustanak od ugovora</a>', false)
+            ->assertSee('Pročitao/la sam i prihvatam <a href="'.url_slash('uslovi-placanja').'">Uslove kupovine i plaćanja</a>', false)
+            ->assertSee('href="'.url_slash('reklamacije').'"', false)
             ->assertSee('Probni režim');
     }
 
@@ -94,6 +96,45 @@ class OrderFlowTest extends PaymentsTestCase
         $this->actingAs($user)->post('/moj-nalog/narudzbine/', ['usluga' => 'listing_slots_3', 'kupac' => 'private'])
             ->assertSessionHasErrors(['odmah', 'uslovi']);
         $this->assertSame(0, Order::count());
+    }
+
+    public function test_private_buyer_without_consent_gets_an_error_and_no_order(): void
+    {
+        $user = $this->seller();
+        $this->actingAs($user)->post('/moj-nalog/narudzbine/', ['usluga' => 'listing_slots_3', 'kupac' => 'private', 'uslovi' => '1'])
+            ->assertSessionHasErrors(['odmah' => 'Potvrdite saglasnost da usluga počne odmah po evidentiranju uplate.']);
+        $this->actingAs($user)->post('/moj-nalog/narudzbine/', ['usluga' => 'listing_slots_3', 'kupac' => 'private', 'odmah' => '1'])
+            ->assertSessionHasErrors(['uslovi' => 'Potvrdite da prihvatate Uslove kupovine i plaćanja.']);
+        $this->assertSame(0, Order::count());
+    }
+
+    public function test_consent_time_and_ip_are_stored_on_the_order(): void
+    {
+        $this->travelTo(now()->setTime(10, 15, 0));
+        $user = $this->seller();
+
+        $this->actingAs($user)->withServerVariables(['REMOTE_ADDR' => '203.0.113.7'])
+            ->post('/moj-nalog/narudzbine/', $this->confirm(['usluga' => 'listing_slots_3']))->assertRedirect();
+
+        $order = Order::sole();
+        $this->assertTrue($order->consent_at->equalTo(now()));
+        $this->assertTrue($order->terms_accepted_at->equalTo(now()));
+        $this->assertSame('203.0.113.7', $order->consent_ip);
+    }
+
+    public function test_pro_forma_mail_links_the_legal_pages(): void
+    {
+        $user = $this->seller();
+        $this->actingAs($user)->post('/moj-nalog/narudzbine/', $this->confirm(['usluga' => 'listing_slots_3']));
+
+        Mail::assertQueued(OrderPlaced::class, function (OrderPlaced $mail) {
+            $html = $mail->render();
+            foreach (['uslovi-placanja', 'odustanak-od-ugovora', 'reklamacije'] as $path) {
+                $this->assertStringContainsString('href="'.url_slash($path).'"', $html);
+            }
+
+            return true;
+        });
     }
 
     public function test_firm_buyer_gives_invoice_data_and_needs_no_consent(): void

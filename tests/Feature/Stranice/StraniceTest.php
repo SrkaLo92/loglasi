@@ -34,6 +34,9 @@ class StraniceTest extends TestCase
             'česta pitanja' => ['/faq/', 'Česta pitanja', 'Kako da postavim oglas?'],
             'uslovi' => ['/uslovi-koriscenja/', 'Uslovi korišćenja', 'Zabranjen sadržaj'],
             'privatnost' => ['/politika-privatnosti/', 'Politika privatnosti', 'Vaša prava'],
+            'uslovi plaćanja' => ['/uslovi-placanja/', 'Uslovi kupovine i plaćanja', 'Kako se naručuje'],
+            'odustanak' => ['/odustanak-od-ugovora/', 'Odustanak od ugovora', 'Obrazac za odustanak od ugovora zaključenog na daljinu'],
+            'reklamacije' => ['/reklamacije/', 'Reklamacije i povraćaj novca', 'Šta nam je potrebno'],
         ];
     }
 

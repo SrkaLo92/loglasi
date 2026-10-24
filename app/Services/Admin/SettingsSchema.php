@@ -6,6 +6,7 @@ use App\Models\AuditLog;
 use App\Models\Setting;
 use App\Services\ListingImages;
 use App\Support\Home\HomeSettings;
+use App\Support\Payments\PaymentDetails;
 use App\Support\Payments\PaymentMode;
 use App\Support\Settings;
 use App\Support\Stranice\Cenovnik;
@@ -120,9 +121,9 @@ class SettingsSchema
             'payment_mb' => ['label' => 'Matični broj primaoca', 'type' => 'text', 'default' => ''],
             'payment_code' => ['label' => 'Šifra plaćanja', 'type' => 'text', 'help' => 'Tri cifre; prazno = 221.', 'default' => ''],
             'payment_vat_note' => ['label' => 'Napomena o PDV-u', 'type' => 'text', 'help' => 'Prikazuje se ispod cena. Prazno dok poreski status nije potvrđen.', 'default' => ''],
-            'payment_page_terms' => ['label' => 'Strana: uslovi kupovine', 'type' => 'text', 'help' => 'Putanja, npr. /uslovi/. Prazno = link se ne prikazuje.', 'default' => ''],
-            'payment_page_withdrawal' => ['label' => 'Strana: odustanak od ugovora', 'type' => 'text', 'default' => ''],
-            'payment_page_complaints' => ['label' => 'Strana: reklamacije', 'type' => 'text', 'default' => ''],
+            'payment_page_terms' => ['label' => 'Strana: uslovi kupovine', 'type' => 'text', 'help' => 'Putanja, npr. /uslovi-placanja/.', 'default' => PaymentDetails::LEGAL_PAGES['terms']],
+            'payment_page_withdrawal' => ['label' => 'Strana: odustanak od ugovora', 'type' => 'text', 'default' => PaymentDetails::LEGAL_PAGES['withdrawal']],
+            'payment_page_complaints' => ['label' => 'Strana: reklamacije', 'type' => 'text', 'default' => PaymentDetails::LEGAL_PAGES['complaints']],
         ];
     }
 
@@ -174,6 +175,9 @@ class SettingsSchema
             'faq' => 'Česta pitanja',
             'uslovi' => 'Uslovi korišćenja',
             'privatnost' => 'Privatnost',
+            'placanje' => 'Uslovi kupovine i plaćanja',
+            'odustanak' => 'Odustanak od ugovora',
+            'reklamacije' => 'Reklamacije',
             'greska' => 'Strane grešaka',
             'brisanje' => 'Brisanje naloga',
         ];
