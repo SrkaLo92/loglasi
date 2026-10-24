@@ -43,7 +43,7 @@ class ApiMessagesTest extends TestCase
             ->assertStatus(201)
             ->assertJsonStructure([
                 'id',
-                'listing' => ['id', 'title', 'price', 'currency', 'price_label', 'location', 'category', 'image', 'featured', 'seller_type', 'status', 'published_at', 'url'],
+                'listing' => ['id', 'title', 'price', 'currency', 'price_label', 'location', 'category', 'image', 'featured', 'premium_xl', 'seller_type', 'status', 'published_at', 'url'],
                 'other_user' => ['id', 'name', 'type'],
                 'last_message' => ['id', 'body', 'mine', 'sent_at', 'read'],
                 'unread',

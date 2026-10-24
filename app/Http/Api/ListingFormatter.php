@@ -44,6 +44,7 @@ class ListingFormatter
             'category' => $listing->category ? CatalogFormatter::categoryRef($listing->category) : null,
             'image' => $image ? static::image($image) : null,
             'featured' => $listing->promotionRank() > 0,
+            'premium_xl' => $listing->isPremiumXl(),
             'seller_type' => $listing->user?->isFirm() ? 'firm' : 'private',
             'status' => static::status($listing),
             'published_at' => static::date($listing->published_at ?? $listing->created_at),
