@@ -406,6 +406,94 @@
 	background: var(--lg-mint);
 }
 
+/* Frequently asked questions */
+
+.hm-faq {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+	gap: 24px 48px;
+	align-items: start;
+}
+
+.hm-faq__uvod {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.hm-faq__uvod p {
+	margin: 0;
+	color: var(--lg-muted);
+	font-size: 16px;
+	line-height: 1.6;
+}
+
+.hm-faq__uvod a {
+	color: var(--lg-green);
+	overflow-wrap: anywhere;
+}
+
+.hm-faq__sve {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 44px;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.hm-faq__lista {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.hm-faq__stavka {
+	padding: 0 22px;
+	border: 1px solid var(--lg-border);
+	border-radius: var(--lg-radius);
+	background: #fff;
+}
+
+.hm-faq__pitanje {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	min-height: 44px;
+	padding: 18px 0;
+	font-size: 17px;
+	font-weight: 700;
+	cursor: pointer;
+	list-style: none;
+}
+
+.hm-faq__pitanje::-webkit-details-marker {
+	display: none;
+}
+
+.hm-faq__pitanje svg {
+	flex: 0 0 20px;
+	color: var(--lg-green);
+	transition: transform .2s ease;
+}
+
+.hm-faq__stavka[open] .hm-faq__pitanje svg {
+	transform: rotate(180deg);
+}
+
+.hm-faq__odgovor {
+	margin: 0;
+	padding: 0 0 20px;
+	color: var(--lg-muted);
+	font-size: 16px;
+	line-height: 1.65;
+}
+
+.hm-faq__odgovor a {
+	color: var(--lg-green);
+}
+
 /* Why loglasi.rs */
 
 .hm-why {
@@ -611,6 +699,18 @@
 	.hm-why {
 		grid-template-columns: 1fr;
 		gap: 12px;
+	}
+
+	.hm-faq {
+		grid-template-columns: 1fr;
+	}
+
+	.hm-faq__stavka {
+		padding: 0 16px;
+	}
+
+	.hm-faq__pitanje {
+		font-size: 16px;
 	}
 
 	.hm-why__item {

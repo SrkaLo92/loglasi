@@ -17,6 +17,7 @@ return [
     /* Cenovnik ------------------------------------------------------------ */
 
     'pocetna.zasto.naslov' => 'Zašto izabrati nas',
+    'pocetna.pitanja.naslov' => 'Najčešća pitanja',
     'pocetna.zasto' => [
         ['ikonica' => 'pin', 'naslov' => 'Lokalna povezanost', 'tekst' => 'Povezujemo ljude iz Loznice i okolnih mesta. Sve je blizu, pa stvar možete da pogledate uživo pre kupovine.'],
         ['ikonica' => 'click', 'naslov' => 'Jednostavnost korišćenja', 'tekst' => 'Sajt je pregledan i lak za korišćenje, i onima koji se ne snalaze najbolje sa tehnologijom. Oglas postavljate za par minuta.'],

@@ -1,10 +1,12 @@
 {{-- Home page: eight sections ported from loglasi-core inc/home. Data: HomeSections (cached 60 s). --}}
 @extends('layouts.app')
 @use('App\Support\Home\HomeSettings')
+@use('App\Support\Phone')
 @use('App\Support\Search\CategoryIcons')
 @use('App\Support\Search\TimeAgo')
 @use('App\Support\Seo')
 @use('App\Support\Stranice\Cenovnik')
+@use('App\Support\Settings')
 @use('App\Support\Stranice\PageText')
 
 @push('head')
@@ -16,6 +18,10 @@
 
 @php
 	$hmTotal = $sections['total'];
+	$hmWhy = PageText::list('pocetna.zasto');
+	$hmFaq = array_slice(array_values(array_filter(PageText::list('faq.pitanja'), fn ($q) => is_array($q) && ! empty($q['pitanje']) && ! empty($q['odgovor']))), 0, 5);
+	$hmEmail = (string) Settings::get('contact_email');
+	$hmPhone = (string) Settings::get('contact_phone');
 	$hmAll = url_slash('/oglasi');
 	$hmMobileLatest = HomeSettings::int('home.latest_mobile_count', 1, 24);
 	$hmCatTotal = $sections['categories_total'];
@@ -180,7 +186,6 @@
 	</section>
 
 	{{-- 7. Why choose us (the old site's feature block, texts in PageText) --}}
-	@php($hmWhy = PageText::list('pocetna.zasto'))
 	@if ($hmWhy)
 		<section class="hm-sec" aria-labelledby="hm-why-title">
 			<h2 class="hm-sec__title" id="hm-why-title">{{ PageText::get('pocetna.zasto.naslov') }}</h2>
@@ -196,7 +201,26 @@
 		</section>
 	@endif
 
-	{{-- 8. About the site --}}
+	{{-- 8. Frequently asked questions: the first ones from the FAQ page, the rest on /faq/ --}}
+	@if ($hmFaq)
+		<section class="hm-sec hm-faq" aria-labelledby="hm-faq-title">
+			<div class="hm-faq__uvod">
+				<h2 class="hm-sec__title" id="hm-faq-title">{{ PageText::get('pocetna.pitanja.naslov') }}</h2>
+				<p>Niste našli odgovor?@if ($hmEmail !== '') Pišite nam na <a href="mailto:{{ $hmEmail }}">{{ $hmEmail }}</a>@endif@if ($hmPhone !== ''){{ $hmEmail !== '' ? ' ili pozovite' : ' Pozovite' }} <a href="tel:{{ $hmPhone }}">{{ Phone::display($hmPhone) }}</a>@endif.</p>
+				<a class="hm-faq__sve" href="{{ url_slash('/faq') }}">Sva pitanja{{ CategoryIcons::svg('arrow', 18, '2') }}</a>
+			</div>
+			<div class="hm-faq__lista">
+				@foreach ($hmFaq as $item)
+					<details class="hm-faq__stavka">
+						<summary class="hm-faq__pitanje"><span>{{ PageText::replace((string) $item['pitanje']) }}</span>{{ CategoryIcons::svg('chevron', 20, '2.5') }}</summary>
+						<p class="hm-faq__odgovor">{{ PageText::inline((string) $item['odgovor']) }}</p>
+					</details>
+				@endforeach
+			</div>
+		</section>
+	@endif
+
+	{{-- 9. About the site --}}
 	<details class="hm-about">
 		<summary class="hm-about__summary"><h2 class="hm-about__title">{{ HomeSettings::get('home.about_title') }}</h2>{{ CategoryIcons::svg('chevron', 20, '2') }}</summary>
 		<div class="hm-about__text">{{ PageText::markdown($hmAbout !== '' ? $hmAbout : HomeSettings::ABOUT_DEFAULT) }}</div>
