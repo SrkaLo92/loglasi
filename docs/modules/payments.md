@@ -75,11 +75,12 @@ The format was written without access to the NBS specification: **check a genera
 
 ## Search ranking
 
-`listing_search.featured` is a rank 0–3: TOP 3, priority 2, highlighted 1, normal 0, and `featured_until` is when the rank next changes; existing indexes are used. `Listing::promotionRank()` and `isPremiumXl()` exist, and `config('payments.premium_xl_every')` is 10.
+`listing_search.featured` is a rank 0–3: TOP and Premium XL 3, priority 2, highlighted 1, normal 0, and `featured_until` is when the rank next changes; existing indexes are used. `Listing::promotionRank()` (Premium XL counts as 3), `isPremiumXl()`, `isPremiumHome()`.
+
+Premium XL is drawn as the wide card at most once per `config('payments.premium_xl_every')` (10) listings of a list page; `premium_xl_home_7` also puts the listing in the home page Premium section (up to 4, random among the running ones each minute). See the search module docs, "Premium XL card".
 
 ## Follow-ups
 
-- Premium XL card (two columns, at most 1 per 8–12) in search and home views; Premium XL + home placement.
 - Mobile contract: product codes beyond `bump, featured_7d, featured_30d, business_year` are returned raw, and the status enum lacks `refunded`.
 - Admin UI for the settings above and for marking paid / receipts / refunds.
 - Legal page slugs for `payment_page_*`.

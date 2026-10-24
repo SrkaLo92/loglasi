@@ -411,7 +411,9 @@ select.sr-input {
 .sr-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+	grid-auto-flow: row dense; /* a Premium XL card (two columns) leaves no hole */
 	gap: 20px;
+	container: lc-grid / inline-size;
 }
 
 .sr-empty {

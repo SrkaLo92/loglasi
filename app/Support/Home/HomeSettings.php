@@ -20,6 +20,9 @@ class HomeSettings
         // 2. Categories
         'home.categories_title' => 'Kategorije',
         'home.categories_count' => 11,
+        // 2b. Premium XL + početna (hidden when empty)
+        'home.premium_title' => 'Premium oglasi',
+        'home.premium_count' => 4,
         // 3. Featured
         'home.featured_title' => 'Istaknuti oglasi',
         'home.featured_count' => 4,
