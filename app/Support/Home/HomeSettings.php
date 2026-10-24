@@ -11,7 +11,8 @@ use App\Support\Settings;
 class HomeSettings
 {
     public const DEFAULTS = [
-        // 1. Intro (the H1 comes from the SEO module)
+        // 1. Intro
+        'home.h1' => 'Oglasi za Loznicu i okolinu',
         'home.intro_text' => 'Besplatno postavljanje oglasa. Kupujte i prodajte direktno, od ljudi iz svog kraja.',
         'home.intro_label' => 'Često se traži:',
         'home.intro_terms' => '',            // "bicikl, stan Loznica, Golf"; empty = the biggest categories

@@ -54,7 +54,7 @@ Pomoćne: `Seo::activeListings()` (objavljeni i neistekli oglasi), `Seo::isActiv
 
 | Strana | Title (do 60 znakova) | H1 | Opis (do 155) |
 | --- | --- | --- | --- |
-| Početna | Oglasi Loznica – besplatni mali oglasi \| loglasi.rs | Oglasi Loznica i Podrinje | Kupi i prodaj u Loznici: automobili, stanovi, posao, drva, poljoprivreda. Besplatno objavi oglas. |
+| Početna | Oglasi Loznica – besplatni mali oglasi \| loglasi.rs | Oglasi za Loznicu i okolinu | Kupi i prodaj u Loznici: automobili, stanovi, posao, drva, poljoprivreda. Besplatno objavi oglas. |
 | /oglasi/ | Svi oglasi u Loznici \| loglasi.rs | Svi oglasi u Loznici | {broj} oglasa iz Loznice i okoline: … |
 | Kategorija | {Fraza} Loznica – {broj} oglasa \| loglasi.rs | {Fraza} u Loznici i okolini | {broj} oglasa za {frazu} u Loznici, Banji Koviljači i Lešnici. Pogledaj cene ili besplatno objavi oglas. |
 | Kategorija + mesto | {Fraza} {Mesto} – oglasi \| loglasi.rs | {Fraza} – {Mesto} | {broj} oglasa za {frazu} u mestu {Mesto}, opština Loznica. |

@@ -208,7 +208,7 @@ class Seo
     public function home(): self
     {
         return $this->title('Oglasi Loznica – besplatni mali oglasi | loglasi.rs')
-            ->h1('Oglasi Loznica i Podrinje')
+            ->h1('Oglasi za Loznicu i okolinu')
             ->description('Kupi i prodaj u Loznici: automobili, stanovi, posao, drva, poljoprivreda. Besplatno objavi oglas.')
             ->canonical('/');
     }

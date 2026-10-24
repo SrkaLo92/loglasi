@@ -17,7 +17,7 @@ class HomePageTest extends SearchTestCase
 
         $response = $this->get('/')->assertOk();
 
-        $response->assertSee('Oglasi Loznica')
+        $response->assertSee('Oglasi za Loznicu i okolinu')
             ->assertSee('Često se traži:')
             ->assertSee('Kategorije')
             ->assertSee('Sve kategorije')

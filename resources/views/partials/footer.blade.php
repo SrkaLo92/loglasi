@@ -29,7 +29,7 @@
 	<div class="lg-wrap lg-footer__in">
 		<div class="lg-footer__col lg-footer__brend">
 			@include('partials.logo', ['logoClass' => 'lg-footer__logo', 'logoTheme' => 'light'])
-			<p class="lg-footer__tekst">Vaš lokalni portal za kupovinu, prodaju i razmenu proizvoda i usluga u Loznici i okolini.</p>
+			<p class="lg-footer__tekst">loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu.</p>
 			<ul class="lg-footer__kontakt">
 				@if ($lgPhone !== '')
 					<li><a href="tel:{{ $lgPhone }}">{{ Ikonice::svg('phone', 18) }}{{ Phone::display($lgPhone) }}</a></li>

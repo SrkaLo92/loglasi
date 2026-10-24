@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Search;
 
 use App\Http\Controllers\Controller;
 use App\Support\Home\HomeSections;
+use App\Support\Home\HomeSettings;
 use App\Support\Seo;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,7 @@ class HomeController extends Controller
             return app(ListingListController::class)->legacySearch($request);
         }
 
-        Seo::get()->home();
+        Seo::get()->home()->h1(HomeSettings::get('home.h1'));
 
         return view('home.index', ['sections' => HomeSections::get()]);
     }
