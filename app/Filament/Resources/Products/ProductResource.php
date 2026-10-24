@@ -55,7 +55,7 @@ class ProductResource extends Resource
         return $schema->components([
             TextInput::make('code')
                 ->label('Šifra')
-                ->helperText('bump, featured_7, featured_30, biznis_12m... Ne menja se posle prve narudžbine.')
+                ->helperText('Npr. bump, featured_7, business_pro_monthly. Prodaje se samo usluga koju modul plaćanja poznaje. Ne menja se posle unosa.')
                 ->required()->maxLength(32)
                 ->rule('regex:/^[a-z0-9_]+$/')
                 ->unique(ignoreRecord: true)
@@ -63,9 +63,13 @@ class ProductResource extends Resource
             TextInput::make('name')->label('Naziv')->required()->maxLength(255),
             TextInput::make('price_rsd')->label('Cena (din)')->integer()->minValue(0)->maxValue(10000000)->required(),
             TextInput::make('duration_days')->label('Trajanje (dana)')->helperText('Prazno = jednokratno (podizanje).')->integer()->minValue(1)->maxValue(3650),
-            TextInput::make('listing_limit')->label('Limit oglasa mesečno')->helperText('Za pakete firmi. Prazno = bez ograničenja.')->integer()->minValue(0)->maxValue(100000),
+            TextInput::make('listing_limit')->label('Limit oglasa')->helperText('Paketi firmi: aktivnih oglasa. Dodatna mesta: koliko oglasa dodaje. Prazno = bez ograničenja.')->integer()->minValue(0)->maxValue(100000),
             TextInput::make('sort')->label('Redosled')->integer()->minValue(0)->default(0),
             Toggle::make('is_active')->label('Aktivna (prikazuje se u cenovniku i aplikaciji)')->default(true),
+            Toggle::make('display_only')
+                ->label('Samo prikaz (u cenovniku, bez naručivanja)')
+                ->helperText('Za usluge koje se još ne prodaju preko sajta.')
+                ->default(false),
             Textarea::make('description')->label('Opis')->helperText('Prazno = podrazumevani opis u cenovniku.')->rows(3)->maxLength(1000),
         ])->columns(1);
     }
@@ -81,6 +85,7 @@ class ProductResource extends Resource
                 TextColumn::make('duration_days')->label('Trajanje')->formatStateUsing(fn ($state) => $state ? $state.' dana' : 'jednokratno')->placeholder('jednokratno'),
                 TextColumn::make('listing_limit')->label('Limit oglasa')->placeholder('—'),
                 IconColumn::make('is_active')->label('Aktivna')->boolean(),
+                IconColumn::make('display_only')->label('Samo prikaz')->boolean(),
             ])
             ->recordActions([EditAction::make()]);
     }
