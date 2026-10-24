@@ -25,7 +25,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use UnitEnum;
 
-/** Site settings: rules, contact, payment data, texts of content pages. Admin only. */
+/** Site settings: limits and rules, contact, payments, Google, home page and page texts. Admin only. */
 class SiteSettings extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
@@ -79,6 +79,12 @@ class SiteSettings extends Page
                                     ->columns(2)
                                     ->schema($this->fields(SettingsSchema::payment())),
                             ]),
+                        Tab::make('Google')
+                            ->icon(Heroicon::OutlinedChartBar)
+                            ->schema([Section::make()->columns(2)->schema($this->fields(SettingsSchema::google()))]),
+                        Tab::make('Početna strana')
+                            ->icon(Heroicon::OutlinedHome)
+                            ->schema([Section::make()->columns(2)->schema($this->fields(SettingsSchema::home()))]),
                         Tab::make('Tekstovi strana')
                             ->icon(Heroicon::OutlinedDocumentText)
                             ->schema([
