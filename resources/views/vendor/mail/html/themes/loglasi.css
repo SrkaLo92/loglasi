@@ -308,16 +308,9 @@ img {
 
 /* Brand */
 
-.logo-text {
-    color: #1d2b26;
-    font-size: 24px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    text-decoration: none;
-}
-
-.logo-text span {
-    color: #ef7a38;
+.logo-image {
+    height: 45px;
+    width: 120px;
 }
 
 .footer .tagline {

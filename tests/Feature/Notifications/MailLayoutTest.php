@@ -3,6 +3,8 @@
 namespace Tests\Feature\Notifications;
 
 use App\Mail\BrandedMailable;
+use App\Mail\ListingExpiringSoon;
+use App\Models\Listing;
 use App\Models\User;
 use App\Notifications\Messages\BrandedMailMessage;
 use App\Support\Notifications\NotificationPreferences;
@@ -48,7 +50,8 @@ class MailLayoutTest extends TestCase
         $text = $email->getTextBody();
 
         $this->assertSame('loglasi.rs', $email->getFrom()[0]->getName());
-        $this->assertMatchesRegularExpression('#loglasi<span[^>]*>\.rs</span>#', $html);
+        $this->assertStringContainsString('src="'.asset('img/brand/logo.png').'"', $html);
+        $this->assertStringContainsString('alt="loglasi.rs"', $html);
         $this->assertStringContainsString(self::TAGLINE, $html);
         $this->assertStringContainsString('#2b7a64', $html); // theme inlined
         $this->assertStringContainsString(url_slash('moj-nalog/obavestenja'), $html);
@@ -120,5 +123,16 @@ class MailLayoutTest extends TestCase
         Mail::fake();
         Mail::send($mail);
         Mail::assertQueued($mail::class);
+    }
+
+    public function test_listing_expiry_mail_can_be_unsubscribed(): void
+    {
+        $listing = Listing::factory()->create();
+        $mail = new ListingExpiringSoon($listing);
+
+        $this->assertStringContainsString(
+            '/moj-nalog/obavestenja/odjava/'.$listing->user_id.'/expiring',
+            $mail->headers()->text['List-Unsubscribe'],
+        );
     }
 }
