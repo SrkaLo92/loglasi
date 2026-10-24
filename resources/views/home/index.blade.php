@@ -19,7 +19,6 @@
 	$hmAll = url_slash('/oglasi');
 	$hmMobileLatest = HomeSettings::int('home.latest_mobile_count', 1, 24);
 	$hmCatTotal = $sections['categories_total'];
-	$hmFree = Cenovnik::freeListings();
 	$hmFirms = $sections['firms'];
 	$hmAbout = HomeSettings::get('home.about');
 	$hmCount = number_format($hmTotal, 0, ',', '.');
@@ -180,27 +179,22 @@
 		<a class="hm-firms__btn" href="{{ HomeSettings::url('home.firms_url') }}">{{ HomeSettings::get('home.firms_button') }}{{ CategoryIcons::svg('arrow', 18, '2') }}</a>
 	</section>
 
-	{{-- 7. Why loglasi.rs --}}
-	<section class="hm-sec" aria-labelledby="hm-why-title">
-		<h2 class="hm-sec__title" id="hm-why-title">{{ HomeSettings::get('home.why_title') }}</h2>
-		<ul class="hm-why">
-			<li class="hm-why__item">
-				<span class="hm-why__icon">{{ CategoryIcons::svg('pin', 24) }}</span>
-				<h3 class="hm-why__title">Samo Loznica i okolina</h3>
-				<p>Oglasi iz Loznice, Banje Koviljače, Lešnice, Tršića i okolnih sela. Sve je blizu, pa stvar možete da pogledate uživo pre nego što kupite.</p>
-			</li>
-			<li class="hm-why__item">
-				<span class="hm-why__icon">{{ CategoryIcons::svg('gift', 24) }}</span>
-				<h3 class="hm-why__title">Postavljanje je besplatno</h3>
-				<p>{{ $hmFree > 0 ? ucfirst(Cenovnik::freeListingsText()).' bez ikakve naplate.' : 'Oglase postavljate bez ikakve naplate.' }} Nema provizije ni skrivenih troškova, plaćate samo ako želite da istaknete oglas.</p>
-			</li>
-			<li class="hm-why__item">
-				<span class="hm-why__icon">{{ CategoryIcons::svg('chat', 24) }}</span>
-				<h3 class="hm-why__title">Direktno sa prodavcem</h3>
-				<p>Dogovarate se direktno, porukom ili telefonom, bez posrednika i bez provizije.</p>
-			</li>
-		</ul>
-	</section>
+	{{-- 7. Why choose us (the old site's feature block, texts in PageText) --}}
+	@php($hmWhy = PageText::list('pocetna.zasto'))
+	@if ($hmWhy)
+		<section class="hm-sec" aria-labelledby="hm-why-title">
+			<h2 class="hm-sec__title" id="hm-why-title">{{ PageText::get('pocetna.zasto.naslov') }}</h2>
+			<ul class="hm-why">
+				@foreach ($hmWhy as $item)
+					<li class="hm-why__item">
+						<span class="hm-why__icon">{{ CategoryIcons::svg((string) ($item['ikonica'] ?? 'tag'), 24) }}</span>
+						<h3 class="hm-why__title">{{ PageText::replace((string) ($item['naslov'] ?? '')) }}</h3>
+						<p>{{ PageText::replace((string) ($item['tekst'] ?? '')) }}</p>
+					</li>
+				@endforeach
+			</ul>
+		</section>
+	@endif
 
 	{{-- 8. About the site --}}
 	<details class="hm-about">

@@ -29,8 +29,10 @@ class HomePageTest extends SearchTestCase
             ->assertSee('Najtraženije kategorije')
             ->assertSee('role="tab"', false)
             ->assertSee('Firme iz Loznice na jednom mestu')
-            ->assertSee('Zašto loglasi.rs')
-            ->assertSee('Direktno sa prodavcem')
+            ->assertSee('Zašto izabrati nas')
+            ->assertSee('Sigurnost i poverenje')
+            ->assertSee('Podrška korisnicima')
+            ->assertSee('Privatna lica imaju do 5 aktivnih oglasa besplatno')
             ->assertSee('O sajtu loglasi.rs');
 
         $html = $response->getContent();

@@ -16,6 +16,16 @@ return [
 
     /* Cenovnik ------------------------------------------------------------ */
 
+    'pocetna.zasto.naslov' => 'Zašto izabrati nas',
+    'pocetna.zasto' => [
+        ['ikonica' => 'pin', 'naslov' => 'Lokalna povezanost', 'tekst' => 'Povezujemo ljude iz Loznice i okolnih mesta. Sve je blizu, pa stvar možete da pogledate uživo pre kupovine.'],
+        ['ikonica' => 'click', 'naslov' => 'Jednostavnost korišćenja', 'tekst' => 'Sajt je pregledan i lak za korišćenje, i onima koji se ne snalaze najbolje sa tehnologijom. Oglas postavljate za par minuta.'],
+        ['ikonica' => 'shield', 'naslov' => 'Sigurnost i poverenje', 'tekst' => 'Kupac i prodavac se dogovaraju direktno, bez posrednika i provizije. Sumnjiv oglas možete da nam prijavite jednim klikom.'],
+        ['ikonica' => 'gift', 'naslov' => 'Besplatno oglašavanje', 'tekst' => 'Privatna lica imaju {besplatni_oglasi} besplatno, bez skrivenih troškova. Plaćate samo ako želite da istaknete oglas.'],
+        ['ikonica' => 'support', 'naslov' => 'Podrška korisnicima', 'tekst' => 'Tu smo kad zapne: pomažemo oko postavljanja oglasa i rešavamo probleme. Pišite nam ili pozovite.'],
+        ['ikonica' => 'search', 'naslov' => 'Brza i efikasna pretraga', 'tekst' => 'Kategorije i filteri po ceni i mestu brzo vas vode do onoga što tražite.'],
+    ],
+
     'cenovnik.naslov' => 'Cenovnik',
     'cenovnik.uvod' => 'Postavljanje oglasa je besplatno. Plaćate samo ako želite da vaš oglas vidi više ljudi, ili ako predstavljate firmu.',
     'cenovnik.privatni.naslov' => 'Za privatne korisnike',

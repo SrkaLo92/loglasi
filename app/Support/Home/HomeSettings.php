@@ -41,8 +41,6 @@ class HomeSettings
         'home.firms_min' => 3,                // strip of firm logos from this many firms
         'home.firms_max' => 12,
         'home.firms_show_remaining' => false, // „Ostalo je još N besplatnih mesta od 30.”
-        // 7. Why loglasi.rs
-        'home.why_title' => 'Zašto loglasi.rs',
         // 8. About the site (Markdown; empty = default text)
         'home.about_title' => 'O sajtu loglasi.rs',
         'home.about' => '',

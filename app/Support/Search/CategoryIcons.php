@@ -47,6 +47,9 @@ class CategoryIcons
         'filter' => '<path d="M4 6h16M7 12h10M10 18h4"/>',
         'sort' => '<path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/>',
         'search' => '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',
+        'shield' => '<path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z"/><path d="m9 12 2 2 4-4"/>',
+        'support' => '<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="13" width="4" height="6" rx="1.5"/><rect x="17" y="13" width="4" height="6" rx="1.5"/><path d="M19 19c0 1.5-2 2.5-5 2.5"/>',
+        'click' => '<path d="M9 3v3M4.5 5l2 2M3 10h3"/><path d="m10 10 10 4-4 1.5L14.5 20z"/>',
     ];
 
     /** Part of the slug => icon, first match wins. */
