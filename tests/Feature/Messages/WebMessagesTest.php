@@ -28,9 +28,9 @@ class WebMessagesTest extends TestCase
 
     public function test_guest_is_sent_to_login(): void
     {
-        $this->get('/moj-nalog/poruke/')->assertRedirect(url_slash('prijava'));
-        $this->get('/moj-nalog/poruke/novo/?oglas=1')->assertRedirect(url_slash('prijava'));
-        $this->get('/moj-nalog/omiljeni/')->assertRedirect(url_slash('prijava'));
+        $this->get('/moj-nalog/poruke/')->assertRedirect(url_slash('login-registracija'));
+        $this->get('/moj-nalog/poruke/novo/?oglas=1')->assertRedirect(url_slash('login-registracija'));
+        $this->get('/moj-nalog/omiljeni/')->assertRedirect(url_slash('login-registracija'));
     }
 
     public function test_unverified_user_cannot_start_a_conversation(): void

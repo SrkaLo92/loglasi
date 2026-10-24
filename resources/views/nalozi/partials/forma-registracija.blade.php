@@ -1,5 +1,6 @@
 <form class="lgn-form" method="post" action="{{ url_slash('registracija') }}" novalidate>
 	@csrf
+	<input type="hidden" name="_tab" value="registracija">
 	<div class="lgn-field">
 		<label for="reg-ime">Ime i prezime</label>
 		<input id="reg-ime" type="text" name="name" value="{{ old('name') }}" autocomplete="name" maxlength="80" required

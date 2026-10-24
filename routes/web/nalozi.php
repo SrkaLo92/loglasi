@@ -8,16 +8,17 @@ use App\Http\Controllers\Nalozi\RegistracijaController;
 use Illuminate\Support\Facades\Route;
 
 // Nalozi: prijava, registracija, lozinka, potvrda emaila, „Moj nalog”.
-// Linkovi se prave sa url_slash(): /prijava/, /moj-nalog/...
+// Linkovi se prave sa url_slash() i LoginPage::url(): /login-registracija/, /moj-nalog/...
 
 Route::middleware('guest')->group(function () {
-    // Stara adresa sa sadašnjeg sajta (Listivo): prijava i registracija na jednoj strani.
-    Route::get('/login-registracija', [PrijavaController::class, 'combined'])->name('login-registracija');
+    // Jedina strana za prijavu i registraciju (adresa sa starog sajta), kartice ?tab=prijava|registracija.
+    Route::get('/login-registracija', [PrijavaController::class, 'show'])->name('login');
 
-    Route::get('/prijava', [PrijavaController::class, 'show'])->name('login');
+    // GET /prijava/ i /registracija/ su 301 na nju; forme i dalje šalju POST na ove adrese.
+    Route::get('/prijava', [PrijavaController::class, 'legacy'])->name('login.legacy');
     Route::post('/prijava', [PrijavaController::class, 'store'])->middleware('throttle:nalozi-login');
 
-    Route::get('/registracija', [RegistracijaController::class, 'show'])->name('register');
+    Route::get('/registracija', [RegistracijaController::class, 'legacy'])->name('register');
     Route::post('/registracija', [RegistracijaController::class, 'store'])->middleware('throttle:nalozi-register');
 
     Route::get('/zaboravljena-lozinka', [LozinkaController::class, 'request'])->name('password.request');

@@ -12,8 +12,8 @@ class NotificationSettingsTest extends TestCase
 {
     public function test_guest_is_sent_to_login(): void
     {
-        $this->get('/moj-nalog/obavestenja/')->assertRedirect(url_slash('prijava'));
-        $this->put('/moj-nalog/obavestenja/', [])->assertRedirect(url_slash('prijava'));
+        $this->get('/moj-nalog/obavestenja/')->assertRedirect(url_slash('login-registracija'));
+        $this->put('/moj-nalog/obavestenja/', [])->assertRedirect(url_slash('login-registracija'));
     }
 
     public function test_page_shows_defaults_with_newsletter_off(): void

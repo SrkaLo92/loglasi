@@ -1,5 +1,6 @@
 <form class="lgn-form" method="post" action="{{ url_slash('prijava') }}" novalidate>
 	@csrf
+	<input type="hidden" name="_tab" value="prijava">
 	<div class="lgn-field">
 		<label for="prijava-email">E-pošta</label>
 		<input id="prijava-email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" inputmode="email" required

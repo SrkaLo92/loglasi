@@ -21,7 +21,7 @@
 			</div>
 			<button class="lgn-btn" type="submit">Pošalji link</button>
 		</form>
-		<p class="lgn-switch"><a href="{{ url_slash('prijava') }}">Nazad na prijavu</a></p>
+		<p class="lgn-switch"><a href="{{ \App\Support\Auth\LoginPage::url() }}">Nazad na prijavu</a></p>
 	</section>
 </div>
 @endsection

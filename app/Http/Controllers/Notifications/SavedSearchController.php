@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Notifications;
 
 use App\Http\Controllers\Controller;
 use App\Models\SavedSearch;
+use App\Support\Auth\LoginPage;
 use App\Support\Notifications\NotificationPreferences;
 use App\Support\Notifications\SavedSearches;
 use App\Support\Notifications\SavedSearchQuery;
@@ -67,7 +68,7 @@ class SavedSearchController extends Controller
             $request->session()->put(SavedSearches::PENDING, ['query' => $query, 'name' => SavedSearches::cleanName($request->input('name'))]);
             $request->session()->put('url.intended', url_slash('moj-nalog/pretrage'));
 
-            return redirect()->to(url_slash('prijava'))
+            return redirect()->to(LoginPage::url())
                 ->with('status', 'Prijavite se ili napravite nalog, a pretragu ćemo sačuvati odmah posle toga.');
         }
 

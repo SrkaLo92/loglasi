@@ -17,7 +17,7 @@ class FavoritesTest extends TestCase
     public function test_guest_cannot_save(): void
     {
         $listing = Listing::factory()->create();
-        $this->post('/moj-nalog/omiljeni/'.$listing->id.'/')->assertRedirect(url_slash('prijava'));
+        $this->post('/moj-nalog/omiljeni/'.$listing->id.'/')->assertRedirect(url_slash('login-registracija'));
         $this->assertDatabaseCount('favorites', 0);
     }
 

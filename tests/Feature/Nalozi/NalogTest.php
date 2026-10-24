@@ -18,9 +18,9 @@ class NalogTest extends TestCase
 {
     public function test_guest_is_redirected_to_login(): void
     {
-        $this->get('/moj-nalog/')->assertRedirect(url_slash('prijava'));
-        $this->put('/moj-nalog/podaci/', ['name' => 'X'])->assertRedirect(url_slash('prijava'));
-        $this->get('/moj-nalog/brisanje/')->assertRedirect(url_slash('prijava'));
+        $this->get('/moj-nalog/')->assertRedirect(url_slash('login-registracija'));
+        $this->put('/moj-nalog/podaci/', ['name' => 'X'])->assertRedirect(url_slash('login-registracija'));
+        $this->get('/moj-nalog/brisanje/')->assertRedirect(url_slash('login-registracija'));
     }
 
     public function test_account_page_shows_data_and_limits(): void

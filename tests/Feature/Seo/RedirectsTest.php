@@ -116,7 +116,7 @@ class RedirectsTest extends SeoTestCase
             'panel poruke putanja' => ['/panel/poruke/', '/moj-nalog/poruke/'],
             'wp admin' => ['/wp-admin/', '/admin/'],
             'wp admin strana' => ['/wp-admin/edit.php', '/admin/'],
-            'wp login' => ['/wp-login.php', '/prijava/'],
+            'wp login' => ['/wp-login.php', '/login-registracija/'],
         ];
     }
 

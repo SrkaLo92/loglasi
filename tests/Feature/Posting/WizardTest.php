@@ -11,8 +11,8 @@ class WizardTest extends PostingTestCase
 {
     public function test_guest_is_sent_to_login(): void
     {
-        $this->get('/postavi-oglas/')->assertRedirect(url_slash('prijava'));
-        $this->post('/postavi-oglas/', ['category_id' => $this->services->id])->assertRedirect(url_slash('prijava'));
+        $this->get('/postavi-oglas/')->assertRedirect(url_slash('login-registracija'));
+        $this->post('/postavi-oglas/', ['category_id' => $this->services->id])->assertRedirect(url_slash('login-registracija'));
     }
 
     public function test_start_page_shows_root_categories_and_drills_down_without_js(): void

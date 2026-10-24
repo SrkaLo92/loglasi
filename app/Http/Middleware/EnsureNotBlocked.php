@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Support\ApiError;
+use App\Support\Auth\LoginPage;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,7 +29,7 @@ class EnsureNotBlocked
                 $request->session()->regenerateToken();
             }
 
-            return redirect()->to(url_slash('prijava'))->withErrors(['email' => self::MESSAGE]);
+            return redirect()->to(LoginPage::url())->withErrors(['email' => self::MESSAGE]);
         }
 
         return $next($request);

@@ -4,19 +4,22 @@ namespace App\Http\Controllers\Nalozi;
 
 use App\Http\Controllers\Controller;
 use App\Support\Auth\Accounts;
+use App\Support\Auth\LoginPage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
-use Illuminate\View\View;
 
 /** Registracija privatnog lica. Nalog firme pravi samo administrator. */
 class RegistracijaController extends Controller
 {
-    public function show(): View
+    /** GET /registracija/: 301 na tab „Novi nalog” strane /login-registracija/. */
+    public function legacy(Request $request): RedirectResponse
     {
-        return view('nalozi.registracija');
+        $request->session()->reflash();
+
+        return redirect()->to(LoginPage::url(LoginPage::REGISTER), 301);
     }
 
     public function store(Request $request): RedirectResponse

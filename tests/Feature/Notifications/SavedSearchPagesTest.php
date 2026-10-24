@@ -22,7 +22,7 @@ class SavedSearchPagesTest extends TestCase
 
     public function test_guest_is_sent_to_login(): void
     {
-        $this->get('/moj-nalog/pretrage/')->assertRedirect(url_slash('prijava'));
+        $this->get('/moj-nalog/pretrage/')->assertRedirect(url_slash('login-registracija'));
         $this->postJson('/moj-nalog/pretrage/', ['keyword' => 'golf'])->assertUnauthorized();
         $this->assertSame(0, SavedSearch::count());
     }
@@ -30,10 +30,10 @@ class SavedSearchPagesTest extends TestCase
     public function test_guest_search_is_saved_after_login(): void
     {
         $this->post('/moj-nalog/pretrage/', ['keyword' => 'golf', 'kategorija' => 'automobili', 'name' => 'Moj golf'])
-            ->assertRedirect(url_slash('prijava'))
+            ->assertRedirect(url_slash('login-registracija'))
             ->assertSessionHas('status');
         $this->assertSame(0, SavedSearch::count());
-        $this->followRedirects($this->get('/prijava/'))->assertSee('pretragu ćemo sačuvati');
+        $this->followRedirects($this->get('/login-registracija/'))->assertSee('pretragu ćemo sačuvati');
 
         $response = $this->post('/prijava/', ['email' => $this->user->email, 'password' => 'lozinka123']);
         $response->assertRedirect(url_slash('moj-nalog/pretrage'));
@@ -50,7 +50,7 @@ class SavedSearchPagesTest extends TestCase
 
     public function test_guest_search_is_saved_after_registration(): void
     {
-        $this->post('/moj-nalog/pretrage/', ['mesto' => 'loznica'])->assertRedirect(url_slash('prijava'));
+        $this->post('/moj-nalog/pretrage/', ['mesto' => 'loznica'])->assertRedirect(url_slash('login-registracija'));
 
         $this->post('/registracija/', [
             'name' => 'Nova Korisnica', 'email' => 'nova@example.com', 'phone' => '0655415128',

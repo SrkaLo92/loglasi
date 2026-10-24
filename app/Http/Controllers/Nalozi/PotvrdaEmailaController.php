@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Nalozi;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\Auth\LoginPage;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,7 +35,7 @@ class PotvrdaEmailaController extends Controller
             event(new Verified($user));
         }
 
-        $target = $request->user()?->is($user) ? url_slash('moj-nalog') : url_slash('prijava');
+        $target = $request->user()?->is($user) ? url_slash('moj-nalog') : LoginPage::url();
 
         return redirect()->to($target)->with('status', 'Email adresa je potvrđena. Hvala!');
     }

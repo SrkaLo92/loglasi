@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Nalozi;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\EnsureNotBlocked;
 use App\Support\Auth\Accounts;
+use App\Support\Auth\LoginPage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,15 +15,18 @@ use Illuminate\View\View;
 /** Prijava i odjava na sajtu. */
 class PrijavaController extends Controller
 {
-    public function show(): View
+    /** /login-registracija/: prijava i registracija u jednoj kartici sa dva taba. */
+    public function show(Request $request): View
     {
-        return view('nalozi.prijava');
+        return view('nalozi.login-registracija', ['tab' => LoginPage::tab($request)]);
     }
 
-    /** /login-registracija/: stara adresa sa sajta, prijava i registracija na jednoj strani. */
-    public function combined(): View
+    /** GET /prijava/: 301 na tab „Prijava”, poruka (status, greške) ostaje za sledeći zahtev. */
+    public function legacy(Request $request): RedirectResponse
     {
-        return view('nalozi.login-registracija');
+        $request->session()->reflash();
+
+        return redirect()->to(LoginPage::url(LoginPage::LOGIN), 301);
     }
 
     public function store(Request $request): RedirectResponse
@@ -37,7 +41,7 @@ class PrijavaController extends Controller
         if ($user === null) {
             throw ValidationException::withMessages([
                 'email' => $error === 'account_blocked' ? EnsureNotBlocked::MESSAGE : 'Pogrešan email ili lozinka.',
-            ])->redirectTo(url()->previous(url_slash('prijava')));
+            ])->redirectTo(url()->previous(LoginPage::url(LoginPage::LOGIN)));
         }
 
         Auth::guard('web')->login($user, $request->boolean('remember'));

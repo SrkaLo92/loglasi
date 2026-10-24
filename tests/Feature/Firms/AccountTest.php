@@ -41,8 +41,8 @@ class AccountTest extends TestCase
 
     public function test_guest_is_sent_to_login_and_private_user_gets_403(): void
     {
-        $this->get('/moj-nalog/firma/')->assertRedirect(url_slash('prijava'));
-        $this->get('/moj-nalog/firma/statistika/')->assertRedirect(url_slash('prijava'));
+        $this->get('/moj-nalog/firma/')->assertRedirect(url_slash('login-registracija'));
+        $this->get('/moj-nalog/firma/statistika/')->assertRedirect(url_slash('login-registracija'));
 
         $private = User::factory()->create();
         $this->actingAs($private)->get('/moj-nalog/firma/')->assertForbidden();

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\Auth\Accounts;
 use App\Support\Auth\ApiTokens;
+use App\Support\Auth\LoginPage;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -80,6 +81,6 @@ class LozinkaController extends Controller
                 ->withErrors(['email' => __('passwords.token')]);
         }
 
-        return redirect()->to(url_slash('prijava'))->with('status', __('passwords.reset'));
+        return redirect()->to(LoginPage::url())->with('status', __('passwords.reset'));
     }
 }
