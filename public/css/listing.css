@@ -1579,3 +1579,206 @@ button.lgo-bar__btn--tel {
 		transition: none;
 	}
 }
+
+/* Full screen gallery (lightbox.js) */
+
+.lgb-lock,
+.lgb-lock body {
+	overflow: hidden;
+}
+
+.lgb {
+	position: fixed;
+	inset: 0;
+	z-index: 9997;
+	display: flex;
+	flex-direction: column;
+	background: #0d1210;
+	color: #fff;
+	opacity: 0;
+	transition: opacity .18s ease-out;
+}
+
+.lgb[hidden] {
+	display: none;
+}
+
+.lgb.is-open {
+	opacity: 1;
+}
+
+.lgb__bar {
+	position: absolute;
+	top: 0;
+	right: 0;
+	left: 0;
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: max(8px, env(safe-area-inset-top)) 8px 8px 16px;
+	background: linear-gradient(rgba(0, 0, 0, .55), rgba(0, 0, 0, 0));
+	pointer-events: none;
+}
+
+.lgb__count {
+	font-size: 15px;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.lgb__btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
+	border: 0;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, .12);
+	color: #fff;
+	cursor: pointer;
+	pointer-events: auto;
+}
+
+.lgb__btn:hover:not(:disabled) {
+	background: rgba(255, 255, 255, .22);
+}
+
+.lgb__btn:focus-visible {
+	outline: 2px solid #fff;
+	outline-offset: 2px;
+}
+
+.lgb__btn:disabled {
+	opacity: .3;
+	cursor: default;
+}
+
+.lgb__track {
+	display: flex;
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-x: auto;
+	overflow-y: hidden;
+	scroll-snap-type: x mandatory;
+	scrollbar-width: none;
+	overscroll-behavior: contain;
+}
+
+.lgb__track::-webkit-scrollbar {
+	display: none;
+}
+
+.lgb.is-zoomed .lgb__track {
+	overflow: hidden;
+	touch-action: none;
+}
+
+.lgb__slide {
+	display: flex;
+	flex: 0 0 100%;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	scroll-snap-align: center;
+	scroll-snap-stop: always;
+	touch-action: pan-x pan-y;
+}
+
+.lgb__img {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+	user-select: none;
+	-webkit-user-select: none;
+	touch-action: pan-x;
+	cursor: zoom-in;
+	transform-origin: center center;
+	transition: transform .12s ease-out;
+}
+
+.lgb.is-zoomed .lgb__img {
+	cursor: grab;
+	transition: none;
+}
+
+.lgb__nav {
+	position: absolute;
+	top: 50%;
+	z-index: 2;
+	width: 56px;
+	height: 56px;
+	transform: translateY(-50%);
+}
+
+.lgb__nav--prev {
+	left: 16px;
+}
+
+.lgb__nav--next {
+	right: 16px;
+}
+
+.lgb__thumbs {
+	display: flex;
+	flex: 0 0 auto;
+	gap: 8px;
+	justify-content: safe center;
+	overflow-x: auto;
+	padding: 10px 16px max(12px, env(safe-area-inset-bottom));
+	scrollbar-width: none;
+}
+
+.lgb__thumbs:empty,
+.lgb--single .lgb__nav {
+	display: none;
+}
+
+.lgb__thumb {
+	flex: 0 0 auto;
+	width: 64px;
+	height: 48px;
+	padding: 0;
+	border: 2px solid transparent;
+	border-radius: 8px;
+	background: none;
+	overflow: hidden;
+	opacity: .55;
+	cursor: pointer;
+}
+
+.lgb__thumb img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.lgb__thumb[aria-current="true"] {
+	border-color: #fff;
+	opacity: 1;
+}
+
+.lgb__thumb:focus-visible {
+	outline: 2px solid #fff;
+	outline-offset: 2px;
+}
+
+/* A phone: swipe instead of arrows. */
+@media (max-width: 767px), (pointer: coarse) {
+	.lgb__nav {
+		display: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.lgb,
+	.lgb__img {
+		transition: none;
+	}
+}
+
+.lgo-gallery__slide a[data-lgo-full] {
+	cursor: zoom-in;
+}

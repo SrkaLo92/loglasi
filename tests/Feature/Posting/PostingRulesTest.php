@@ -160,7 +160,14 @@ class PostingRulesTest extends PostingTestCase
         $this->assertSame(ListingStatus::Published, $this->submit($this->draft($user))->status);
     }
 
-    public function test_moderation_all_sends_everyone_to_review_except_staff(): void
+    public function test_moderation_all_is_the_default_and_covers_the_staff_too(): void
+    {
+        \App\Models\Setting::query()->where('key', 'moderation')->delete();
+        Settings::flush();
+        $this->assertSame(ListingStatus::Pending, $this->submit($this->draft($this->user()))->status);
+    }
+
+    public function test_moderation_all_sends_everyone_to_review_except_staff_posting_for_others(): void
     {
         Settings::set('moderation', 'all');
         $listing = $this->submit($this->draft($this->user()));
@@ -169,8 +176,11 @@ class PostingRulesTest extends PostingTestCase
         $this->assertNotNull($listing->expires_at);
         $this->assertSame('krecenje-stanova-i-kuca', $listing->slug);
 
+        // KP style: the admin's own listing waits too; submitting someone else's listing approves it.
         $admin = $this->user(['role' => 'admin']);
-        $this->assertSame(ListingStatus::Published, $this->submit($this->draft($admin, ['title' => 'Admin oglas']))->status);
+        $this->assertSame(ListingStatus::Pending, $this->submit($this->draft($admin, ['title' => 'Admin oglas']))->status);
+        $other = $this->draft($this->user(), ['title' => 'Oglas za korisnika']);
+        $this->assertSame(ListingStatus::Published, app(Posting::class)->submit($other, $admin)->status);
     }
 
     public function test_moderation_new_users(): void

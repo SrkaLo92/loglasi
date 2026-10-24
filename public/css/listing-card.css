@@ -459,3 +459,38 @@
 		left: auto;
 	}
 }
+
+/* A featured listing as a whole row on a two column phone grid: bigger photo and text. */
+.lc--wide {
+	border-color: #f0b48f;
+	box-shadow: 0 4px 14px rgba(184, 80, 26, .08);
+}
+
+@media (max-width: 767px) {
+	.lc--wide .lc__media {
+		aspect-ratio: 16 / 9;
+	}
+
+	.lc--wide .lc__body {
+		gap: 4px;
+		padding: 10px 12px 12px;
+	}
+
+	.lc--wide .lc__title {
+		font-size: 16px;
+		font-weight: 700;
+		min-height: 0;
+	}
+
+	.lc--wide .lc__specs {
+		font-size: 13px;
+	}
+
+	.lc--wide .lc__price {
+		font-size: 19px;
+	}
+
+	.lc--wide .lc__meta {
+		font-size: 13px;
+	}
+}

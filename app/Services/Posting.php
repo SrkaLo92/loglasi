@@ -66,13 +66,17 @@ class Posting
     /** Whether a new or substantially changed listing of this user waits for approval. */
     public function needsReview(User $user): bool
     {
+        $mode = (string) Settings::get('moderation');
+        // "all" (KP style): every listing, the staff's own too, waits for an admin.
+        if ($mode === 'all') {
+            return true;
+        }
         if ($user->isStaff()) {
             return false;
         }
 
-        return match ((string) Settings::get('moderation', 'new_users')) {
+        return match ($mode) {
             'none' => false,
-            'all' => true,
             default => $user->created_at === null
                 || $user->created_at->gt(now()->subDays(self::NEW_USER_DAYS))
                 || ! $user->isPhoneVerified(),
@@ -385,7 +389,9 @@ class Posting
             }
             $listing->rejection_reason = null;
 
-            if ($this->needsReview($actor->isStaff() ? $actor : $owner)) {
+            // Staff submitting someone else's listing approve it by doing so.
+            $reviewer = $actor->isStaff() && $actor->id !== $owner->id;
+            if (! $reviewer && $this->needsReview($owner)) {
                 $listing->status = ListingStatus::Pending;
                 $listing->expires_at = now()->addDays($this->durationDays());
                 $listing->save();

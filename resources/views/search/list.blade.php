@@ -200,7 +200,7 @@
 				@php($srXl = PremiumXl::cards($results))
 				<div class="sr-grid">
 					@foreach ($results as $listing)
-						<x-listing-card :listing="$listing" layout="list" :eager="$loop->index < 4" heading="h2" :xl="isset($srXl[$listing->id])" />
+						<x-listing-card :listing="$listing" :eager="$loop->index < 4" heading="h2" :xl="isset($srXl[$listing->id])" :wide="$listing->isFeatured()" />
 					@endforeach
 				</div>
 				@include('search.partials.pagination', ['results' => $results, 'filters' => $filters])

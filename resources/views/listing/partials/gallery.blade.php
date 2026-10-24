@@ -9,7 +9,7 @@
 		<div class="lgo-gallery__track" tabindex="0" aria-label="Fotografije, {{ $count }} ukupno" data-lgo-track>
 			@foreach ($listing->images as $i => $image)
 				<figure class="lgo-gallery__slide" id="slika-{{ $i + 1 }}" data-lgo-slide>
-					<a href="{{ $image->sizeUrl('lg') }}" target="_blank" rel="noopener" aria-label="Otvori fotografiju {{ $i + 1 }} od {{ $count }} u punoj veličini">
+					<a href="{{ $image->sizeUrl('lg') }}" target="_blank" rel="noopener" data-lgo-full="{{ $image->sizeUrl('lg') }}" data-lgo-thumb-src="{{ $image->sizeUrl('sm') }}" aria-label="Otvori galeriju, fotografija {{ $i + 1 }} od {{ $count }}">
 						@include('listing.partials.picture', [
 							'image' => $image,
 							'alt' => $image->alt ?: $listing->title.($count > 1 ? ', fotografija '.($i + 1) : ''),

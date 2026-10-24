@@ -702,9 +702,15 @@ a.sr-pages__step:hover {
 		min-width: 0;
 	}
 
+	/* Two listings in a row on a phone (KP, OLX); featured and Premium take the whole row. */
 	.sr-grid {
-		grid-template-columns: 1fr;
-		gap: 12px;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px;
+	}
+
+	.sr-grid > .lc--wide,
+	.sr-grid > .lc--xl {
+		grid-column: 1 / -1;
 	}
 
 	.sr-pages__step {

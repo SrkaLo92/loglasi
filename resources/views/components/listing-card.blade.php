@@ -4,9 +4,10 @@
     loaded the card also shows up to three field values), highlight (orange frame of the
     featured section), eager (first visible images), layout ("grid" or "list": a row on phones),
     heading (h2-h4), xl (the wide Premium XL card: two columns on desktop, bigger image,
-    "Premium" badge, description excerpt; pick the listings with PremiumXl::cards()).
+    "Premium" badge, description excerpt; pick the listings with PremiumXl::cards()),
+    wide (a featured listing on a two column phone grid takes the whole row, KP style).
 --}}
-@props(['listing', 'highlight' => false, 'eager' => false, 'layout' => 'grid', 'heading' => 'h3', 'xl' => false])
+@props(['listing', 'highlight' => false, 'eager' => false, 'layout' => 'grid', 'heading' => 'h3', 'xl' => false, 'wide' => false])
 @use('App\Support\Search\CategoryIcons')
 @use('App\Support\Search\Favorites')
 @use('App\Support\Search\ImageUrls')
@@ -40,7 +41,7 @@
 	}
 	$lcFav = auth()->check() ? app(Favorites::class)->has((int) $listing->id) : null;
 @endphp
-<article {{ $attributes->class(['lc', 'lc--featured' => $highlight && ! $lcXl, 'lc--xl' => $lcXl, 'lc--list' => $layout === 'list']) }}>
+<article {{ $attributes->class(['lc', 'lc--featured' => $highlight && ! $lcXl, 'lc--xl' => $lcXl, 'lc--list' => $layout === 'list', 'lc--wide' => $wide && ! $lcXl]) }}>
 	<a class="lc__link" href="{{ url_slash('/oglas/'.$listing->slug) }}">
 		<div class="lc__media">
 			@if ($lcImage)

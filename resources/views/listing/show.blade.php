@@ -9,6 +9,7 @@
 
 @push('scripts')
 <script src="{{ asset_v('js/listing.js') }}" defer></script>
+<script src="{{ asset_v('js/lightbox.js') }}" defer></script>
 @endpush
 
 @section('content')

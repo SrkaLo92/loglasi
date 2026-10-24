@@ -18,7 +18,7 @@ class Settings
         'eur_rate' => 117.2,               // 1 € = ... din
         'private_active_limit' => 5,       // active listings a private user may have for free
         'listing_duration_days' => 30,     // oglas traje mesec dana, obnova besplatna
-        'moderation' => 'new_users',       // all | new_users | none
+        'moderation' => 'all',             // all | new_users | none (all: every listing waits for an admin)
         'founding_firms_total' => 30,      // prvih 30 firmi besplatno
         'contact_email' => 'office@loglasi.rs',
         'contact_phone' => '+381655415128',     // footer and FAQ, E.164
