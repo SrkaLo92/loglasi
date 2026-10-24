@@ -34,7 +34,19 @@
 					</li>
 				@endforeach
 			</ol>
-			<p class="pst-steps__mobile">Korak {{ array_search($step, array_keys($steps)) + 1 }} od {{ count($steps) }}: <strong>{{ $steps[$step][1] }}</strong></p>
+			@php($pstAt = array_search($step, array_keys($steps)))
+			@php($pstNext = array_values($steps)[$pstAt + 1][1] ?? null)
+			<div class="pst-steps__mobile">
+				<p class="pst-steps__now">Korak {{ $pstAt + 1 }} od {{ count($steps) }}: <strong>{{ $steps[$step][1] }}</strong></p>
+				<div class="pst-steps__bar" aria-hidden="true">
+					@foreach ($steps as $key => $item)
+						<span class="{{ $loop->index < $pstAt ? 'is-done' : ($loop->index === $pstAt ? 'is-current' : '') }}"></span>
+					@endforeach
+				</div>
+				@if ($pstNext)
+					<p class="pst-steps__next">Sledeće: {{ $pstNext }}</p>
+				@endif
+			</div>
 		</nav>
 	@endif
 

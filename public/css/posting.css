@@ -101,6 +101,8 @@ fieldset.pst-field > legend { margin-bottom: 6px; }
 .pst-btn--danger { background: #fff; border-color: var(--lg-error); color: var(--lg-error); }
 .pst-btn--danger:hover { background: #fdf0ee; border-color: var(--lg-error); color: var(--lg-error); }
 .pst-btn--sm { min-height: 44px; padding: 8px 14px; font-size: 14px; }
+.pst-btn--ghost { background: #fff; border-color: var(--lg-border); color: var(--lg-text-2); }
+.pst-btn--ghost:hover, .pst-more[open] > .pst-btn--ghost { background: var(--lg-bg); border-color: var(--lg-input); color: var(--lg-text); }
 .pst-link { display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; font-weight: 700; }
 .pst-link--danger { color: var(--lg-error); }
 .pst-link--danger:hover { color: #8a1c12; }
@@ -256,6 +258,24 @@ fieldset.pst-field > legend { margin-bottom: 6px; }
 .pst-mine__stats .lg-icon { color: var(--lg-green); }
 .pst-mine__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 8px; }
 .pst-mine__actions form { margin: 0; }
+.pst-more { position: relative; }
+.pst-more > summary { list-style: none; gap: 6px; cursor: pointer; }
+.pst-more > summary::-webkit-details-marker { display: none; }
+.pst-more__dots { letter-spacing: 1px; font-weight: 800; }
+.pst-more__menu {
+	position: absolute; z-index: 20; top: calc(100% + 6px); right: 0; min-width: 190px; padding: 6px;
+	background: #fff; border: 1px solid var(--lg-border); border-radius: 12px; box-shadow: 0 10px 30px rgba(20, 40, 30, .14);
+}
+.pst-more__menu a,
+.pst-more__menu button {
+	display: flex; align-items: center; width: 100%; min-height: 44px; padding: 0 12px; border: 0; border-radius: 8px;
+	background: none; color: var(--lg-text); font: inherit; font-size: 15px; font-weight: 600; text-align: left; text-decoration: none; cursor: pointer;
+}
+.pst-more__menu a:hover,
+.pst-more__menu button:hover { background: var(--lg-bg); }
+.pst-more__menu .is-danger { color: #b3261e; }
+.pst-more.is-up .pst-more__menu { top: auto; bottom: calc(100% + 6px); }
+.pst-more__menu form { margin: 0; }
 
 .pst-confirm { max-width: 560px; margin: 24px auto; }
 .pst-confirm h1 { font-size: 24px; margin-bottom: 12px; }
@@ -279,8 +299,14 @@ fieldset.pst-field > legend { margin-bottom: 6px; }
 	.pst-card { padding: 16px; }
 	.pst-steps ol { display: none; }
 	.pst-steps__mobile { display: block; }
-	.pst-steps { margin-bottom: 12px; padding: 10px 14px; border-radius: 10px; background: #fff; border: 1px solid var(--lg-border); }
-	.pst-steps__mobile { margin: 0; }
+	.pst-steps { margin-bottom: 14px; }
+	.pst-steps__now { margin: 0 0 8px; font-size: 14px; color: var(--lg-muted); }
+	.pst-steps__now strong { color: var(--lg-text); }
+	.pst-steps__bar { display: flex; gap: 4px; }
+	.pst-steps__bar span { flex: 1 1 0; height: 4px; border-radius: 2px; background: var(--lg-border); }
+	.pst-steps__bar .is-done { background: var(--lg-green); }
+	.pst-steps__bar .is-current { background: linear-gradient(90deg, var(--lg-green) 50%, var(--lg-border) 50%); }
+	.pst-steps__next { margin: 6px 0 0; font-size: 13px; color: var(--lg-muted); }
 	.pst-grid { grid-template-columns: minmax(0, 1fr); }
 	.pst-side { position: static; order: -1; display: none; }
 	.pst-cats { grid-template-columns: minmax(0, 1fr); }
@@ -294,6 +320,11 @@ fieldset.pst-field > legend { margin-bottom: 6px; }
 	.pst-submit .pst-help { text-align: left; }
 	.pst-photos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	.pst-mine__item { grid-template-columns: 104px minmax(0, 1fr); gap: 12px; padding: 12px; }
+	/* Buttons take the full card width under the photo, in one row. */
+	.pst-mine__actions { flex-wrap: nowrap; margin-left: -116px; padding-top: 10px; border-top: 1px solid var(--lg-border); }
+	.pst-mine__actions > a, .pst-mine__actions > form { flex: 1 1 0; }
+	.pst-mine__actions > form .pst-btn, .pst-mine__actions > a.pst-btn { width: 100%; }
+	.pst-more { flex: 0 0 auto; }
 	.pst-kpis { grid-template-columns: minmax(0, 1fr); gap: 0; }
 	.pst-head--row .pst-btn { width: 100%; }
 }

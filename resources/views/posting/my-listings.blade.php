@@ -10,7 +10,6 @@
 <div class="pst lg-wrap">
 	<header class="pst-head pst-head--row">
 		<div>
-			<p class="pst-head__back"><a href="{{ url_slash('moj-nalog') }}">Moj nalog</a></p>
 			<h1>{{ \App\Support\Seo::get()->getH1() }}</h1>
 			@unless ($limits['unlimited'])
 				<p class="pst-help">Aktivni oglasi: {{ $limits['used_this_month'] }} od {{ $limits['monthly_limit'] }} besplatnih.</p>
@@ -100,12 +99,20 @@
 							@endif
 							@if ($item->status === ListingStatus::Published && ! $expired)
 								<form method="post" action="{{ url_slash('moj-nalog/oglasi/'.$item->id.'/prodato') }}">@csrf<button class="pst-btn pst-btn--sm pst-btn--line" type="submit">Prodato</button></form>
-								<form method="post" action="{{ url_slash('moj-nalog/oglasi/'.$item->id.'/deaktivacija') }}">@csrf<button class="pst-btn pst-btn--sm pst-btn--line" type="submit">Skini sa sajta</button></form>
 							@endif
-							@if ($item->status !== ListingStatus::Draft)
-								<a class="pst-link" href="{{ url_slash('moj-nalog/oglasi/'.$item->id.'/statistika') }}">Statistika</a>
-							@endif
-							<a class="pst-link pst-link--danger" href="{{ url_slash('moj-nalog/oglasi/'.$item->id.'/brisanje') }}">Obriši</a>
+							{{-- Rarely used actions sit in a small menu so the card keeps one clear row of buttons. --}}
+							<details class="pst-more" data-pst-more>
+								<summary class="pst-btn pst-btn--sm pst-btn--ghost" aria-label="Još radnji za oglas {{ $item->title }}">Još<span aria-hidden="true" class="pst-more__dots">···</span></summary>
+								<div class="pst-more__menu">
+									@if ($item->status !== ListingStatus::Draft)
+										<a href="{{ url_slash('moj-nalog/oglasi/'.$item->id.'/statistika') }}">Statistika</a>
+									@endif
+									@if ($item->status === ListingStatus::Published && ! $expired)
+										<form method="post" action="{{ url_slash('moj-nalog/oglasi/'.$item->id.'/deaktivacija') }}">@csrf<button type="submit">Skini sa sajta</button></form>
+									@endif
+									<a class="is-danger" href="{{ url_slash('moj-nalog/oglasi/'.$item->id.'/brisanje') }}">Obriši</a>
+								</div>
+							</details>
 						</div>
 					</div>
 				</li>
@@ -114,4 +121,20 @@
 		{{ $listings->links() }}
 	@endif
 </div>
+<script>
+// Only one "Još" menu open at a time; a tap outside closes it. Near the bottom of the screen the menu opens upwards.
+Array.prototype.forEach.call(document.querySelectorAll('[data-pst-more]'), function (d) {
+	d.addEventListener('toggle', function () {
+		if (!d.open) { return; }
+		d.classList.remove('is-up');
+		var menu = d.querySelector('.pst-more__menu');
+		if (menu.getBoundingClientRect().bottom > window.innerHeight - 90) { d.classList.add('is-up'); }
+	});
+});
+document.addEventListener('click', function (ev) {
+	Array.prototype.forEach.call(document.querySelectorAll('[data-pst-more][open]'), function (d) {
+		if (!d.contains(ev.target)) { d.removeAttribute('open'); }
+	});
+});
+</script>
 @endsection

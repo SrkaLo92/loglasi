@@ -7,9 +7,6 @@
 
 @section('content')
 <div class="lgpay lg-wrap">
-	<nav class="lgpay-crumbs" aria-label="Putanja">
-		<a href="{{ url_slash('moj-nalog') }}">Moj nalog</a> <span aria-hidden="true">›</span> <span>Moje narudžbine</span>
-	</nav>
 	<header class="lgpay-head">
 		<h1>Moje narudžbine</h1>
 		<p class="lgpay-lead">Promocije oglasa, dodatni oglasi i paketi za firme plaćaju se uplatom na račun. Usluga se uključuje čim administrator vidi uplatu.</p>

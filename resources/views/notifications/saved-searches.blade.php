@@ -7,7 +7,6 @@
 
 @section('content')
 <div class="lgn lgt lg-wrap">
-	<a class="lgt-back" href="{{ url_slash('moj-nalog') }}">← Moj nalog</a>
 	<h1>Sačuvane pretrage</h1>
 	<p class="lgn-lead">Kad stigne nov oglas koji odgovara pretrazi, javljamo vam mejlom i u aplikaciji, najviše jednom dnevno po pretrazi.</p>
 

@@ -7,7 +7,6 @@
 
 @section('content')
 <div class="lgm lg-wrap">
-	@include('messages.partials.tabs', ['active' => 'favorites'])
 	<h1>Omiljeni oglasi</h1>
 	@include('messages.partials.status')
 

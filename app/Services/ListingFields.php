@@ -39,6 +39,16 @@ class ListingFields
         'marka_automobila' => ['volkswagen', 'opel', 'audi', 'bmw', 'mercedes-benz', 'skoda', 'peugeot', 'renault', 'fiat', 'ford', 'toyota', 'zastava'],
     ];
 
+    /**
+     * Key facts shown right under the price on the listing page, like the spec strip on polovniautomobili
+     * and AutoScout24: the first four of these that the listing has, in this order.
+     */
+    public const HIGHLIGHTS = [
+        'godina', 'kilometraza', 'gorivo', 'snaga', 'menjac',
+        'velicina_nekretnine', 'sobe', 'sprat', 'godina_izgradnje', 'povrsina_placa',
+        'memorija', 'ram', 'nosivost', 'radni_sati', 'stanje',
+    ];
+
     public function __construct(private readonly Catalog $catalog) {}
 
     // ---------------------------------------------------------------- forma

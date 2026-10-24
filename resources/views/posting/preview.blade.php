@@ -66,7 +66,7 @@
 		@csrf
 		<p class="pst-help">
 			@if ($needsReview)
-				Oglas će biti vidljiv kad ga pregledamo. Novi nalozi i nalozi bez potvrđenog telefona prolaze proveru.
+				Oglas će biti vidljiv kad ga pregledamo i odobrimo. Status pratite u „Mojim oglasima”, na kartici „Na čekanju”.
 			@else
 				Oglas će odmah biti vidljiv na sajtu i aktivan {{ app(\App\Services\Posting::class)->durationDays() }} dana. Obnova je besplatna.
 			@endif

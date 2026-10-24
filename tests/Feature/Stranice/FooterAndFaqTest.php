@@ -30,7 +30,7 @@ class FooterAndFaqTest extends TestCase
             ->assertSee('+381 65 541 5128')
             ->assertSee('mailto:'.Settings::get('contact_email'), false)
             ->assertSee('15300 Loznica, Srbija')
-            ->assertSee('Prijavite se da biste primali najnovija ažuriranja i vesti')
+            ->assertSee('Imate nešto za prodaju?')
             ->assertSee('Pratite nas')
             ->assertSee('https://www.tiktok.com/@loglasi.rs', false)
             ->assertSee('Korisni linkovi')

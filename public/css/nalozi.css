@@ -188,3 +188,27 @@
 	height: 1px;
 	overflow: hidden;
 }
+
+/* File picker that looks like the other buttons instead of the browser's grey "Choose File". */
+.lgn-field input[type="file"] {
+	width: 100%;
+	padding: 8px;
+	border: 1px dashed #b9d8cc;
+	border-radius: 10px;
+	background: var(--lg-mint);
+	font: inherit;
+	font-size: 14px;
+	color: var(--lg-text-2);
+}
+.lgn-field input[type="file"]::file-selector-button {
+	margin-right: 12px;
+	min-height: 40px;
+	padding: 0 16px;
+	border: 1px solid var(--lg-green);
+	border-radius: 8px;
+	background: #fff;
+	color: var(--lg-green-dark);
+	font: inherit;
+	font-weight: 700;
+	cursor: pointer;
+}

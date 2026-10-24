@@ -56,7 +56,7 @@
 
 		<div class="pst-field">
 			<label for="pst-location">Mesto</label>
-			<select id="pst-location" name="location_id" required data-pst-preview="location"
+			<select id="pst-location" name="location_id" required data-pick data-pst-preview="location"
 				@if ($errors->has('location_id')) aria-invalid="true" aria-describedby="pst-location-error" @endif>
 				<option value="">Izaberite mesto</option>
 				@foreach ($locations as $location)

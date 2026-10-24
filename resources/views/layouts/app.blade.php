@@ -21,6 +21,9 @@
 <a class="lg-skip" href="#sadrzaj">Pređi na sadržaj</a>
 @include('partials.header')
 <main id="sadrzaj" tabindex="-1">
+@if (auth()->check() && request()->is('moj-nalog', 'moj-nalog/*') && ! request()->is('moj-nalog/obavestenja/odjava/*'))
+	@include('partials.account-tabs')
+@endif
 @yield('content')
 </main>
 @include('partials.footer')

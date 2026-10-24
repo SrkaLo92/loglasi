@@ -10,6 +10,8 @@
 		'kontakt' => 'Kontakt',
 		'faq' => 'Česta pitanja',
 		'cenovnik' => 'Cenovnik',
+	];
+	$lgLegalLinks = [
 		'privatnost' => 'Politika privatnosti',
 		'brisanje' => 'Brisanje ličnih podataka',
 		'uslovi' => 'Uslovi korišćenja',
@@ -18,6 +20,8 @@
 		'reklamacije' => 'Reklamacije i povraćaj novca',
 	];
 	$lgCurrent = url_slash(request()->path());
+	// No "post a listing" band while posting or inside the account: the user is already doing it.
+	$lgFooterCta = ! request()->is('postavi-oglas*', 'moj-nalog*');
 	$lgFooter = FooterSections::get();
 	$lgPhone = (string) Settings::get('contact_phone');
 	$lgEmail = (string) Settings::get('contact_email');
@@ -29,10 +33,15 @@
 	];
 @endphp
 <footer class="lg-footer">
-	<div class="lg-wrap lg-footer__vrh">
-		<p class="lg-footer__vesti">Prijavite se da biste primali najnovija ažuriranja i vesti</p>
-		<a class="lg-btn lg-btn--orange lg-footer__postavi" href="{{ url_slash('/postavi-oglas') }}">{{ Ikonice::svg('plus', 18) }}Postavite oglas</a>
-	</div>
+	@if ($lgFooterCta)
+		<div class="lg-wrap lg-footer__vrh">
+			<div>
+				<p class="lg-footer__vesti">Imate nešto za prodaju?</p>
+				<p class="lg-footer__podnaslov">Postavite oglas besplatno, za par minuta, i javite se kupcima iz svog kraja.</p>
+			</div>
+			<a class="lg-btn lg-btn--orange lg-footer__postavi" href="{{ url_slash('/postavi-oglas') }}">{{ Ikonice::svg('plus', 18) }}Postavite oglas</a>
+		</div>
+	@endif
 
 	<div class="lg-wrap lg-footer__in">
 		<div class="lg-footer__col lg-footer__brend">
@@ -51,28 +60,41 @@
 			</ul>
 		</div>
 
-		<nav class="lg-footer__col" aria-labelledby="lg-footer-linkovi">
-			<h2 class="lg-footer__naslov" id="lg-footer-linkovi">Korisni linkovi</h2>
-			<ul class="lg-footer__lista">
-				@foreach ($lgFooterLinks as $key => $label)
-					@php($href = Navigacija::link($key))
-					<li><a href="{{ $href }}" @if ($href === $lgCurrent) aria-current="page" @endif>{{ $label }}</a></li>
-				@endforeach
-			</ul>
+		<nav class="lg-footer__col lg-footer__grupe" aria-label="Linkovi u podnožju">
+			<details class="lg-footer__grupa" open data-lg-fold>
+				<summary class="lg-footer__naslov">Korisni linkovi</summary>
+				<ul class="lg-footer__lista">
+					@foreach ($lgFooterLinks as $key => $label)
+						@php($href = Navigacija::link($key))
+						<li><a href="{{ $href }}" @if ($href === $lgCurrent) aria-current="page" @endif>{{ $label }}</a></li>
+					@endforeach
+				</ul>
+			</details>
+			<details class="lg-footer__grupa" open data-lg-fold>
+				<summary class="lg-footer__naslov">Pravne informacije</summary>
+				<ul class="lg-footer__lista">
+					@foreach ($lgLegalLinks as $key => $label)
+						@php($href = Navigacija::link($key))
+						<li><a href="{{ $href }}" @if ($href === $lgCurrent) aria-current="page" @endif>{{ $label }}</a></li>
+					@endforeach
+				</ul>
+			</details>
 		</nav>
 
-		<nav class="lg-footer__col" aria-labelledby="lg-footer-kategorije">
-			<h2 class="lg-footer__naslov" id="lg-footer-kategorije">Kategorije</h2>
-			<ul class="lg-footer__lista">
-				@foreach ($lgFooter['categories'] as $item)
-					<li><a href="{{ $item['url'] }}">{{ $item['name'] }}</a></li>
-				@endforeach
-				<li><a class="lg-footer__sve" href="{{ url_slash('/oglasi') }}">Svi oglasi</a></li>
-			</ul>
+		<nav class="lg-footer__col" aria-label="Kategorije">
+			<details class="lg-footer__grupa" open data-lg-fold>
+				<summary class="lg-footer__naslov">Kategorije</summary>
+				<ul class="lg-footer__lista">
+					@foreach ($lgFooter['categories'] as $item)
+						<li><a href="{{ $item['url'] }}">{{ $item['name'] }}</a></li>
+					@endforeach
+					<li><a class="lg-footer__sve" href="{{ url_slash('/oglasi') }}">Svi oglasi</a></li>
+				</ul>
+			</details>
 		</nav>
 
-		<div class="lg-footer__col">
-			<h2 class="lg-footer__naslov" id="lg-footer-najnoviji">Najnoviji oglasi</h2>
+		<div class="lg-footer__col lg-footer__zadnja">
+			<h2 class="lg-footer__naslov lg-footer__naslov--najnoviji" id="lg-footer-najnoviji">Najnoviji oglasi</h2>
 			<ul class="lg-footer__lista lg-footer__najnoviji" data-lg-najnoviji="{{ url_slash('/podnozje/najnoviji-oglasi') }}" aria-labelledby="lg-footer-najnoviji">
 				<li><a class="lg-footer__sve" href="{{ url_slash('/oglasi') }}">Pogledajte sve oglase</a></li>
 			</ul>
@@ -91,6 +113,12 @@
 	</div>
 </footer>
 <script>
+(function () {
+	// Link groups fold on phones and stay open on bigger screens.
+	if (window.matchMedia && window.matchMedia('(max-width: 767.98px)').matches) {
+		Array.prototype.forEach.call(document.querySelectorAll('[data-lg-fold]'), function (d) { d.removeAttribute('open'); });
+	}
+})();
 (function () {
 	var list = document.querySelector('[data-lg-najnoviji]');
 	if (!list || !window.fetch) return;

@@ -1,5 +1,11 @@
 @extends('layouts.app')
 @include('nalozi.partials.head')
+@push('head')
+<link rel="stylesheet" href="{{ asset_v('css/pick.css') }}">
+@endpush
+@push('scripts')
+<script src="{{ asset_v('js/pick.js') }}" defer></script>
+@endpush
 @php
 	$title = 'Moj nalog | loglasi.rs';
 	$robots = 'noindex, follow';
@@ -29,10 +35,6 @@
 			</p>
 			<p class="lgn-head__meta">Na sajtu od {{ $user->created_at->format('j. n. Y.') }}</p>
 		</div>
-		<form method="post" action="{{ url_slash('odjava') }}" class="lgn-head__logout">
-			@csrf
-			<button class="lgn-btn lgn-btn--line" type="submit">Odjavi se</button>
-		</form>
 	</header>
 
 	@include('nalozi.partials.status')
@@ -94,7 +96,7 @@
 				</div>
 				<div class="lgn-field">
 					<label for="nalog-mesto">Mesto</label>
-					<select id="nalog-mesto" name="location_id">
+					<select id="nalog-mesto" name="location_id" data-pick>
 						<option value="">Nije izabrano</option>
 						@foreach ($locations as $location)
 							<option value="{{ $location->id }}" @selected((int) old('location_id', $user->location_id) === $location->id)>{{ $location->name }}</option>
@@ -152,10 +154,13 @@
 			</form>
 		</section>
 
-		<section class="lgn-card" aria-labelledby="lgn-obavestenja">
-			<h2 id="lgn-obavestenja">Obaveštenja i pretrage</h2>
-			<p><a href="{{ url_slash('moj-nalog/obavestenja') }}">Podešavanja obaveštenja</a></p>
-			<p><a href="{{ url_slash('moj-nalog/pretrage') }}">Sačuvane pretrage</a></p>
+		<section class="lgn-card" aria-labelledby="lgn-odjava">
+			<h2 id="lgn-odjava">Odjava</h2>
+			<p>Odjavite se na ovom uređaju. Oglasi i poruke ostaju sačuvani.</p>
+			<form method="post" action="{{ url_slash('odjava') }}">
+				@csrf
+				<button class="lgn-btn lgn-btn--line" type="submit">Odjavi se</button>
+			</form>
 		</section>
 
 		<section class="lgn-card lgn-danger" aria-labelledby="lgn-brisanje">

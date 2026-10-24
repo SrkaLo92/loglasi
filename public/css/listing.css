@@ -997,12 +997,14 @@
 		display: contents;
 	}
 
+	/* Phone order, as buyers read it: photos, price and contact, details, description, then the seller,
+	   the loan calculator, safety tips and sharing. */
 	.lgo-o1 { order: 1; }
 	.lgo-o3 { order: 3; }
-	.lgo-o4 { order: 4; }
-	.lgo-o5 { order: 5; }
-	.lgo-o6 { order: 6; }
-	.lgo-o7 { order: 7; }
+	.lgo-o6 { order: 4; }
+	.lgo-o7 { order: 5; }
+	.lgo-o4 { order: 6; }
+	.lgo-o5 { order: 7; }
 	.lgo-o8 { order: 8; }
 	.lgo-o10 { order: 10; }
 }
@@ -1782,3 +1784,19 @@ button.lgo-bar__btn--tel {
 .lgo-gallery__slide a[data-lgo-full] {
 	cursor: zoom-in;
 }
+
+/* Key facts under the price */
+.lgo-facts {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 8px;
+	margin: 12px 0 4px;
+}
+.lgo-facts__item {
+	min-width: 0;
+	padding: 8px 12px;
+	border-radius: 10px;
+	background: var(--lg-bg);
+}
+.lgo-facts dt { font-size: 12px; color: var(--lg-muted); }
+.lgo-facts dd { margin: 2px 0 0; font-size: 15px; font-weight: 700; color: var(--lg-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

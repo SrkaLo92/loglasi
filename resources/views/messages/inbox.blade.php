@@ -9,7 +9,6 @@
 
 @section('content')
 <div class="lgm lg-wrap">
-	@include('messages.partials.tabs', ['active' => 'messages'])
 	<h1>Poruke</h1>
 	@include('messages.partials.status')
 

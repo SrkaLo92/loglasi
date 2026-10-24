@@ -794,9 +794,13 @@
 		justify-content: center;
 	}
 
+	/* One compact list instead of six tall cards: icon on the left, text on the right. */
 	.hm-why {
 		grid-template-columns: 1fr;
-		gap: 12px;
+		gap: 0;
+		border: 1px solid var(--lg-border);
+		border-radius: var(--lg-radius);
+		background: #fff;
 	}
 
 	.hm-faq {
@@ -812,7 +816,39 @@
 	}
 
 	.hm-why__item {
-		padding: 20px;
+		display: grid;
+		grid-template-columns: 40px minmax(0, 1fr);
+		column-gap: 14px;
+		padding: 16px;
+		border: 0;
+		border-radius: 0;
+		background: none;
+	}
+
+	.hm-why__item + .hm-why__item {
+		border-top: 1px solid var(--lg-border);
+	}
+
+	.hm-why__icon {
+		grid-row: span 2;
+		width: 40px;
+		height: 40px;
+		border-radius: 10px;
+	}
+
+	.hm-why__icon svg {
+		width: 20px;
+		height: 20px;
+	}
+
+	.hm-why__title {
+		margin: 0 0 2px;
+		font-size: 16px;
+	}
+
+	.hm-why__item p {
+		font-size: 14px;
+		line-height: 1.5;
 	}
 }
 

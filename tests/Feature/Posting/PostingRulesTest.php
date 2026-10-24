@@ -4,6 +4,7 @@ namespace Tests\Feature\Posting;
 
 use App\Enums\ListingStatus;
 use App\Models\Listing;
+use App\Models\Setting;
 use App\Services\ListingImages;
 use App\Services\Posting;
 use App\Services\PostingRefused;
@@ -162,7 +163,7 @@ class PostingRulesTest extends PostingTestCase
 
     public function test_moderation_all_is_the_default_and_covers_the_staff_too(): void
     {
-        \App\Models\Setting::query()->where('key', 'moderation')->delete();
+        Setting::query()->where('key', 'moderation')->delete();
         Settings::flush();
         $this->assertSame(ListingStatus::Pending, $this->submit($this->draft($this->user()))->status);
     }

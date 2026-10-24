@@ -337,7 +337,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	padding-bottom: 28px;
 	border-bottom: 1px solid var(--lg-footer-line);
 }
-.lg-footer__vesti { margin: 0; color: #fff; font-size: 18px; font-weight: 700; line-height: 1.4; }
+.lg-footer__vesti { margin: 0; color: #fff; font-size: 20px; font-weight: 800; line-height: 1.3; }
+.lg-footer__podnaslov { margin: 4px 0 0; font-size: 15px; line-height: 1.5; }
 .lg-footer a.lg-footer__postavi,
 .lg-footer a.lg-footer__postavi:visited { color: #fff; text-decoration: none; }
 .lg-footer__in {
@@ -366,6 +367,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .lg-footer__kontakt span { display: inline-flex; align-items: center; min-height: 44px; overflow-wrap: anywhere; }
 .lg-footer__naslov { margin: 4px 0 10px; color: #fff; font-size: 16px; font-weight: 800; }
 .lg-footer__naslov--mreze { margin-top: 18px; }
+/* Link groups: plain headings on a computer, folding rows on a phone. */
+.lg-footer__grupe { display: grid; gap: 18px; align-content: start; }
+.lg-footer__grupa > summary { display: block; list-style: none; pointer-events: none; }
+.lg-footer__grupa > summary::-webkit-details-marker { display: none; }
 .lg-footer__lista { margin: 0; padding: 0; list-style: none; }
 .lg-footer__lista a { display: inline-flex; align-items: center; min-height: 44px; font-size: 15px; }
 .lg-footer__lista a[aria-current="page"] { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
@@ -402,6 +407,41 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 @media (max-width: 1100px) {
 	.lg-footer__in { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Navigacija naloga ---------------------------------------------------- */
+
+.lg-acct { max-width: 1040px; margin-top: 20px; margin-bottom: -4px; }
+.lg-acct__list {
+	display: flex;
+	gap: 6px;
+	margin: 0;
+	padding: 0 0 2px;
+	list-style: none;
+	overflow-x: auto;
+	scrollbar-width: none;
+}
+.lg-acct__list::-webkit-scrollbar { display: none; }
+.lg-acct__list a,
+.lg-acct__list a:visited {
+	display: inline-flex;
+	align-items: center;
+	min-height: 40px;
+	padding: 0 16px;
+	border: 1px solid var(--lg-border);
+	border-radius: 999px;
+	background: #fff;
+	color: var(--lg-text-2);
+	font-size: 15px;
+	font-weight: 600;
+	white-space: nowrap;
+	text-decoration: none;
+}
+.lg-acct__list a:hover { border-color: var(--lg-green); color: var(--lg-green-dark); }
+.lg-acct__list a[aria-current="page"] { border-color: var(--lg-green); background: var(--lg-green); color: #fff; }
+@media (max-width: 767.98px) {
+	.lg-acct { margin-top: 14px; margin-bottom: -8px; padding-right: 0; }
+	.lg-acct__list { padding-right: var(--lg-gutter); }
 }
 
 /* Donja navigacija (samo telefon) -------------------------------------- */
@@ -453,11 +493,41 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 	.lg-footer { margin-top: 32px; }
 	.lg-footer__vrh { padding-top: 24px; padding-bottom: 24px; }
-	.lg-footer__vesti { font-size: 16px; }
-	.lg-footer__in { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 16px; padding-top: 32px; padding-bottom: 24px; }
-	.lg-footer__brend, .lg-footer__col:last-child { grid-column: 1 / -1; }
-	.lg-footer__lista a { font-size: 14px; }
-	.lg-footer__naslov { margin-bottom: 4px; }
+	.lg-footer__vesti { font-size: 18px; }
+	.lg-footer__podnaslov { font-size: 14px; }
+	.lg-footer__postavi { width: 100%; justify-content: center; }
+	.lg-footer__in { grid-template-columns: minmax(0, 1fr); gap: 0; padding-top: 28px; padding-bottom: 16px; }
+	.lg-footer__brend { gap: 6px; padding-bottom: 20px; }
+	.lg-footer__kontakt a, .lg-footer__kontakt span { min-height: 36px; }
+	.lg-footer__grupe { gap: 0; }
+	.lg-footer__grupa { border-top: 1px solid var(--lg-footer-line); }
+	.lg-footer__grupa > summary {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		min-height: 52px;
+		margin: 0;
+		pointer-events: auto;
+		cursor: pointer;
+	}
+	.lg-footer__grupa > summary::after {
+		content: "";
+		width: 9px;
+		height: 9px;
+		margin-right: 4px;
+		border-right: 2px solid currentColor;
+		border-bottom: 2px solid currentColor;
+		transform: rotate(45deg) translateY(-3px);
+		transition: transform .2s;
+	}
+	.lg-footer__grupa[open] > summary::after { transform: rotate(-135deg) translate(-2px, -1px); }
+	.lg-footer__grupa > .lg-footer__lista { padding-bottom: 10px; }
+	.lg-footer__lista a { font-size: 15px; }
+	.lg-footer__zadnja { padding-top: 20px; border-top: 1px solid var(--lg-footer-line); }
+	/* The newest listings are all over the page already; on a phone the footer keeps only the social links. */
+	.lg-footer__naslov--najnoviji, .lg-footer__najnoviji { display: none; }
+	.lg-footer__naslov--mreze { margin-top: 0; }
+	.lg-footer__dno { font-size: 13px; }
 
 	.lg-mnav {
 		display: block;

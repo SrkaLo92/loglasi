@@ -12,6 +12,19 @@
 			<span class="lgo-badge lgo-badge--zamena">{{ Icons::listing('swap') }}Moguća zamena</span>
 		@endif
 	</div>
+	@php
+		$lgoFacts = collect($fieldValues ?? [])
+			->filter(fn ($f) => in_array($f['key'], \App\Services\ListingFields::HIGHLIGHTS, true) && ($f['items'] ?? []) === [])
+			->sortBy(fn ($f) => array_search($f['key'], \App\Services\ListingFields::HIGHLIGHTS, true))
+			->take(4);
+	@endphp
+	@if ($lgoFacts->isNotEmpty())
+		<dl class="lgo-facts">
+			@foreach ($lgoFacts as $fact)
+				<div class="lgo-facts__item"><dt>{{ $fact['label'] }}</dt><dd>{{ $fact['display'] }}</dd></div>
+			@endforeach
+		</dl>
+	@endif
 	<p class="lgo-contact__meta">
 		@if ($listing->location)
 			<span class="lgo-contact__m">{{ Icons::listing('pin') }}<span>{{ $listing->location->name }}</span></span>

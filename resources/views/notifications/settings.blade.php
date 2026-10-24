@@ -7,7 +7,6 @@
 
 @section('content')
 <div class="lgn lgt lg-wrap">
-	<a class="lgt-back" href="{{ url_slash('moj-nalog') }}">← Moj nalog</a>
 	<h1>Obaveštenja</h1>
 	<p class="lgn-lead">Izaberite o čemu želite da vas obaveštavamo mejlom na <strong>{{ $user->email }}</strong> i u aplikaciji.</p>
 
@@ -21,11 +20,13 @@
 			<ul class="lgt-toggles">
 				@foreach ($labels as $key => $item)
 					<li>
-						<label class="lgn-check" for="obavestenje-{{ $key }}">
-							<input id="obavestenje-{{ $key }}" type="checkbox" name="{{ $key }}" value="1" @checked($values[$key]) aria-describedby="obavestenje-{{ $key }}-pomoc">
-							<span>{{ $item['label'] }}</span>
+						<label class="lgt-switch" for="obavestenje-{{ $key }}">
+							<span class="lgt-switch__text">
+								<span class="lgt-switch__label">{{ $item['label'] }}</span>
+								<span class="lgn-help" id="obavestenje-{{ $key }}-pomoc">{{ $item['help'] }}</span>
+							</span>
+							<input id="obavestenje-{{ $key }}" type="checkbox" role="switch" name="{{ $key }}" value="1" @checked($values[$key]) aria-describedby="obavestenje-{{ $key }}-pomoc">
 						</label>
-						<p class="lgn-help" id="obavestenje-{{ $key }}-pomoc">{{ $item['help'] }}</p>
 					</li>
 				@endforeach
 			</ul>
