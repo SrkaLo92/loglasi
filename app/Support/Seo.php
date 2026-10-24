@@ -620,6 +620,11 @@ class Seo
             'twitter:image' => $images[0] ?? null,
         ]);
 
+        // Staging and local copies stay out of search engines whatever the page says.
+        if (! config('seo.indexable')) {
+            $indexable = false;
+        }
+
         return [
             'title' => $title,
             'description' => $description,

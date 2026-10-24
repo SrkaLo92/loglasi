@@ -124,6 +124,15 @@ class SeoHeadTest extends SeoTestCase
         $this->assertStringContainsString('{search_term_string}', $website['potentialAction']['target']['urlTemplate']);
     }
 
+    public function test_staging_copy_is_never_indexable(): void
+    {
+        config(['seo.indexable' => false]);
+
+        $response = $this->get('/')->assertOk();
+
+        $this->assertSame('noindex, follow', $this->robots($response));
+    }
+
     public function test_canonical_never_uses_request_domain_or_tracking_params(): void
     {
         $response = $this->get('http://loglasirs.local/?utm_source=fb&fbclid=1');
