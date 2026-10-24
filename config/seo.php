@@ -102,6 +102,7 @@ return [
             'poruke' => '/moj-nalog/poruke/',
             'listings' => '/moj-nalog/oglasi/',
             'oglasi' => '/moj-nalog/oglasi/',
+            'lista' => '/moj-nalog/oglasi/',
             'favorites' => '/moj-nalog/omiljeni/',
             'omiljeni' => '/moj-nalog/omiljeni/',
             'saved' => '/moj-nalog/omiljeni/',
