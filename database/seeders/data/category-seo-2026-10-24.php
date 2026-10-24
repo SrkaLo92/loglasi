@@ -45,7 +45,7 @@ return [
         'seo_description' => 'Lokalne usluge u Loznici: majstori, molerski i građevinski radovi, prevoz, servisi, podučavanje i još mnogo toga. Pronađite proverene ljude iz svog kraja.',
         'seo_h1' => 'Usluge u Loznici – majstori i servisi iz vašeg kraja',
         'seo_intro' => 'Treba vam majstor, prevoz, servis ili neko ko drži časove? U ovoj kategoriji su usluge koje nude ljudi i firme iz Loznice i okoline. Pozovite direktno, dogovorite termin i platite lokalno – bez posrednika i provizije.',
-        'seo_faq' => "Kako da oglasim svoju uslugu?\nRegistrujte se besplatno, izaberite kategoriju Usluge i odgovarajuću podkategoriju (majstorske, transport, servis…), opišite šta nudite i dodajte fotografije radova. Oglas je odmah vidljiv nakon odobrenja.\n\nDa li su majstori iz Loznice?\nDa, loglasi.rs prikazuje samo ponude iz Loznice i okolnih mesta. Uz svaki oglas piše mesto.\n\nKako firme mogu da istaknu svoju ponudu?\nFirme i zanatlije mogu dobiti poslovni nalog sa oznakom na oglasima i istaknutu karticu. Javite se na kontakt@loglasi.rs.",
+        'seo_faq' => "Kako da oglasim svoju uslugu?\nRegistrujte se besplatno, izaberite kategoriju Usluge i odgovarajuću podkategoriju (majstorske, transport, servis…), opišite šta nudite i dodajte fotografije radova. Oglas je odmah vidljiv nakon odobrenja.\n\nDa li su majstori iz Loznice?\nDa, loglasi.rs prikazuje samo ponude iz Loznice i okolnih mesta. Uz svaki oglas piše mesto.\n\nKako firme mogu da istaknu svoju ponudu?\nFirme i zanatlije mogu dobiti poslovni nalog sa oznakom na oglasima i istaknutu karticu. Javite se na office@loglasi.rs.",
     ],
     // Subcategories of Besplatne stvari: only the description.
     'besplatne-stvari-igracke-i-oprema-za-decu' => [
