@@ -123,6 +123,25 @@ fieldset.pst-field > legend { margin-bottom: 6px; }
 .pst-cat__more { color: var(--lg-green); font-size: 22px; line-height: 1; }
 .pst-cat__note { font-size: 12px; color: var(--lg-green-dark); font-weight: 700; }
 
+.pst-cat__icon { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; background: var(--lg-mint); color: var(--lg-green-dark); }
+.pst-cats--top .pst-cat { justify-content: flex-start; }
+.pst-cats--top .pst-cat__name { flex: 1 1 auto; }
+.pst-cat__text { display: grid; gap: 2px; min-width: 0; }
+.pst-cat__path { color: var(--lg-muted); font-size: 13px; font-weight: 500; overflow-wrap: anywhere; }
+.pst-cats--results { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); margin-bottom: 16px; }
+
+.pst-find { margin: 12px 0 16px; }
+.pst-find__label { display: block; margin-bottom: 6px; font-weight: 700; }
+.pst-find__row { position: relative; display: flex; gap: 8px; }
+.pst-find__icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); display: inline-flex; color: var(--lg-muted); pointer-events: none; }
+.pst-find__row input { flex: 1 1 auto; min-width: 0; min-height: 48px; padding: 10px 14px 10px 42px; border: 1px solid var(--lg-input); border-radius: 12px; font: inherit; font-size: 16px; background: #fff; }
+.pst-find__row input:focus { outline: 2px solid var(--lg-brand); outline-offset: 1px; border-color: var(--lg-brand); }
+.pst-results[hidden], .pst-tree[hidden], [data-pst-find-submit][hidden] { display: none; }
+
+.pst-group { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 0 0 12px; }
+.pst-back { display: inline-flex; align-items: center; min-height: 44px; padding-right: 4px; font-weight: 700; }
+.pst-group__title { display: inline-flex; align-items: center; gap: 10px; margin: 0; font-size: 18px; font-weight: 800; }
+
 .pst-drafts ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .pst-drafts li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
 .pst-drafts a { font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; }
@@ -265,6 +284,9 @@ fieldset.pst-field > legend { margin-bottom: 6px; }
 	.pst-grid { grid-template-columns: minmax(0, 1fr); }
 	.pst-side { position: static; order: -1; display: none; }
 	.pst-cats { grid-template-columns: minmax(0, 1fr); }
+	.pst-cats--top { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+	.pst-cats--top .pst-cat { flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 8px; min-height: 104px; padding: 12px; font-size: 14px; line-height: 1.3; }
+	.pst-cats--top .pst-cat__more { display: none; }
 	.pst-price__row { grid-template-columns: minmax(0, 1fr) 120px; }
 	.pst-actions { justify-content: stretch; }
 	.pst-actions > * { flex: 1 1 auto; }
@@ -275,3 +297,23 @@ fieldset.pst-field > legend { margin-bottom: 6px; }
 	.pst-kpis { grid-template-columns: minmax(0, 1fr); gap: 0; }
 	.pst-head--row .pst-btn { width: 100%; }
 }
+
+/* Details step: sections, two columns on wider screens, chips, unit inside the input */
+
+.pst-section { display: flex; flex-direction: column; gap: 14px; padding-top: 18px; border-top: 1px solid var(--lg-border); }
+.pst-section__title { margin: 0; font-size: 17px; }
+.pst-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+@media (min-width: 700px) {
+	.pst-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; }
+	.pst-field--wide { grid-column: 1 / -1; }
+}
+.pst-affix { position: relative; }
+.pst .pst-affix input.has-unit { padding-right: 64px; }
+.pst-affix__unit { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--lg-muted); font-weight: 600; pointer-events: none; }
+.pst-chips > legend { font-size: 17px; }
+.pst-chips__count { margin-left: 6px; color: var(--lg-green); font-size: 14px; font-weight: 600; }
+.pst-check--chip { min-height: 40px; padding: 6px 12px; border-radius: 999px; font-weight: 500; }
+.pst-check--chip input { width: 18px; height: 18px; }
+.pst-more { margin-top: 8px; }
+.pst-more > summary { display: inline-flex; min-height: 40px; align-items: center; color: var(--lg-green); font-weight: 700; cursor: pointer; }
+.pst-more[open] > summary { margin-bottom: 8px; }

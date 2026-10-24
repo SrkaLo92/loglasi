@@ -23,6 +23,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -375,12 +376,74 @@ class WizardController extends Controller
             $items[] = ['category' => $category, 'leaf' => $this->catalog->children($category)->isEmpty()];
         }
 
+        $query = trim((string) $request->query('trazi', ''));
+        $leaves = $this->pickerLeaves();
+
         return [
             'parent' => $parent,
             'trail' => $parent ? $this->catalog->breadcrumbs($parent) : collect(),
             'items' => $items,
             'current' => $listing?->category_id,
+            'query' => mb_substr($query, 0, 60),
+            'results' => $query !== '' ? self::matchLeaves($leaves, $query) : [],
+            'leaves' => $leaves,
         ];
+    }
+
+    /**
+     * Every category a listing can go to, with its path ("Automobili › Limuzina"), for the search in the picker.
+     *
+     * @return list<array{id: int, name: string, path: string}>
+     */
+    private function pickerLeaves(): array
+    {
+        $out = [];
+        foreach ($this->catalog->categories() as $category) {
+            if (! $this->catalog->isVisible($category) || $this->catalog->children($category)->isNotEmpty()) {
+                continue;
+            }
+            $out[] = [
+                'id' => (int) $category->id,
+                'name' => (string) $category->name,
+                'path' => $this->catalog->breadcrumbs($category)->pluck('name')->implode(' › '),
+            ];
+        }
+        usort($out, fn ($a, $b) => strcmp(self::fold($a['path']), self::fold($b['path'])));
+
+        return $out;
+    }
+
+    /**
+     * Leaves whose path has every word of the query (without accents: "dzip" finds "Džip/SUV").
+     *
+     * @param  list<array{id: int, name: string, path: string}>  $leaves
+     * @return list<array{id: int, name: string, path: string}>
+     */
+    public static function matchLeaves(array $leaves, string $query): array
+    {
+        $words = array_filter(preg_split('/\s+/', self::fold($query)) ?: [], 'strlen');
+        if ($words === []) {
+            return [];
+        }
+
+        $hits = [];
+        foreach ($leaves as $leaf) {
+            $name = self::fold($leaf['name']);
+            $path = self::fold($leaf['path']);
+            if (array_filter($words, fn ($w) => ! str_contains($path, $w)) !== []) {
+                continue;
+            }
+            // Name matches first, then by path.
+            $hits[] = [array_filter($words, fn ($w) => str_contains($name, $w)) !== [] ? 0 : 1, $leaf];
+        }
+        usort($hits, fn ($a, $b) => $a[0] <=> $b[0]);
+
+        return array_slice(array_column($hits, 1), 0, 30);
+    }
+
+    private static function fold(string $text): string
+    {
+        return mb_strtolower(Str::ascii(strtr($text, ['đ' => 'dj', 'Đ' => 'Dj'])));
     }
 
     private function chosenCategory(Request $request): Category

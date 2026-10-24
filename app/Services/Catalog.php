@@ -322,7 +322,7 @@ class Catalog
 
     /**
      * Fields a list of this category can be filtered by: its own (and inherited) fields, then the
-     * fields of its subcategories, the ones most subcategories share first. On "Automobili" that is
+     * fields of its subcategories. On "Automobili" that is
      * make, model, year... of the body types, although "Automobili" itself has no fields.
      * Every field is optional here (`required` false).
      *
@@ -339,24 +339,27 @@ class Catalog
         $picked = $own->keyBy('id')->all();
         $map = $this->childrenMap();
 
-        $shared = [];
+        // Leaves with the most fields lead (on "Automobili" the body types, not "Auto delovi"), so the
+        // filters keep the order of the form: make, model, year... and what other leaves add comes after.
+        $leaves = [];
         foreach ($this->descendantIds($id, false) as $descendantId) {
-            if (isset($map[$descendantId]) || ! $this->category($descendantId)?->is_active) {
-                continue; // only active last-level categories hold listings
+            if (! isset($map[$descendantId]) && $this->category($descendantId)?->is_active) {
+                $leaves[] = $this->fieldsFor($descendantId);
             }
-            foreach ($this->fieldsFor($descendantId) as $field) {
-                if (! isset($picked[$field->id])) {
-                    $shared[$field->id] ??= [0, $field];
-                    $shared[$field->id][0]++;
+        }
+        usort($leaves, fn ($a, $b) => $b->count() <=> $a->count());
+
+        $extra = [];
+        foreach ($leaves as $fields) {
+            foreach ($fields as $field) {
+                if (! isset($picked[$field->id]) && ! isset($extra[$field->id])) {
+                    $extra[$field->id] = $field;
                 }
             }
         }
 
-        $extra = array_values($shared);
-        usort($extra, fn ($a, $b) => [$b[0], (int) $a[1]->position, (int) $a[1]->sort, $a[1]->id] <=> [$a[0], (int) $b[1]->position, (int) $b[1]->sort, $b[1]->id]);
-
         $list = $own->all();
-        foreach ($extra as [, $field]) {
+        foreach ($extra as $field) {
             $copy = clone $field;
             $copy->setAttribute('required', false);
             $list[] = $copy;
