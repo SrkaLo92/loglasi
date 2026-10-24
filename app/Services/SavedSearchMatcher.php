@@ -6,6 +6,7 @@ use App\Enums\Currency;
 use App\Models\Listing;
 use App\Models\SavedSearch;
 use App\Support\Price;
+use App\Support\Search\SearchText;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
@@ -21,7 +22,7 @@ use Illuminate\Validation\ValidationException;
  * Semantics follow the /oglasi/ search: category includes subcategories, location is
  * exact, price bounds compare price_eur (no price never matches a bound), every keyword
  * word must start a word of the title or description (diacritics ignored), f[...] filters
- * as ListingFields::apply(). The seller's own listings never match.
+ * as ListingFields::apply() (text rules from App\Support\Search\SearchText). The seller's own listings never match.
  *
  * If the search module's ListingSearch later gets an in-memory or id-restricted matcher,
  * match() can delegate to it; its signature does not need to change.
@@ -33,11 +34,6 @@ class SavedSearchMatcher
 
     /** @var array<string, mixed> lookups of one match() call (category / location by slug) */
     private array $memo = [];
-
-    private const DIACRITICS = [
-        'č' => 'c', 'ć' => 'c', 'š' => 's', 'ž' => 'z', 'đ' => 'dj',
-        'Č' => 'c', 'Ć' => 'c', 'Š' => 's', 'Ž' => 'z', 'Đ' => 'dj',
-    ];
 
     public function __construct(
         private readonly Catalog $catalog,
@@ -187,7 +183,7 @@ class SavedSearchMatcher
             'min' => isset($query['price_min']) ? round(max(0.01, Price::toEur((float) $query['price_min'], $currency)), 2) : null,
             'max' => isset($query['price_max']) ? round(Price::toEur((float) $query['price_max'], $currency), 2) : null,
             'words' => isset($query['keyword'])
-                ? array_slice(array_values(array_unique(array_map(fn ($w) => mb_substr($w, 0, self::PREFIX_MAX), $this->words((string) $query['keyword'])))), 0, 10)
+                ? array_values(array_unique(array_map(fn ($w) => mb_substr($w, 0, self::PREFIX_MAX), SearchText::words((string) $query['keyword']))))
                 : [],
             'filters' => $filters,
         ];
@@ -229,7 +225,11 @@ class SavedSearchMatcher
     private function prefixes(string $text): array
     {
         $set = [];
-        foreach ($this->words($text) as $word) {
+        // Same normalization as the search index (listings_search.text): no diacritics, lower case.
+        foreach (array_unique(explode(' ', SearchText::forListing($text, null))) as $word) {
+            if ($word === '') {
+                continue;
+            }
             $length = min(mb_strlen($word), self::PREFIX_MAX);
             for ($i = 1; $i <= $length; $i++) {
                 $set[mb_substr($word, 0, $i)] = true;
@@ -262,23 +262,5 @@ class SavedSearchMatcher
         }
 
         return true;
-    }
-
-    /**
-     * Normalized words, the same rules as the search index (no diacritics, lower case,
-     * letters and digits only): "Ćevapi, Lešnica" -> ["cevapi", "lesnica"].
-     *
-     * @return list<string>
-     */
-    private function words(string $text): array
-    {
-        $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $text = mb_strtolower(strtr($text, self::DIACRITICS), 'UTF-8');
-        if (class_exists(\Normalizer::class)) {
-            $text = (string) preg_replace('/\p{Mn}+/u', '', (string) \Normalizer::normalize($text, \Normalizer::FORM_D));
-        }
-        $text = (string) preg_replace('/[^\p{L}\p{N}]+/u', ' ', $text);
-
-        return array_values(array_unique(array_filter(explode(' ', $text), 'strlen')));
     }
 }
