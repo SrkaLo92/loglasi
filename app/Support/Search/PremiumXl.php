@@ -37,7 +37,9 @@ class PremiumXl
     /** Plain one-paragraph start of the description. */
     public static function excerpt(?string $description): string
     {
-        $text = trim((string) preg_replace('/\s+/u', ' ', strip_tags((string) $description)));
+        $text = strip_tags((string) $description);
+        $text = (string) preg_replace('~\b(?:https?://|www\.)\S+~iu', '', $text); // links make no sense in a teaser
+        $text = trim((string) preg_replace('/\s+/u', ' ', $text));
 
         return Str::limit($text, self::EXCERPT, '…', preserveWords: true);
     }

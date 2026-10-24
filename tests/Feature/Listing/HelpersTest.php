@@ -33,6 +33,10 @@ class HelpersTest extends TestCase
     {
         $this->assertSame('AC', Text::wordInitials('Auto centar Drina'));
         $this->assertSame('ŽD', Text::initials('Žikica Drezgić'));
+        $this->assertSame('Suncica Perisic', Text::displayName('suncica perisic'));
+        $this->assertSame('Auto centar DRINA', Text::displayName('Auto centar DRINA'));
+        $this->assertSame('đorđe ćirić', mb_strtolower(Text::displayName('đorđe ćirić')));
+        $this->assertSame('Đorđe Ćirić', Text::displayName('đorđe ćirić'));
     }
 
     public function test_description_escapes_and_links_safely(): void

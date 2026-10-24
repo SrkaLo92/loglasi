@@ -363,11 +363,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .lg-footer__tekst { margin: 0; font-size: 15px; line-height: 1.6; }
 .lg-footer__kontakt { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; font-size: 15px; }
 .lg-footer__kontakt a,
-.lg-footer__kontakt span { display: inline-flex; align-items: center; min-height: 32px; overflow-wrap: anywhere; }
+.lg-footer__kontakt span { display: inline-flex; align-items: center; min-height: 44px; overflow-wrap: anywhere; }
 .lg-footer__naslov { margin: 4px 0 10px; color: #fff; font-size: 16px; font-weight: 800; }
 .lg-footer__naslov--mreze { margin-top: 18px; }
 .lg-footer__lista { margin: 0; padding: 0; list-style: none; }
-.lg-footer__lista a { display: inline-flex; align-items: center; min-height: 36px; font-size: 15px; }
+.lg-footer__lista a { display: inline-flex; align-items: center; min-height: 44px; font-size: 15px; }
 .lg-footer__lista a[aria-current="page"] { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
 .lg-footer a.lg-footer__sve { color: #fff; font-weight: 700; }
 .lg-footer__lista a.lg-footer__oglas { display: flex; justify-content: space-between; gap: 10px; max-width: 100%; }

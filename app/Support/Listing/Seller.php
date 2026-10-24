@@ -32,7 +32,7 @@ class Seller
         $user = $listing->user;
         $user->loadMissing('firm');
         $firm = $user->isFirm() ? $user->firm : null;
-        $name = $firm?->name ?: $user->name;
+        $name = Text::displayName((string) ($firm?->name ?: $user->name));
 
         // Listing phone first, then the firm phone, then the account phone.
         $phone = Phone::normalize($listing->contact_phone)

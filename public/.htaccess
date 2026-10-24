@@ -21,3 +21,10 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Static files: CSS/JS carry ?v=<mtime> (asset_v), listing images get a new name when replaced.
+<IfModule mod_headers.c>
+    <FilesMatch "\.(css|js|webp|jpe?g|png|gif|svg|ico|woff2?)$">
+        Header set Cache-Control "public, max-age=2592000"
+    </FilesMatch>
+</IfModule>

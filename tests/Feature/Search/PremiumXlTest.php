@@ -105,6 +105,7 @@ class PremiumXlTest extends SearchTestCase
         $this->assertSame([], PremiumXl::cards([$ended]));
         $this->assertSame('Opis sa razmacima.', PremiumXl::excerpt("  <b>Opis</b>\n sa   razmacima. "));
         $this->assertLessThanOrEqual(PremiumXl::EXCERPT + 1, mb_strlen(PremiumXl::excerpt(str_repeat('reč ', 200))));
+        $this->assertSame('Pogledajte i javite se.', PremiumXl::excerpt('Pogledajte https://primer.rs/oglas?id=5 i www.test.rs javite se.'));
     }
 
     public function test_home_premium_section_shows_premium_home_listings_once(): void

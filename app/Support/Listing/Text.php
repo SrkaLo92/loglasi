@@ -115,6 +115,14 @@ class Text
         return 'pre '.$n.' '.static::plural($n, 'godinu', 'godine', 'godina');
     }
 
+    /** A name typed all in lowercase ("suncica perisic") is shown with capitals; any other name as typed. */
+    public static function displayName(string $name): string
+    {
+        $name = trim($name);
+
+        return $name !== '' && mb_strtolower($name) === $name ? mb_convert_case($name, MB_CASE_TITLE) : $name;
+    }
+
     /** Seller card initials: first letters of the first two words ("Auto centar Drina" → "AC"). */
     public static function wordInitials(string $name): string
     {
