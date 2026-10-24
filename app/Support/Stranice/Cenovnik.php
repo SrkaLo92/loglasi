@@ -43,6 +43,70 @@ class Cenovnik
             ->get());
     }
 
+    /** Codes of the /cenovnik/ sections, in order (shown when the product exists). */
+    public const SLOTS = ['listing_slots_3', 'listing_slots_10', 'listing_slots_30'];
+
+    public const PROMOTIONS = ['bump', 'bump_10', 'featured_7', 'priority_3', 'top_7', 'premium_xl_7', 'premium_xl_home_7'];
+
+    public const PACKAGES = ['business_start', 'business_pro', 'business_max'];
+
+    /**
+     * Products for the price list: active ones and display-only ones (listed, not sold yet), by code.
+     *
+     * @return Collection<string, Product>
+     */
+    public static function listed(): Collection
+    {
+        return once(fn () => Product::query()
+            ->where(fn ($q) => $q->where('is_active', true)->orWhere('display_only', true))
+            ->orderBy('sort')->orderBy('id')
+            ->get()->keyBy('code'));
+    }
+
+    /** @return list<Product> listed products of the given codes, in that order */
+    public static function listedOf(array $codes): array
+    {
+        $listed = self::listed();
+
+        return array_values(array_filter(array_map(fn (string $code) => $listed->get($code), $codes)));
+    }
+
+    /**
+     * Business packages: monthly product (required) and yearly product (optional).
+     *
+     * @return list<array{code: string, monthly: Product, yearly: ?Product, features: list<string>}>
+     */
+    public static function packages(): array
+    {
+        $listed = self::listed();
+        $packages = [];
+        foreach (self::PACKAGES as $code) {
+            $monthly = $listed->get($code.'_monthly');
+            if ($monthly === null) {
+                continue;
+            }
+            $packages[] = [
+                'code' => $code,
+                'monthly' => $monthly,
+                'yearly' => $listed->get($code.'_yearly'),
+                'features' => array_values(array_filter(array_map('trim', preg_split('/\R/', (string) $monthly->description) ?: []), 'strlen')),
+            ];
+        }
+
+        return $packages;
+    }
+
+    /** Duration column of the promotions table: „jednom”, „10 puta”, „7 dana”. */
+    public static function promotionDuration(Product $product): string
+    {
+        if (preg_match('/_(\d+)$/', $product->code, $m) && $product->duration_days === null) {
+            return $m[1].' puta';
+        }
+        $days = (int) $product->duration_days;
+
+        return $days > 0 ? $days.' '.self::plural($days, 'dan', 'dana', 'dana') : 'jednom';
+    }
+
     public static function product(string $code): ?Product
     {
         return self::products()->firstWhere('code', $code);

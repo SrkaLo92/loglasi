@@ -285,7 +285,7 @@ class UvozWordpressTest extends UvozTestCase
         $this->assertSame(5, (int) Settings::get('private_active_limit')); // the old monthly limit is not imported
         $this->assertSame(60, Product::where('code', Product::BUMP)->value('price_rsd'));
         $this->assertFalse((bool) Product::where('code', Product::FEATURED_30)->value('is_active'));
-        $this->assertSame(4, Product::count());
+        $this->assertSame(4, Product::where('display_only', false)->count()); // plus the display-only price list
     }
 
     public function test_running_twice_gives_the_same_result(): void

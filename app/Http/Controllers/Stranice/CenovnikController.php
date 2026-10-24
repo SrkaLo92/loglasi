@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Stranice;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
 use App\Support\Stranice\Cenovnik;
 use App\Support\Stranice\PageText;
 use Illuminate\View\View;
@@ -19,12 +18,10 @@ class CenovnikController extends Controller
         ));
 
         return view('stranice.cenovnik', [
-            'products' => Cenovnik::products(),
-            'biznisCode' => Product::BIZNIS_12M,
             'faq' => $faq,
             'paymentRows' => Cenovnik::paymentReady() ? Cenovnik::paymentRows() : [],
             'title' => 'Cenovnik: besplatni oglasi i dodatne usluge | loglasi.rs',
-            'description' => 'Postavljanje oglasa na loglasi.rs je besplatno. Cene podizanja i isticanja oglasa i Biznis paketa za firme, i kako da platite uplatom na račun.',
+            'description' => 'Postavljanje oglasa na loglasi.rs je besplatno. Cene dodatnih oglasa, podizanja i isticanja, paketi za firme i kako da platite.',
             'canonical' => url_slash('cenovnik'),
         ]);
     }

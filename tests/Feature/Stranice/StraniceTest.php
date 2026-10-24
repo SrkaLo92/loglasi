@@ -27,7 +27,7 @@ class StraniceTest extends TestCase
     public static function pages(): array
     {
         return [
-            'cenovnik' => ['/cenovnik/', 'Cenovnik', 'Postavljanje je besplatno, plaćate samo dodatke'],
+            'cenovnik' => ['/cenovnik/', 'Cenovnik', 'Za privatne korisnike'],
             'za firme' => ['/za-firme/', 'Predstavite svoju firmu kupcima iz Loznice', 'Šta dobijate uz Biznis paket'],
             'kontakt' => ['/kontakt/', 'Kontakt', 'Pišite nam'],
             'o nama' => ['/o-nama/', 'O nama', 'Zašto lokalni oglasi'],
