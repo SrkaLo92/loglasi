@@ -101,7 +101,9 @@ class ListingListPageTest extends SearchTestCase
 
         $response = $this->get('/?s=cevapi')->assertOk()->assertSee('Ćevapi roštilj');
         $this->assertSame('noindex, follow', $this->robots($response));
-        $this->get('/oglasi/?s=cevapi')->assertOk()->assertSee('Ćevapi roštilj');
+        $this->get('/oglasi/?s=cevapi')->assertOk()->assertSee('Ćevapi roštilj')
+            ->assertSee('id="lg-q" type="search" name="keyword" value="cevapi"', false);
+        $this->get('/oglasi/?q=cevapi')->assertOk()->assertSee('id="lg-q" type="search" name="keyword" value="cevapi"', false);
     }
 
     public function test_pagination_pages_are_indexable_with_self_canonical(): void

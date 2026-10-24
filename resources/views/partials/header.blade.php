@@ -14,7 +14,7 @@
 			<label class="lg-visually-hidden" for="lg-q">Šta tražite?</label>
 			<div class="lg-search__polje">
 				{{ Ikonice::svg('search', 20, '2') }}
-				<input class="lg-search__input" id="lg-q" type="search" name="keyword" value="{{ is_string(request('keyword')) ? request('keyword') : '' }}" placeholder="Šta tražite? npr. bicikl, stan, Golf" autocomplete="off" enterkeyhint="search" maxlength="100">
+				<input class="lg-search__input" id="lg-q" type="search" name="keyword" value="{{ collect(['keyword', 's', 'q', 'kljucna-rec'])->map(fn ($key) => request($key))->first(fn ($value) => is_string($value) && trim($value) !== '') ?? '' }}" placeholder="Šta tražite? npr. bicikl, stan, Golf" autocomplete="off" enterkeyhint="search" maxlength="100">
 			</div>
 			@if ($lgKategorije)
 				<label class="lg-visually-hidden" for="lg-kat">Kategorija</label>
