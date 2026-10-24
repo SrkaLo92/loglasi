@@ -48,6 +48,25 @@ class LegacyUrls
             return $this->hit('/brisanje-licnih-podataka/', 301, 'brisanje-podataka');
         }
 
+        // Old account panel of the WordPress theme -> our account pages.
+        if (preg_match('#^/panel(/.*)?$#', $path, $m)) {
+            return $this->panel(trim($m[1] ?? '', '/'), $clean);
+        }
+
+        // Subcategory in the old WordPress form, with a comma: /oglasi/{parent},{child}/
+        if (preg_match('#^/oglasi/([a-z0-9-]+(?:,[a-z0-9-]+)+)/?$#', $path, $m)) {
+            return $this->categoryTarget($m[1], 'kategorija-zarez');
+        }
+
+        // Old pagination parameter: ?paginacija=N -> /.../page/N/
+        if (isset($clean['paginacija']) && preg_match('#^/oglasi(/[a-z0-9-]+){0,2}/?$#', $path)) {
+            $page = is_scalar($clean['paginacija']) && ctype_digit((string) $clean['paginacija']) ? (int) $clean['paginacija'] : 1;
+            $rest = array_diff_key($clean, ['paginacija' => true]);
+            $base = rtrim($path, '/').'/';
+
+            return $this->hit($page > 1 ? $base.'page/'.$page.'/' : $base, 301, 'paginacija', $rest);
+        }
+
         // WooCommerce ostaci.
         if (preg_match('#^/product/[^/]+/?$#', $path)) {
             return $this->hit(config('seo.targets.woo_product'), 301, 'woo-product');
@@ -57,7 +76,11 @@ class LegacyUrls
             return $this->hit(config('seo.targets.woo_shop'), 301, 'woo-shop');
         }
 
-        if (preg_match('#^/(cart|checkout|my-account)(/.*)?$#', $path)) {
+        if (preg_match('#^/(cart|checkout|naplata)(/.*)?$#', $path)) {
+            return $this->hit(config('seo.targets.woo_cart'), 301, 'woo-korpa');
+        }
+
+        if (preg_match('#^/my-account(/.*)?$#', $path)) {
             return $this->hit(config('seo.targets.woo_account'), 301, 'woo-nalog');
         }
 
@@ -91,15 +114,29 @@ class LegacyUrls
         }
 
         if ($keys === ['kategorija'] && is_string($clean['kategorija'])) {
-            $slug = trim($clean['kategorija']);
-            $exists = $slug !== '' && Category::query()->where('slug', $slug)->where('is_active', true)->exists();
-
-            return $exists
-                ? $this->hit('/oglasi/'.$slug.'/', 301, 'kategorija-param')
-                : $this->hit(config('seo.targets.kategorija_unknown'), 301, 'kategorija-param');
+            return $this->categoryTarget($clean['kategorija'], 'kategorija-param');
         }
 
         return null;
+    }
+
+    /** Last slug of a comma list (the subcategory), if it is an active category; otherwise /oglasi/. */
+    private function categoryTarget(string $slugs, string $rule): array
+    {
+        $parts = array_values(array_filter(array_map('trim', explode(',', mb_strtolower($slugs)))));
+        $slug = (string) end($parts);
+        $exists = $slug !== '' && Category::query()->where('slug', $slug)->where('is_active', true)->exists();
+
+        return $this->hit($exists ? '/oglasi/'.$slug.'/' : config('seo.targets.kategorija_unknown'), 301, $rule);
+    }
+
+    /** /panel/ and its tabs (?tab=create, ?tab=messages, ...). */
+    private function panel(string $sub, array $clean): array
+    {
+        $tab = $sub !== '' ? $sub : (is_string($clean['tab'] ?? null) ? mb_strtolower($clean['tab']) : '');
+        $targets = config('seo.targets.panel_tabs', []);
+
+        return $this->hit($targets[$tab] ?? config('seo.targets.panel'), 301, 'panel');
     }
 
     /** /?attachment_id=N (strana priloga) i /?p=N (kratki WordPress link oglasa). */

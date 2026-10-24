@@ -164,8 +164,26 @@ class SeoProvera extends Command
             return ['pattern' => 'Woo prodavnica', 'status' => 301, 'target' => $targets['woo_shop']];
         }
 
-        if (preg_match('#^/(cart|checkout|my-account)(/.*)?$#', $lower)) {
+        if (preg_match('#^/(cart|checkout|naplata)(/.*)?$#', $lower)) {
+            return ['pattern' => 'Woo korpa', 'status' => 301, 'target' => $targets['woo_cart']];
+        }
+
+        if (preg_match('#^/my-account(/.*)?$#', $lower)) {
             return ['pattern' => 'Woo nalog', 'status' => 301, 'target' => $targets['woo_account']];
+        }
+
+        if (preg_match('#^/panel(/.*)?$#', $lower, $m)) {
+            $tab = trim($m[1] ?? '', '/') ?: (is_string($clean['tab'] ?? null) ? mb_strtolower($clean['tab']) : '');
+
+            return ['pattern' => '/panel/', 'status' => 301, 'target' => $targets['panel_tabs'][$tab] ?? $targets['panel']];
+        }
+
+        if (preg_match('#^/oglasi/([a-z0-9-]+(?:,[a-z0-9-]+)+)/?$#', $lower, $m)) {
+            return ['pattern' => 'kategorija sa zarezom', 'status' => 301, 'target' => $this->categoryTarget($m[1])];
+        }
+
+        if (isset($clean['paginacija']) && str_starts_with($norm, '/oglasi/')) {
+            return ['pattern' => '?paginacija=', 'status' => 301, 'target' => null];
         }
 
         if ($norm === '/stranica-404/') {
@@ -200,12 +218,17 @@ class SeoProvera extends Command
             return ['pattern' => 'pretraga', 'status' => 200, 'index' => false];
         }
 
+        if ($clean !== [] && array_diff(array_keys($clean), config('seo.page_params', [])) === []) {
+            return ['pattern' => 'paginacija', 'status' => 200, 'index' => true];
+        }
+
         if ($clean !== []) {
-            return ['pattern' => 'filter/paginacija', 'status' => 200, 'index' => false];
+            return ['pattern' => 'filter', 'status' => 200, 'index' => false];
         }
 
         if (preg_match('#/page/\d+/$#', $norm)) {
-            return ['pattern' => 'paginacija', 'status' => 200, 'index' => false];
+            // Pages 2+ are indexable with a self canonical.
+            return ['pattern' => 'paginacija', 'status' => 200, 'index' => true];
         }
 
         if ($norm === '/oglasi/') {
@@ -235,6 +258,16 @@ class SeoProvera extends Command
         return ['pattern' => 'ostalo', 'status' => 200, 'index' => null];
     }
 
+    /** Same rule as LegacyUrls: the last slug of a comma list, if it is an active category. */
+    private function categoryTarget(string $slugs): string
+    {
+        $parts = array_values(array_filter(array_map('trim', explode(',', mb_strtolower($slugs)))));
+        $slug = (string) end($parts);
+        $exists = $slug !== '' && Category::query()->where('slug', $slug)->where('is_active', true)->exists();
+
+        return $exists ? '/oglasi/'.$slug.'/' : config('seo.targets.kategorija_unknown');
+    }
+
     private function expectArchiveQuery(array $clean): array
     {
         $keys = array_keys($clean);
@@ -245,14 +278,15 @@ class SeoProvera extends Command
         }
 
         if ($keys === ['kategorija'] && is_string($clean['kategorija'])) {
-            $slug = trim($clean['kategorija']);
-            $exists = $slug !== '' && Category::query()->where('slug', $slug)->where('is_active', true)->exists();
+            return ['pattern' => '?kategorija=', 'status' => 301, 'target' => $this->categoryTarget($clean['kategorija'])];
+        }
 
-            return ['pattern' => '?kategorija=', 'status' => 301, 'target' => $exists ? '/oglasi/'.$slug.'/' : config('seo.targets.kategorija_unknown')];
+        if (isset($clean['paginacija'])) {
+            return ['pattern' => '?paginacija=', 'status' => 301, 'target' => null];
         }
 
         if (array_diff($keys, $pageKeys) === []) {
-            return ['pattern' => 'paginacija', 'status' => 200, 'index' => false];
+            return ['pattern' => 'paginacija', 'status' => 200, 'index' => true];
         }
 
         return ['pattern' => 'filter', 'status' => 200, 'index' => false];
