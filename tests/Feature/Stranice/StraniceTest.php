@@ -27,8 +27,8 @@ class StraniceTest extends TestCase
     public static function pages(): array
     {
         return [
-            'cenovnik' => ['/cenovnik/', 'Cenovnik', 'Postavljanje je besplatno, plaćate samo dodatke'],
-            'za firme' => ['/za-firme/', 'Predstavite svoju firmu kupcima iz Loznice', 'Šta dobijate uz Biznis paket'],
+            'cenovnik' => ['/cenovnik/', 'Cenovnik', 'Za privatne korisnike'],
+            'za firme' => ['/za-firme/', 'Predstavite svoju firmu kupcima iz Loznice', 'Šta dobija firma uz profil firme'],
             'kontakt' => ['/kontakt/', 'Kontakt', 'Pišite nam'],
             'o nama' => ['/o-nama/', 'O nama', 'Zašto lokalni oglasi'],
             'česta pitanja' => ['/faq/', 'Česta pitanja', 'Kako da postavim oglas?'],
@@ -60,7 +60,7 @@ class StraniceTest extends TestCase
             ->assertSee('class="lg-footer"', false)
             ->assertSee('class="lg-mnav"', false)
             ->assertSee('loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu.')
-            ->assertSee('<link rel="canonical" href="'.url_slash($url).'">', false)
+            ->assertSee('<link rel="canonical" href="'.config('seo.base_url').rtrim($url, '/').'/">', false)
             ->assertSee('css/stranice.css', false);
     }
 
@@ -79,7 +79,7 @@ class StraniceTest extends TestCase
             ->assertSee('<h2>Naš tim</h2>', false)
             ->assertSee('Tekst iz admina')
             ->assertDontSee('<script>alert(1)</script>', false)
-            ->assertSee('do 10 novih oglasa')
+            ->assertSee('do 5 aktivnih oglasa')
             ->assertDontSee('Zašto lokalni oglasi');
     }
 

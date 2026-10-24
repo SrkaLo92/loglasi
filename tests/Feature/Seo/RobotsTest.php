@@ -2,28 +2,49 @@
 
 namespace Tests\Feature\Seo;
 
-use App\Models\Listing;
-use DOMDocument;
+use App\Models\Category;
 
 class RobotsTest extends SeoTestCase
 {
-    public function test_production_robots_allows_bots_and_points_to_sitemap(): void
+    public function test_production_robots_is_the_exact_block_from_the_seo_plan(): void
     {
         config(['seo.indexable' => true]);
 
         $response = $this->get('/robots.txt')->assertOk()->assertHeader('Content-Type', 'text/plain; charset=utf-8');
-        $body = $response->getContent();
 
-        $this->assertStringContainsString("User-agent: *\nDisallow: /admin/\n", $body);
+        $expected = <<<'TXT'
+User-agent: *
+Disallow: /admin
+Disallow: /api/
+Disallow: /panel/
+Disallow: /nalog/
+Disallow: /naplata/
+Disallow: /uporedite-oglase/
+Disallow: /*?*kljucna-rec=
 
-        foreach (['Googlebot', 'Bingbot', 'GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'ClaudeBot', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot', 'Perplexity-User', 'Google-Extended', 'Applebot', 'Applebot-Extended'] as $bot) {
-            $this->assertStringContainsString("User-agent: {$bot}\nAllow: /\n", $body);
-        }
+User-agent: Googlebot
+User-agent: Bingbot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /panel/
+Disallow: /nalog/
+Disallow: /naplata/
 
-        $this->assertStringContainsString('Sitemap: https://loglasi.rs/sitemap.xml', $body);
-        $this->assertStringNotContainsString('sitemap_index', $body);
-        $this->assertStringNotContainsString('Disallow: /api', $body);
-        $this->assertStringNotContainsString('Disallow: /oglasi', $body);
+Sitemap: https://loglasi.rs/sitemap.xml
+
+TXT;
+
+        $this->assertSame($expected, $response->getContent());
     }
 
     public function test_non_production_robots_disallows_everything(): void
@@ -33,28 +54,26 @@ class RobotsTest extends SeoTestCase
         $this->assertSame("User-agent: *\nDisallow: /\n", $this->get('/robots.txt')->getContent());
     }
 
-    public function test_llms_txt_is_served_as_utf8_text_unchanged(): void
+    public function test_llms_txt_links_only_existing_categories(): void
     {
-        $response = $this->get('/llms.txt')->assertOk()->assertHeader('Content-Type', 'text/plain; charset=utf-8');
+        Category::factory()->create(['name' => 'Automobili', 'slug' => 'automobili']);
 
-        $this->assertSame(file_get_contents(resource_path('seo/llms.txt')), $response->getContent());
-        $this->assertStringContainsString('Banja Koviljača, Lešnica, Tršić', $response->getContent());
+        $response = $this->get('/llms.txt')->assertOk()->assertHeader('Content-Type', 'text/plain; charset=utf-8');
+        $body = $response->getContent();
+
+        $this->assertStringContainsString('[Automobili](https://loglasi.rs/oglasi/automobili/)', $body);
+        $this->assertStringNotContainsString('oglasi/nekretnine/', $body);
+        $this->assertStringContainsString('[O nama](https://loglasi.rs/o-nama/)', $body);
+        $this->assertStringContainsString('Banja Koviljača, Lešnica, Tršić', $body);
+        $this->assertStringNotContainsString('Podrinj', $body);
         $this->assertStringContainsString('max-age=86400', $response->headers->get('Cache-Control'));
     }
 
-    public function test_feed_is_rss_with_noindex_header(): void
+    public function test_every_feed_url_is_gone(): void
     {
-        Listing::factory()->create(['title' => 'Golf 4', 'slug' => 'golf-4']);
-        Listing::factory()->expired()->create(['title' => 'Istekao']);
-
-        $response = $this->get('/feed/')->assertOk()
-            ->assertHeader('X-Robots-Tag', 'noindex')
-            ->assertHeader('Content-Type', 'application/rss+xml; charset=UTF-8');
-
-        $dom = new DOMDocument;
-        $this->assertTrue($dom->loadXML($response->getContent()));
-        $this->assertSame(1, $dom->getElementsByTagName('item')->length);
-        $this->assertStringContainsString('https://loglasi.rs/oglas/golf-4/', $response->getContent());
+        foreach (['/feed/', '/feed', '/comments/feed/', '/oglasi/feed/', '/oglasi/automobili/feed/', '/oglas/golf-4/feed/', '/korisnik/pera/feed/'] as $url) {
+            $this->get($url)->assertStatus(410);
+        }
     }
 
     public function test_stranica_404_returns_real_404(): void

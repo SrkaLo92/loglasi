@@ -28,7 +28,7 @@
 	</section>
 </main>
 <footer class="lg-footer">
-	<div class="lg-wrap lg-footer__in">
+	<div class="lg-wrap lg-footer__dno">
 		<p class="lg-footer__tekst">loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu.</p>
 	</div>
 </footer>

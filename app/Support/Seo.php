@@ -8,7 +8,9 @@ use App\Models\Firm;
 use App\Models\Listing;
 use App\Models\Location;
 use App\Models\User;
+use App\Services\ListingFields;
 use App\Support\Seo\Url;
+use App\Support\Stranice\PageText;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -41,6 +43,9 @@ class Seo
     private ?bool $indexable = null;
 
     private string $ogType = 'website';
+
+    /** schema.org type of the page node: WebPage, CollectionPage (lists), ProfilePage (profiles). */
+    private string $pageType = 'WebPage';
 
     /** @var list<string> */
     private array $images = [];
@@ -84,9 +89,14 @@ class Seo
         return $this;
     }
 
-    public function description(?string $description): self
+    /** Generated text is cut at 155 characters; a text entered in the admin goes as it is. */
+    public function description(?string $description, bool $literal = false): self
     {
-        $this->description = $description === null ? null : static::excerpt($description, (int) config('seo.description_max', 155));
+        $this->description = match (true) {
+            $description === null => null,
+            $literal => static::clean($description),
+            default => static::excerpt($description, (int) config('seo.description_max', 155)),
+        };
 
         return $this;
     }
@@ -124,6 +134,13 @@ class Seo
     public function index(): self
     {
         $this->indexable = true;
+
+        return $this;
+    }
+
+    public function pageType(string $type): self
+    {
+        $this->pageType = $type;
 
         return $this;
     }
@@ -207,9 +224,9 @@ class Seo
 
     public function home(): self
     {
-        return $this->title('Oglasi Loznica – besplatni mali oglasi | loglasi.rs')
-            ->h1('Oglasi Loznica i Podrinje')
-            ->description('Kupi i prodaj u Loznici: automobili, stanovi, posao, drva, poljoprivreda. Besplatno objavi oglas.')
+        return $this->title(static::withSuffix(static::text('home.title')))
+            ->h1('Oglasi za Loznicu i okolinu')
+            ->description(static::text('home.description'), true)
             ->canonical('/');
     }
 
@@ -230,10 +247,11 @@ class Seo
     {
         $count ??= static::activeListings()->count();
 
-        $this->title('Svi oglasi u Loznici'.config('seo.title_suffix'))
-            ->h1('Svi oglasi u Loznici')
-            ->description(static::countLabel($count).' iz Loznice i okoline: automobili, stanovi, posao, drva, poljoprivreda. Besplatno objavi oglas.')
+        $this->title(static::withSuffix(static::text('archive.title')))
+            ->h1(static::text('archive.h1'))
+            ->description(static::text('archive.description'), true)
             ->canonical('/oglasi/')
+            ->pageType('CollectionPage')
             ->breadcrumbs([['Početna', '/'], ['Oglasi', '/oglasi/']]);
 
         return $count === 0 ? $this->noindex() : $this;
@@ -242,18 +260,40 @@ class Seo
     public function listing(Listing $listing): self
     {
         $listing->loadMissing(['category.parent', 'location', 'user.firm', 'images']);
-        $place = $listing->location?->name;
-        $price = $listing->priceLabel();
+        $place = $listing->location?->name ?: 'Loznica';
+        $top = $listing->category ? static::topCategory($listing->category) : null;
+        $topSlug = $top?->slug;
+        $vars = [
+            '{naslov}' => static::clean((string) $listing->title),
+            '{kategorija}' => $top ? static::categoryName($top) : '',
+            '{mesto}' => $place,
+        ];
+
+        $title = static::withSuffix(static::text('listing.title', $vars));
+        if (mb_strlen($title) > 70) {
+            $title = static::withSuffix(static::text('listing.title_short', $vars));
+        }
 
         $this->h1($listing->title)
-            ->title(static::fitTitle($listing->title.($place ? ', '.$place : '').' – '.$price))
+            ->title($title)
             ->canonical('/oglas/'.$listing->slug.'/')
-            ->type('product');
+            ->type('article');
 
-        $text = static::excerpt((string) $listing->description, 140);
-        $this->description($text !== ''
-            ? $text.($place ? ' ('.$place.')' : '')
-            : $listing->title.($place ? ', '.$place : '').'. Cena: '.$price.'. Pogledaj oglas na loglasi.rs.');
+        // Price is left out for jobs (it is a salary) and when there is none.
+        $hasPrice = $listing->price !== null && (float) $listing->price > 0 && $topSlug !== 'poslovi';
+        $price = $hasPrice ? 'Cena '.$listing->priceLabel().'. ' : '';
+        $text = static::clean((string) $listing->description);
+
+        $this->description(mb_strlen($text) >= 60
+            ? $price.$text
+            : static::text('listing.description', $vars + ['{cena}' => $price]));
+
+        if ($listing->published_at ?? $listing->created_at) {
+            $this->meta('article:published_time', ($listing->published_at ?? $listing->created_at)->toAtomString());
+        }
+        if ($listing->updated_at) {
+            $this->meta('article:modified_time', $listing->updated_at->toAtomString());
+        }
 
         $images = $listing->images->take(6)->map(fn ($image) => static::imageUrl($image->path))->filter()->values()->all();
         $this->image($images);
@@ -276,8 +316,13 @@ class Seo
         $crumbs[] = [$listing->title, null];
         $this->breadcrumbs($crumbs);
 
+        if (! $hasPrice || in_array($topSlug, ['usluge', 'poslovi'], true)) {
+            return $this;
+        }
+
         $product = [
             '@type' => 'Product',
+            '@id' => Url::canonical('/oglas/'.$listing->slug.'/').'#product',
             'name' => $listing->title,
             'description' => static::excerpt((string) $listing->description, 500) ?: $listing->title,
             'url' => Url::canonical('/oglas/'.$listing->slug.'/'),
@@ -292,7 +337,7 @@ class Seo
             $product['category'] = $listing->category->name;
         }
 
-        if ($listing->price !== null) {
+        if ($hasPrice) {
             $offer = [
                 '@type' => 'Offer',
                 'price' => static::number((float) $listing->price),
@@ -308,11 +353,10 @@ class Seo
                 ];
             }
 
-            if ($place) {
-                $offer['availableAtOrFrom'] = [
-                    '@type' => 'Place',
-                    'address' => ['@type' => 'PostalAddress', 'addressLocality' => $place, 'addressCountry' => 'RS'],
-                ];
+            $offer['areaServed'] = ['@type' => 'City', 'name' => $place];
+
+            if ($condition = app(ListingFields::class)->condition($listing)) {
+                $offer['itemCondition'] = $condition === 'novo' ? 'https://schema.org/NewCondition' : 'https://schema.org/UsedCondition';
             }
 
             $product['offers'] = $offer;
@@ -349,19 +393,64 @@ class Seo
             $crumbs[] = [$location->name, $path];
             $indexable = $count >= static::placeMinListings();
         } else {
-            $title = $count > 0 ? $phrase.' Loznica – '.static::countLabel($count) : $phrase.' Loznica';
+            $vars = ['{kategorija}' => static::categoryName($category)];
 
-            $this->title($category->seo_title ?: static::fitTitle($title, $phrase.' Loznica'))
-                ->h1($phrase.' u Loznici i okolini')
-                ->description($category->seo_description ?: static::countLabel($count).' '.static::about($accusative, $category)
-                    .' u Loznici, Banji Koviljači i Lešnici. Pogledaj cene ili besplatno objavi oglas.');
+            $this->title($category->seo_title ?: static::withSuffix(static::text('category.title', $vars)))
+                ->h1($category->seo_h1 ?: static::text('category.h1', $vars))
+                ->description($category->seo_description ?: (static::clean((string) $category->description) ?: static::text('category.description', $vars)), (bool) $category->seo_description);
 
             $indexable = $count > 0;
         }
 
-        $this->canonical($path)->breadcrumbs($crumbs);
+        $this->canonical($path)->breadcrumbs($crumbs)->type('website')->pageType('CollectionPage');
+
+        if (! $location) {
+            $this->faq(static::faqItems($category->seo_faq));
+        }
 
         return $indexable ? $this : $this->noindex();
+    }
+
+    /**
+     * FAQ of a category from its admin field: question on the first line, answer on the
+     * next ones, blocks separated by an empty line.
+     *
+     * @return list<array{q: string, a: string}>
+     */
+    public static function faqItems(?string $text): array
+    {
+        $items = [];
+
+        foreach (preg_split('/\R\s*\R/u', trim((string) $text)) ?: [] as $block) {
+            $lines = preg_split('/\R/u', trim($block)) ?: [];
+            $question = trim((string) array_shift($lines));
+            $answer = trim(implode(' ', array_map('trim', $lines)));
+
+            if ($question !== '' && $answer !== '') {
+                $items[] = ['q' => $question, 'a' => $answer];
+            }
+        }
+
+        return $items;
+    }
+
+    /** ItemList of the newest listings on a list page. @param iterable<Listing> $listings */
+    public function itemList(iterable $listings, string $path): self
+    {
+        $items = [];
+        foreach ($listings as $listing) {
+            $items[] = [
+                '@type' => 'ListItem',
+                'position' => count($items) + 1,
+                'url' => Url::canonical('/oglas/'.$listing->slug.'/'),
+                'name' => static::clean((string) $listing->title),
+            ];
+            if (count($items) === 12) {
+                break;
+            }
+        }
+
+        return $items === [] ? $this : $this->schema(['@type' => 'ItemList', '@id' => Url::canonical($path).'#listings', 'itemListElement' => $items]);
     }
 
     /** Profil firme (/korisnik/{slug}/): indeksabilan uz aktivan Biznis paket, LocalBusiness schema. */
@@ -372,25 +461,27 @@ class Seo
         $name = $firm?->name ?: $user->name;
         $path = '/korisnik/'.$user->slug.'/';
 
+        $vars = ['{firma}' => static::clean($name), '{mesto}' => $firm?->location?->name ?: 'Loznica'];
+
         $this->h1($name)
-            ->title(static::fitTitle($name.' – '.($activity ? $activity.' Loznica' : 'firma iz Loznice')))
-            ->description($activity
-                ? $activity.' u Loznici: adresa, telefon i oglasi firme '.$name.'.'
-                : $name.' iz Loznice: adresa, telefon i oglasi na loglasi.rs.')
+            ->title(static::withSuffix(static::text('business.title', $vars)))
+            ->description(static::clean((string) $firm?->description) ?: static::text('business.description', $vars))
             ->canonical($path)
             ->type('profile')
+            ->pageType('ProfilePage')
             ->breadcrumbs([['Početna', '/'], [$name, $path]]);
 
         if ($firm?->logo_path) {
             $this->image(static::imageUrl($firm->logo_path));
         }
 
-        if (! $firm || ! $firm->hasBiznis()) {
+        if (! static::firmIndexable($user)) {
             return $this->noindex();
         }
 
         $business = [
             '@type' => 'LocalBusiness',
+            '@id' => Url::canonical($path).'#business',
             'name' => $name,
             'url' => Url::canonical($path),
             'address' => array_filter([
@@ -405,8 +496,10 @@ class Seo
             $business['description'] = static::excerpt($firm->description, 300);
         }
 
-        if ($user->phone) {
-            $business['telephone'] = $user->phone;
+        // E.164 only; a number that cannot be normalized is left out.
+        $phone = Phone::normalize($firm->phone ?: $user->phone);
+        if ($phone !== '') {
+            $business['telephone'] = $phone;
         }
 
         if ($firm->logo_path) {
@@ -436,11 +529,12 @@ class Seo
     {
         $path = '/korisnik/'.$user->slug.'/';
 
-        return $this->title(static::fitTitle($user->name.' – oglasi korisnika'))
+        return $this->title(static::withSuffix(static::text('person.title', ['{ime}' => static::clean((string) $user->name)])))
             ->h1($user->name)
             ->description('Oglasi korisnika '.$user->name.' na loglasi.rs, sajtu za oglase za Loznicu i okolinu.')
             ->canonical($path)
             ->type('profile')
+            ->pageType('ProfilePage')
             ->breadcrumbs([['Početna', '/'], [$user->name, $path]])
             ->noindex();
     }
@@ -484,8 +578,7 @@ class Seo
             $indexable = false;
             $canonical = Url::canonical(preg_replace('#page/\d+/$#', '', Url::normalizePath($canonicalPath)));
         } elseif ($isPaged) {
-            // Paginacija: noindex, canonical na samu sebe.
-            $indexable = false;
+            // Pagination: indexable with a self canonical, so Google reaches older listings.
             $canonicalQuery = array_intersect_key($query, array_flip($pageKeys));
             $canonical = Url::canonical($path, $canonicalQuery);
         } else {
@@ -494,6 +587,11 @@ class Seo
 
         $title = $this->getTitle();
         $description = $this->description ?? config('seo.tagline');
+        $pageNumber = static::pageNumber($path, $query);
+
+        if ($pageNumber > 1) {
+            $title = static::paged($title, $pageNumber);
+        }
         $images = $this->images;
 
         if ($images === [] && ($default = static::defaultImage())) {
@@ -525,37 +623,55 @@ class Seo
         return [
             'title' => $title,
             'description' => $description,
-            'robots' => $indexable ? 'index, follow, max-image-preview:large' : 'noindex, follow',
+            'robots' => $indexable ? 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1' : 'noindex, follow',
             'canonical' => $canonical,
             'og' => $og,
             'twitter' => $twitter,
-            'jsonld' => $this->jsonLd(),
+            'jsonld' => $this->jsonLd($title, $description, $canonical ?? Url::canonical($path), $images[0] ?? null),
         ];
     }
 
-    /** @return list<array<string, mixed>> */
-    public function jsonLd(): array
+    /**
+     * One @graph as on the old site: Organization, WebSite, the page node, BreadcrumbList and the
+     * page's own nodes (Product, LocalBusiness, FAQPage, ItemList).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function jsonLd(?string $name = null, ?string $description = null, ?string $url = null, ?string $image = null): array
     {
         $base = config('seo.base_url');
+        $logo = static::assetExists(config('seo.logo')) ? static::absolute(config('seo.logo')) : null;
+        $phone = Phone::normalize((string) Settings::get('contact_phone'));
+        $email = (string) Settings::get('contact_email', config('seo.organization.email'));
+        $organization = array_filter([
+            '@type' => 'Organization',
+            '@id' => $base.'/#organization',
+            'name' => config('seo.site_name'),
+            'url' => $base.'/',
+            'logo' => $logo ? ['@type' => 'ImageObject', '@id' => $base.'/#logo', 'url' => $logo, 'contentUrl' => $logo] : null,
+            'image' => $logo ? ['@id' => $base.'/#logo'] : null,
+            'description' => config('seo.tagline'),
+            'email' => $email !== '' ? $email : null,
+            'telephone' => $phone !== '' ? $phone : null,
+            'address' => [
+                '@type' => 'PostalAddress',
+                'postalCode' => config('seo.organization.postal_code'),
+                'addressLocality' => config('seo.organization.city'),
+                'addressCountry' => 'RS',
+            ],
+            'areaServed' => array_map(fn ($city) => ['@type' => 'City', 'name' => $city], config('seo.organization.area_served', [])),
+            'sameAs' => config('seo.organization.same_as'),
+        ]);
+
         $graph = [
-            array_filter([
-                '@type' => 'Organization',
-                '@id' => $base.'/#organizacija',
-                'name' => config('seo.site_name'),
-                'url' => $base.'/',
-                'logo' => static::assetExists(config('seo.logo')) ? static::absolute(config('seo.logo')) : null,
-                'description' => config('seo.tagline'),
-                'email' => config('seo.organization.email'),
-                'areaServed' => ['@type' => 'City', 'name' => 'Loznica'],
-                'sameAs' => config('seo.organization.same_as'),
-            ]),
+            $organization,
             [
                 '@type' => 'WebSite',
-                '@id' => $base.'/#sajt',
+                '@id' => $base.'/#website',
                 'name' => config('seo.site_name'),
                 'url' => $base.'/',
-                'inLanguage' => 'sr-Latn-RS',
-                'publisher' => ['@id' => $base.'/#organizacija'],
+                'inLanguage' => 'sr-RS',
+                'publisher' => ['@id' => $base.'/#organization'],
                 'potentialAction' => [
                     '@type' => 'SearchAction',
                     'target' => ['@type' => 'EntryPoint', 'urlTemplate' => $base.config('seo.search_url')],
@@ -563,6 +679,22 @@ class Seo
                 ],
             ],
         ];
+
+        if ($url !== null) {
+            $isHome = rtrim($url, '/') === $base;
+            $graph[] = array_filter([
+                '@type' => $this->pageType,
+                '@id' => $url.'#webpage',
+                'url' => $url,
+                'name' => $name,
+                'description' => $description,
+                'inLanguage' => 'sr-RS',
+                'isPartOf' => ['@id' => $base.'/#website'],
+                'primaryImageOfPage' => $image ? ['@type' => 'ImageObject', 'url' => $image] : null,
+                'about' => $isHome ? ['@id' => $base.'/#organization'] : null,
+                'breadcrumb' => count($this->breadcrumbs) > 1 ? ['@id' => $url.'#breadcrumb'] : null,
+            ]);
+        }
 
         if (count($this->breadcrumbs) > 1) {
             $items = [];
@@ -576,7 +708,7 @@ class Seo
                 ]);
             }
 
-            $graph[] = ['@type' => 'BreadcrumbList', 'itemListElement' => $items];
+            $graph[] = array_filter(['@type' => 'BreadcrumbList', '@id' => $url !== null ? $url.'#breadcrumb' : null, 'itemListElement' => $items]);
         }
 
         foreach ($this->schemas as $schema) {
@@ -587,6 +719,99 @@ class Seo
     }
 
     // ---- pomoćne ----
+
+    /** SEO text from PageText (admin can change it), with {x} replaced and empty commas or brackets removed. */
+    public static function text(string $key, array $vars = []): string
+    {
+        $text = strtr(PageText::get('seo.'.$key), $vars);
+        $text = (string) preg_replace(['/\(\s*\)/u', '/\s+,/u', '/,\s*(?=,|\||$)/u', '/\s{2,}/u'], ['', ',', '', ' '], $text);
+
+        return trim($text, " \t\n,");
+    }
+
+    /** Adds „ | loglasi.rs” unless the title already names the site. */
+    public static function withSuffix(string $title): string
+    {
+        $title = static::clean($title);
+
+        return str_contains($title, (string) config('seo.site_name')) ? $title : $title.config('seo.title_suffix');
+    }
+
+    /** „Svi oglasi Loznica, strana 2 | loglasi.rs” */
+    public static function paged(string $title, int $page): string
+    {
+        $suffix = (string) config('seo.title_suffix');
+
+        return str_ends_with($title, $suffix)
+            ? mb_substr($title, 0, mb_strlen($title) - mb_strlen($suffix)).', strana '.$page.$suffix
+            : $title.', strana '.$page;
+    }
+
+    /** Category name without the old „Parent | ” prefix (WordPress term names). */
+    public static function categoryName(Category $category): string
+    {
+        $name = static::clean(html_entity_decode((string) $category->name, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+
+        if (! str_contains($name, '|')) {
+            return $name;
+        }
+
+        $parts = array_map('trim', explode('|', $name));
+        $parent = $category->parent_id ? static::clean((string) $category->parent?->name) : '';
+
+        if ($parent !== '' && mb_strtolower($parts[0]) === mb_strtolower($parent) && count($parts) > 1) {
+            array_shift($parts);
+        }
+
+        return implode(' – ', array_filter($parts, fn ($part) => $part !== ''));
+    }
+
+    private static function topCategory(Category $category): Category
+    {
+        $guard = 0;
+        while ($category->parent_id && $guard++ < 10) {
+            $parent = $category->parent ?? Category::query()->find($category->parent_id);
+            if (! $parent) {
+                break;
+            }
+            $category = $parent;
+        }
+
+        return $category;
+    }
+
+    private static function pageNumber(string $path, array $query): int
+    {
+        if (preg_match('#/page/(\d+)/$#', $path, $m)) {
+            return (int) $m[1];
+        }
+
+        foreach (config('seo.page_params', []) as $key) {
+            if (isset($query[$key]) && is_scalar($query[$key]) && ctype_digit((string) $query[$key])) {
+                return (int) $query[$key];
+            }
+        }
+
+        return 1;
+    }
+
+    /**
+     * A firm profile is indexed (and in the sitemap) once it has an active listing or a filled
+     * profile (description or logo), or a paid package; an empty profile stays noindex.
+     */
+    public static function firmIndexable(User $user): bool
+    {
+        $firm = $user->firm;
+
+        if (! $user->isFirm() || ! $firm) {
+            return false;
+        }
+
+        return $firm->hasPackage()
+            || trim((string) $firm->description) !== ''
+            || ! empty($firm->logo_path)
+            || static::activeListings()->where('user_id', $user->id)->exists();
+    }
 
     /** Aktivan oglas: objavljen i nije istekao. */
     public static function isActive(Listing $listing): bool

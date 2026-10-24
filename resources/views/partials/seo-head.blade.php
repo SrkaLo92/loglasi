@@ -3,7 +3,7 @@
 @php
     $seoBuilder = \App\Support\Seo::get();
     if (isset($title)) { $seoBuilder->title($title); }
-    if (isset($description)) { $seoBuilder->description($description); }
+    if (isset($description)) { $seoBuilder->description($description, true); }
     if (isset($canonical)) { $seoBuilder->canonical($canonical); }
     if (isset($robots) && str_contains(strtolower($robots), 'noindex')) { $seoBuilder->noindex(); }
     $seo = $seoBuilder->resolve();

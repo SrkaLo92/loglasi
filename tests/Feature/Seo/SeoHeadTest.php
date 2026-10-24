@@ -67,6 +67,13 @@ class SeoHeadTest extends SeoTestCase
         return $m[1] ?? '';
     }
 
+    private function description(TestResponse $response): string
+    {
+        preg_match('#<meta name="description" content="([^"]*)">#', $response->getContent(), $m);
+
+        return html_entity_decode($m[1] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
+
     private function canonical(TestResponse $response): ?string
     {
         return preg_match('#<link rel="canonical" href="([^"]+)">#', $response->getContent(), $m) ? $m[1] : null;
@@ -88,15 +95,29 @@ class SeoHeadTest extends SeoTestCase
     public function test_home_has_defaults_and_site_wide_schema(): void
     {
         $response = $this->get('/')->assertOk()
-            ->assertSee('<title>Oglasi Loznica – besplatni mali oglasi | loglasi.rs</title>', false)
+            ->assertSee('<title>Besplatni oglasi Loznica – kupovina, prodaja, usluge | loglasi.rs</title>', false)
+            ->assertSee('<meta name="description" content="loglasi.rs je lokalni oglasnik za Loznicu i okolinu: automobili, nekretnine, usluge, poslovi, mobilni telefoni i besplatne stvari. Postavite oglas besplatno.">', false)
+            ->assertSee('<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">', false)
             ->assertSee('<meta property="og:url" content="https://loglasi.rs/">', false);
 
         $this->assertSame('https://loglasi.rs/', $this->canonical($response));
         $this->assertStringStartsWith('index, follow', $this->robots($response));
 
         $organization = $this->schemaOf($response, 'Organization');
-        $this->assertContains('https://www.instagram.com/loglasi.rs/', $organization['sameAs']);
-        $this->assertSame('Loznica', $organization['areaServed']['name']);
+        $this->assertSame([
+            'https://www.facebook.com/profile.php?id=61571911496798',
+            'https://www.instagram.com/loglasi.rs/',
+            'https://www.tiktok.com/@loglasi.rs',
+        ], $organization['sameAs']);
+        $this->assertSame('https://loglasi.rs/#organization', $organization['@id']);
+        $this->assertSame('+381655415128', $organization['telephone']);
+        $this->assertSame('kontakt@loglasi.rs', $organization['email']);
+        $this->assertSame('15300', $organization['address']['postalCode']);
+        $this->assertSame(['Loznica', 'Banja Koviljača', 'Lešnica', 'Krupanj', 'Ljubovija', 'Mali Zvornik'], array_column($organization['areaServed'], 'name'));
+
+        $page = $this->schemaOf($response, 'WebPage');
+        $this->assertSame('https://loglasi.rs/#webpage', $page['@id']);
+        $this->assertSame(['@id' => 'https://loglasi.rs/#organization'], $page['about']);
 
         $website = $this->schemaOf($response, 'WebSite');
         $this->assertSame('SearchAction', $website['potentialAction']['@type']);
@@ -126,9 +147,10 @@ class SeoHeadTest extends SeoTestCase
         ]);
 
         $response = $this->get('/oglas/golf-4/')->assertOk()
-            ->assertSee('<title>Golf 4 1.9 TDI, Banja Koviljača – 2.500 € | loglasi.rs</title>', false)
-            ->assertSee('<meta name="description" content="Odličan auto, redovno servisiran. (Banja Koviljača)">', false)
-            ->assertSee('<meta property="og:type" content="product">', false);
+            ->assertSee('<title>Golf 4 1.9 TDI, Automobili, Banja Koviljača | loglasi.rs</title>', false)
+            ->assertSee('<meta name="description" content="Golf 4 1.9 TDI u mestu Banja Koviljača. Cena 2.500 €. Pogledajte oglas i kontaktirajte prodavca na loglasi.rs.">', false)
+            ->assertSee('<meta property="og:type" content="article">', false)
+            ->assertSee('<meta property="article:published_time"', false);
 
         $this->assertSame('https://loglasi.rs/oglas/golf-4/', $this->canonical($response));
         $this->assertStringStartsWith('index', $this->robots($response));
@@ -158,9 +180,31 @@ class SeoHeadTest extends SeoTestCase
     {
         Listing::factory()->negotiable()->create(['slug' => 'dogovor', 'title' => 'Plac']);
 
-        $response = $this->get('/oglas/dogovor/')->assertSee('– Dogovor | loglasi.rs</title>', false);
+        $response = $this->get('/oglas/dogovor/')->assertOk();
 
-        $this->assertArrayNotHasKey('offers', $this->schemaOf($response, 'Product'));
+        // No price, no Product (as on the old site).
+        $this->assertNull($this->schemaOf($response, 'Product'));
+        $this->assertStringNotContainsString('Cena ', $this->description($response));
+    }
+
+    public function test_long_listing_text_goes_into_the_description_with_price(): void
+    {
+        Listing::factory()->create([
+            'slug' => 'dug-opis', 'title' => 'Bicikl', 'price' => 120, 'currency' => Currency::EUR,
+            'description' => "Ekstra stanje\nUvoz Švajcarska, sve radi, nove gume i kočnice, može probna vožnja.",
+        ]);
+
+        $this->assertSame('Cena 120 €. Ekstra stanje Uvoz Švajcarska, sve radi, nove gume i kočnice, može probna vožnja.', $this->description($this->get('/oglas/dug-opis/')));
+    }
+
+    public function test_services_and_jobs_have_no_product_and_jobs_no_price(): void
+    {
+        $jobs = Category::factory()->create(['name' => 'Poslovi', 'slug' => 'poslovi']);
+        Listing::factory()->for($jobs)->create(['slug' => 'konobar', 'title' => 'Konobar', 'price' => 80000, 'currency' => Currency::RSD, 'description' => 'Kratko.']);
+
+        $response = $this->get('/oglas/konobar/');
+        $this->assertNull($this->schemaOf($response, 'Product'));
+        $this->assertStringNotContainsString('Cena', $this->description($response));
     }
 
     public function test_expired_listing_is_noindex_follow_without_canonical(): void
@@ -176,13 +220,13 @@ class SeoHeadTest extends SeoTestCase
         }
     }
 
-    public function test_long_listing_title_is_cut_to_60_characters(): void
+    public function test_long_listing_title_drops_the_category(): void
     {
-        Listing::factory()->create(['slug' => 'dug', 'title' => str_repeat('Veoma dugačak naslov oglasa ', 4)]);
+        $category = Category::factory()->create(['name' => 'Automobili', 'slug' => 'automobili']);
+        $place = Location::factory()->create(['name' => 'Lešnica', 'slug' => 'lesnica']);
+        Listing::factory()->for($category)->for($place)->create(['slug' => 'dug', 'title' => 'Volkswagen Golf 7 1.6 TDI Highline, prvi vlasnik, servisna knjiga']);
 
-        preg_match('#<title>(.+)</title>#u', $this->get('/oglas/dug/')->getContent(), $m);
-
-        $this->assertLessThanOrEqual(60, mb_strlen(html_entity_decode($m[1])));
+        $this->get('/oglas/dug/')->assertSee('<title>Volkswagen Golf 7 1.6 TDI Highline, prvi vlasnik, servisna knjiga, Lešnica | loglasi.rs</title>', false);
     }
 
     public function test_category_title_h1_and_description_follow_keyword_map(): void
@@ -192,10 +236,12 @@ class SeoHeadTest extends SeoTestCase
         Listing::factory()->expired()->for($category)->create();
 
         $response = $this->get('/oglasi/automobili/')->assertOk()
-            ->assertSee('<title>Polovni automobili Loznica – 12 oglasa | loglasi.rs</title>', false)
-            ->assertSee('content="12 oglasa za polovne automobile u Loznici, Banji Koviljači i Lešnici. Pogledaj cene ili besplatno objavi oglas."', false);
+            ->assertSee('<title>Automobili, oglasi Loznica | loglasi.rs</title>', false)
+            ->assertSee('content="Pregledajte Automobili oglase u Loznici i okolini na loglasi.rs. Kontaktirajte prodavca direktno ili besplatno postavite svoj oglas."', false);
 
-        $this->assertSame('Polovni automobili u Loznici i okolini', (new Seo)->category($category)->getH1());
+        $this->assertSame('Automobili u Loznici', (new Seo)->category($category)->getH1());
+        $this->assertNotNull($this->schemaOf($response, 'CollectionPage'));
+        $this->assertCount(12, $this->schemaOf($response, 'ItemList')['itemListElement']);
         $this->assertSame('https://loglasi.rs/oglasi/automobili/', $this->canonical($response));
         $this->assertStringStartsWith('index', $this->robots($response));
     }
@@ -207,8 +253,42 @@ class SeoHeadTest extends SeoTestCase
         Listing::factory()->for($child)->create();
 
         $this->get('/oglasi/ogrev/')
-            ->assertSee('<title>Ogrev Loznica – 1 oglas | loglasi.rs</title>', false)
-            ->assertSee('content="1 oglas u kategoriji Ogrev u Loznici', false);
+            ->assertSee('<title>Ogrev, oglasi Loznica | loglasi.rs</title>', false)
+            ->assertSee('content="Pregledajte Ogrev oglase u Loznici', false);
+    }
+
+    public function test_subcategory_name_has_no_parent_prefix(): void
+    {
+        $parent = Category::factory()->create(['name' => 'Nekretnine', 'slug' => 'nekretnine']);
+        $child = Category::factory()->create(['name' => 'Nekretnine | Stanovi za prodaju', 'slug' => 'stanovi-prodaja', 'parent_id' => $parent->id]);
+        Listing::factory()->for($child)->create();
+
+        $this->get('/oglasi/stanovi-prodaja/')
+            ->assertSee('<title>Stanovi za prodaju, oglasi Loznica | loglasi.rs</title>', false)
+            ->assertSee('<h1 class="sr-head__title">Stanovi za prodaju u Loznici</h1>', false);
+    }
+
+    public function test_manual_category_texts_intro_and_faq(): void
+    {
+        $category = Category::factory()->create([
+            'name' => 'Automobili', 'slug' => 'automobili',
+            'seo_title' => 'Automobili Loznica – polovni automobili i auto delovi | loglasi.rs',
+            'seo_description' => 'Polovni automobili, auto delovi i oprema u Loznici i okolini.',
+            'seo_h1' => 'Automobili – polovni automobili i delovi u Loznici',
+            'seo_intro' => 'Tražite polovan automobil ili delove u Loznici?',
+            'seo_faq' => "Da li je oglas besplatan?\nDa. Oglas je aktivan 30 dana, a obnavljanje je besplatno.\n\nGde mogu da pogledam auto?\nU svom mestu.",
+        ]);
+        Listing::factory()->for($category)->create();
+
+        $response = $this->get('/oglasi/automobili/')->assertOk()
+            ->assertSee('<title>Automobili Loznica – polovni automobili i auto delovi | loglasi.rs</title>', false)
+            ->assertSee('<h1 class="sr-head__title">Automobili – polovni automobili i delovi u Loznici</h1>', false)
+            ->assertSee('Tražite polovan automobil ili delove u Loznici?')
+            ->assertSee('Česta pitanja – Automobili Loznica');
+
+        $faq = $this->schemaOf($response, 'FAQPage');
+        $this->assertSame(['Da li je oglas besplatan?', 'Gde mogu da pogledam auto?'], array_column($faq['mainEntity'], 'name'));
+        $this->assertSame('Da. Oglas je aktivan 30 dana, a obnavljanje je besplatno.', $faq['mainEntity'][0]['acceptedAnswer']['text']);
     }
 
     public function test_empty_category_is_noindex(): void
@@ -263,25 +343,29 @@ class SeoHeadTest extends SeoTestCase
 
     public function test_site_search_is_noindex(): void
     {
+        Listing::factory()->create(['title' => 'Golf 4']);
         $response = $this->get('/?s=golf');
 
+        // The old WordPress search shows the listing list, so it points to it.
         $this->assertSame('noindex, follow', $this->robots($response));
-        $this->assertSame('https://loglasi.rs/', $this->canonical($response));
+        $this->assertSame('https://loglasi.rs/oglasi/', $this->canonical($response));
     }
 
-    public function test_pagination_is_noindex_with_self_canonical(): void
+    public function test_pagination_is_indexable_with_self_canonical(): void
     {
-        Listing::factory()->create();
+        // Three pages of 24 listings (a page past the last one is 404).
+        Listing::factory()->count(49)->for(User::factory())->for(Category::factory())->for(Location::factory())->create();
 
         $response = $this->get('/oglasi/?page=2');
-        $this->assertSame('noindex, follow', $this->robots($response));
+        $this->assertStringStartsWith('index, follow', $this->robots($response));
         $this->assertSame('https://loglasi.rs/oglasi/?page=2', $this->canonical($response));
+        $response->assertSee('<title>Svi oglasi Loznica, strana 2 | loglasi.rs</title>', false);
 
         $response = $this->get('/oglasi/?paged=3&utm_source=x');
         $this->assertSame('https://loglasi.rs/oglasi/?paged=3', $this->canonical($response));
 
         $response = $this->get('/oglasi/page/2/');
-        $this->assertSame('noindex, follow', $this->robots($response));
+        $this->assertStringStartsWith('index, follow', $this->robots($response));
         $this->assertSame('https://loglasi.rs/oglasi/page/2/', $this->canonical($response));
     }
 
@@ -298,7 +382,7 @@ class SeoHeadTest extends SeoTestCase
         User::factory()->create(['slug' => 'petar', 'name' => 'Petar Petrović']);
 
         $response = $this->get('/korisnik/petar/')
-            ->assertSee('<title>Petar Petrović – oglasi korisnika | loglasi.rs</title>', false);
+            ->assertSee('<title>Petar Petrović, oglasi | loglasi.rs</title>', false);
 
         $this->assertSame('noindex, follow', $this->robots($response));
     }
@@ -306,10 +390,11 @@ class SeoHeadTest extends SeoTestCase
     public function test_firm_profile_is_indexable_with_local_business(): void
     {
         $user = User::factory()->firm()->create(['slug' => 'auto-servis-drina', 'phone' => '+381641112222']);
-        $user->firm->forceFill(['name' => 'Auto servis Drina', 'address' => 'Jadranska 5', 'working_hours' => ['mon' => '08:00-16:00']])->save();
+        $user->firm->forceFill(['name' => 'Auto servis Drina', 'description' => null, 'address' => 'Jadranska 5', 'working_hours' => ['mon' => '08:00-16:00']])->save();
 
         $response = $this->get('/korisnik/auto-servis-drina/')
-            ->assertSee('<title>Auto servis Drina – firma iz Loznice | loglasi.rs</title>', false);
+            ->assertSee('<title>Auto servis Drina, Loznica | loglasi.rs</title>', false)
+            ->assertSee('content="Oglasi i kontakt firme Auto servis Drina iz mesta Loznica na loglasi.rs."', false);
 
         $this->assertStringStartsWith('index', $this->robots($response));
         $this->assertSame('https://loglasi.rs/korisnik/auto-servis-drina/', $this->canonical($response));
@@ -321,11 +406,12 @@ class SeoHeadTest extends SeoTestCase
         $this->assertSame('Monday', $business['openingHoursSpecification'][0]['dayOfWeek']);
     }
 
-    public function test_firm_without_biznis_package_is_noindex(): void
+    public function test_empty_firm_profile_is_noindex(): void
     {
         $user = User::factory()->firm()->create(['slug' => 'bez-paketa']);
-        $user->firm->forceFill(['biznis_until' => now()->subDay()])->save();
+        $user->firm->forceFill(['package_ends_at' => now()->subDay(), 'description' => null, 'logo_path' => null])->save();
 
+        // An empty firm profile without listings stays out of the index.
         $response = $this->get('/korisnik/bez-paketa/');
 
         $this->assertSame('noindex, follow', $this->robots($response));

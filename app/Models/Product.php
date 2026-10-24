@@ -21,7 +21,7 @@ class Product extends Model
 
     protected function casts(): array
     {
-        return ['is_active' => 'boolean'];
+        return ['is_active' => 'boolean', 'display_only' => 'boolean'];
     }
 
     public static function byCode(string $code): ?self

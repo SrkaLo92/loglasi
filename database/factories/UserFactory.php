@@ -53,10 +53,10 @@ class UserFactory extends Factory
         return $this->state(fn () => ['role' => Role::Moderator]);
     }
 
-    /** Nalog firme sa profilom i aktivnim Biznis paketom. */
+    /** Firm account with a profile and an active Business Max package (unlimited listings). */
     public function firm(): static
     {
         return $this->state(fn () => ['account_type' => AccountType::Firm])
-            ->afterCreating(fn (User $user) => Firm::factory()->for($user)->create());
+            ->afterCreating(fn (User $user) => Firm::factory()->package('max')->for($user)->create());
     }
 }

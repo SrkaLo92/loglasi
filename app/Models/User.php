@@ -166,4 +166,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->devices()->pluck('token')->all();
     }
+
+    // Listing page module
+
+    /** Public profile: /korisnik/{slug}/ */
+    public function profileUrl(): string
+    {
+        return url_slash('korisnik/'.$this->slug);
+    }
 }
