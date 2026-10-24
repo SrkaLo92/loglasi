@@ -26,16 +26,19 @@
 		</section>
 	@endif
 
-	@foreach ($lists as $field)
+	@if ($lists->isNotEmpty())
 		<section class="pst-section">
-			@include('posting.partials.detail-field')
+			@if ($lists->count() > 1)<h3 class="pst-section__title">Oprema i karakteristike</h3>@endif
+			@foreach ($lists as $field)
+				@include('posting.partials.detail-field')
+			@endforeach
 		</section>
-	@endforeach
+	@endif
 
 	@if ($flags->isNotEmpty())
 		<section class="pst-section">
 			<h3 class="pst-section__title">Dodatno</h3>
-			<div class="pst-checks">
+			<div class="pst-switches">
 				@foreach ($flags as $field)
 					@include('posting.partials.detail-field')
 				@endforeach

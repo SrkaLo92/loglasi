@@ -205,8 +205,8 @@ $fields->apply($upit, $uslovi);  // jedan WHERE EXISTS po polju, koristi indekse
 ## Prikaz na sajtu
 
 - Izbor kategorije pri postavljanju: pretraga (`?trazi=`, uživo preko JavaScript-a) nudi samo kategorije poslednjeg nivoa sa putanjom („Vozila › Automobili”); ispod je stablo jedan nivo po strani (`?grupa=`), vrh kao pločice sa ikonama.
-- Korak „Detalji”: „Osnovni podaci” (izbor, broj, godina, tekst) u dve kolone na širem ekranu, godina kao spisak (sledeća godina do 1900), jedinica u samom polju; svako „više izbora” polje kao oznake (posle 12 „Prikaži još”), pa „Dodatno” (da/ne).
-- Filteri: prvih 6 polja kategorije su vidljiva, ostala su pod „Više filtera (N)” koje je otvoreno kad je neki od njih izabran; godište od/do kao spisak.
+- Korak „Detalji”: „Osnovni podaci” u dve kolone na širem ekranu. Izbor sa do 7 kratkih vrednosti je red dugmića (drugi dodir poništava), duži izbor otvara prozor sa pretragom (`public/js/pick.js` + `pick.css`: `select[data-pick]`, `data-pick="year"` za godine u mreži po decenijama, `data-pick-popular` za „Najtraženije”, vrednosti u `ListingFields::POPULAR`). Pravi `<select>` ostaje u formi, pa sve radi i bez JavaScript-a i sa zavisnim poljima (`fields.js`). Polje sa više izbora i više od 8 vrednosti (`data-pick-multi`) je grupa koja se skuplja: zaglavlje pokazuje izabrano, otvorena ima pretragu. Da/ne polja su prekidači pod „Dodatno”; km/cm³/m²/kg dobijaju tačke za hiljade, kW pokazuje KS.
+- Filteri: prvih 6 polja kategorije su vidljiva, ostala su pod „Više filtera (N)” koje je otvoreno kad je neki od njih izabran; izbori i godište od/do koriste isti prozor sa pretragom, duge liste su grupe koje se skupljaju.
 - Stranica oglasa: pojedinačne vrednosti u tabeli „Karakteristike”, polja sa više izbora kao oznake ispod svog naslova.
 
 ## Podaci za lokalni razvoj

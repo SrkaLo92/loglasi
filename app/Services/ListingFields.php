@@ -34,6 +34,11 @@ class ListingFields
 
     public const YEAR_MIN = 1900;
 
+    /** Values shown first in the picker ("Najtraženije"), by field key. */
+    public const POPULAR = [
+        'marka_automobila' => ['volkswagen', 'opel', 'audi', 'bmw', 'mercedes-benz', 'skoda', 'peugeot', 'renault', 'fiat', 'ford', 'toyota', 'zastava'],
+    ];
+
     public function __construct(private readonly Catalog $catalog) {}
 
     // ---------------------------------------------------------------- forma

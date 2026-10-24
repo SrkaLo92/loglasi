@@ -8,10 +8,12 @@
 
 @push('head')
 	<link rel="stylesheet" href="{{ asset_v('css/search.css') }}">
+	<link rel="stylesheet" href="{{ asset_v('css/pick.css') }}">
 @endpush
 @push('scripts')
 	<script src="{{ asset_v('js/search.js') }}" defer></script>
 	<script src="{{ asset_v('js/fields.js') }}" defer></script>
+	<script src="{{ asset_v('js/pick.js') }}" defer></script>
 @endpush
 
 @php
@@ -100,7 +102,7 @@
 					@if ($locations->isNotEmpty())
 						<div class="sr-group">
 							<label class="sr-group__title" for="sr-place">Mesto</label>
-							<select class="sr-input" id="sr-place" name="mesto">
+							<select class="sr-input" id="sr-place" name="mesto" data-pick>
 								<option value="">Loznica i okolina</option>
 								@foreach ($locations as $place)
 									<option value="{{ $place->slug }}" @selected($filters->placeSlug() === $place->slug)>{{ $place->name }}</option>

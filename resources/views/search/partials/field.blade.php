@@ -10,7 +10,7 @@
 				@php $years = range((int) date('Y') + 1, \App\Services\ListingFields::YEAR_MIN); @endphp
 				@foreach (['_od' => 'Od', '_do' => 'Do'] as $suffix => $word)
 					@php $picked = (string) ($filters->fieldValue($field['key'].$suffix) ?? ''); @endphp
-					<label>{{ $word }}<select class="sr-input" name="f[{{ $field['key'] }}{{ $suffix }}]">
+					<label>{{ $word }}<select class="sr-input" data-pick="year" name="f[{{ $field['key'] }}{{ $suffix }}]">
 						<option value="">Sve</option>
 						@foreach ($years as $year)
 							<option value="{{ $year }}" @selected($picked === (string) $year)>{{ $year }}.</option>
@@ -38,6 +38,7 @@
 	@endphp
 	<fieldset class="sr-group">
 		<legend class="sr-group__title">{{ $field['label'] }}</legend>
+		@if ($rest->isNotEmpty())<div data-pick-multi="{{ $field['label'] }}" data-pick-hint="Sve">@endif
 		<div class="sr-pills">
 			@foreach ($first as $option)
 				<label class="sr-pill"><input type="checkbox" data-field-key="{{ $field['key'] }}" name="f[{{ $field['key'] }}][]" value="{{ $option['value'] }}" @checked(in_array($option['value'], $chosen, true))><span>{{ $option['label'] }}</span></label>
@@ -53,6 +54,7 @@
 				</div>
 			</details>
 		@endif
+		@if ($rest->isNotEmpty())</div>@endif
 	</fieldset>
 @elseif (! empty($field['depends_on']))
 	{{-- Dependent select (model on make): only the chosen parent's options, otherwise all grouped by parent. --}}
@@ -65,7 +67,7 @@
 	@endphp
 	<div class="sr-group">
 		<label class="sr-group__title" for="{{ $fid }}">{{ $field['label'] }}</label>
-		<select class="sr-input" id="{{ $fid }}" name="f[{{ $field['key'] }}]" data-field-key="{{ $field['key'] }}" data-depends-on="{{ $field['depends_on'] }}" data-placeholder="Sve">
+		<select class="sr-input" id="{{ $fid }}" name="f[{{ $field['key'] }}]" data-pick data-field-key="{{ $field['key'] }}" data-depends-on="{{ $field['depends_on'] }}" data-placeholder="Sve">
 			<option value="">Sve</option>
 			@foreach ($groups as $group => $options)
 				@if ($group !== '')<optgroup label="{{ $group }}">@endif
@@ -79,7 +81,7 @@
 @else
 	<div class="sr-group">
 		<label class="sr-group__title" for="{{ $fid }}">{{ $field['label'] }}</label>
-		<select class="sr-input" id="{{ $fid }}" name="f[{{ $field['key'] }}]" data-field-key="{{ $field['key'] }}">
+		<select class="sr-input" id="{{ $fid }}" name="f[{{ $field['key'] }}]" data-pick @if (isset(\App\Services\ListingFields::POPULAR[$field['key']])) data-pick-popular="{{ implode(',', \App\Services\ListingFields::POPULAR[$field['key']]) }}" @endif data-field-key="{{ $field['key'] }}">
 			<option value="">Sve</option>
 			@foreach ($field['options'] as $option)
 				<option value="{{ $option['value'] }}" @selected($filters->fieldValue($field['key']) === $option['value'])>{{ $option['label'] }}</option>

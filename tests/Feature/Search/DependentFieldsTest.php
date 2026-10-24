@@ -124,7 +124,8 @@ class DependentFieldsTest extends SearchTestCase
     {
         $page = $this->get('/oglasi/automobili/')->assertOk();
         $page->assertSee('<details class="sr-morefilters" >', false)
-            ->assertSee('<select class="sr-input" name="f[godina_od]">', false);
+            ->assertSee('<select class="sr-input" data-pick="year" name="f[godina_od]">', false)
+            ->assertSee('data-pick-popular="volkswagen,opel,audi', false);
         $this->assertMatchesRegularExpression('/Više filtera \(\d+\)/', $page->getContent());
 
         $this->assertMatchesRegularExpression('/<details class="sr-morefilters"\s+open\s*>/', $this->get('/oglasi/automobili/?f[snaga_od]=50')->assertOk()->getContent());
@@ -164,6 +165,13 @@ class DependentFieldsTest extends SearchTestCase
 
         $page = $this->actingAs($user)->get('/postavi-oglas/'.$listing->id.'/detalji/')->assertOk();
         $page->assertSee('data-needs-parent', false)->assertSee('<optgroup label="Audi">', false)->assertSee('Kilometraža');
+        // Long lists open in the searchable picker, short ones are pills, yes/no are switches.
+        $this->assertMatchesRegularExpression('/name="fields\[marka_automobila\]" data-pick\s+data-pick-popular="volkswagen/', $page->getContent());
+        $page->assertSee('data-pick="year"', false)
+            ->assertSee('<label class="pst-pill"><input type="radio" name="fields[menjac]"', false)
+            ->assertSee('role="switch" name="fields[registrovan]"', false)
+            ->assertSee('data-thousands', false)
+            ->assertSee('data-kw', false);
 
         $this->actingAs($user)->put('/postavi-oglas/'.$listing->id.'/detalji/', ['fields' => [
             'marka_automobila' => 'bmw', 'model_automobila' => 'audi-a4', 'godina' => '2009', 'stanje' => 'korisceno',

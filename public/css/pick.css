@@ -1,0 +1,591 @@
+/* loglasi.rs pickers (pick.js): the button that replaces a select, the summary of a checkbox list,
+   and the sheet with search (bottom sheet on a phone, a dialog on a computer). */
+
+.lp-native {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	clip: rect(0 0 0 0) !important;
+	border: 0 !important;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.lp-multi-native {
+	display: none !important;
+}
+
+.lp-lock,
+.lp-lock body {
+	overflow: hidden;
+}
+
+/* The field button */
+
+.lp-trigger {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	width: 100%;
+	min-height: 52px;
+	padding: 0 12px 0 14px;
+	border: 1px solid var(--lg-input, #c9d1cc);
+	border-radius: 12px;
+	background: #fff;
+	color: var(--lg-text, #1d2b26);
+	font: inherit;
+	font-size: 16px;
+	font-weight: 700;
+	text-align: left;
+	cursor: pointer;
+}
+
+.lp-trigger--sm {
+	min-height: 44px;
+	font-size: 15px;
+}
+
+.lp-trigger.is-empty {
+	font-weight: 500;
+	color: var(--lg-muted, #5b6470);
+}
+
+.lp-trigger:not(.is-empty) {
+	border-color: var(--lg-green, #2b7a64);
+	background: #f4faf7;
+}
+
+.lp-trigger:hover:not(:disabled) {
+	border-color: var(--lg-green, #2b7a64);
+}
+
+.lp-trigger:focus-visible,
+.lp-acc__head:focus-visible {
+	outline: 2px solid var(--lg-green, #2b7a64);
+	outline-offset: 2px;
+}
+
+.lp-trigger:disabled {
+	background: #f3f5f4;
+	border-color: var(--lg-border, #e3e7e4);
+	color: #6b737b;
+	cursor: not-allowed;
+}
+
+.lp-trigger[aria-invalid="true"] {
+	border-color: var(--lg-orange, #b8501a);
+}
+
+.lp-trigger__text {
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.lp-trigger__icon {
+	display: inline-flex;
+	flex: 0 0 auto;
+	color: var(--lg-muted, #5b6470);
+}
+
+/* The sheet */
+
+.lp-sheet {
+	position: fixed;
+	inset: 0;
+	z-index: 9996;
+	color: var(--lg-text, #1d2b26);
+	font-family: inherit;
+}
+
+.lp-sheet[hidden] {
+	display: none;
+}
+
+.lp-scrim {
+	position: absolute;
+	inset: 0;
+	background: rgba(16, 24, 20, .45);
+	opacity: 0;
+	transition: opacity .18s ease-out;
+}
+
+.lp-panel {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	display: flex;
+	flex-direction: column;
+	height: 88vh;
+	height: 88dvh;
+	border-radius: 20px 20px 0 0;
+	background: #fff;
+	box-shadow: 0 -8px 30px rgba(0, 0, 0, .18);
+	transform: translateY(24px);
+	opacity: 0;
+	transition: transform .22s cubic-bezier(.2, .8, .2, 1), opacity .18s ease-out;
+}
+
+.lp-sheet.is-open .lp-scrim {
+	opacity: 1;
+}
+
+.lp-sheet.is-open .lp-panel {
+	transform: none;
+	opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.lp-scrim,
+	.lp-panel {
+		transition: none;
+	}
+}
+
+.lp-grab {
+	align-self: center;
+	width: 40px;
+	height: 5px;
+	margin-top: 8px;
+	border-radius: 4px;
+	background: #d5dbd7;
+}
+
+.lp-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 6px 8px 0 16px;
+}
+
+.lp-head__text {
+	min-width: 0;
+}
+
+.lp-title {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 800;
+	line-height: 1.3;
+}
+
+.lp-sub {
+	margin: 2px 0 0;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--lg-muted, #5b6470);
+}
+
+.lp-sub:empty {
+	display: none;
+}
+
+.lp-x {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 44px;
+	height: 44px;
+	border: 0;
+	border-radius: 12px;
+	background: transparent;
+	color: var(--lg-text, #1d2b26);
+	cursor: pointer;
+}
+
+.lp-x:hover {
+	background: #f1f4f2;
+}
+
+.lp-find {
+	position: relative;
+	padding: 10px 16px 8px;
+}
+
+.lp-find__icon {
+	position: absolute;
+	top: 26px;
+	left: 30px;
+	display: inline-flex;
+	color: var(--lg-muted, #5b6470);
+	pointer-events: none;
+}
+
+.lp-find__input {
+	width: 100%;
+	height: 52px;
+	padding: 0 14px 0 44px;
+	border: 1px solid var(--lg-input, #c9d1cc);
+	border-radius: 12px;
+	background: var(--lg-bg, #f6f7f5);
+	color: var(--lg-text, #1d2b26);
+	font: inherit;
+	font-size: 16px;
+	box-sizing: border-box;
+}
+
+.lp-find__input:focus {
+	outline: none;
+	border-color: var(--lg-green, #2b7a64);
+	background: #fff;
+	box-shadow: 0 0 0 3px rgba(43, 122, 100, .18);
+}
+
+.lp-body {
+	flex: 1 1 auto;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding-bottom: 16px;
+	-webkit-overflow-scrolling: touch;
+}
+
+.lp-group__title {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	margin: 0;
+	padding: 12px 16px 6px;
+	border-bottom: 1px solid #eef1ef;
+	background: #fff;
+	color: var(--lg-muted, #5b6470);
+	font-size: 12px;
+	font-weight: 800;
+	letter-spacing: .06em;
+	text-transform: uppercase;
+}
+
+.lp-list {
+	display: flex;
+	flex-direction: column;
+}
+
+.lp-opt {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	width: 100%;
+	min-height: 52px;
+	padding: 0 16px;
+	border: 0;
+	border-bottom: 1px solid #eef1ef;
+	background: transparent;
+	color: var(--lg-text, #1d2b26);
+	font: inherit;
+	font-size: 16px;
+	font-weight: 600;
+	text-align: left;
+	cursor: pointer;
+}
+
+.lp-opt:hover,
+.lp-opt:focus-visible {
+	outline: none;
+	background: #f1f6f3;
+}
+
+.lp-opt__label {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.lp-opt[aria-selected="true"] {
+	font-weight: 800;
+}
+
+.lp-opt__tick {
+	display: inline-flex;
+	color: var(--lg-green, #2b7a64);
+}
+
+.lp-opt--clear {
+	color: var(--lg-muted, #5b6470);
+	font-weight: 500;
+}
+
+/* Popular values and years: chips and a grid instead of rows */
+
+.lp-list--chips {
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 10px 16px 6px;
+}
+
+.lp-list--chips .lp-opt,
+.lp-list--grid .lp-opt {
+	justify-content: center;
+	width: auto;
+	min-height: 44px;
+	padding: 0 14px;
+	border: 1px solid var(--lg-input, #c9d1cc);
+	border-radius: 999px;
+	font-size: 15px;
+	font-weight: 700;
+}
+
+.lp-list--chips .lp-opt__label,
+.lp-list--grid .lp-opt__label {
+	flex: 0 1 auto;
+	text-align: center;
+}
+
+.lp-list--grid {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 8px;
+	padding: 10px 16px 6px;
+}
+
+.lp-list--grid .lp-opt {
+	min-height: 48px;
+	padding: 0;
+	border-color: var(--lg-border, #e3e7e4);
+	border-radius: 12px;
+}
+
+.lp-list--chips .lp-opt[aria-selected="true"],
+.lp-list--grid .lp-opt[aria-selected="true"] {
+	border-color: var(--lg-green, #2b7a64);
+	background: var(--lg-green, #2b7a64);
+	color: #fff;
+}
+
+.lp-list--chips .lp-opt__tick,
+.lp-list--grid .lp-opt__tick {
+	display: none;
+}
+
+.lp-empty {
+	padding: 32px 24px;
+	text-align: center;
+}
+
+.lp-empty__title {
+	margin: 0 0 6px;
+	font-size: 16px;
+	font-weight: 700;
+}
+
+.lp-empty__text {
+	margin: 0;
+	font-size: 14px;
+	color: var(--lg-muted, #5b6470);
+}
+
+/* A computer: the same sheet as a centred dialog */
+
+@media (min-width: 720px) {
+	.lp-panel {
+		top: 50%;
+		right: auto;
+		bottom: auto;
+		left: 50%;
+		width: min(520px, calc(100vw - 48px));
+		height: min(640px, calc(100vh - 80px));
+		border-radius: 18px;
+		box-shadow: 0 24px 60px rgba(0, 0, 0, .25);
+		transform: translate(-50%, -48%);
+	}
+
+	.lp-sheet.is-open .lp-panel {
+		transform: translate(-50%, -50%);
+	}
+
+	.lp-grab {
+		display: none;
+	}
+
+	.lp-head {
+		padding-top: 12px;
+	}
+
+	.lp-list--grid {
+		grid-template-columns: repeat(5, minmax(0, 1fr));
+	}
+}
+
+/* Long checkbox lists: a group that folds (header with what is chosen) and opens in place */
+
+.lp-acc-on > legend {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+.lp-acc {
+	border: 1px solid var(--lg-input, #c9d1cc);
+	border-radius: 14px;
+	background: #fff;
+}
+
+.lp-acc.has-value {
+	border-color: var(--lg-green, #2b7a64);
+}
+
+.lp-acc__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	width: 100%;
+	min-height: 60px;
+	padding: 12px 12px 12px 14px;
+	border: 0;
+	border-radius: 14px;
+	background: transparent;
+	color: var(--lg-text, #1d2b26);
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.lp-acc__main {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
+}
+
+.lp-acc__top {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 4px 8px;
+}
+
+.lp-acc__title {
+	font-size: 16px;
+	font-weight: 800;
+}
+
+.lp-acc__count {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--lg-green, #2b7a64);
+}
+
+.lp-acc__hint {
+	font-size: 14px;
+	color: var(--lg-muted, #5b6470);
+}
+
+.lp-acc__chev {
+	display: inline-flex;
+	flex: 0 0 auto;
+	color: var(--lg-muted, #5b6470);
+	transition: transform .18s ease-out;
+}
+
+.lp-acc.is-open .lp-acc__chev {
+	transform: rotate(180deg);
+}
+
+.lp-acc__panel {
+	padding: 0 14px 14px;
+}
+
+.lp-acc__panel[hidden] {
+	display: none;
+}
+
+.lp-acc__tools {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 12px;
+	margin-bottom: 12px;
+}
+
+.lp-acc__find {
+	position: relative;
+	flex: 1 1 220px;
+}
+
+.lp-acc__find .lp-find__icon {
+	top: 16px;
+	left: 14px;
+}
+
+.lp-acc__find .lp-find__input {
+	height: 48px;
+}
+
+.lp-acc__clear {
+	min-height: 44px;
+	padding: 0 4px;
+	border: 0;
+	background: transparent;
+	color: var(--lg-green, #2b7a64);
+	font: inherit;
+	font-size: 14px;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.lp-acc__clear[hidden],
+.lp-acc__panel label[hidden] {
+	display: none !important;
+}
+
+.lp-acc__none {
+	margin: 4px 0 0;
+	font-size: 14px;
+	color: var(--lg-muted, #5b6470);
+}
+
+.lp-acc__none[hidden] {
+	display: none;
+}
+
+.lp-flat > summary {
+	display: none !important;
+}
+
+.lp-flat {
+	margin: 0 !important;
+}
+
+.lp-flat .sr-pills {
+	margin-top: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.lp-acc__chev {
+		transition: none;
+	}
+}
+
+.lp-summary__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.lp-summary__chips:empty {
+	display: none;
+}
+
+.lp-chip {
+	padding: 4px 10px;
+	border-radius: 999px;
+	background: var(--lg-mint, #e9f4f0);
+	color: var(--lg-green-dark, #1f5b4a);
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.lp-chip--more {
+	background: #eef1ef;
+	color: var(--lg-text, #1d2b26);
+}
