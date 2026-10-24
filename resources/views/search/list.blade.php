@@ -83,7 +83,7 @@
 						<legend class="sr-group__title">Cena</legend>
 						<div class="sr-range">
 							<label>Od<input class="sr-input" type="text" inputmode="numeric" pattern="[0-9 .]*" name="cena_od" value="{{ $filters->query['cena_od'] ?? '' }}" placeholder="0" autocomplete="off"></label>
-							<label>Do<input class="sr-input" type="text" inputmode="numeric" pattern="[0-9 .]*" name="cena_do" value="{{ $filters->query['cena_do'] ?? '' }}" placeholder="bez limita" autocomplete="off"></label>
+							<label>Do<input class="sr-input" type="text" inputmode="numeric" pattern="[0-9 .]*" name="cena_do" value="{{ $filters->query['cena_do'] ?? '' }}" autocomplete="off"></label>
 							<label>Valuta<select class="sr-input" name="valuta">
 								<option value="EUR" @selected($filters->currency()->value === 'EUR')>€</option>
 								<option value="RSD" @selected($filters->currency()->value === 'RSD')>din</option>

@@ -62,7 +62,7 @@ class HomeSections
             'categories' => $this->categories($counts),
             'categories_total' => count(array_filter($counts)),
             'featured' => $this->search->ids(['featured_only' => true], HomeSettings::int('home.featured_count', 1, 12)),
-            'latest' => $this->search->ids([], HomeSettings::int('home.latest_count', 1, 24)),
+            'latest' => $this->search->ids(['featured_first' => false], HomeSettings::int('home.latest_count', 1, 24)),
             'tabs' => $this->tabs($counts),
             'firms' => $this->firms(),
         ];

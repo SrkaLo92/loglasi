@@ -3,6 +3,7 @@
 namespace Tests\Feature\Search;
 
 use App\Models\User;
+use App\Support\Home\HomeSections;
 use App\Support\Settings;
 
 class HomePageTest extends SearchTestCase
@@ -34,6 +35,17 @@ class HomePageTest extends SearchTestCase
 
         $html = $response->getContent();
         $this->assertLessThan(strpos($html, 'Novi oglas 2'), strpos($html, 'Novi oglas 1'));
+    }
+
+    public function test_latest_section_is_plain_newest(): void
+    {
+        $this->listing(['title' => 'Stari istaknut', 'bumped_at' => now()->subDays(5), 'featured_until' => now()->addDay()]);
+        $this->listing(['title' => 'Novi običan']);
+
+        $sections = HomeSections::get();
+
+        $this->assertSame(['Novi običan', 'Stari istaknut'], $sections['latest']->pluck('title')->all());
+        $this->assertSame(['Stari istaknut'], $sections['featured']->pluck('title')->all());
     }
 
     public function test_empty_site_hides_featured_and_shows_a_call_to_action(): void

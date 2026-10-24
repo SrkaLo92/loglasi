@@ -36,6 +36,7 @@ return new class extends Migration
 
             // Newest first (featured first), with each common filter in front.
             $table->index(['featured', 'sort_at', 'id'], 'ls_all');
+            $table->index(['sort_at', 'id'], 'ls_newest'); // home "latest": newest without featured first
             $table->index(['cat1', 'featured', 'sort_at', 'id'], 'ls_cat1');
             $table->index(['cat2', 'featured', 'sort_at', 'id'], 'ls_cat2');
             $table->index(['cat3', 'featured', 'sort_at', 'id'], 'ls_cat3');

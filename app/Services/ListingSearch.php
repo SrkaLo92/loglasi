@@ -185,6 +185,7 @@ class ListingSearch
             'firm' => null,
             'filters' => [],
             'featured_only' => false, // home page section, not an API parameter
+            'featured_first' => true, // false: plain newest order (home page "latest" section)
             'sort' => 'newest',
             'page' => 1,
             'per_page' => self::PER_PAGE_DEFAULT,
@@ -219,7 +220,7 @@ class ListingSearch
         }
 
         $relevance = $this->applyText($query, $params['q']);
-        $this->applyOrder($query, $params['sort'], $relevance);
+        $this->applyOrder($query, $params['sort'], $relevance, $params['featured_first'] ?? true);
 
         return $query;
     }
@@ -390,8 +391,14 @@ class ListingSearch
     }
 
     /** Featured first, then the chosen sort; every branch matches an index of listing_search. */
-    private function applyOrder(Builder $query, string $sort, ?array $relevance): void
+    private function applyOrder(Builder $query, string $sort, ?array $relevance, bool $featuredFirst = true): void
     {
+        if (! $featuredFirst && $sort === 'newest') {
+            $query->orderByDesc('listing_search.sort_at')->orderByDesc('listing_search.id'); // ls_newest
+
+            return;
+        }
+
         $query->orderByDesc('listing_search.featured');
 
         if ($sort === 'price_asc' || $sort === 'price_desc') {
