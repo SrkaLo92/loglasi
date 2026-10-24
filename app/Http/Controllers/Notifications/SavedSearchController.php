@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Notifications;
 use App\Http\Controllers\Controller;
 use App\Models\SavedSearch;
 use App\Support\Notifications\NotificationPreferences;
+use App\Support\Notifications\SavedSearches;
 use App\Support\Notifications\SavedSearchQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -20,7 +21,10 @@ use Illuminate\View\View;
  */
 class SavedSearchController extends Controller
 {
-    public function __construct(private readonly SavedSearchQuery $queries) {}
+    public function __construct(
+        private readonly SavedSearchQuery $queries,
+        private readonly SavedSearches $searches,
+    ) {}
 
     public function index(Request $request): View
     {
@@ -29,7 +33,7 @@ class SavedSearchController extends Controller
         return view('notifications.saved-searches', [
             'searches' => $user->savedSearches()->latest('id')->get(['id', 'name', 'query', 'notify', 'last_notified_at', 'created_at']),
             'alertsOn' => NotificationPreferences::allows($user, NotificationPreferences::SAVED_SEARCHES),
-            'max' => $this->max(),
+            'max' => SavedSearches::max(),
         ]);
     }
 
@@ -42,37 +46,33 @@ class SavedSearchController extends Controller
                 throw $e;
             }
 
-            // The form is on the results page of another module: errors are shown on the list.
-            return redirect()->to(url_slash('moj-nalog/pretrage'))->withErrors($e->errors());
+            // The form is on the results page of another module: errors are shown on the list
+            // (a guest has no list yet, so back to the results).
+            return $request->user() === null
+                ? redirect()->back(302, [], url_slash('oglasi'))->withErrors($e->errors())
+                : redirect()->to(url_slash('moj-nalog/pretrage'))->withErrors($e->errors());
         }
     }
 
     private function save(Request $request): RedirectResponse|JsonResponse
     {
-        $user = $request->user();
-
         $request->validate(['name' => ['nullable', 'string', 'max:80']]);
         $query = $this->queries->normalize($request->only(['keyword', 'kategorija', 'mesto', 'price_min', 'price_max', 'currency', 'f']));
-        $hash = SavedSearchQuery::hash($query);
 
-        $search = $user->savedSearches()->where('query_hash', $hash)->first();
-        $created = false;
-
-        if ($search === null) {
-            if ($user->savedSearches()->count() >= $this->max()) {
-                throw ValidationException::withMessages([
-                    'keyword' => 'Možete sačuvati najviše '.$this->max().' pretraga. Obrišite neku koju više ne koristite.',
-                ]);
+        // Guest: keep the search in the session, it is saved right after login or registration.
+        if ($request->user() === null) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Prijavite se da biste sačuvali pretragu.'], 401);
             }
+            $request->session()->put(SavedSearches::PENDING, ['query' => $query, 'name' => SavedSearches::cleanName($request->input('name'))]);
+            $request->session()->put('url.intended', url_slash('moj-nalog/pretrage'));
 
-            // createOrFirst: a double click saves one row (unique user_id + query_hash).
-            $search = $user->savedSearches()->createOrFirst(['query_hash' => $hash], [
-                'name' => $this->cleanName($request->input('name')) ?? $this->queries->describe($query),
-                'query' => $query,
-                'notify' => true,
-            ]);
-            $created = $search->wasRecentlyCreated;
+            return redirect()->to(url_slash('prijava'))
+                ->with('status', 'Prijavite se ili napravite nalog, a pretragu ćemo sačuvati odmah posle toga.');
         }
+
+        $search = $this->searches->save($request->user(), $query, $request->input('name'));
+        $created = $search->wasRecentlyCreated;
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -98,7 +98,7 @@ class SavedSearchController extends Controller
         ]);
 
         if (array_key_exists('name', $data)) {
-            $savedSearch->name = $this->cleanName($data['name']) ?? $this->queries->describe((array) $savedSearch->query);
+            $savedSearch->name = SavedSearches::cleanName($data['name']) ?? $this->queries->describe((array) $savedSearch->query);
         }
         if (array_key_exists('notify', $data)) {
             $savedSearch->notify = (bool) $data['notify'];
@@ -114,17 +114,5 @@ class SavedSearchController extends Controller
         $savedSearch->delete();
 
         return redirect()->to(url_slash('moj-nalog/pretrage'))->with('status', 'Pretraga je obrisana.');
-    }
-
-    private function cleanName(mixed $name): ?string
-    {
-        $name = trim((string) preg_replace('/\s+/u', ' ', strip_tags((string) $name)));
-
-        return $name === '' ? null : mb_substr($name, 0, 80);
-    }
-
-    private function max(): int
-    {
-        return (int) config('notifications.saved_searches.max_per_user', 20);
     }
 }

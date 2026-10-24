@@ -23,8 +23,65 @@ class SavedSearchPagesTest extends TestCase
     public function test_guest_is_sent_to_login(): void
     {
         $this->get('/moj-nalog/pretrage/')->assertRedirect(url_slash('prijava'));
-        $this->post('/moj-nalog/pretrage/', ['keyword' => 'golf'])->assertRedirect(url_slash('prijava'));
+        $this->postJson('/moj-nalog/pretrage/', ['keyword' => 'golf'])->assertUnauthorized();
         $this->assertSame(0, SavedSearch::count());
+    }
+
+    public function test_guest_search_is_saved_after_login(): void
+    {
+        $this->post('/moj-nalog/pretrage/', ['keyword' => 'golf', 'kategorija' => 'automobili', 'name' => 'Moj golf'])
+            ->assertRedirect(url_slash('prijava'))
+            ->assertSessionHas('status');
+        $this->assertSame(0, SavedSearch::count());
+        $this->followRedirects($this->get('/prijava/'))->assertSee('pretragu ćemo sačuvati');
+
+        $response = $this->post('/prijava/', ['email' => $this->user->email, 'password' => 'lozinka123']);
+        $response->assertRedirect(url_slash('moj-nalog/pretrage'));
+
+        $this->get('/moj-nalog/pretrage/')->assertOk()->assertSee('Pretraga je sačuvana')->assertSee('Moj golf');
+        $search = SavedSearch::sole();
+        $this->assertSame($this->user->id, $search->user_id);
+        $this->assertSame(['keyword' => 'golf', 'kategorija' => 'automobili'], $search->query);
+
+        // Saved once: later pages do not save it again.
+        $this->get('/moj-nalog/')->assertOk();
+        $this->assertSame(1, SavedSearch::count());
+    }
+
+    public function test_guest_search_is_saved_after_registration(): void
+    {
+        $this->post('/moj-nalog/pretrage/', ['mesto' => 'loznica'])->assertRedirect(url_slash('prijava'));
+
+        $this->post('/registracija/', [
+            'name' => 'Nova Korisnica', 'email' => 'nova@example.com', 'phone' => '0655415128',
+            'password' => 'lozinka123', 'password_confirmation' => 'lozinka123', 'accept_terms' => '1',
+        ])->assertRedirect(url_slash('moj-nalog'));
+
+        $this->get('/moj-nalog/')->assertRedirect(url_slash('moj-nalog/pretrage'))->assertSessionHas('status', 'Pretraga je sačuvana. Javićemo vam kad stignu novi oglasi.');
+
+        $search = SavedSearch::sole();
+        $this->assertSame('nova@example.com', $search->user->email);
+        $this->assertSame(['mesto' => 'loznica'], $search->query);
+        $this->assertSame('Loznica', $search->name);
+    }
+
+    public function test_invalid_guest_search_is_not_kept(): void
+    {
+        $this->from(url_slash('oglasi'))->post('/moj-nalog/pretrage/', [])
+            ->assertRedirect(url_slash('oglasi'))->assertSessionHasErrors('keyword')
+            ->assertSessionMissing('notifications.pending_search');
+    }
+
+    public function test_pending_search_over_the_limit_shows_the_error(): void
+    {
+        config(['notifications.saved_searches.max_per_user' => 1]);
+        SavedSearch::create(['user_id' => $this->user->id, 'query' => ['keyword' => 'stari'], 'query_hash' => 'x']);
+
+        $this->post('/moj-nalog/pretrage/', ['keyword' => 'novi']);
+        $this->post('/prijava/', ['email' => $this->user->email, 'password' => 'lozinka123']);
+
+        $this->get('/moj-nalog/pretrage/')->assertRedirect(url_slash('moj-nalog/pretrage'))->assertSessionHasErrors('keyword');
+        $this->assertSame(1, SavedSearch::count());
     }
 
     public function test_saving_normalizes_the_query_of_the_listings_page(): void

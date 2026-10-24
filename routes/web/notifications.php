@@ -16,13 +16,16 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/moj-nalog/pretrage', [SavedSearchController::class, 'index'])->name('saved-searches.index');
     Route::middleware('throttle:notifications-account')->group(function () {
-        Route::post('/moj-nalog/pretrage', [SavedSearchController::class, 'store'])->name('saved-searches.store');
         Route::patch('/moj-nalog/pretrage/{savedSearch}', [SavedSearchController::class, 'update'])
             ->whereNumber('savedSearch')->name('saved-searches.update');
         Route::delete('/moj-nalog/pretrage/{savedSearch}', [SavedSearchController::class, 'destroy'])
             ->whereNumber('savedSearch')->name('saved-searches.destroy');
     });
 });
+
+// A guest's search is kept in the session and saved after login or registration (SavePendingSearch).
+Route::post('/moj-nalog/pretrage', [SavedSearchController::class, 'store'])
+    ->middleware('throttle:notifications-account')->name('saved-searches.store');
 
 // Signed, works without signing in (the link is opened from the mail).
 Route::middleware(['signed', 'throttle:20,1'])
