@@ -123,10 +123,15 @@ class ListingListController extends Controller
         return 1;
     }
 
-    /** Title, description, robots and canonical by the SEO rules (count only when not filtered). */
+    /**
+     * Title, description, robots and canonical by the SEO rules. They describe the clean page,
+     * so with filters the count is the cached one of the page without them.
+     */
     private function seo(WebFilters $filters, int $total): void
     {
-        $count = $filters->hasFilters() ? null : $total;
+        $count = $filters->hasFilters()
+            ? $this->search->count(['category' => $filters->category?->id, 'location' => $filters->location?->id])
+            : $total;
 
         if ($filters->category) {
             Seo::for($filters->category, ['location' => $filters->location, 'count' => $count]);

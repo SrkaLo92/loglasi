@@ -59,8 +59,6 @@ class WebFilters
     /**
      * Reads the request. Returns the filters, or a URL to redirect to when the
      * request can be written cleaner (empty fields, kategorija/mesto that belong in the path).
-     *
-     * @return self|string
      */
     public static function fromRequest(Request $request, ?Category $category, ?Location $location, int $page): self|string
     {

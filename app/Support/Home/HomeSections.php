@@ -38,13 +38,20 @@ class HomeSections
         Cache::forget(self::CACHE_KEY);
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * Sections ready for the view. The cache holds only ids and plain values (models are
+     * never serialized); listings of all sections are then loaded with one query.
+     *
+     * @return array<string, mixed>
+     */
     public static function get(): array
     {
-        return Cache::remember(self::CACHE_KEY, self::TTL, fn () => (new self)->build());
+        $data = Cache::remember(self::CACHE_KEY, self::TTL, fn () => (new self)->build());
+
+        return (new self)->hydrate($data);
     }
 
-    /** @return array<string, mixed> */
+    /** @return array<string, mixed> plain data for the cache */
     public function build(): array
     {
         $counts = $this->catalog->counts();
@@ -54,11 +61,35 @@ class HomeSections
             'chips' => $this->chips($counts),
             'categories' => $this->categories($counts),
             'categories_total' => count(array_filter($counts)),
-            'featured' => $this->search->take(['featured_only' => true], HomeSettings::int('home.featured_count', 1, 12)),
-            'latest' => $this->search->take([], HomeSettings::int('home.latest_count', 1, 24)),
+            'featured' => $this->search->ids(['featured_only' => true], HomeSettings::int('home.featured_count', 1, 12)),
+            'latest' => $this->search->ids([], HomeSettings::int('home.latest_count', 1, 24)),
             'tabs' => $this->tabs($counts),
             'firms' => $this->firms(),
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function hydrate(array $data): array
+    {
+        $ids = array_merge($data['featured'], $data['latest'], ...array_column($data['tabs'], 'ids'));
+        $listings = $this->search->listings(array_values(array_unique($ids)))->keyBy('id');
+        $pick = fn (array $ids) => (new Collection(array_map(fn (int $id) => $listings->get($id), $ids)))->filter()->values();
+
+        $data['categories'] = array_values(array_filter(array_map(fn (array $c) => ($category = $this->catalog->category($c['id']))
+            ? ['category' => $category, 'count' => $c['count']] : null, $data['categories'])));
+        $data['featured'] = $pick($data['featured']);
+        $data['latest'] = $pick($data['latest']);
+        $data['tabs'] = array_values(array_filter(array_map(function (array $tab) use ($pick) {
+            $category = $this->catalog->category($tab['id']);
+            $items = $pick($tab['ids']);
+
+            return $category && $items->isNotEmpty() ? ['category' => $category, 'count' => $tab['count'], 'listings' => $items] : null;
+        }, $data['tabs'])));
+
+        return $data;
     }
 
     /**
@@ -102,7 +133,7 @@ class HomeSections
             ->values()->all();
     }
 
-    /** @return list<array{category: Category, count: int}> top categories with the most listings */
+    /** @return list<array{id: int, count: int}> top categories with the most listings */
     private function categories(array $counts): array
     {
         return $this->catalog->children(null)
@@ -112,11 +143,11 @@ class HomeSections
                 fn (Category $a, Category $b) => strcmp($a->name, $b->name),
             ])
             ->take(HomeSettings::int('home.categories_count', 1, 47))
-            ->map(fn (Category $c) => ['category' => $c, 'count' => $counts[$c->id]])
+            ->map(fn (Category $c) => ['id' => $c->id, 'count' => $counts[$c->id]])
             ->values()->all();
     }
 
-    /** @return list<array{category: Category, count: int, listings: Collection}> */
+    /** @return list<array{id: int, count: int, ids: list<int>}> */
     private function tabs(array $counts): array
     {
         $tabs = [];
@@ -125,9 +156,9 @@ class HomeSections
             if ($category === null || ! $this->catalog->isVisible($category) || ($counts[$category->id] ?? 0) < 1) {
                 continue;
             }
-            $listings = $this->search->take(['category' => $category->id], HomeSettings::int('home.tabs_count', 1, 12));
-            if ($listings->isNotEmpty()) {
-                $tabs[] = ['category' => $category, 'count' => $counts[$category->id], 'listings' => $listings];
+            $ids = $this->search->ids(['category' => $category->id], HomeSettings::int('home.tabs_count', 1, 12));
+            if ($ids !== []) {
+                $tabs[] = ['id' => $category->id, 'count' => $counts[$category->id], 'ids' => $ids];
             }
         }
 

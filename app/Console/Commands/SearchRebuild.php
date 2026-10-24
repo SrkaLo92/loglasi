@@ -18,7 +18,7 @@ class SearchRebuild extends Command
         $start = microtime(true);
         $total = $index->rebuild();
         HomeSections::flush();
-        $this->info(sprintf('Indeks pretrage: %d aktivnih oglasa (%.1f s).', $total, microtime(true) - $start));
+        $this->info(sprintf('Search index: %d active listings (%.1f s).', $total, microtime(true) - $start));
 
         return self::SUCCESS;
     }

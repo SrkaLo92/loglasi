@@ -8,7 +8,6 @@ use App\Enums\FieldType;
 use App\Enums\ListingStatus;
 use App\Models\Category;
 use App\Models\Field;
-use App\Models\Firm;
 use App\Models\Location;
 use App\Models\User;
 use App\Services\Catalog;
@@ -73,7 +72,7 @@ class DevListings extends Command
     public function handle(Catalog $catalog, SearchIndex $index): int
     {
         if (app()->isProduction()) {
-            $this->error('Ova komanda ne radi na produkciji.');
+            $this->error('This command does not run in production.');
 
             return self::FAILURE;
         }
@@ -83,7 +82,7 @@ class DevListings extends Command
         $locations = Location::query()->pluck('id')->all();
 
         if ($categories->isEmpty() || $locations === []) {
-            $this->error('Nema kategorija ili mesta. Pokrenite: php artisan db:seed --class=KatalogSeeder');
+            $this->error('No categories or places. Run: php artisan db:seed --class=KatalogSeeder');
 
             return self::FAILURE;
         }
@@ -163,12 +162,12 @@ class DevListings extends Command
         $bar->finish();
         $this->newLine();
 
-        $this->line('Pravim indeks pretrage...');
+        $this->line('Building the search index...');
         $indexed = $index->rebuild();
         $catalog->flushCounts();
         HomeSections::flush();
-        $this->line("U indeksu pretrage: {$indexed} aktivnih oglasa.");
-        $this->info("Napravljeno oglasa: {$made}.");
+        $this->line("Search index: {$indexed} active listings.");
+        $this->info("Listings created: {$made}.");
 
         return self::SUCCESS;
     }
@@ -224,7 +223,7 @@ class DevListings extends Command
         foreach ($userIds->chunk(100) as $chunk) {
             $deleted += DB::table('listings')->whereIn('user_id', $chunk)->delete();
         }
-        $this->line("Obrisano oglasa: {$deleted}.");
+        $this->line("Listings deleted: {$deleted}.");
     }
 
     private function root(Category $category, $byId): Category

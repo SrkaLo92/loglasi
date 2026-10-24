@@ -10,9 +10,9 @@ use App\Models\SearchEntry;
 use App\Support\Price;
 use App\Support\Search\SearchText;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Pagination\LengthAwarePaginator as Paginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator as Paginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -248,9 +248,13 @@ class ListingSearch
     /** The first $limit results (home sections, similar listings). */
     public function take(array $params, int $limit): Collection
     {
-        $ids = $this->query($params)->limit($limit)->pluck('listing_search.id')->map(fn ($id) => (int) $id)->all();
+        return $this->listings($this->ids($params, $limit));
+    }
 
-        return $this->listings($ids);
+    /** @return list<int> ids of the first $limit results */
+    public function ids(array $params, int $limit): array
+    {
+        return $this->query($params)->limit($limit)->pluck('listing_search.id')->map(fn ($id) => (int) $id)->all();
     }
 
     /** Number of results, cached for a minute and until any listing changes. */
