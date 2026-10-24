@@ -147,11 +147,11 @@ class Listing extends Model
         return $this->hasMany(Order::class);
     }
 
-    /** Search rank of the active promotion: 3 TOP, 2 priority, 1 highlighted, 0 none. */
+    /** Search rank of the active promotion: 3 TOP or Premium XL, 2 priority, 1 highlighted, 0 none. */
     public function promotionRank(): int
     {
         return match (true) {
-            $this->top_until?->isFuture() === true => 3,
+            $this->top_until?->isFuture() === true, $this->isPremiumXl() => 3,
             $this->priority_until?->isFuture() === true => 2,
             $this->isFeatured() => 1,
             default => 0,
@@ -162,5 +162,11 @@ class Listing extends Model
     public function isPremiumXl(): bool
     {
         return $this->premium_xl_until?->isFuture() === true;
+    }
+
+    /** Also shown in the Premium section of the home page. */
+    public function isPremiumHome(): bool
+    {
+        return $this->premium_home_until?->isFuture() === true;
     }
 }

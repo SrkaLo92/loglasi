@@ -27,7 +27,7 @@ use Illuminate\Validation\ValidationException;
  *   $page = $search->paginate($params);                // LengthAwarePaginator, card relations loaded
  *   $query = $search->query($params);                  // Builder, filtered and ordered
  *
- * Order: promoted listings first (rank: TOP 3, priority 2, highlighted 1), then the chosen sort.
+ * Order: promoted listings first (rank: TOP and Premium XL 3, priority 2, highlighted 1), then the chosen sort.
  * Only active listings: published, not deleted, not expired. See docs/moduli/search.md.
  */
 class ListingSearch

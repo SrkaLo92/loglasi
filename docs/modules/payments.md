@@ -75,12 +75,49 @@ The format was written without access to the NBS specification: **check a genera
 
 ## Search ranking
 
-`listing_search.featured` is a rank 0–3: TOP 3, priority 2, highlighted 1, normal 0, and `featured_until` is when the rank next changes; existing indexes are used. `Listing::promotionRank()` and `isPremiumXl()` exist, and `config('payments.premium_xl_every')` is 10.
+`listing_search.featured` is a rank 0–3: TOP and Premium XL 3, priority 2, highlighted 1, normal 0, and `featured_until` is when the rank next changes; existing indexes are used. `Listing::promotionRank()` (Premium XL counts as 3), `isPremiumXl()`, `isPremiumHome()`.
+
+Premium XL is drawn as the wide card at most once per `config('payments.premium_xl_every')` (10) listings of a list page; `premium_xl_home_7` also puts the listing in the home page Premium section (up to 4, random among the running ones each minute). See the search module docs, "Premium XL card".
+
+## Mobile contract changes
+
+`GET /api/v1/me/orders` (`OrderPresenter::order()`) follows the `Order` schema of the mobile repo's `api/openapi.yaml` with these additions, which the yaml should take over (the mobile repo is not changed from here):
+
+- `product` keeps the contract codes `bump`, `featured_7d`, `featured_30d`, `business_year` for `bump`, `featured_7`, `featured_30`, `biznis_12m`. Every other product is returned with its `products.code` as a plain string, so the app must not reject an unknown code.
+- New field `product_label`: the product name in Serbian (`products.name`, edited in the admin), for example "Premium XL + početna" or "Business Pro, godišnje".
+- `status` gets `refunded`: money returned (`refunded` orders were shown as `cancelled` before). `paid` still covers both paid and activated.
+
+Proposed yaml (`components.schemas.Order`):
+
+```yaml
+    Order:
+      type: object
+      properties:
+        id: { type: integer }
+        product:
+          type: string
+          description: |
+            Šifra usluge. Poznate vrednosti: bump, featured_7d, featured_30d, business_year,
+            bump_10, priority_3, top_7, premium_xl_7, premium_xl_home_7,
+            listing_slots_3, listing_slots_10, listing_slots_30,
+            business_start_monthly, business_start_yearly, business_pro_monthly,
+            business_pro_yearly, business_max_monthly, business_max_yearly.
+            Nepoznatu šifru prikazati preko product_label.
+          examples: [premium_xl_7]
+        product_label: { type: string, description: Naziv usluge za prikaz, examples: ["Premium XL kartica"] }
+        amount: { type: integer }
+        status: { type: string, enum: [awaiting_payment, paid, refunded, cancelled] }
+        listing_id: { type: integer, nullable: true }
+        user: { type: object, properties: { id: { type: integer }, name: { type: string } } }
+        payment_reference: { type: string, description: Poziv na broj }
+        created_at: { type: string, format: date-time }
+        paid_at: { type: string, format: date-time, nullable: true }
+```
+
+The `Price` schema (`product` enum) is unchanged: `GET /catalog` still lists only products with a contract code.
 
 ## Follow-ups
 
-- Premium XL card (two columns, at most 1 per 8–12) in search and home views; Premium XL + home placement.
-- Mobile contract: product codes beyond `bump, featured_7d, featured_30d, business_year` are returned raw, and the status enum lacks `refunded`.
 - Admin UI for the settings above and for marking paid / receipts / refunds.
 - Legal page slugs for `payment_page_*`.
 - Card and instant payments: `CardPaymentGateway` and `InstantPaymentFeed` are interfaces only.

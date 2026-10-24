@@ -39,7 +39,7 @@ Parameters as in the WordPress API and the openapi contract:
 | `sort` | `newest` (default, by `bumped_at`), `price_asc`, `price_desc`, `relevance`. |
 | `page`, `per_page` | `per_page` 1 to 50, default 20. |
 
-Always: active listings only (published, not deleted, not expired), featured first, "Dogovor" last when sorting by price.
+Always: active listings only (published, not deleted, not expired), promoted first (rank: TOP and Premium XL 3, priority 2, highlighted 1), "Dogovor" last when sorting by price.
 
 Response `{items, page, total}`, items from `ListingFormatter::card()` (listing module), headers `X-WP-Total`, `X-WP-TotalPages`, `Cache-Control: max-age=60`, `ETag` (304 on `If-None-Match`). Errors: 400 `invalid_param` with the WordPress messages in Serbian, all fields at once.
 
@@ -107,13 +107,23 @@ TTFB on `php artisan serve` (median of 5, warm): home 51 ms, `/oglasi/` 54 ms, c
 
 Eight sections ported from loglasi-core `inc/home`: intro (H1 from the SEO module, chips), categories, featured (hidden when empty), latest (plain newest order, from the 7th card hidden on phones), category tabs (desktop only; all panels show without JavaScript), firms (offer from `Cenovnik::offerText()`, firm strip from `home.firms_min` firms), why loglasi.rs, about the site (Markdown).
 
+The Premium section ("Premium XL + početna", `premium_home_until` running) sits after the categories: up to `home.premium_count` (4) wide cards, a random pick among all running ones for each cache period, two per row on desktop and one column on phones; those listings are not repeated among the featured ones. Hidden when empty.
+
 Section data is cached for 60 s (`home.sections`, ids and plain values only) and cleared on any change to listings, images, categories, firms or account types.
 
-Settings keys (`Settings::get`, defaults in `HomeSettings::DEFAULTS`): `home.intro_text`, `home.intro_label`, `home.intro_terms` (comma list; empty = biggest categories), `home.intro_terms_count`, `home.categories_title`, `home.categories_count`, `home.featured_title`, `home.featured_count`, `home.featured_link_text`, `home.featured_link_url`, `home.latest_title`, `home.latest_count`, `home.latest_mobile_count`, `home.tabs_title`, `home.tabs_categories` (slugs), `home.tabs_count`, `home.firms_title`, `home.firms_text`, `home.firms_button`, `home.firms_url`, `home.firms_min`, `home.firms_max`, `home.firms_show_remaining`, `home.why_title`, `home.about_title`, `home.about`.
+Settings keys (`Settings::get`, defaults in `HomeSettings::DEFAULTS`): `home.intro_text`, `home.intro_label`, `home.intro_terms` (comma list; empty = biggest categories), `home.intro_terms_count`, `home.categories_title`, `home.categories_count`, `home.premium_title`, `home.premium_count`, `home.featured_title`, `home.featured_count`, `home.featured_link_text`, `home.featured_link_url`, `home.latest_title`, `home.latest_count`, `home.latest_mobile_count`, `home.tabs_title`, `home.tabs_categories` (slugs), `home.tabs_count`, `home.firms_title`, `home.firms_text`, `home.firms_button`, `home.firms_url`, `home.firms_min`, `home.firms_max`, `home.firms_show_remaining`, `home.why_title`, `home.about_title`, `home.about`.
 
 ## Listing card
 
-`<x-listing-card :listing="$listing" />` with optional `highlight` (orange frame), `eager` (first images), `layout` (`grid` or `list`, a row on phones), `heading` (`h2` to `h4`). Load `ListingSearch::cardRelations()` first; with `fieldValues` loaded the card also shows up to three field values. Extra attributes (for example `class`) go to the root `<article>`.
+`<x-listing-card :listing="$listing" />` with optional `highlight` (orange frame), `eager` (first images), `layout` (`grid` or `list`, a row on phones), `heading` (`h2` to `h4`), `xl` (Premium XL card). Load `ListingSearch::cardRelations()` first; with `fieldValues` loaded the card also shows up to three field values. Extra attributes (for example `class`) go to the root `<article>`.
+
+### Premium XL card
+
+A listing with a running `premium_xl_until` ranks with TOP (rank 3 in `listing_search.featured`, `SearchIndex::RANKS`), so it is at the top of its category and search, and `featured_until` is the earliest end of any running promotion. On the list pages `PremiumXl::cards($results)` picks the wide cards: at most one per `config('payments.premium_xl_every')` (10) listings of the page, rounded up (24 per page: 3), the first XL listings in list order; the others keep their rank on a normal card.
+
+The card (`lc--xl`) has the "Premium" badge, a bigger image (800/1600 px sources), title and price, a description excerpt (180 characters) and a "Kontaktirajte prodavca" button (the whole card links to the listing). It spans two columns of a grid declared as `container: lc-grid / inline-size` once that grid is at least 520 px wide (`.sr-grid`, which also packs with `grid-auto-flow: dense`), and puts the text beside the image once the card is at least 480 px wide. Phones: one column, full width image on top. Without container query support it is a normal size card with the badge.
+
+No new column or index: the rank reuses every existing index. After deploying, run `php artisan search:rebuild` once so running Premium XL periods get their rank.
 
 ## Development data
 

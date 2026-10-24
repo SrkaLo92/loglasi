@@ -1,4 +1,4 @@
-{{-- Home page: eight sections ported from loglasi-core inc/home. Data: HomeSections (cached 60 s). --}}
+{{-- Home page: eight sections (and Premium XL + početna) ported from loglasi-core inc/home. Data: HomeSections (cached 60 s). --}}
 @extends('layouts.app')
 @use('App\Support\Home\HomeSettings')
 @use('App\Support\Phone')
@@ -89,6 +89,21 @@
 		</section>
 	@endif
 
+	{{-- 2b. Premium XL + početna (nothing when there are none): wide cards, one column on phones --}}
+	@if ($sections['premium']->isNotEmpty())
+		<section class="hm-sec hm-premium" aria-labelledby="hm-premium-title">
+			<div class="hm-sec__head">
+				<h2 class="hm-sec__title" id="hm-premium-title">{{ HomeSettings::get('home.premium_title') }}</h2>
+				<a class="hm-sec__link" href="{{ url_slash('/cenovnik') }}">Premium za vaš oglas</a>
+			</div>
+			<div class="hm-premium__grid">
+				@foreach ($sections['premium'] as $listing)
+					<x-listing-card :listing="$listing" xl :eager="$loop->index < 2" />
+				@endforeach
+			</div>
+		</section>
+	@endif
+
 	{{-- 3. Featured (nothing when there are none) --}}
 	@if ($sections['featured']->isNotEmpty())
 		<section class="hm-sec" aria-labelledby="hm-featured-title">
@@ -98,7 +113,7 @@
 			</div>
 			<div class="hm-grid">
 				@foreach ($sections['featured'] as $listing)
-					<x-listing-card :listing="$listing" highlight :eager="$loop->index < 2" />
+					<x-listing-card :listing="$listing" highlight :eager="$sections['premium']->isEmpty() && $loop->index < 2" />
 				@endforeach
 			</div>
 		</section>
@@ -120,7 +135,7 @@
 		@else
 			<div class="hm-grid">
 				@foreach ($sections['latest'] as $listing)
-					<x-listing-card :listing="$listing" :eager="$sections['featured']->isEmpty() && $loop->index < 2" @class(['hm-hide-m' => $loop->index >= $hmMobileLatest]) />
+					<x-listing-card :listing="$listing" :eager="$sections['premium']->isEmpty() && $sections['featured']->isEmpty() && $loop->index < 2" @class(['hm-hide-m' => $loop->index >= $hmMobileLatest]) />
 				@endforeach
 			</div>
 			<p class="hm-more">

@@ -3,12 +3,14 @@
     Props: listing (Listing with ListingSearch::cardRelations() loaded; with fieldValues
     loaded the card also shows up to three field values), highlight (orange frame of the
     featured section), eager (first visible images), layout ("grid" or "list": a row on phones),
-    heading (h2-h4).
+    heading (h2-h4), xl (the wide Premium XL card: two columns on desktop, bigger image,
+    "Premium" badge, description excerpt; pick the listings with PremiumXl::cards()).
 --}}
-@props(['listing', 'highlight' => false, 'eager' => false, 'layout' => 'grid', 'heading' => 'h3'])
+@props(['listing', 'highlight' => false, 'eager' => false, 'layout' => 'grid', 'heading' => 'h3', 'xl' => false])
 @use('App\Support\Search\CategoryIcons')
 @use('App\Support\Search\Favorites')
 @use('App\Support\Search\ImageUrls')
+@use('App\Support\Search\PremiumXl')
 @use('App\Support\Search\TimeAgo')
 @use('App\Services\ListingFields')
 @once
@@ -21,7 +23,9 @@
 	$lcImage = $listing->coverImage;
 	$lcTime = $listing->bumped_at ?? $listing->published_at ?? $listing->created_at;
 	$lcFirm = $listing->user?->isFirm() ?? false;
-	$lcFeatured = $listing->isFeatured();
+	$lcXl = (bool) $xl;
+	$lcFeatured = ! $lcXl && $listing->isFeatured();
+	$lcExcerpt = $lcXl ? PremiumXl::excerpt($listing->description) : '';
 	$lcTag = in_array($heading, ['h2', 'h3', 'h4'], true) ? $heading : 'h3';
 	$lcSpecs = [];
 	if ($listing->relationLoaded('fieldValues')) {
@@ -36,14 +40,18 @@
 	}
 	$lcFav = auth()->check() ? app(Favorites::class)->has((int) $listing->id) : null;
 @endphp
-<article {{ $attributes->class(['lc', 'lc--featured' => $highlight, 'lc--list' => $layout === 'list']) }}>
+<article {{ $attributes->class(['lc', 'lc--featured' => $highlight && ! $lcXl, 'lc--xl' => $lcXl, 'lc--list' => $layout === 'list']) }}>
 	<a class="lc__link" href="{{ url_slash('/oglas/'.$listing->slug) }}">
 		<div class="lc__media">
 			@if ($lcImage)
 				@php($lcFallback = ImageUrls::fallback($lcImage, 'medium'))
 				<picture>
 					@if ($lcFallback)
-						<source type="image/webp" srcset="{{ ImageUrls::url($lcImage, 'thumb') }} 400w, {{ ImageUrls::url($lcImage, 'medium') }} 800w" sizes="(max-width: 767px) 50vw, 300px">
+						@if ($lcXl)
+							<source type="image/webp" srcset="{{ ImageUrls::url($lcImage, 'medium') }} 800w, {{ ImageUrls::url($lcImage, 'large') }} 1600w" sizes="(max-width: 767px) 100vw, 400px">
+						@else
+							<source type="image/webp" srcset="{{ ImageUrls::url($lcImage, 'thumb') }} 400w, {{ ImageUrls::url($lcImage, 'medium') }} 800w" sizes="(max-width: 767px) 50vw, 300px">
+						@endif
 					@endif
 					<img class="lc__img" src="{{ $lcFallback ?? ImageUrls::url($lcImage, 'medium') }}" alt="" width="400" height="300" loading="{{ $eager ? 'eager' : 'lazy' }}" decoding="async" @if ($eager) fetchpriority="high" @endif>
 				</picture>
@@ -53,8 +61,9 @@
 					@if ($listing->category)<span class="lc__ph-label">{{ $listing->category->name }}</span>@endif
 				</span>
 			@endif
-			@if ($lcFeatured || $lcFirm)
+			@if ($lcXl || $lcFeatured || $lcFirm)
 				<span class="lc__badges">
+					@if ($lcXl)<span class="lc__badge lc__badge--premium">Premium</span>@endif
 					@if ($lcFeatured)<span class="lc__badge lc__badge--featured">Istaknuto</span>@endif
 					@if ($lcFirm)<span class="lc__badge lc__badge--firm">Firma</span>@endif
 				</span>
@@ -66,6 +75,9 @@
 				<p class="lc__specs">{{ implode(' · ', $lcSpecs) }}</p>
 			@endif
 			<p class="lc__price">{{ $listing->priceLabel() }}</p>
+			@if ($lcExcerpt !== '')
+				<p class="lc__excerpt">{{ $lcExcerpt }}</p>
+			@endif
 			<p class="lc__meta">
 				@if ($listing->location)
 					{{ CategoryIcons::svg('pin', 14) }}<span class="lg-visually-hidden">Mesto: </span><span class="lc__place">{{ $listing->location->name }}</span>
@@ -73,6 +85,9 @@
 				@if ($listing->location && $lcTime)<span class="lc__sep" aria-hidden="true">·</span>@endif
 				@if ($lcTime)<time datetime="{{ $lcTime->toIso8601String() }}">{{ TimeAgo::format($lcTime) }}</time>@endif
 			</p>
+			@if ($lcXl)
+				<span class="lc__cta" aria-hidden="true">Kontaktirajte prodavca</span>
+			@endif
 		</div>
 	</a>
 	@if ($lcFav !== null)

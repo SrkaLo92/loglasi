@@ -332,3 +332,130 @@
 		transition: none;
 	}
 }
+
+/*
+ * Premium XL card (xl prop): wider, bigger image and title, "Premium" badge, description excerpt.
+ * Spans two columns of a list grid that declares `container: lc-grid / inline-size` and is wide
+ * enough for two columns; text goes beside the image once the card itself is wide. Phones: one column.
+ */
+
+.lc--xl {
+	container-type: inline-size;
+	border: 2px solid #f0b48f;
+	box-shadow: 0 6px 20px rgba(184, 80, 26, .10);
+}
+
+.lc--xl:hover {
+	border-color: var(--lg-accent);
+}
+
+@container lc-grid (min-width: 520px) {
+	.lc--xl {
+		grid-column: span 2;
+	}
+}
+
+.lc__badge--premium {
+	background: var(--lg-orange-dark);
+	letter-spacing: .04em;
+	text-transform: uppercase;
+}
+
+.lc--xl .lc__title {
+	font-size: 20px;
+	min-height: 0;
+}
+
+.lc--xl .lc__price {
+	font-size: 22px;
+}
+
+.lc__excerpt {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.45;
+	color: var(--lg-text-2);
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	overflow-wrap: anywhere;
+}
+
+.lc__cta {
+	align-self: flex-start;
+	margin-top: 6px;
+	padding: 9px 16px;
+	border-radius: 8px;
+	background: var(--lg-orange);
+	color: #fff;
+	font-size: 14px;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.lc--xl:hover .lc__cta {
+	background: var(--lg-orange-dark);
+}
+
+@container (min-width: 480px) {
+	.lc--xl .lc__link {
+		flex-direction: row;
+	}
+
+	.lc--xl .lc__media {
+		flex: 0 0 52%;
+		aspect-ratio: auto;
+		min-height: 240px;
+	}
+
+	.lc--xl .lc__body {
+		gap: 8px;
+		padding: 18px 20px 20px;
+	}
+}
+
+@media (max-width: 767px) {
+	.lc--xl .lc__media,
+	.lc--xl.lc--list .lc__media {
+		width: auto;
+		height: auto;
+		min-height: 0;
+		aspect-ratio: 16 / 10;
+	}
+
+	.lc--xl.lc--list .lc__link {
+		flex-direction: column;
+		min-height: 0;
+	}
+
+	.lc--xl .lc__body,
+	.lc--xl.lc--list .lc__body {
+		gap: 5px;
+		padding: 12px 14px 14px;
+	}
+
+	.lc--xl .lc__title,
+	.lc--xl.lc--list .lc__title {
+		font-size: 17px;
+		font-weight: 700;
+	}
+
+	.lc--xl .lc__price,
+	.lc--xl.lc--list .lc__price {
+		font-size: 19px;
+		margin-top: 0;
+	}
+
+	.lc--xl .lc__excerpt {
+		-webkit-line-clamp: 2;
+		font-size: 13px;
+	}
+
+	.lc--xl.lc--list .lc__fav {
+		top: 2px;
+		right: 2px;
+		bottom: auto;
+		left: auto;
+	}
+}

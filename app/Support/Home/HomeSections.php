@@ -59,12 +59,18 @@ class HomeSections
     {
         $counts = $this->catalog->counts();
 
+        // A listing in the Premium section is not repeated among the featured ones.
+        $premium = $this->premium(HomeSettings::int('home.premium_count', 1, 8));
+        $featuredCount = HomeSettings::int('home.featured_count', 1, 12);
+        $featured = array_values(array_diff($this->search->ids(['featured_only' => true], $featuredCount + count($premium)), $premium));
+
         return [
             'total' => $this->search->count([]),
             'chips' => $this->chips($counts),
             'categories' => $this->categories($counts),
             'categories_total' => count(array_filter($counts)),
-            'featured' => $this->search->ids(['featured_only' => true], HomeSettings::int('home.featured_count', 1, 12)),
+            'premium' => $premium,
+            'featured' => array_slice($featured, 0, $featuredCount),
             'latest' => $this->search->ids(['featured_first' => false], HomeSettings::int('home.latest_count', 1, 24)),
             'tabs' => $this->tabs($counts),
             'firms' => $this->firms(),
@@ -77,12 +83,15 @@ class HomeSections
      */
     private function hydrate(array $data): array
     {
-        $ids = array_merge($data['featured'], $data['latest'], ...array_column($data['tabs'], 'ids'));
+        $data['premium'] ??= []; // cached before the section existed
+        $ids = array_merge($data['premium'], $data['featured'], $data['latest'], ...array_column($data['tabs'], 'ids'));
         $listings = $this->search->listings(array_values(array_unique($ids)))->keyBy('id');
         $pick = fn (array $ids) => (new Collection(array_map(fn (int $id) => $listings->get($id), $ids)))->filter()->values();
 
         $data['categories'] = array_values(array_filter(array_map(fn (array $c) => ($category = $this->catalog->category($c['id']))
             ? ['category' => $category, 'count' => $c['count']] : null, $data['categories'])));
+        // Premium XL + početna ended within the cache minute: left out.
+        $data['premium'] = $pick($data['premium'])->filter(fn ($l) => $l->isPremiumHome())->values();
         $data['featured'] = $pick($data['featured']);
         $data['latest'] = $pick($data['latest']);
         $data['tabs'] = array_values(array_filter(array_map(function (array $tab) use ($pick) {
@@ -148,6 +157,26 @@ class HomeSections
             ->take(HomeSettings::int('home.categories_count', 1, 47))
             ->map(fn (Category $c) => ['id' => $c->id, 'count' => $counts[$c->id]])
             ->values()->all();
+    }
+
+    /**
+     * "Premium XL + početna": active listings with a running premium_home_until, a random
+     * $limit of them for each cache period (so all of them take turns). Index premium_home_until.
+     *
+     * @return list<int>
+     */
+    private function premium(int $limit): array
+    {
+        $ids = DB::table('listings')
+            ->join('listing_search', 'listing_search.id', '=', 'listings.id') // active listings only
+            ->where('listings.premium_home_until', '>', now())
+            ->orderByDesc('listings.premium_home_until')
+            ->limit(200)
+            ->pluck('listings.id')->map(fn ($id) => (int) $id)->all();
+
+        shuffle($ids);
+
+        return array_slice($ids, 0, $limit);
     }
 
     /** @return list<array{id: int, count: int, ids: list<int>}> */

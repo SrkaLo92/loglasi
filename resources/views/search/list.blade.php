@@ -2,6 +2,7 @@
 @extends('layouts.app')
 @use('App\Support\Search\CategoryIcons')
 @use('App\Support\Search\TimeAgo')
+@use('App\Support\Search\PremiumXl')
 @use('App\Support\Search\WebFilters')
 @use('App\Support\Seo')
 
@@ -179,9 +180,10 @@
 					</p>
 				</div>
 			@else
+				@php($srXl = PremiumXl::cards($results))
 				<div class="sr-grid">
 					@foreach ($results as $listing)
-						<x-listing-card :listing="$listing" layout="list" :eager="$loop->index < 4" heading="h2" />
+						<x-listing-card :listing="$listing" layout="list" :eager="$loop->index < 4" heading="h2" :xl="isset($srXl[$listing->id])" />
 					@endforeach
 				</div>
 				@include('search.partials.pagination', ['results' => $results, 'filters' => $filters])

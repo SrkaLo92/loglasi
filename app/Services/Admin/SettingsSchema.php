@@ -70,6 +70,7 @@ class SettingsSchema
             'home.categories_title' => 'Kategorije: naslov', 'home.categories_count' => 'Kategorije: broj',
             'home.featured_title' => 'Istaknuti: naslov', 'home.featured_count' => 'Istaknuti: broj',
             'home.featured_link_text' => 'Istaknuti: tekst linka', 'home.featured_link_url' => 'Istaknuti: adresa linka',
+            'home.premium_title' => 'Premium: naslov', 'home.premium_count' => 'Premium: broj',
             'home.latest_title' => 'Najnoviji: naslov', 'home.latest_count' => 'Najnoviji: broj', 'home.latest_mobile_count' => 'Najnoviji: broj na telefonu',
             'home.tabs_title' => 'Kartice: naslov', 'home.tabs_categories' => 'Kartice: kategorije (slugovi, zarezom)', 'home.tabs_count' => 'Kartice: broj oglasa',
             'home.firms_title' => 'Firme: naslov', 'home.firms_text' => 'Firme: tekst', 'home.firms_cta_title' => 'Firme: naslov poziva',

@@ -21,7 +21,7 @@ class OrderApiController extends Controller
 
         $orders = Order::query()
             ->where('user_id', $user->getKey())
-            ->with('product:id,code')
+            ->with('product:id,code,name')
             ->latest('created_at')->latest('id')
             ->limit(self::LIMIT)
             ->get()

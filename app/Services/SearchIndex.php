@@ -27,6 +27,12 @@ class SearchIndex
 
     private const CHUNK = 1000;
 
+    /**
+     * Listing column of each promotion => its search rank. Premium XL ranks with TOP: both sit at
+     * the top of their category and search; the XL listing is also drawn as the wide card.
+     */
+    public const RANKS = ['top_until' => 3, 'premium_xl_until' => 3, 'priority_until' => 2, 'featured_until' => 1];
+
     public function __construct(private readonly Catalog $catalog) {}
 
     public static function isActive(Listing $listing): bool
@@ -153,7 +159,7 @@ class SearchIndex
             ->where(fn ($q) => $q->whereNull('listings.expires_at')->orWhere('listings.expires_at', '>', now()))
             ->select('listings.id', 'listings.user_id', 'listings.category_id', 'listings.location_id', 'listings.title',
                 'listings.description', 'listings.price_eur', 'listings.featured_until', 'listings.priority_until',
-                'listings.top_until', 'listings.bumped_at',
+                'listings.top_until', 'listings.premium_xl_until', 'listings.bumped_at',
                 'listings.published_at', 'listings.created_at', 'listings.expires_at', 'users.account_type');
         $scope($query);
 
@@ -187,27 +193,26 @@ class SearchIndex
     }
 
     /**
-     * Promotion rank (3 TOP, 2 priority, 1 highlighted, 0 none) and when it next changes:
-     * the earliest end among the running promotions.
+     * Promotion rank (3 TOP or Premium XL, 2 priority, 1 highlighted, 0 none) and when it next
+     * changes: the earliest end among the running promotions.
      *
      * @return array{0: int, 1: ?Carbon}
      */
     public static function rank(array $l): array
     {
         $now = now();
+        $rank = 0;
         $ends = [];
-        foreach (['top_until' => 3, 'priority_until' => 2, 'featured_until' => 1] as $column => $rank) {
+        foreach (self::RANKS as $column => $columnRank) {
             $value = $l[$column] ?? null;
             $value = $value instanceof \DateTimeInterface ? Carbon::instance($value) : ($value ? Carbon::parse($value) : null);
             if ($value !== null && $value->greaterThan($now)) {
-                $ends[$rank] = $value;
+                $rank = max($rank, $columnRank);
+                $ends[] = $value;
             }
         }
-        if ($ends === []) {
-            return [0, null];
-        }
 
-        return [max(array_keys($ends)), collect($ends)->min()];
+        return $ends === [] ? [0, null] : [$rank, collect($ends)->min()];
     }
 
     /** @return array{0: int, 1: ?int, 2: ?int} ids from the root, levels 1 to 3 */

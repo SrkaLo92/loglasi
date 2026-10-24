@@ -11,19 +11,19 @@ use DateTimeInterface;
 class OrderPresenter
 {
     /**
-     * The contract knows three statuses. Activated is still "paid" for the app; a refunded order
-     * is shown as "cancelled" until the contract gets a "refunded" value.
+     * Contract statuses: awaiting_payment, paid, cancelled, plus "refunded" (money returned; see
+     * "Mobile contract changes" in docs/modules/payments.md). Activated is still "paid" for the app.
      */
     public const STATUSES = [
         'pending' => 'awaiting_payment',
         'paid' => 'paid',
         'activated' => 'paid',
-        'refunded' => 'cancelled',
+        'refunded' => 'refunded',
         'cancelled' => 'cancelled',
     ];
 
     /**
-     * Contract status (awaiting_payment, paid, cancelled) → the OrderStatus values it covers,
+     * Contract status (awaiting_payment, paid, refunded, cancelled) → the OrderStatus values it covers,
      * for filters such as GET /admin/orders?status=paid.
      *
      * @return list<OrderStatus>
@@ -33,7 +33,13 @@ class OrderPresenter
         return array_map(fn (string $value) => OrderStatus::from($value), array_keys(self::STATUSES, $status, true));
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * `product` is the contract code where the contract has one (bump, featured_7d, featured_30d,
+     * business_year), otherwise the products.code as is (premium_xl_7, business_pro_monthly, ...);
+     * `product_label` is the product name in Serbian. Load the product with code and name.
+     *
+     * @return array<string, mixed>
+     */
     public static function order(Order $order): array
     {
         $code = (string) $order->product?->code;
@@ -41,6 +47,7 @@ class OrderPresenter
         return [
             'id' => (int) $order->id,
             'product' => CatalogFormatter::PRODUCT_CODES[$code] ?? $code,
+            'product_label' => (string) ($order->product?->name ?? $code),
             'amount' => (int) $order->amount_rsd,
             'status' => self::STATUSES[$order->status->value],
             'listing_id' => $order->listing_id !== null ? (int) $order->listing_id : null,
