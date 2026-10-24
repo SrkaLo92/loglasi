@@ -158,6 +158,45 @@ class AdminStats
         return array_slice(array_values(array_filter($rows, fn ($r) => $r['count'] > 0)), 0, $limit);
     }
 
+    /**
+     * Saved searches, alert mails and app devices (read-only page). Cached for 10 minutes.
+     *
+     * @return array{searches: array<string, int>, matches: array<string, int>, devices: array<string, int>, platforms: array<string, int>, top: list<array{name: string, count: int}>}
+     */
+    public function notifications(): array
+    {
+        return Cache::remember('admin.stats.notifications', 600, function () {
+            $week = now()->subDays(7);
+            $month = now()->subDays(30);
+            $searches = DB::table('saved_searches')
+                ->selectRaw('COUNT(*) AS total, COALESCE(SUM(notify), 0) AS notify, COALESCE(SUM(created_at >= ?), 0) AS week, COUNT(DISTINCT user_id) AS users', [$week])
+                ->first();
+            $matches = DB::table('saved_search_matches')
+                ->where('created_at', '>=', $month)
+                ->selectRaw('COUNT(*) AS month, COALESCE(SUM(notified_at IS NOT NULL), 0) AS sent, COALESCE(SUM(notified_at IS NULL), 0) AS waiting, COALESCE(SUM(created_at >= ?), 0) AS week', [$week])
+                ->first();
+            $devices = DB::table('devices')
+                ->selectRaw('COUNT(*) AS total, COUNT(DISTINCT user_id) AS users, COALESCE(SUM(last_seen_at >= ?), 0) AS active', [$month])
+                ->first();
+
+            return [
+                'searches' => ['total' => (int) $searches->total, 'notify' => (int) $searches->notify, 'week' => (int) $searches->week, 'users' => (int) $searches->users],
+                'matches' => ['month' => (int) $matches->month, 'week' => (int) $matches->week, 'sent' => (int) $matches->sent, 'waiting' => (int) $matches->waiting],
+                'devices' => ['total' => (int) $devices->total, 'users' => (int) $devices->users, 'active' => (int) $devices->active],
+                'platforms' => DB::table('devices')->groupBy('platform')->selectRaw('platform, COUNT(*) AS n')->pluck('n', 'platform')->map(fn ($n) => (int) $n)->all(),
+                'top' => DB::table('saved_searches')
+                    ->whereNotNull('query_hash')
+                    ->groupBy('query_hash')
+                    ->selectRaw('MIN(name) AS name, COUNT(*) AS n')
+                    ->orderByDesc('n')
+                    ->limit(10)
+                    ->get()
+                    ->map(fn ($row) => ['name' => (string) $row->name, 'count' => (int) $row->n])
+                    ->all(),
+            ];
+        });
+    }
+
     /** AdminStats from the API contract. */
     public function api(string $period): array
     {

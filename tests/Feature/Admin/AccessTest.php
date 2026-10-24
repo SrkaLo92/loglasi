@@ -66,7 +66,7 @@ class AccessTest extends TestCase
         $this->get('/admin/users')->assertOk();
         $this->get('/admin/reports')->assertOk();
         // Moderators work on listings and reports only.
-        foreach (['/admin/orders', '/admin/firms', '/admin/categories', '/admin/locations', '/admin/redirects', '/admin/audit-logs'] as $url) {
+        foreach (['/admin/orders', '/admin/firms', '/admin/categories', '/admin/locations', '/admin/redirects', '/admin/audit-logs', '/admin/notifications'] as $url) {
             $this->get($url)->assertForbidden();
         }
         $this->get('/admin/settings')->assertForbidden();
