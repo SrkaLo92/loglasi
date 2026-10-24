@@ -8,6 +8,7 @@
 <link rel="preload" href="{{ asset('fonts/manrope-latin-ext.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ asset_v('css/osnova.css') }}">
 <meta name="theme-color" content="#ffffff">
+@include('partials.google')
 @stack('head')
 </head>
 @php
@@ -23,6 +24,7 @@
 @if ($mnav)
 @include('partials.bottom-nav')
 @endif
+@include('partials.cookie-bar')
 @stack('scripts')
 </body>
 </html>

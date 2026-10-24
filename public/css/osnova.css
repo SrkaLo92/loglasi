@@ -269,6 +269,35 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	.lg-search__izbor--mesto { display: none; }
 }
 
+/* Kolačići ------------------------------------------------------------ */
+
+.lg-kolacici {
+	position: fixed;
+	right: 16px;
+	bottom: 16px;
+	left: 16px;
+	z-index: 9995;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px 20px;
+	max-width: 760px;
+	margin: 0 auto;
+	padding: 16px 20px;
+	border: 1px solid var(--lg-border);
+	border-radius: var(--lg-radius);
+	background: #fff;
+	box-shadow: 0 10px 30px rgba(29, 43, 38, .16);
+}
+.lg-kolacici[hidden] { display: none; }
+.lg-kolacici p { margin: 0; flex: 1 1 280px; font-size: 15px; line-height: 1.5; }
+.lg-kolacici__dugmad { display: flex; gap: 10px; }
+.lg-kolacici__ne, .lg-kolacici__ne:visited { border: 1px solid var(--lg-input); background: #fff; color: var(--lg-text); }
+@media (max-width: 767.98px) {
+	body.lg-has-mnav .lg-kolacici { bottom: calc(var(--lg-mnav-h) + 12px + env(safe-area-inset-bottom, 0px)); }
+}
+
 /* Podnožje ------------------------------------------------------------ */
 
 .lg-footer {

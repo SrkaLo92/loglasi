@@ -24,6 +24,10 @@ class Settings
         'contact_phone' => '+381655415128',     // footer and FAQ, E.164
         'contact_address' => '15300 Loznica, Srbija',
         'new_condition_firms_only' => true,
+        // Google: tag (gtag.js, production only, after cookie consent) and Search Console meta tag.
+        'google_tag_id' => 'GT-MKTJD4NV',         // Google tag, destination GA4 G-EKVEVJTR90
+        'ga4_measurement_id' => 'G-EKVEVJTR90',
+        'google_site_verification' => '',         // content of <meta name="google-site-verification">
     ];
 
     public static function get(string $key, mixed $default = null): mixed
