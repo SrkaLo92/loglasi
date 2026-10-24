@@ -23,7 +23,7 @@ class SavedSearchDigestNotification extends Notification implements ShouldQueue
     /**
      * @param  list<array{id: int, name: string, url: string, total: int, listings: list<array{title: string, price: string, location: ?string, url: string}>}>  $searches
      */
-    public function __construct(public array $searches) {}
+    public function __construct(public array $searches, public ?bool $hasDevices = null) {}
 
     public function via(User $notifiable): array
     {
@@ -35,7 +35,7 @@ class SavedSearchDigestNotification extends Notification implements ShouldQueue
         if ($notifiable->hasVerifiedEmail()) {
             $channels[] = 'mail';
         }
-        if ($notifiable->devices()->exists()) {
+        if ($this->hasDevices ?? $notifiable->devices()->exists()) {
             $channels[] = PushChannel::class;
         }
 

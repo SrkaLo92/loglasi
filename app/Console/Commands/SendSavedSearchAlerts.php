@@ -33,8 +33,7 @@ class SendSavedSearchAlerts extends Command
             ->where('status', ListingStatus::Published)
             ->where('published_at', '>', $from)
             ->where('published_at', '<=', $to)
-            ->orderBy('id')
-            ->pluck('id');
+            ->pluck('id'); // range scan on (status, published_at, id), no sort needed
 
         $jobs = $ids->chunk(max(1, (int) $config['chunk']))
             ->map(fn ($chunk) => new MatchSavedSearches($chunk->values()->all()))

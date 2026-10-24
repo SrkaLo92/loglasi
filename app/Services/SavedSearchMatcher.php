@@ -28,6 +28,12 @@ use Illuminate\Validation\ValidationException;
  */
 class SavedSearchMatcher
 {
+    /** Longest word start compared; longer keyword words are compared by their first PREFIX_MAX letters. */
+    private const PREFIX_MAX = 24;
+
+    /** @var array<string, mixed> lookups of one match() call (category / location by slug) */
+    private array $memo = [];
+
     private const DIACRITICS = [
         'č' => 'c', 'ć' => 'c', 'š' => 's', 'ž' => 'z', 'đ' => 'dj',
         'Č' => 'c', 'Ć' => 'c', 'Š' => 's', 'Ž' => 'z', 'Đ' => 'dj',
@@ -45,6 +51,7 @@ class SavedSearchMatcher
      */
     public function match(iterable $listings, iterable $searches): array
     {
+        $this->memo = [];
         [$byCategory, $anyCategory] = $this->compile($searches);
         if ($byCategory === [] && $anyCategory === []) {
             return [];
@@ -58,21 +65,25 @@ class SavedSearchMatcher
                 continue;
             }
 
+            // Read the attributes once: Eloquent accessors are too slow in the inner loop.
+            $userId = (int) $listing->user_id;
+            $locationId = $listing->location_id === null ? null : (int) $listing->location_id;
+            $eur = $listing->price_eur === null ? null : (float) $listing->price_eur;
             $words = null; // computed only when a candidate has a keyword
             $values = null;
 
             foreach ($candidates as $search) {
-                if ($search['user_id'] === $listing->user_id) {
+                if ($search['user_id'] === $userId) {
                     continue;
                 }
-                if ($search['location'] !== null && $search['location'] !== $listing->location_id) {
+                if ($search['location'] !== null && $search['location'] !== $locationId) {
                     continue;
                 }
-                if (! $this->priceMatches($search, $listing)) {
+                if (($search['min'] !== null || $search['max'] !== null) && ! $this->priceMatches($search, $eur)) {
                     continue;
                 }
                 if ($search['words'] !== []) {
-                    $words ??= $this->words($listing->title.' '.$listing->description);
+                    $words ??= $this->prefixes($listing->title.' '.$listing->description);
                     if (! $this->wordsMatch($search['words'], $words)) {
                         continue;
                     }
@@ -125,19 +136,29 @@ class SavedSearchMatcher
         $category = null;
         $categories = null;
         if (! empty($query['kategorija'])) {
-            $category = $this->catalog->categoryBySlug((string) $query['kategorija']);
-            if ($category === null || ! $this->catalog->isVisible($category)) {
-                return null; // category removed or hidden: nothing can match
+            $slug = (string) $query['kategorija'];
+            $this->memo['c:'.$slug] ??= (function () use ($slug) {
+                $category = $this->catalog->categoryBySlug($slug);
+
+                // Removed or hidden category: nothing can match.
+                return $category === null || ! $this->catalog->isVisible($category)
+                    ? false
+                    : [$category, $this->catalog->descendantIds($category)];
+            })();
+            if ($this->memo['c:'.$slug] === false) {
+                return null;
             }
-            $categories = $this->catalog->descendantIds($category);
+            [$category, $categories] = $this->memo['c:'.$slug];
         }
 
         $location = null;
         if (! empty($query['mesto'])) {
-            $location = $this->catalog->locationBySlug((string) $query['mesto'])?->id;
-            if ($location === null) {
+            $slug = (string) $query['mesto'];
+            $this->memo['l:'.$slug] ??= $this->catalog->locationBySlug($slug)?->id ?? false;
+            if ($this->memo['l:'.$slug] === false) {
                 return null;
             }
+            $location = $this->memo['l:'.$slug];
         }
 
         $currency = Currency::tryFrom((string) ($query['currency'] ?? '')) ?? Currency::EUR;
@@ -160,48 +181,62 @@ class SavedSearchMatcher
 
         return [
             'id' => $search->id,
-            'user_id' => $search->user_id,
+            'user_id' => (int) $search->user_id,
             'categories' => $categories,
             'location' => $location,
-            'min' => isset($query['price_min']) ? max(0.01, Price::toEur((float) $query['price_min'], $currency)) : null,
-            'max' => isset($query['price_max']) ? Price::toEur((float) $query['price_max'], $currency) : null,
-            'words' => isset($query['keyword']) ? array_slice(array_values(array_unique($this->words((string) $query['keyword']))), 0, 10) : [],
+            'min' => isset($query['price_min']) ? round(max(0.01, Price::toEur((float) $query['price_min'], $currency)), 2) : null,
+            'max' => isset($query['price_max']) ? round(Price::toEur((float) $query['price_max'], $currency), 2) : null,
+            'words' => isset($query['keyword'])
+                ? array_slice(array_values(array_unique(array_map(fn ($w) => mb_substr($w, 0, self::PREFIX_MAX), $this->words((string) $query['keyword'])))), 0, 10)
+                : [],
             'filters' => $filters,
         ];
     }
 
-    private function priceMatches(array $search, Listing $listing): bool
+    private function priceMatches(array $search, ?float $eur): bool
     {
-        if ($search['min'] === null && $search['max'] === null) {
-            return true;
+        if ($eur === null) {
+            return false; // "Dogovor" never matches a price bound
         }
-        if ($listing->price_eur === null) {
-            return false;
-        }
-        $eur = (float) $listing->price_eur;
 
-        // Rounded the same way as the DECIMAL(14,2) comparison in SQL.
-        return ($search['min'] === null || $eur >= round($search['min'], 2))
-            && ($search['max'] === null || $eur <= round($search['max'], 2));
+        // Bounds are rounded like the DECIMAL(14,2) comparison in SQL (compileOne).
+        return ($search['min'] === null || $eur >= $search['min'])
+            && ($search['max'] === null || $eur <= $search['max']);
     }
 
-    /** @param  list<string>  $needles @param  list<string>  $haystack */
-    private function wordsMatch(array $needles, array $haystack): bool
+    /**
+     * Every keyword word must start a word of the listing: one hash lookup per word.
+     *
+     * @param  list<string>  $needles  @param  array<string, true>  $prefixes
+     */
+    private function wordsMatch(array $needles, array $prefixes): bool
     {
         foreach ($needles as $needle) {
-            $found = false;
-            foreach ($haystack as $word) {
-                if (str_starts_with($word, $needle)) {
-                    $found = true;
-                    break;
-                }
-            }
-            if (! $found) {
+            if (! isset($prefixes[$needle])) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * All word starts of a text as a set: "golf" -> g, go, gol, golf.
+     * Keyword words longer than PREFIX_MAX are cut to it in compileOne(), like here.
+     *
+     * @return array<string, true>
+     */
+    private function prefixes(string $text): array
+    {
+        $set = [];
+        foreach ($this->words($text) as $word) {
+            $length = min(mb_strlen($word), self::PREFIX_MAX);
+            for ($i = 1; $i <= $length; $i++) {
+                $set[mb_substr($word, 0, $i)] = true;
+            }
+        }
+
+        return $set;
     }
 
     /** @param  array<int, array{values: list<string>, min: ?float, max: ?float}>  $filters */
