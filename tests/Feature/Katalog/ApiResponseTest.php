@@ -5,6 +5,7 @@ namespace Tests\Feature\Katalog;
 use App\Http\Api\ApiError;
 use App\Http\Api\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use RuntimeException;
 use Tests\TestCase;
@@ -50,6 +51,15 @@ class ApiResponseTest extends TestCase
         $this->get('/api/v1/proba/greska')
             ->assertStatus(403)
             ->assertExactJson(['code' => 'limit_reached', 'message' => 'Potrošili ste mesečni limit oglasa.', 'fields' => ['limit' => 'Najviše 10 oglasa.']]);
+    }
+
+    public function test_client_errors_are_not_logged(): void
+    {
+        Log::spy();
+
+        $this->getJson('/api/v1/proba/greska')->assertStatus(403);
+
+        Log::shouldNotHaveReceived('error');
     }
 
     public function test_validation_is_400_for_query_and_422_for_body(): void

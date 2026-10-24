@@ -47,6 +47,12 @@ class ApiError extends RuntimeException
         return new self('forbidden', $message, 403);
     }
 
+    /** Client errors (4xx) are answers, not faults: they are not written to the log. */
+    public function report(): bool
+    {
+        return $this->status < 500;
+    }
+
     public function render(): JsonResponse
     {
         return ApiResponse::error($this->errorCode, $this->getMessage(), $this->status, $this->fields, $this->headers);
