@@ -353,7 +353,7 @@ class SeoProvera extends Command
             return ['pattern' => '/korisnik/ (obrisan)', 'status' => 410];
         }
 
-        $firm = $user->isFirm() && $user->firm?->hasBiznis();
+        $firm = Seo::firmIndexable($user);
 
         return ['pattern' => $firm ? '/korisnik/ (firma)' : '/korisnik/ (privatni)', 'status' => 200, 'index' => $firm];
     }

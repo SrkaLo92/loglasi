@@ -475,7 +475,7 @@ class Seo
             $this->image(static::imageUrl($firm->logo_path));
         }
 
-        if (! $firm || ! $firm->hasBiznis()) {
+        if (! static::firmIndexable($user)) {
             return $this->noindex();
         }
 
@@ -793,6 +793,24 @@ class Seo
         }
 
         return 1;
+    }
+
+    /**
+     * A firm profile is indexed (and in the sitemap) once it has an active listing or a filled
+     * profile (description or logo), or a paid package; an empty profile stays noindex.
+     */
+    public static function firmIndexable(User $user): bool
+    {
+        $firm = $user->firm;
+
+        if (! $user->isFirm() || ! $firm) {
+            return false;
+        }
+
+        return $firm->hasBiznis()
+            || trim((string) $firm->description) !== ''
+            || ! empty($firm->logo_path)
+            || static::activeListings()->where('user_id', $user->id)->exists();
     }
 
     /** Aktivan oglas: objavljen i nije istekao. */
