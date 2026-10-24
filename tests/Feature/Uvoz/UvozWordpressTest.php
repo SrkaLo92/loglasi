@@ -219,6 +219,30 @@ class UvozWordpressTest extends UvozTestCase
         $this->assertSame('185000.00', DB::table('listing_field_values')->where('listing_id', 5001)->where('field_id', $km->id)->value('value_num'));
     }
 
+    public function test_listed_live_paths_become_gone_unless_they_exist(): void
+    {
+        $file = tempnam(sys_get_temp_dir(), 'gone');
+        file_put_contents($file, "# sa živog sajta\nhttps://loglasi.rs/oglas/obrisan-oglas/\n/oglas/%D0%BF%D1%80%D0%BE%D0%B4%D0%B0%D1%98%D0%B5%D0%BC\n/oglas/dvosoban-stan-klupci/ # postoji\n\n");
+        config(['uvoz.gone_file' => $file]);
+
+        $this->import()->assertSuccessful();
+        unlink($file);
+
+        $this->assertTrue(DB::table('gone_urls')->where('path', '/oglas/obrisan-oglas/')->exists());
+        $this->assertTrue(DB::table('gone_urls')->where('path', '/oglas/продајем/')->exists());
+        $this->assertFalse(DB::table('gone_urls')->where('path', '/oglas/dvosoban-stan-klupci/')->exists());
+        $this->get('/oglas/obrisan-oglas/')->assertStatus(410);
+    }
+
+    public function test_category_seo_texts_are_filled_after_import(): void
+    {
+        $this->import()->assertSuccessful();
+
+        $automobili = Category::where('slug', 'automobili')->first();
+        $this->assertSame('Automobili Loznica – polovni automobili i auto delovi | loglasi.rs', $automobili->seo_title);
+        $this->assertNotEmpty($automobili->seo_faq);
+    }
+
     public function test_field_definitions_can_be_overridden_in_config(): void
     {
         config(['uvoz.fields' => ['listivo_1912' => ['key' => 'km', 'unit' => 'km']]]);

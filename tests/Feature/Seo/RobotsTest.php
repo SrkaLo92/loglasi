@@ -76,6 +76,12 @@ TXT;
         }
     }
 
+    public function test_listivo_templates_are_gone(): void
+    {
+        $this->get('/listivo_template/kartica-oglasa/')->assertStatus(410);
+        $this->get('/listivo_template/')->assertStatus(410);
+    }
+
     public function test_stranica_404_returns_real_404(): void
     {
         $this->get('/stranica-404/')->assertNotFound();

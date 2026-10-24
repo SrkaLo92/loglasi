@@ -103,6 +103,9 @@ return [
         'loglasi_preuzimanje' => ['key' => 'preuzimanje', 'label' => 'Preuzimanje', 'type' => 'multiselect', 'filter' => 'multi', 'options' => ['Lično preuzimanje', 'Dostava']],
     ],
 
+    // Paths from the live sitemap that no longer exist (deleted while cleaning the copy): 410 after import.
+    'gone_file' => env('UVOZ_GONE_FILE', database_path('seeders/data/gone-urls.txt')),
+
     // Spam nalozi koji se ne prenose (docs/09-deploy-seo.md, odeljak 2); njihovi URL-ovi idu u gone_urls.
     'spam_users' => [80, 106, 109],
 

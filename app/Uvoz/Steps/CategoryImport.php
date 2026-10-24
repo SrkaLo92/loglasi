@@ -2,6 +2,7 @@
 
 namespace App\Uvoz\Steps;
 
+use App\Support\Seo\CategorySeoDefaults;
 use App\Uvoz\Text;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -64,6 +65,8 @@ class CategoryImport extends Step
         }
 
         $this->ctx->forget('categories');
+
+        CategorySeoDefaults::apply(); // the migration ran before the categories existed
     }
 
     /** Ikonica: ID priloga (kopira se) ili URL (beleži se kao putanja). */

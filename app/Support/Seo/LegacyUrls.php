@@ -48,6 +48,11 @@ class LegacyUrls
             return $this->hit('/brisanje-licnih-podataka/', 301, 'brisanje-podataka');
         }
 
+        // The theme's listing comparison page does not exist any more.
+        if (rtrim($path, '/') === '/uporedite-oglase') {
+            return $this->hit('/oglasi/', 301, 'uporedite-oglase');
+        }
+
         // Old account panel of the WordPress theme -> our account pages.
         if (preg_match('#^/panel(/.*)?$#', $path, $m)) {
             return $this->panel(trim($m[1] ?? '', '/'), $clean);

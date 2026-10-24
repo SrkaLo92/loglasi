@@ -24,7 +24,8 @@ class Gone
         }
 
         // The site has no feeds: every old WordPress feed URL is gone for good.
-        if (preg_match('#(^|/)feed/?$#', $request->getPathInfo())) {
+        // ... and so is every Listivo template page (/listivo_template/...).
+        if (preg_match('#(^|/)feed/?$#', $request->getPathInfo()) || preg_match('#^/listivo_template(/|$)#', $request->getPathInfo())) {
             return static::response();
         }
 

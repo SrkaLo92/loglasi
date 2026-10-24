@@ -1,8 +1,8 @@
 <?php
 
+use App\Support\Seo\CategorySeoDefaults;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 // Landing fields of a category (admin): H1, intro under it, FAQ. Fills the texts kept from
@@ -17,13 +17,7 @@ return new class extends Migration
             $table->text('seo_faq')->nullable()->after('seo_intro');
         });
 
-        foreach (require database_path('seeders/data/category-seo-2026-10-24.php') as $slug => $fields) {
-            foreach ($fields as $column => $value) {
-                DB::table('categories')->where('slug', $slug)
-                    ->where(fn ($q) => $q->whereNull($column)->orWhere($column, ''))
-                    ->update([$column => $value]);
-            }
-        }
+        CategorySeoDefaults::apply();
     }
 
     public function down(): void

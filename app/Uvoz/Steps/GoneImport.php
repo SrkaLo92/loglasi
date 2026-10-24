@@ -2,6 +2,7 @@
 
 namespace App\Uvoz\Steps;
 
+use App\Support\Seo\UrlTables;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -44,6 +45,36 @@ class GoneImport extends Step
                 $this->gone('/oglas/'.$slug.'/', "oglas #{$post->ID} u otpadu");
             }
         }
+
+        // Addresses Google still knows from the live sitemap, deleted when the copy was cleaned.
+        foreach (static::listedPaths((string) config('uvoz.gone_file')) as $path) {
+            $this->gone($path, 'sa živog sajta, obrisano pri čišćenju');
+        }
+
+        UrlTables::flushGone();
+    }
+
+    /** @return list<string> one path per line ("/oglas/x/" or a full URL), "#" starts a comment */
+    public static function listedPaths(string $file): array
+    {
+        if ($file === '' || ! is_file($file)) {
+            return [];
+        }
+
+        $paths = [];
+        foreach (file($file, FILE_IGNORE_NEW_LINES) ?: [] as $line) {
+            $line = trim((string) preg_replace('/#.*$/', '', $line));
+            if ($line === '') {
+                continue;
+            }
+            $path = rawurldecode((string) (parse_url($line, PHP_URL_PATH) ?? ''));
+            if ($path === '' || $path === '/') {
+                continue;
+            }
+            $paths[] = '/'.trim($path, '/').'/';
+        }
+
+        return array_values(array_unique($paths));
     }
 
     /** Slug bez WordPress dodatka „__trashed”. */

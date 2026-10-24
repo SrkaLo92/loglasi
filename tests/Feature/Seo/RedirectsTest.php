@@ -112,6 +112,7 @@ class RedirectsTest extends SeoTestCase
             'panel poruke' => ['/panel/?tab=messages', '/moj-nalog/poruke/'],
             'panel nepoznat tab' => ['/panel/?tab=nesto', '/moj-nalog/'],
             'panel kreiraj' => ['/panel/kreiraj/', '/postavi-oglas/'],
+            'uporedite oglase' => ['/uporedite-oglase/', '/oglasi/'],
             'panel lista' => ['/panel/lista/', '/moj-nalog/oglasi/'],
             'panel poruke putanja' => ['/panel/poruke/', '/moj-nalog/poruke/'],
             'wp admin' => ['/wp-admin/', '/admin/'],

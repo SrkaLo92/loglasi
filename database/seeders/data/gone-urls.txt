@@ -1,0 +1,2 @@
+# Addresses from the live loglasi.rs sitemap that the cleaned WordPress copy no longer has.
+# One path per line; uvoz:wordpress --only=gone puts them on the 410 list (a path that exists is skipped).
