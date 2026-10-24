@@ -28,7 +28,7 @@ class StraniceTest extends TestCase
     {
         return [
             'cenovnik' => ['/cenovnik/', 'Cenovnik', 'Za privatne korisnike'],
-            'za firme' => ['/za-firme/', 'Predstavite svoju firmu kupcima iz Loznice', 'Šta dobijate uz Biznis paket'],
+            'za firme' => ['/za-firme/', 'Predstavite svoju firmu kupcima iz Loznice', 'Šta dobija firma uz profil firme'],
             'kontakt' => ['/kontakt/', 'Kontakt', 'Pišite nam'],
             'o nama' => ['/o-nama/', 'O nama', 'Zašto lokalni oglasi'],
             'česta pitanja' => ['/faq/', 'Česta pitanja', 'Kako da postavim oglas?'],

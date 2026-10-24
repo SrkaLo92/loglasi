@@ -31,7 +31,9 @@ class ZaFirmeTest extends TestCase
             ->assertOk()
             ->assertSee('Još 23 besplatna mesta od 30')
             ->assertSee('Zauzeto je 7 od 30.')
-            ->assertSee("Prvih 30 firmi dobija Biznis paket besplatno prvu godinu, a posle toga 6.000\u{00A0}RSD godišnje.", false)
+            ->assertSee("Prvih 30 firmi: 12 meseci besplatno. Posle toga paketi počinju od 1.490\u{00A0}RSD mesečno, bez automatske naplate.", false)
+            ->assertSee('Za firme')
+            ->assertDontSee('Founder')
             ->assertSee('Prijavite firmu dok ima besplatnih mesta');
     }
 
@@ -56,16 +58,27 @@ class ZaFirmeTest extends TestCase
 
         $this->get('/za-firme/')
             ->assertSee('Sva besplatna mesta su popunjena')
-            ->assertSee("Biznis paket košta 6.000\u{00A0}RSD godišnje.", false)
-            ->assertDontSee('dobija Biznis paket besplatno')
+            ->assertSee("Paketi za firme počinju od 1.490\u{00A0}RSD mesečno.", false)
+            ->assertDontSee('firmi: 12 meseci besplatno')
             ->assertSee('Prijavite svoju firmu');
     }
 
-    public function test_business_price_from_products(): void
+    public function test_package_prices_from_products(): void
     {
-        Product::where('code', Product::BIZNIS_12M)->update(['price_rsd' => 9000]);
+        Product::where('code', 'business_start_monthly')->update(['price_rsd' => 1990]);
 
-        $this->get('/za-firme/')->assertSee("9.000\u{00A0}RSD", false);
+        $this->get('/za-firme/')
+            ->assertSee("paketi počinju od 1.990\u{00A0}RSD mesečno", false)
+            ->assertSeeInOrder(['Business Start', "1.990\u{00A0}RSD", 'Business Pro', 'Business Max'], false)
+            ->assertSee('<th scope="col" class="lgx-tabela__biznis">Profil firme</th>', false)
+            ->assertDontSee('Biznis paket');
+    }
+
+    public function test_offer_uses_serbian_plural(): void
+    {
+        Settings::set('founding_firms_total', 21);
+
+        $this->get('/za-firme/')->assertSee('Prva 21 firma: 12 meseci besplatno.');
     }
 
     public function test_cta_goes_to_contact_form_with_firm_topic(): void

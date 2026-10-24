@@ -1525,3 +1525,15 @@ main:focus { outline: none; }
 		position: static;
 	}
 }
+
+/* Za firme: business packages after the free period */
+.lgx-paketi__uvod { margin: 0 0 16px; color: var(--lg-muted, #5B6470); }
+.lgx-paketi { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.lgx-paket { border: 1px solid var(--lg-border, #e5e5e5); border-radius: 12px; padding: 20px; background: #fff; }
+.lgx-paket__naziv { margin: 0 0 8px; font-size: 1.125rem; }
+.lgx-paket__cena { margin: 0; font-size: 1.375rem; font-weight: 700; }
+.lgx-paket__cena span { font-size: .9375rem; font-weight: 400; }
+.lgx-paket__godisnje { margin: 4px 0 0; color: var(--lg-muted, #5B6470); font-size: .9375rem; }
+.lgx-paket__stavke { margin: 12px 0 0; padding-left: 18px; }
+.lgx-paket__stavke li { margin: 4px 0; }
+.lgx-paketi__link { margin: 16px 0 0; }

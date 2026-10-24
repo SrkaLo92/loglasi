@@ -87,10 +87,10 @@ return [
 
     /* Za firme ------------------------------------------------------------ */
 
-    'za_firme.oznaka' => 'Biznis paket',
+    'za_firme.oznaka' => 'Za firme',
     'za_firme.naslov' => 'Predstavite svoju firmu kupcima iz Loznice',
     'za_firme.uvod' => 'Profil firme sa logoom, radnim vremenom, mapom i svim vašim oglasima na jednom mestu. Kupci vas pozivaju jednim dodirom, a vi vidite koliko ljudi vas je pronašlo.',
-    'za_firme.prednosti.naslov' => 'Šta dobijate uz Biznis paket',
+    'za_firme.prednosti.naslov' => 'Šta dobija firma uz profil firme',
     'za_firme.prednosti' => [
         ['ikonica' => 'image', 'naslov' => 'Logo i naslovna slika', 'tekst' => 'Profil izgleda kao izlog vaše radnje, a ne kao nalog privatnog lica.'],
         ['ikonica' => 'badge', 'naslov' => 'Oznaka „Proverena firma”', 'tekst' => 'Podatke o firmi proveravamo pre uključenja, pa kupci znaju s kim posluju.'],
@@ -99,6 +99,8 @@ return [
         ['ikonica' => 'phone', 'naslov' => 'Pozovi, WhatsApp, Viber', 'tekst' => 'Dugmad za kontakt su pri vrhu profila i na svakom vašem oglasu.'],
         ['ikonica' => 'chart', 'naslov' => 'Statistika', 'tekst' => 'Pregledi profila i oglasa i broj kontakata, da znate šta donosi kupce.'],
     ],
+    'za_firme.paketi.naslov' => 'Paketi posle besplatnog perioda',
+    'za_firme.paketi.uvod' => 'Posle 12 meseci nema automatske naplate. Sami birate da li želite da nastavite sa nekim od paketa. Godišnje plaćate 10 meseci, a koristite 12.',
     'za_firme.poredjenje.naslov' => 'Privatni nalog ili profil firme',
     'za_firme.koraci.naslov' => 'Kako da se prijavite',
     'za_firme.koraci' => [
@@ -114,7 +116,7 @@ return [
     /* Kontakt ------------------------------------------------------------- */
 
     'kontakt.naslov' => 'Kontakt',
-    'kontakt.uvod' => 'Imate pitanje o oglasu, plaćanju ili Biznis paketu? Pišite nam i odgovorićemo vam što pre, obično istog ili sledećeg radnog dana.',
+    'kontakt.uvod' => 'Imate pitanje o oglasu, plaćanju ili paketima za firme? Pišite nam i odgovorićemo vam što pre, obično istog ili sledećeg radnog dana.',
     'kontakt.forma.naslov' => 'Pišite nam',
     'kontakt.poslato' => 'Hvala na poruci. Poslata je, a odgovor stiže na adresu e-pošte koju ste uneli.',
     'kontakt.teme' => [
@@ -144,7 +146,7 @@ Na velikim sajtovima oglas iz Loznice se izgubi među hiljadama oglasa iz cele S
 
 ## Kako zarađujemo
 
-Postavljanje oglasa je besplatno. Plaćaju se samo dodaci koje sami izaberete: podizanje oglasa, isticanje oglasa i Biznis paket za firme. Sve cene su na strani [Cenovnik](/cenovnik/).
+Postavljanje oglasa je besplatno. Plaćaju se samo dodaci koje sami izaberete: podizanje oglasa, isticanje oglasa i paketi za firme. Sve cene su na strani [Cenovnik](/cenovnik/).
 
 ## Kontakt
 
@@ -161,7 +163,7 @@ MD,
         ['pitanje' => 'Koliko dugo traje oglas?', 'odgovor' => 'Oglas traje {trajanje_oglasa}. Kad istekne, možete besplatno da ga obnovite iz svog naloga.'],
         ['pitanje' => 'Kako da kontaktiram prodavca?', 'odgovor' => 'Na strani oglasa su dugmad za poziv i poruku preko sajta, a ako je prodavac ostavio broj, i za WhatsApp i Viber.'],
         ['pitanje' => 'Kako da istaknem ili podignem oglas?', 'odgovor' => 'Podizanje oglasa košta {cena_podizanje}, a isticanje {cena_istaknuto_7} za 7 dana ili {cena_istaknuto_30} za 30 dana. Plaća se uplatom na račun, a postupak je opisan na strani [Cenovnik](/cenovnik/).'],
-        ['pitanje' => 'Šta je Biznis paket?', 'odgovor' => 'Biznis paket je profil firme sa logoom, radnim vremenom, mapom i oznakom „Firma” na svakom oglasu. {ponuda_firme} Više na strani [Za firme](/za-firme/).'],
+        ['pitanje' => 'Šta dobija firma uz profil firme?', 'odgovor' => 'Profil firme sa logoom, radnim vremenom, mapom i oznakom „Firma” na svakom oglasu. {ponuda_firme} Više na strani [Za firme](/za-firme/).'],
         ['pitanje' => 'Kako da prijavim sumnjiv oglas?', 'odgovor' => 'Na strani oglasa kliknite na „Prijavi oglas” i ukratko napišite šta nije u redu. Svaku prijavu pregledamo.'],
         ['pitanje' => 'Kako da kupujem bezbedno?', 'odgovor' => 'Robu pogledajte uživo pre plaćanja, ne plaćajte unapred nepoznatim osobama i nikome ne šaljite kodove koje dobijete SMS porukom.'],
         ['pitanje' => 'Kako da obrišem nalog i svoje podatke?', 'odgovor' => 'Uputstvo je na strani [Brisanje ličnih podataka](/brisanje-licnih-podataka/). Možete i da nam pišete preko [kontakt forme](/kontakt/).'],

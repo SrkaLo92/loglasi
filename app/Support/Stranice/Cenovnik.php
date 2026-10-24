@@ -203,22 +203,30 @@ class Cenovnik
         return self::foundingTotal() > 0 && self::foundingLeft() > 0;
     }
 
-    /** „Prvih 30 firmi dobija Biznis paket besplatno prvu godinu, a posle toga 6.000 RSD godišnje.” */
+    /** Monthly price of the cheapest business package (Business Start), null when it is not listed. */
+    public static function packagesFrom(): ?int
+    {
+        $start = self::listed()->get(self::PACKAGES[0].'_monthly');
+
+        return $start && $start->price_rsd > 0 ? (int) $start->price_rsd : null;
+    }
+
+    /** „Prvih 30 firmi: 12 meseci besplatno. Posle toga paketi počinju od 1.490 RSD mesečno, bez automatske naplate.” */
     public static function offerText(): string
     {
-        $biznis = self::product(Product::BIZNIS_12M);
-        $price = $biznis ? self::price($biznis->price_rsd) : null;
+        $from = self::packagesFrom();
+        $price = $from !== null ? self::price($from) : null;
 
         if (! self::offerOpen()) {
-            return $price ? 'Biznis paket košta '.$price.' godišnje.' : '';
+            return $price ? 'Paketi za firme počinju od '.$price.' mesečno.' : '';
         }
 
         $free = self::foundingTotal();
-        $lead = sprintf(self::plural($free, 'Prva %d firma dobija', 'Prve %d firme dobijaju', 'Prvih %d firmi dobija'), $free);
+        $lead = sprintf(self::plural($free, 'Prva %d firma', 'Prve %d firme', 'Prvih %d firmi'), $free).': 12 meseci besplatno.';
 
         return $price
-            ? $lead.' Biznis paket besplatno prvu godinu, a posle toga '.$price.' godišnje.'
-            : $lead.' Biznis paket besplatno prvu godinu.';
+            ? $lead.' Posle toga paketi počinju od '.$price.' mesečno, bez automatske naplate.'
+            : $lead.' Posle toga nema automatske naplate.';
     }
 
     /** „Prvih 30 firmi besplatno prvu godinu” (kratko, za karticu). */

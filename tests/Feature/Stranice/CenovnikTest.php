@@ -29,7 +29,7 @@ class CenovnikTest extends TestCase
             ->assertSee("199\u{00A0}RSD", false)
             ->assertSee("899\u{00A0}RSD", false)
             ->assertSeeInOrder(['Podizanje oglasa', 'Paket 10 podizanja', 'Istaknut oglas 7 dana', 'Prioritetni oglas', 'TOP oglas', 'Premium XL kartica', 'Premium XL + početna'])
-            ->assertSeeInOrder(['Business Start', '1.490', "14.900\u{00A0}RSD", 'Business Pro', 'Najčešći izbor', 'Business Max', '4.990'], false)
+            ->assertSeeInOrder(['Business Start', '1.490', "14.900\u{00A0}RSD", 'Business Pro', 'Najpopularniji', 'Business Max', '4.990'], false)
             ->assertSee('Do 20 aktivnih oglasa')
             ->assertDontSee('Founder');
     }

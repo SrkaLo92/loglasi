@@ -80,7 +80,7 @@
 						<tr>
 							<th scope="col"><span class="lg-visually-hidden">Pogodnost</span></th>
 							<th scope="col">Privatni nalog</th>
-							<th scope="col" class="lgx-tabela__biznis">Biznis paket</th>
+							<th scope="col" class="lgx-tabela__biznis">Profil firme</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -102,6 +102,32 @@
 				</table>
 			</div>
 		</div>
+
+		@if ($packages)
+			<div class="lgx-blok">
+				<h2 class="lgx-naslov">{{ PageText::get('za_firme.paketi.naslov') }}</h2>
+				<p class="lgx-paketi__uvod">{{ PageText::get('za_firme.paketi.uvod') }}</p>
+				<ul class="lgx-paketi">
+					@foreach ($packages as $package)
+						<li class="lgx-paket">
+							<h3 class="lgx-paket__naziv">{{ $package['monthly']->name }}</h3>
+							<p class="lgx-paket__cena">{{ Cenovnik::price($package['monthly']->price_rsd) }} <span>mesečno</span></p>
+							@if ($package['yearly'])
+								<p class="lgx-paket__godisnje">ili {{ Cenovnik::price($package['yearly']->price_rsd) }} godišnje</p>
+							@endif
+							@if ($package['features'])
+								<ul class="lgx-paket__stavke">
+									@foreach ($package['features'] as $feature)
+										<li>{{ $feature }}</li>
+									@endforeach
+								</ul>
+							@endif
+						</li>
+					@endforeach
+				</ul>
+				<p class="lgx-paketi__link"><a href="{{ Navigacija::link('cenovnik') }}">Sve cene i detalji paketa na strani Cenovnik</a></p>
+			</div>
+		@endif
 
 		<div class="lgx-blok">
 			<h2 class="lgx-naslov">{{ PageText::get('za_firme.koraci.naslov') }}</h2>

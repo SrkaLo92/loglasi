@@ -166,7 +166,7 @@
 							<div class="lgc-paket__vrh">
 								<h4 class="lgc-paket__naziv">{{ $package['monthly']->name }}</h4>
 								@if ($package['code'] === $popular)
-									<span class="lgc-paket__oznaka">Najčešći izbor</span>
+									<span class="lgc-paket__oznaka">Najpopularniji</span>
 								@endif
 							</div>
 							<p class="lgc-paket__cena"><span class="lgc-paket__iznos">{{ number_format($package['monthly']->price_rsd, 0, ',', '.') }}</span> <span class="lgc-paket__period">RSD / mesec</span></p>
