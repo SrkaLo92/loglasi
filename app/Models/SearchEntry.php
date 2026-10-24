@@ -24,7 +24,7 @@ class SearchEntry extends Model
         return [
             'is_firm' => 'boolean',
             'no_price' => 'boolean',
-            'featured' => 'boolean',
+            'featured' => 'integer', // promotion rank 0..3
             'featured_until' => 'datetime',
             'sort_at' => 'datetime',
             'expires_at' => 'datetime',

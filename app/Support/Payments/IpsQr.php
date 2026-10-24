@@ -60,7 +60,7 @@ final class IpsQr
             'svgAddXmlHeader' => false,
             'drawLightModules' => false,
             'connectPaths' => true,
-            'cssClass' => 'lgp-qr__svg',
+            'cssClass' => 'lgpay-qr__svg',
         ])))->render($payload);
     }
 

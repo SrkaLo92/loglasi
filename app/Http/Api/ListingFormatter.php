@@ -43,7 +43,7 @@ class ListingFormatter
             'location' => $listing->location ? CatalogFormatter::locationRef($listing->location) : null,
             'category' => $listing->category ? CatalogFormatter::categoryRef($listing->category) : null,
             'image' => $image ? static::image($image) : null,
-            'featured' => $listing->isFeatured(),
+            'featured' => $listing->promotionRank() > 0,
             'seller_type' => $listing->user?->isFirm() ? 'firm' : 'private',
             'status' => static::status($listing),
             'published_at' => static::date($listing->published_at ?? $listing->created_at),

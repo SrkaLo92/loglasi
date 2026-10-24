@@ -27,7 +27,7 @@ use Illuminate\Validation\ValidationException;
  *   $page = $search->paginate($params);                // LengthAwarePaginator, card relations loaded
  *   $query = $search->query($params);                  // Builder, filtered and ordered
  *
- * Order: featured listings (featured_until in the future) first, then the chosen sort.
+ * Order: promoted listings first (rank: TOP 3, priority 2, highlighted 1), then the chosen sort.
  * Only active listings: published, not deleted, not expired. See docs/moduli/search.md.
  */
 class ListingSearch
@@ -204,7 +204,7 @@ class ListingSearch
         $this->applyCategory($query, $params['category']);
 
         if ($params['featured_only']) {
-            $query->where('listing_search.featured', true);
+            $query->where('listing_search.featured', '>', 0);
         }
 
         if ($params['location'] !== null) {

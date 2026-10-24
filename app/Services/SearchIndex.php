@@ -92,11 +92,17 @@ class SearchIndex
     {
         $now = now();
         $changed = DB::table('listing_search')->whereNotNull('expires_at')->where('expires_at', '<=', $now)->delete();
-        $changed += DB::table('listing_search')->where('featured', true)
+        // A promotion ended (featured_until = when the rank next changes): rank the row again.
+        $ids = DB::table('listing_search')->where('featured', '>', 0)
             ->where(fn ($q) => $q->whereNull('featured_until')->orWhere('featured_until', '<=', $now))
-            ->update(['featured' => false]);
-        $changed += DB::table('listing_search')->where('featured', false)->where('featured_until', '>', $now)
-            ->update(['featured' => true]);
+            ->pluck('id')->map(fn ($id) => (int) $id)->all();
+        foreach (array_chunk($ids, self::CHUNK) as $chunk) {
+            $rows = $this->activeRows(fn ($q) => $q->whereIn('listings.id', $chunk));
+            foreach ($rows as $row) {
+                DB::table('listing_search')->where('id', $row['id'])->update(['featured' => $row['featured'], 'featured_until' => $row['featured_until']]);
+            }
+            $changed += count($chunk);
+        }
 
         if ($changed > 0) {
             $this->touch();
@@ -146,7 +152,8 @@ class SearchIndex
             ->whereNull('listings.deleted_at')
             ->where(fn ($q) => $q->whereNull('listings.expires_at')->orWhere('listings.expires_at', '>', now()))
             ->select('listings.id', 'listings.user_id', 'listings.category_id', 'listings.location_id', 'listings.title',
-                'listings.description', 'listings.price_eur', 'listings.featured_until', 'listings.bumped_at',
+                'listings.description', 'listings.price_eur', 'listings.featured_until', 'listings.priority_until',
+                'listings.top_until', 'listings.bumped_at',
                 'listings.published_at', 'listings.created_at', 'listings.expires_at', 'users.account_type');
         $scope($query);
 
@@ -158,8 +165,7 @@ class SearchIndex
     private function row(array $l, bool $isFirm): array
     {
         [$c1, $c2, $c3] = $this->path((int) $l['category_id']);
-        $featuredUntil = $l['featured_until'] ?? null;
-        $featuredUntil = $featuredUntil instanceof \DateTimeInterface ? $featuredUntil : ($featuredUntil ? Carbon::parse($featuredUntil) : null);
+        [$rank, $rankUntil] = self::rank($l);
 
         return [
             'id' => (int) $l['id'],
@@ -172,12 +178,36 @@ class SearchIndex
             'is_firm' => $isFirm,
             'price_eur' => $l['price_eur'],
             'no_price' => $l['price_eur'] === null,
-            'featured' => $featuredUntil !== null && $featuredUntil->isFuture(),
-            'featured_until' => $featuredUntil,
+            'featured' => $rank,
+            'featured_until' => $rankUntil,
             'sort_at' => $l['bumped_at'] ?? $l['published_at'] ?? $l['created_at'] ?? now(),
             'expires_at' => $l['expires_at'] ?? null,
             'search_text' => SearchText::forListing($l['title'] ?? '', $l['description'] ?? ''),
         ];
+    }
+
+    /**
+     * Promotion rank (3 TOP, 2 priority, 1 highlighted, 0 none) and when it next changes:
+     * the earliest end among the running promotions.
+     *
+     * @return array{0: int, 1: ?Carbon}
+     */
+    public static function rank(array $l): array
+    {
+        $now = now();
+        $ends = [];
+        foreach (['top_until' => 3, 'priority_until' => 2, 'featured_until' => 1] as $column => $rank) {
+            $value = $l[$column] ?? null;
+            $value = $value instanceof \DateTimeInterface ? Carbon::instance($value) : ($value ? Carbon::parse($value) : null);
+            if ($value !== null && $value->greaterThan($now)) {
+                $ends[$rank] = $value;
+            }
+        }
+        if ($ends === []) {
+            return [0, null];
+        }
+
+        return [max(array_keys($ends)), collect($ends)->min()];
     }
 
     /** @return array{0: int, 1: ?int, 2: ?int} ids from the root, levels 1 to 3 */

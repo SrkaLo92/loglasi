@@ -27,6 +27,10 @@ class Listing extends Model
             'currency' => Currency::class,
             'status' => ListingStatus::class,
             'featured_until' => 'datetime',
+            'priority_until' => 'datetime',
+            'top_until' => 'datetime',
+            'premium_xl_until' => 'datetime',
+            'premium_home_until' => 'datetime',
             'bumped_at' => 'datetime',
             'published_at' => 'datetime',
             'expires_at' => 'datetime',
@@ -133,5 +137,22 @@ class Listing extends Model
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    /** Search rank of the active promotion: 3 TOP, 2 priority, 1 highlighted, 0 none. */
+    public function promotionRank(): int
+    {
+        return match (true) {
+            $this->top_until?->isFuture() === true => 3,
+            $this->priority_until?->isFuture() === true => 2,
+            $this->isFeatured() => 1,
+            default => 0,
+        };
+    }
+
+    /** Shown as the bigger Premium XL card in lists. */
+    public function isPremiumXl(): bool
+    {
+        return $this->premium_xl_until?->isFuture() === true;
     }
 }

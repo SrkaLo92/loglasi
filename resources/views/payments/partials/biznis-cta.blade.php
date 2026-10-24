@@ -10,9 +10,9 @@
 	$firm ??= auth()->user()?->firm;
 @endphp
 @if ($biznisProduct)
-	<div class="lgp-biznis">
+	<div class="lgpay-biznis">
 		@if ($firm?->hasBiznis())
-			<p class="lgp-biznis__status">Biznis paket važi do {{ $firm->biznis_until->format('j. n. Y.') }}.</p>
+			<p class="lgpay-biznis__status">Biznis paket važi do {{ $firm->biznis_until->format('j. n. Y.') }}.</p>
 		@endif
 		<a class="lg-btn lg-btn--green" href="{{ url_slash('moj-nalog/narudzbine/nova') }}?usluga={{ Product::BIZNIS_12M }}">{{ $label ?? ($firm?->hasBiznis() ? 'Produžite Biznis paket' : 'Naručite Biznis paket') }}</a>
 	</div>

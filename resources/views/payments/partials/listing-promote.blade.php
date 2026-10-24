@@ -26,15 +26,15 @@
 		}
 	@endphp
 	@if ($items)
-		<div class="lgp-promote" role="group" aria-label="Isticanje i podizanje oglasa">
+		<div class="lgpay-promote" role="group" aria-label="Isticanje i podizanje oglasa">
 			@if ($listing->isFeatured())
-				<p class="lgp-promote__note">Istaknut do {{ $listing->featured_until->format('j. n. Y.') }}</p>
+				<p class="lgpay-promote__note">Istaknut do {{ $listing->featured_until->format('j. n. Y.') }}</p>
 			@endif
 			@foreach ($items as $item)
 				@if ($item['code'] === Product::BUMP && $bumpAt)
-					<span class="lg-btn lg-btn--outline lgp-promote__btn" aria-disabled="true" title="Ponovo od {{ $bumpAt->format('j. n. \u H:i') }}">{{ $item['label'] }} <small>od {{ $bumpAt->format('j. n. \u H:i') }}</small></span>
+					<span class="lg-btn lg-btn--outline lgpay-promote__btn" aria-disabled="true" title="Ponovo od {{ $bumpAt->format('j. n. \u H:i') }}">{{ $item['label'] }} <small>od {{ $bumpAt->format('j. n. \u H:i') }}</small></span>
 				@else
-					<a class="lg-btn {{ $item['code'] === Product::BUMP ? 'lg-btn--outline' : 'lg-btn--orange' }} lgp-promote__btn" href="{{ $base }}?usluga={{ $item['code'] }}&amp;oglas={{ $listing->id }}">{{ $item['label'] }} <small>{{ Cenovnik::price($item['price']) }}</small></a>
+					<a class="lg-btn {{ $item['code'] === Product::BUMP ? 'lg-btn--outline' : 'lg-btn--orange' }} lgpay-promote__btn" href="{{ $base }}?usluga={{ $item['code'] }}&amp;oglas={{ $listing->id }}">{{ $item['label'] }} <small>{{ Cenovnik::price($item['price']) }}</small></a>
 				@endif
 			@endforeach
 		</div>

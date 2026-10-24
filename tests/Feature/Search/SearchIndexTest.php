@@ -45,12 +45,36 @@ class SearchIndexTest extends SearchTestCase
         $featured = $this->listing(['title' => 'Istaknut', 'featured_until' => now()->addHour()]);
         DB::table('listings')->where('id', $expiring->id)->update(['expires_at' => now()->subMinute()]);
         DB::table('listing_search')->where('id', $expiring->id)->update(['expires_at' => now()->subMinute()]);
+        DB::table('listings')->where('id', $featured->id)->update(['featured_until' => now()->subMinute()]);
         DB::table('listing_search')->where('id', $featured->id)->update(['featured_until' => now()->subMinute()]);
 
         $this->assertSame(2, app(SearchIndex::class)->refresh());
         $this->assertFalse(SearchEntry::whereKey($expiring->id)->exists());
         $this->assertFalse((bool) SearchEntry::find($featured->id)->featured);
         $this->artisan('search:refresh')->assertSuccessful();
+    }
+
+    public function test_promotions_rank_top_above_priority_above_highlighted(): void
+    {
+        $plain = $this->listing(['title' => 'Običan', 'bumped_at' => now()]);
+        $featured = $this->listing(['title' => 'Istaknut', 'featured_until' => now()->addDays(7), 'bumped_at' => now()->subDays(3)]);
+        $priority = $this->listing(['title' => 'Prioritetni', 'priority_until' => now()->addDays(3), 'bumped_at' => now()->subDays(4)]);
+        $top = $this->listing(['title' => 'TOP', 'top_until' => now()->addDays(7), 'featured_until' => now()->addDay(), 'bumped_at' => now()->subDays(5)]);
+
+        $this->assertSame(3, SearchEntry::find($top->id)->featured);
+        $this->assertSame(now()->addDay()->toDateString(), SearchEntry::find($top->id)->featured_until->toDateString());
+        $this->assertSame(['TOP', 'Prioritetni', 'Istaknut', 'Običan'], array_column($this->getJson('/api/v1/listings')->json('items'), 'title'));
+
+        // The highlight of the TOP listing ends first: the rank stays 3 until TOP ends.
+        $this->travel(2)->days();
+        app(SearchIndex::class)->refresh();
+        $this->assertSame(3, SearchEntry::find($top->id)->featured);
+        $this->travel(6)->days();
+        app(SearchIndex::class)->refresh();
+        $this->assertSame(0, SearchEntry::find($top->id)->featured);
+        $this->assertSame(0, SearchEntry::find($priority->id)->featured);
+        $this->assertSame(0, SearchEntry::find($featured->id)->featured);
+        $this->assertSame(0, SearchEntry::find($plain->id)->featured);
     }
 
     public function test_rebuild_after_a_bulk_import(): void
