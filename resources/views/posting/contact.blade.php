@@ -19,6 +19,6 @@
 		</p>
 		@include('posting.partials.error', ['field' => 'contact_phone', 'id' => 'pst-phone'])
 	</div>
-	@include('posting.partials.actions', ['label' => 'Sačuvaj i pogledaj oglas'])
+	@include('posting.partials.actions', ['submitLabel' => 'Sačuvaj i pogledaj oglas'])
 </form>
 @endsection

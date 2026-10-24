@@ -4,5 +4,5 @@
 	@if ($previous)
 		<a class="pst-btn pst-btn--line" href="{{ Wizard::url($listing, $previous) }}">Nazad</a>
 	@endif
-	<button class="pst-btn" type="submit">{{ $label ?? 'Sačuvaj i nastavi' }}</button>
+	<button class="pst-btn" type="submit">{{ $submitLabel ?? 'Sačuvaj i nastavi' }}</button>
 </div>

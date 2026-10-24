@@ -84,6 +84,19 @@ class WizardTest extends PostingTestCase
         $this->assertSame("Prodajem Golf 4.\nRedovno servisiran.", $listing->description);
     }
 
+    public function test_details_step_button_is_not_renamed_by_the_last_field(): void
+    {
+        $user = $this->user();
+        $this->actingAs($user)->post('/postavi-oglas/', ['category_id' => $this->cars->id]);
+        $listing = Listing::sole();
+
+        $this->get('/postavi-oglas/'.$listing->id.'/detalji/')->assertOk()
+            ->assertSee('<button class="pst-btn" type="submit">Sačuvaj i nastavi</button>', false)
+            ->assertDontSee('<button class="pst-btn" type="submit">Stanje</button>', false);
+        $this->get('/postavi-oglas/'.$listing->id.'/kontakt/')->assertOk()
+            ->assertSee('<button class="pst-btn" type="submit">Sačuvaj i pogledaj oglas</button>', false);
+    }
+
     public function test_price_negotiable_and_rsd_and_validation(): void
     {
         $user = $this->user();
