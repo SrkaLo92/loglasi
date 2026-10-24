@@ -9,7 +9,7 @@ use App\Support\Firms\FirmAccount;
 use App\Support\Firms\FirmImages;
 use App\Support\Firms\FirmProfileUpdater;
 use App\Support\Firms\FirmStats;
-use App\Support\Firms\WorkingHours;
+use App\Support\Listing\WorkingHours;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +18,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use RuntimeException;
 
-/** /moj-nalog/firma/: firm profile, Biznis status and statistics (firm accounts only). */
+/** /moj-nalog/firma/: firm profile, package status and statistics (firm accounts only). */
 class AccountController extends Controller
 {
     public function edit(Request $request): View
@@ -71,13 +71,15 @@ class AccountController extends Controller
         $firm = FirmAccount::firmFor($user);
         Gate::authorize('update', $firm);
 
-        $periods = array_map('intval', (array) config('firms.stats.periods', [30, 90]));
-        $period = (int) $request->query('period', (string) config('firms.stats.default_period', 30));
+        $allowed = Gate::allows('viewStats', $firm);
+        $advanced = Gate::allows('viewAdvancedStats', $firm);
+        $default = (int) config('firms.stats.default_period', 30);
+        // Basic statistics: the default period only; Pro and Max also get the longer ones.
+        $periods = $advanced ? array_map('intval', (array) config('firms.stats.periods', [30, 90])) : [$default];
+        $period = (int) $request->query('period', (string) $default);
         if (! in_array($period, $periods, true)) {
             return redirect()->to(url_slash('moj-nalog/firma/statistika'));
         }
-
-        $allowed = Gate::allows('viewStats', $firm);
 
         return view('firms.account.stats', [
             'user' => $user,
@@ -86,7 +88,8 @@ class AccountController extends Controller
             'period' => $period,
             'periods' => $periods,
             'stats' => $allowed ? FirmStats::daily($user->id, $period) : null,
-            'listings' => $allowed ? FirmStats::perListing($user->id, $period) : [],
+            'advanced' => $advanced,
+            'listings' => $advanced ? FirmStats::perListing($user->id, $period) : [],
             'status' => $allowed ? null : FirmAccount::status($user, $firm),
         ]);
     }

@@ -9,6 +9,7 @@ use App\Models\Listing;
 use App\Models\ListingImage;
 use App\Models\User;
 use App\Services\ListingFields;
+use App\Support\Firms\FirmPackage;
 use App\Support\Listing\Seller;
 use App\Support\Listing\WorkingHours;
 use Carbon\CarbonImmutable;
@@ -139,8 +140,8 @@ class ListingFormatter
             'website' => (string) $firm->website,
             'working_hours' => WorkingHours::text(WorkingHours::days($firm->working_hours)),
             'phone_verified' => (bool) $firm->user?->isPhoneVerified(),
-            'package' => $firm->hasBiznis() ? 'Biznis' : 'Bez paketa',
-            'package_expires_at' => $firm->hasBiznis() ? static::date($firm->biznis_until) : null,
+            'package' => FirmPackage::label($firm) ?? 'Bez paketa',
+            'package_expires_at' => $firm->hasPackage() ? static::date($firm->package_ends_at) : null,
             'active_listings' => Seller::activeCount((int) $firm->user_id),
             'member_since' => static::date($firm->user?->created_at ?? $firm->created_at),
         ];

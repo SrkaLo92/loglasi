@@ -98,9 +98,9 @@ class SitemapTest extends SeoTestCase
 
     public function test_firms_sitemap_has_firms_with_a_listing_or_a_filled_profile(): void
     {
-        $empty = ['biznis_until' => null, 'description' => null, 'logo_path' => null];
+        $empty = ['package' => null, 'package_ends_at' => null, 'description' => null, 'logo_path' => null];
         User::factory()->firm()->create(['slug' => 'firma-sa-paketom']);
-        User::factory()->firm()->create(['slug' => 'firma-sa-opisom'])->firm->forceFill(['biznis_until' => null])->save();
+        User::factory()->firm()->create(['slug' => 'firma-sa-opisom'])->firm->forceFill(['package' => null, 'package_ends_at' => null])->save();
         $withListing = User::factory()->firm()->create(['slug' => 'firma-sa-oglasom']);
         $withListing->firm->forceFill($empty)->save();
         Listing::factory()->for($withListing)->create();

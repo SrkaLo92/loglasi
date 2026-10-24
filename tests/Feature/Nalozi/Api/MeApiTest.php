@@ -226,9 +226,9 @@ class MeApiTest extends TestCase
             ->assertJson(['monthly_limit' => 2, 'used_this_month' => 3, 'remaining' => 0]);
     }
 
-    public function test_firm_with_biznis_is_unlimited_unless_product_sets_limit(): void
+    public function test_firm_with_max_package_is_unlimited_unless_product_sets_limit(): void
     {
-        $product = Product::factory()->create(['code' => Product::BIZNIS_12M, 'listing_limit' => null]);
+        $product = Product::byCode('business_max_monthly'); // inserted by the pricing migration, unlimited
         $firm = User::factory()->firm()->create();
         Listing::factory()->count(2)->for($firm)->create();
 
@@ -244,7 +244,7 @@ class MeApiTest extends TestCase
     public function test_firm_without_active_package_has_private_limit(): void
     {
         $firm = User::factory()->firm()->create();
-        Firm::where('user_id', $firm->id)->update(['biznis_until' => now()->subDay()]);
+        Firm::where('user_id', $firm->id)->update(['package_ends_at' => now()->subDay()]);
 
         $this->withToken($this->tokenFor($firm))->getJson('/api/v1/me/limits')
             ->assertJson(['monthly_limit' => 5, 'unlimited' => false]);

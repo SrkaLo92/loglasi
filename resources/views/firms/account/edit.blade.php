@@ -31,7 +31,7 @@
 		</div>
 	@endif
 
-	@include('firms.partials.biznis-status', ['status' => $status])
+	@include('firms.partials.package-status', ['status' => $status])
 
 	<form class="lgf-form" method="post" action="{{ url_slash('moj-nalog/firma') }}" enctype="multipart/form-data" novalidate>
 		@csrf
@@ -133,10 +133,10 @@
 			<h2 id="firma-radno-vreme">Radno vreme</h2>
 			<p class="lgf-help lgf-wide" id="firma-hours-pomoc">Upišite po danima, npr. „08–16”, „8–12, 13–17” ili „Zatvoreno”. Prazan dan se prikazuje kao neradni ako je upisan bar jedan dan.</p>
 			<div class="lgf-hours">
-				@foreach (\App\Support\Firms\WorkingHours::DAYS as $day => $label)
+				@foreach (\App\Support\Listing\WorkingHours::DAYS as $day => [$label])
 					<label for="firma-hours-{{ $day }}">{{ $label }}</label>
 					<div>
-						<input id="firma-hours-{{ $day }}" type="text" name="hours[{{ $day }}]" value="{{ old('hours.'.$day, $hours[$day] ?? '') }}" maxlength="{{ \App\Support\Firms\WorkingHours::MAX_LENGTH }}" placeholder="{{ $day <= 5 ? '08–16' : ($day === 6 ? '08–13' : 'Zatvoreno') }}" aria-describedby="firma-hours-pomoc" @error('hours.'.$day) aria-invalid="true" @enderror>
+						<input id="firma-hours-{{ $day }}" type="text" name="hours[{{ $day }}]" value="{{ old('hours.'.$day, $hours[$day] ?? '') }}" maxlength="{{ \App\Support\Firms\WorkingHoursInput::MAX_LENGTH }}" placeholder="{{ $day <= 5 ? '08–16' : ($day === 6 ? '08–13' : 'Zatvoreno') }}" aria-describedby="firma-hours-pomoc" @error('hours.'.$day) aria-invalid="true" @enderror>
 						@error('hours.'.$day)<p class="lgf-error">{{ $message }}</p>@enderror
 					</div>
 				@endforeach

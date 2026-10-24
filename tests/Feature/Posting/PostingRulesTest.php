@@ -4,7 +4,6 @@ namespace Tests\Feature\Posting;
 
 use App\Enums\ListingStatus;
 use App\Models\Listing;
-use App\Models\Product;
 use App\Services\ListingImages;
 use App\Services\Posting;
 use App\Services\PostingRefused;
@@ -72,15 +71,14 @@ class PostingRulesTest extends PostingTestCase
     public function test_firm_with_package_uses_package_limit(): void
     {
         Settings::set('private_active_limit', 1);
-        Product::factory()->create(['code' => Product::BIZNIS_12M, 'listing_limit' => null]);
         $firm = $this->user(['account_type' => 'firm']);
         $firm->firm()->create(['name' => 'Auto Plac']);
-        $firm->firm->forceFill(['biznis_until' => now()->addYear()])->save();
+        $firm->firm->forceFill(['package' => 'start', 'package_period' => 'monthly', 'package_ends_at' => now()->addMonth()])->save();
         $this->published($firm);
 
         $this->assertTrue(ListingLimits::canCreate($firm->fresh()));
 
-        $firm->firm->forceFill(['biznis_until' => now()->subDay()])->save();
+        $firm->firm->forceFill(['package_ends_at' => now()->subDay()])->save();
         $this->expectException(PostingRefused::class);
         app(Posting::class)->ensureCanCreate($firm->fresh());
     }

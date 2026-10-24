@@ -4,14 +4,15 @@ namespace App\Support;
 
 use App\Enums\ListingStatus;
 use App\Models\Listing;
-use App\Models\Product;
 use App\Models\User;
+use App\Support\Firms\FirmPackage;
 use Carbon\CarbonImmutable;
 
 /**
  * How many ACTIVE listings a user may have (pending or published and not expired).
- * Private users: setting private_active_limit (5). Firms with a package: products.listing_limit,
- * a package without a limit (Biznis) is unlimited. A firm without an active package has the private limit.
+ * Private users: setting private_active_limit (5). Firms with an active package: the package limit
+ * (Start 20, Pro 100, Max and the free first year unlimited; FirmPackage::listingLimit).
+ * A firm without an active package has the private limit.
  * A slot frees when a listing expires, is sold, rejected or deleted.
  * The API keeps the contract names (monthly_limit, used_this_month, resets_at).
  */
@@ -50,10 +51,8 @@ class ListingLimits
     {
         if ($user->isFirm()) {
             $firm = $user->firm;
-            if ($firm !== null && $firm->hasBiznis()) {
-                $limit = Product::query()->where('code', Product::BIZNIS_12M)->value('listing_limit');
-
-                return $limit === null ? null : (int) $limit;
+            if ($firm !== null && FirmPackage::isActive($firm)) {
+                return FirmPackage::listingLimit($firm);
             }
         }
 

@@ -9,7 +9,7 @@ use App\Support\Seo\Url;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-/** /firme/: "Firme iz Loznice", firms with an active Biznis package. */
+/** /firme/: "Firme iz Loznice", firm accounts with an active package or the free first year. */
 class DirectoryController extends Controller
 {
     public function __invoke(Request $request): View
@@ -46,7 +46,7 @@ class DirectoryController extends Controller
         $count = $total.' '.($total % 10 === 1 && $total % 100 !== 11 ? 'firma' : (in_array($total % 10, [2, 3, 4], true) && ! in_array($total % 100, [12, 13, 14], true) ? 'firme' : 'firmi'));
 
         $seo = Seo::get()
-            ->title('Firme Loznica – imenik lokalnih firmi | loglasi.rs')
+            ->title('Firme iz Loznice – lokalne firme i usluge | loglasi.rs')
             ->h1('Firme iz Loznice')
             ->description($total > 0
                 ? $count.' iz Loznice i okoline na jednom mestu: delatnost, adresa, telefon, radno vreme i oglasi svake firme.'

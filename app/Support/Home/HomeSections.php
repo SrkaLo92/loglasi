@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Firm;
 use App\Services\Catalog;
 use App\Services\ListingSearch;
+use App\Support\Firms\FirmDirectory;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -173,7 +174,7 @@ class HomeSections
      * @return array{total: int, items: list<array{name: string, url: string, logo: ?string, initials: string}>}
      */
     /**
-     * Firm cards: active firm accounts, Biznis first, with their place and number of active listings.
+     * Firm cards: active firm accounts, firms with a package first, with their place and number of active listings.
      *
      * @return array{total: int, items: list<array<string, mixed>>}
      */
@@ -188,7 +189,7 @@ class HomeSections
         }
 
         $firms = $query->with('user:id,slug')
-            ->orderByRaw('(biznis_until IS NOT NULL AND biznis_until > ?) DESC', [now()])
+            ->orderByRaw('(package_ends_at IS NOT NULL AND package_ends_at > ?) DESC', [now()])
             ->orderByDesc('id')
             ->limit(HomeSettings::int('home.firms_max', 1, 24))
             ->get(['id', 'user_id', 'name', 'activity', 'location_id', 'logo_path', 'cover_path']);
@@ -211,7 +212,8 @@ class HomeSections
             'count' => (int) ($counts[$f->user_id] ?? 0),
         ])->values()->all();
 
-        return ['total' => $total, 'items' => $items];
+        // Same number as the /firme/ directory (firms with a package), cached there.
+        return ['total' => $total, 'items' => $items, 'directory_total' => count(FirmDirectory::all())];
     }
 
     private static function storageUrl(?string $path): ?string

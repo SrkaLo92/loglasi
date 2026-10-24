@@ -207,7 +207,8 @@ class DevListings extends Command
             ]);
             DB::table('firms')->insert([
                 'user_id' => $id, 'name' => $name, 'address' => 'Loznica',
-                'biznis_until' => $i % 4 === 3 ? null : now()->addYear(), 'founding_free' => $i < 12,
+                'package' => $i % 4 === 3 || $i < 12 ? null : ['start', 'pro', 'max'][$i % 3], 'package_period' => $i % 4 === 3 || $i < 12 ? null : 'monthly',
+                'package_ends_at' => $i % 4 === 3 ? null : now()->addMonth(), 'free_program' => $i < 12 && $i % 4 !== 3, 'founding_free' => $i < 12,
                 'created_at' => now(), 'updated_at' => now(),
             ]);
             $firm[] = $id;

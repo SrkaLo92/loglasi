@@ -113,7 +113,7 @@ class ListingApiTest extends TestCase
             ->assertOk()
             ->assertJsonStructure(['id', 'name', 'about', 'logo', 'address', 'website', 'working_hours', 'phone_verified', 'package', 'package_expires_at', 'active_listings', 'member_since'])
             ->assertJsonPath('active_listings', 2)
-            ->assertJsonPath('package', 'Biznis');
+            ->assertJsonPath('package', 'Business Max');
     }
 
     public function test_firm_of_blocked_or_unknown_account_is_404(): void

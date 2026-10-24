@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Firms\FirmPackage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,14 +11,21 @@ class Firm extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id', 'user_id', 'biznis_until', 'founding_free', 'verified_at'];
+    // Package, free year and verification are set only by the admin or the payments module.
+    protected $guarded = [
+        'id', 'user_id', 'founding_free', 'verified_at', 'package', 'package_period', 'package_starts_at',
+        'package_ends_at', 'free_program', 'package_reminder_days', 'package_reminder_for',
+    ];
 
     protected function casts(): array
     {
         return [
             'working_hours' => 'array',
-            'biznis_until' => 'datetime',
             'founding_free' => 'boolean',
+            'package_starts_at' => 'datetime',
+            'package_ends_at' => 'datetime',
+            'package_reminder_for' => 'datetime',
+            'free_program' => 'boolean',
             'verified_at' => 'datetime',
             'lat' => 'float',
             'lng' => 'float',
@@ -34,9 +42,10 @@ class Firm extends Model
         return $this->belongsTo(Location::class);
     }
 
-    public function hasBiznis(): bool
+    /** Active Business package or free first year (App\Support\Firms\FirmPackage). */
+    public function hasPackage(): bool
     {
-        return $this->biznis_until !== null && $this->biznis_until->isFuture();
+        return FirmPackage::isActive($this);
     }
 
     // Listing page module: images and contact preferences

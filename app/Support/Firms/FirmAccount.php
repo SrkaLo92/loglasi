@@ -11,7 +11,7 @@ use App\Services\FirmBenefits;
 use App\Support\ListingLimits;
 use Carbon\CarbonInterface;
 
-/** The firm profile of a firm account and its Biznis status box (web and API). */
+/** The firm profile of a firm account and its package status box. */
 class FirmAccount
 {
     /** Saved firm row, or an unsaved one named after the account (the admin may not have filled it yet). */
@@ -38,38 +38,60 @@ class FirmAccount
     }
 
     /**
-     * @return array{state: string, until: ?CarbonInterface, days_left: ?int, founding: bool, verified: bool, pending_order: ?Order, price_rsd: ?int, renew_url: string, limit: array, benefits: list<string>}
+     * Package status box: state (active | expiring | expired | none), plan, term end, credits left, limits.
+     *
+     * @return array{state: string, code: ?string, label: ?string, period: ?string, free_program: bool, until: ?CarbonInterface, days_left: ?int, verified: bool, credits: array, pending_order: ?Order, packages: list<array{code: string, label: string, monthly: ?int, yearly: ?int}>, renew_url: string, limit: array, benefits: list<string>}
      */
     public static function status(User $user, Firm $firm): array
     {
         $benefits = app(FirmBenefits::class);
-        $has = $benefits->hasBiznis($firm);
+        $has = $benefits->hasPackage($firm);
         $daysLeft = $benefits->daysLeft($firm);
+        $code = $benefits->packageCode($firm);
+        $soon = $code === null ? 0 : (int) max((array) config($firm->package_period === 'monthly' ? 'firms.reminder_days_monthly' : 'firms.reminder_days', [14]));
 
         $state = match (true) {
-            $has && $daysLeft !== null && $daysLeft <= (int) max(config('firms.reminder_days', [14])) => 'expiring',
+            $has && $daysLeft !== null && $daysLeft <= $soon => 'expiring',
             $has => 'active',
-            $firm->biznis_until !== null => 'expired',
+            $firm->package_ends_at !== null => 'expired',
             default => 'none',
         };
 
-        $product = Product::query()->where('code', Product::BIZNIS_12M)->first(['id', 'price_rsd', 'is_active']);
-        $pending = $product === null ? null : Order::query()
+        $codes = [];
+        foreach (FirmPackage::PACKAGES as $package) {
+            foreach ((array) config('firms.packages.'.$package.'.products') as $product) {
+                $codes[] = $product;
+            }
+        }
+        $products = Product::query()->whereIn('code', $codes)->get(['id', 'code', 'price_rsd', 'is_active', 'display_only'])->keyBy('code');
+        $packages = [];
+        foreach (FirmPackage::PACKAGES as $package) {
+            $definition = config('firms.packages.'.$package);
+            $price = fn (string $period) => ($p = $products->get($definition['products'][$period] ?? '')) && ($p->is_active || $p->display_only) ? (int) $p->price_rsd : null;
+            $packages[] = ['code' => $package, 'label' => $definition['label'], 'monthly' => $price('monthly'), 'yearly' => $price('yearly')];
+        }
+
+        $pending = Order::query()
             ->where('user_id', $user->id)
-            ->where('product_id', $product->id)
             ->where('status', OrderStatus::Pending)
+            ->whereIn('product_id', $products->pluck('id'))
             ->latest('id')
             ->first();
 
         return [
             'state' => $state,
-            'until' => $firm->biznis_until,
+            'code' => $code,
+            'label' => $benefits->packageLabel($firm) ?? (FirmPackage::definition($firm->free_program ? FirmPackage::FREE : $firm->package)['label'] ?? null),
+            'period' => $firm->free_program ? null : $firm->package_period,
+            'free_program' => (bool) $firm->free_program,
+            'until' => $firm->package_ends_at,
             'days_left' => $daysLeft,
-            'founding' => (bool) $firm->founding_free,
             'verified' => $firm->verified_at !== null,
+            'credits' => $has ? FirmCredits::remaining(FirmAccount::ensureSaved($firm)) : null,
+            'credits_granted' => FirmPackage::monthlyCredits($firm),
             'pending_order' => $pending,
-            'price_rsd' => $product?->is_active ? (int) $product->price_rsd : null,
-            'renew_url' => url_slash(trim((string) config('firms.renew_url', '/cenovnik/'), '/')),
+            'packages' => $packages,
+            'renew_url' => url_slash(trim((string) parse_url((string) config('firms.renew_url', '/cenovnik/'), PHP_URL_PATH), '/')).(($f = parse_url((string) config('firms.renew_url'), PHP_URL_FRAGMENT)) ? '#'.$f : ''),
             'limit' => ListingLimits::for($user),
             'benefits' => FirmBenefits::benefitLabels(),
         ];

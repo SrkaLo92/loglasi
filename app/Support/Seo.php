@@ -807,7 +807,7 @@ class Seo
             return false;
         }
 
-        return $firm->hasBiznis()
+        return $firm->hasPackage()
             || trim((string) $firm->description) !== ''
             || ! empty($firm->logo_path)
             || static::activeListings()->where('user_id', $user->id)->exists();

@@ -18,4 +18,9 @@ class FirmPolicy
     {
         return $this->update($user, $firm) && app(FirmBenefits::class)->canShowStats($firm);
     }
+
+    public function viewAdvancedStats(User $user, Firm $firm): bool
+    {
+        return $this->update($user, $firm) && app(FirmBenefits::class)->canShowAdvancedStats($firm);
+    }
 }

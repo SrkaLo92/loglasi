@@ -8,6 +8,7 @@ use App\Models\Firm;
 use App\Models\Listing;
 use App\Models\User;
 use App\Services\Catalog;
+use App\Services\FirmBenefits;
 use App\Support\Listing\Seller;
 use App\Support\Listing\SimilarListings;
 use App\Support\Listing\Stats;
@@ -79,7 +80,7 @@ class ProfileController extends Controller
             'total' => $total,
             'canEdit' => $canEdit,
             'isOwner' => $viewer !== null && $viewer->id === $user->id,
-            'editUrl' => url_slash((string) config('listing.profile_edit_path', 'moj-nalog')),
+            'editUrl' => url_slash($isFirm ? 'moj-nalog/firma' : (string) config('listing.profile_edit_path', 'moj-nalog')),
             'messageUrl' => url_slash('moj-nalog/poruke/novo').'?korisnik='.$user->id,
         ];
 
@@ -96,7 +97,7 @@ class ProfileController extends Controller
         $hours = WorkingHours::days($firm->working_hours);
         $schedule = WorkingHours::schedule($hours);
         $phone = Phone::normalize($firm->phone) ?: Phone::normalize($user->phone);
-        $showStats = $canEdit && $firm->exists && $firm->hasBiznis();
+        $showStats = $canEdit && $firm->exists && app(FirmBenefits::class)->canShowStats($firm);
 
         return view('listing.profile-firm', $data + [
             'phone' => $phone,

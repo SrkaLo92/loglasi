@@ -22,14 +22,18 @@
 	@include('firms.partials.account-nav', ['active' => 'stats'])
 
 	@if (! $allowed)
-		<div class="lgf-alert lgf-alert--err" role="status"><p>Statistika je deo Biznis paketa. Podaci se i dalje beleže i biće vidljivi čim se paket produži.</p></div>
-		@include('firms.partials.biznis-status', ['status' => $status])
+		<div class="lgf-alert lgf-alert--err" role="status"><p>Statistika je deo paketa za firme. Podaci se i dalje beleže i biće vidljivi čim firma ponovo ima paket.</p></div>
+		@include('firms.partials.package-status', ['status' => $status])
 	@else
+		@if (count($periods) > 1)
 		<nav class="lgf-periods" aria-label="Period">
 			@foreach ($periods as $p)
 				<a class="lg-btn {{ $p === $period ? 'lg-btn--green' : 'lg-btn--outline' }}" href="{{ url_slash('moj-nalog/firma/statistika') }}{{ $p === (int) config('firms.stats.default_period', 30) ? '' : '?period='.$p }}" @if ($p === $period) aria-current="page" @endif>Poslednjih {{ $p }} dana</a>
 			@endforeach
 		</nav>
+		@else
+			<p class="lgf-help">Poslednjih {{ $period }} dana.</p>
+		@endif
 
 		<ul class="lgf-tiles">
 			@foreach ($metrics as $key => [$label])
@@ -50,7 +54,9 @@
 
 		<section class="lgf-card" aria-labelledby="po-oglasu">
 			<h2 id="po-oglasu">Po oglasu</h2>
-			@if ($listings === [])
+			@if (! $advanced)
+				<p class="lgf-muted">Statistika po oglasu i za 90 dana je deo paketa Business Pro i Business Max. <a href="{{ url_slash('cenovnik') }}#lgc-firme">Paketi i cene</a></p>
+			@elseif ($listings === [])
 				<p class="lgf-muted">U ovom periodu oglasi firme još nemaju preglede.</p>
 			@else
 				<div class="lgf-table-wrap">

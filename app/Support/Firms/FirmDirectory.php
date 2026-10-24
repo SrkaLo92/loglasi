@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * "Firme iz Loznice" (/firme/): firm accounts with an active Biznis package.
+ * "Firme iz Loznice" (/firme/): firm accounts with an active package (Business Start/Pro/Max or the free first year).
  *
  * The whole directory is one cached array (there are hundreds of firms at most), built with two
- * indexed queries: firms joined to users (active firm accounts, biznis_until in the future) and one
+ * indexed queries: firms joined to users (active firm accounts, package_ends_at in the future) and one
  * grouped count of active listings for those users. Filters (place, text) and paging run on the
  * cached array. The cache is cleared when a firm or a firm account changes (FirmsServiceProvider)
  * and expires after config('firms.directory.cache_ttl'), which also refreshes listing counts and
@@ -25,7 +25,7 @@ class FirmDirectory
     public const CACHE_KEY = 'firms.directory.v1';
 
     /**
-     * Sorted: founding firms first, then by active listings, then by name.
+     * Sorted: the first 30 firms first, then by active listings, then by name.
      *
      * @return list<array{id: int, user_id: int, slug: string, name: string, activity: ?string, description: ?string, logo: ?string, location_id: ?int, location: ?string, location_slug: ?string, founding: bool, verified: bool, listings: int, search: string}>
      */
@@ -108,7 +108,7 @@ class FirmDirectory
             ->where('u.account_type', AccountType::Firm->value)
             ->where('u.status', UserStatus::Active->value)
             ->whereNull('u.deleted_at')
-            ->where('f.biznis_until', '>', now())
+            ->where('f.package_ends_at', '>', now())
             ->get([
                 'f.id', 'f.user_id', 'f.name', 'f.activity', 'f.description', 'f.logo_path', 'f.founding_free', 'f.verified_at',
                 'f.location_id', 'u.slug', 'u.name as user_name', 'l.name as location', 'l.slug as location_slug',

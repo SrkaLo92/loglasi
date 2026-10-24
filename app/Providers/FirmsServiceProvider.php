@@ -51,7 +51,7 @@ class FirmsServiceProvider extends ServiceProvider
         User::deleted(fn (User $user) => $user->isFirm() ? $forget() : null);
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
-            $schedule->command('firms:biznis-reminders')->dailyAt('09:00')->withoutOverlapping()->onOneServer();
+            $schedule->command('firms:package-reminders')->dailyAt('09:00')->withoutOverlapping()->onOneServer();
         });
     }
 }

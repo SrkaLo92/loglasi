@@ -290,7 +290,7 @@ class Sitemap
             ->where('status', UserStatus::Active)
             ->whereHas('firm')
             ->where(fn ($q) => $q
-                ->whereHas('firm', fn ($f) => $f->where('biznis_until', '>', now())
+                ->whereHas('firm', fn ($f) => $f->where('package_ends_at', '>', now())
                     ->orWhere(fn ($w) => $w->whereNotNull('description')->where('description', '!=', ''))
                     ->orWhereNotNull('logo_path'))
                 ->orWhereExists(fn ($e) => $e->selectRaw('1')->from('listings')

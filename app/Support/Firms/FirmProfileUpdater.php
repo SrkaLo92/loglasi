@@ -10,8 +10,8 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * Validation and cleaning of the firm profile fields, shared by /moj-nalog/firma/ and PATCH /me/firm.
- * Text is stored without HTML (output is escaped anyway). Admin-only fields (biznis_until,
- * founding_free, verified_at, user_id) are never taken from input.
+ * Text is stored without HTML (output is escaped anyway). Admin-only fields (package, its dates,
+ * free_program, founding_free, verified_at, user_id) are never taken from input.
  */
 class FirmProfileUpdater
 {
@@ -42,7 +42,7 @@ class FirmProfileUpdater
             'pib' => ['nullable', 'string', 'regex:/^\d{9}$/'],
             'mb' => ['nullable', 'string', 'regex:/^\d{8}$/'],
             'hours' => ['nullable', 'array'],
-            'hours.*' => ['nullable', 'string', 'max:'.WorkingHours::MAX_LENGTH],
+            'hours.*' => ['nullable', 'string', 'max:'.WorkingHoursInput::MAX_LENGTH],
             'logo' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120', 'dimensions:min_width=100,min_height=100,max_width=8000,max_height=8000'],
             'cover' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192', 'dimensions:min_width=800,min_height=250,max_width=10000,max_height=10000'],
             'remove_logo' => ['nullable', 'boolean'],
@@ -110,7 +110,7 @@ class FirmProfileUpdater
 
         $firm->pib = ($data['pib'] ?? null) ?: null;
         $firm->mb = ($data['mb'] ?? null) ?: null;
-        $firm->working_hours = WorkingHours::fromInput((array) ($data['hours'] ?? []));
+        $firm->working_hours = WorkingHoursInput::fromInput((array) ($data['hours'] ?? []));
 
         if ($errors !== []) {
             throw ValidationException::withMessages($errors);
@@ -153,7 +153,7 @@ class FirmProfileUpdater
             }
         }
         if (array_key_exists('working_hours', $data)) {
-            $hours = WorkingHours::fromText((string) $data['working_hours']);
+            $hours = WorkingHoursInput::fromText((string) $data['working_hours']);
             if ($hours === false) {
                 $errors['working_hours'] = 'Radno vreme upišite po danima, npr. „Pon–Pet: 08–16” i „Sub: 08–13”.';
             } else {

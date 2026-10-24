@@ -409,7 +409,7 @@ class SeoHeadTest extends SeoTestCase
     public function test_empty_firm_profile_is_noindex(): void
     {
         $user = User::factory()->firm()->create(['slug' => 'bez-paketa']);
-        $user->firm->forceFill(['biznis_until' => now()->subDay(), 'description' => null, 'logo_path' => null])->save();
+        $user->firm->forceFill(['package_ends_at' => now()->subDay(), 'description' => null, 'logo_path' => null])->save();
 
         // An empty firm profile without listings stays out of the index.
         $response = $this->get('/korisnik/bez-paketa/');

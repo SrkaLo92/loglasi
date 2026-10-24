@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Firms\Api;
 
 use App\Http\Api\ApiResponse;
-use App\Http\Api\FirmFormatter;
+use App\Http\Api\ListingFormatter;
 use App\Http\Controllers\Controller;
 use App\Models\ListingImage;
 use App\Support\ApiError;
@@ -33,7 +33,7 @@ class MyFirmController extends Controller
         $firm = FirmAccount::ensureSaved(FirmAccount::firmFor($user));
         Gate::authorize('update', $firm);
 
-        return ApiResponse::json($request, FirmFormatter::firm($firm, $user), ApiResponse::CACHE_PRIVATE);
+        return ApiResponse::json($request, ListingFormatter::firm($firm), ApiResponse::CACHE_PRIVATE);
     }
 
     public function update(Request $request): JsonResponse
@@ -53,7 +53,7 @@ class MyFirmController extends Controller
             $this->setLogo($firm, $user->id, $data['logo_media_id']);
         }
 
-        return new JsonResponse(FirmFormatter::firm($firm->fresh(), $user), 200, [], ApiResponse::JSON_FLAGS);
+        return new JsonResponse(ListingFormatter::firm(FirmAccount::ensureSaved($firm)->fresh()), 200, [], ApiResponse::JSON_FLAGS);
     }
 
     public function stats(Request $request): JsonResponse|Response
@@ -65,7 +65,7 @@ class MyFirmController extends Controller
         $data = $request->validate(['period' => ['sometimes', 'string', Rule::in(array_keys(self::PERIODS))]]);
 
         if (! Gate::allows('viewStats', $firm)) {
-            return ApiError::response('biznis_required', 'Statistika je deo Biznis paketa. Produžite paket na sajtu.', 403);
+            return ApiError::response('package_required', 'Statistika je deo paketa za firme. Paket birate na sajtu.', 403);
         }
 
         $stats = FirmStats::daily($user->id, self::PERIODS[$data['period'] ?? '7d']);

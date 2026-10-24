@@ -162,8 +162,8 @@
 						<p class="hm-firms__text">{{ HomeSettings::get('home.firms_text') }}</p>
 					@endif
 				</div>
-				@if (Route::has('firms.directory'))
-					<a class="hm-sec__link" href="{{ url_slash('/firme') }}">Sve firme ({{ number_format($hmFirms['total'], 0, ',', '.') }}){{ CategoryIcons::svg('arrow', 18, '2') }}</a>
+				@if (Route::has('firms.directory') && ($hmFirms['directory_total'] ?? 0) > 0)
+					<a class="hm-sec__link" href="{{ url_slash('/firme') }}">Sve firme ({{ number_format($hmFirms['directory_total'], 0, ',', '.') }}){{ CategoryIcons::svg('arrow', 18, '2') }}</a>
 				@endif
 			</div>
 			<ul class="hm-firms__list">

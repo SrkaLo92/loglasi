@@ -65,11 +65,8 @@
 								<span>{{ $firm['location'] ?: 'Loznica' }}</span>
 								<span>{{ $firm['listings'] }} {{ $plural($firm['listings'], 'aktivan oglas', 'aktivna oglasa', 'aktivnih oglasa') }}</span>
 							</p>
-							@if ($firm['founding'] || $firm['verified'])
-								<p class="lgf-firm__badges">
-									@if ($firm['verified'])<span class="lgf-badge lgf-badge--ok">Proverena firma</span>@endif
-									@if ($firm['founding'])<span class="lgf-badge lgf-badge--founding">Osnivačka firma</span>@endif
-								</p>
+							@if ($firm['verified'])
+								<p class="lgf-firm__badges"><span class="lgf-badge lgf-badge--ok">Proverena firma</span></p>
 							@endif
 						</div>
 					</article>
@@ -91,7 +88,7 @@
 	<aside class="lgf-cta" aria-labelledby="firme-cta">
 		<div>
 			<h2 id="firme-cta">Imate firmu u Loznici?</h2>
-			<p>Sa Biznis paketom firma dobija profil sa logom, radnim vremenom i mapom, i mesto u ovom imeniku.</p>
+			<p>Sa paketom za firme dobijate profil sa logom, radnim vremenom i mapom, i mesto u ovom imeniku. Prvih 30 firmi prvu godinu ne plaća ništa.</p>
 		</div>
 		<a class="lg-btn lg-btn--orange" href="{{ url_slash('za-firme') }}">Prijavite svoju firmu</a>
 	</aside>
