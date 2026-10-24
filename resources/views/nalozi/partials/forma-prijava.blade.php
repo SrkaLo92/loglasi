@@ -1,7 +1,7 @@
 <form class="lgn-form" method="post" action="{{ url_slash('prijava') }}" novalidate>
 	@csrf
 	<div class="lgn-field">
-		<label for="prijava-email">Email</label>
+		<label for="prijava-email">E-pošta</label>
 		<input id="prijava-email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" inputmode="email" required
 			@if ($errors->has('email')) aria-invalid="true" aria-describedby="prijava-email-greska" @endif>
 		@include('nalozi.partials.greska', ['field' => 'email', 'prefix' => 'prijava-'])

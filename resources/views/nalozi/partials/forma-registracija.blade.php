@@ -7,7 +7,7 @@
 		@include('nalozi.partials.greska', ['field' => 'name', 'prefix' => 'reg-'])
 	</div>
 	<div class="lgn-field">
-		<label for="reg-email">Email</label>
+		<label for="reg-email">E-pošta</label>
 		<input id="reg-email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" inputmode="email" required
 			@if ($errors->has('email')) aria-invalid="true" aria-describedby="reg-email-greska" @endif>
 		@include('nalozi.partials.greska', ['field' => 'email', 'prefix' => 'reg-'])

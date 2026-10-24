@@ -71,7 +71,7 @@
 					@include('nalozi.partials.greska', ['field' => 'name', 'bag' => 'podaci', 'prefix' => 'nalog-'])
 				</div>
 				<div class="lgn-field">
-					<label for="nalog-email">Email</label>
+					<label for="nalog-email">E-pošta</label>
 					<input id="nalog-email" type="email" value="{{ $user->email }}" readonly aria-describedby="nalog-email-pomoc">
 					<p class="lgn-help" id="nalog-email-pomoc">Email se ne menja ovde. Ako vam treba promena, pišite nam.</p>
 				</div>
