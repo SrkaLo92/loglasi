@@ -84,6 +84,24 @@ class SavedSearchPagesTest extends TestCase
         $this->assertSame(1, SavedSearch::count());
     }
 
+    public function test_price_from_the_listings_page_is_saved_and_opened_again(): void
+    {
+        $page = $this->actingAs($this->user)->get('/oglasi/automobili/?keyword=golf&cena_od=1.000&cena_do=5000&valuta=RSD&sortiranje=cena-rastuce')->assertOk();
+        $page->assertSee('name="price_min" value="1.000"', false)
+            ->assertSee('name="price_max" value="5000"', false)
+            ->assertSee('name="currency" value="RSD"', false)
+            ->assertDontSee('type="hidden" name="cena_do"', false);
+
+        // The form posts its hidden inputs.
+        $this->post('/moj-nalog/pretrage/', ['kategorija' => 'automobili', 'keyword' => 'golf', 'price_min' => '1.000', 'price_max' => '5000', 'currency' => 'RSD'])
+            ->assertRedirect(url_slash('moj-nalog/pretrage'));
+
+        $search = SavedSearch::sole();
+        $this->assertSame(['keyword' => 'golf', 'kategorija' => 'automobili', 'price_min' => 1000, 'price_max' => 5000, 'currency' => 'RSD'], $search->query);
+        $this->assertSame(url_slash('oglasi').'?keyword=golf&kategorija=automobili&cena_od=1000&cena_do=5000&valuta=RSD', $search->url());
+        $this->get($search->url())->assertRedirect(url_slash('oglasi/automobili').'?keyword=golf&cena_od=1000&cena_do=5000&valuta=RSD');
+    }
+
     public function test_saving_normalizes_the_query_of_the_listings_page(): void
     {
         $this->actingAs($this->user)->post('/moj-nalog/pretrage/', [

@@ -8,6 +8,7 @@ use App\Models\Location;
 use App\Services\Catalog;
 use App\Services\ListingFields;
 use App\Services\ListingSearch;
+use App\Support\Notifications\SavedSearchQuery;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -291,10 +292,19 @@ class WebFilters
         return $chips;
     }
 
-    /** Hidden inputs for "Sačuvaj pretragu": the whole search as /oglasi/ query names. */
+    /**
+     * Hidden inputs for "Sačuvaj pretragu": the search in the names the saved search stores
+     * (price_min, price_max, currency instead of cena_od, cena_do, valuta). Sort is not part of it.
+     */
     public function savedSearchQuery(): array
     {
-        $query = $this->query;
+        $query = [];
+        $names = array_flip(SavedSearchQuery::WEB_NAMES);
+        foreach ($this->query as $key => $value) {
+            if ($key !== 'sortiranje') {
+                $query[$names[$key] ?? $key] = $value;
+            }
+        }
         if ($this->category) {
             $query = ['kategorija' => $this->category->slug] + $query;
         }

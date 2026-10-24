@@ -126,10 +126,18 @@ class SavedSearchQuery
         return sha1(json_encode($query, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
 
+    /** Stored price names => query names of the /oglasi/ page (WebFilters). */
+    public const WEB_NAMES = ['price_min' => 'cena_od', 'price_max' => 'cena_do', 'currency' => 'valuta'];
+
     /** URL of the results page for the stored query. */
     public static function url(array $query): string
     {
-        return url_slash('oglasi').($query === [] ? '' : '?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986));
+        $web = [];
+        foreach ($query as $key => $value) {
+            $web[self::WEB_NAMES[$key] ?? $key] = $value;
+        }
+
+        return url_slash('oglasi').($web === [] ? '' : '?'.http_build_query($web, '', '&', PHP_QUERY_RFC3986));
     }
 
     /** Short Serbian description, the default name: "golf · Automobili · Loznica · do 5.000 €". */
