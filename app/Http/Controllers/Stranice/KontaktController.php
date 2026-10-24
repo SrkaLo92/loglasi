@@ -39,7 +39,7 @@ class KontaktController extends Controller
             'poslato' => (bool) $request->session()->get('kontakt_poslato'),
             'title' => 'Kontakt | loglasi.rs',
             'description' => 'Pišite nam: pitanja o oglasima, plaćanju, isticanju oglasa i Biznis paketu za firme na loglasi.rs.',
-            'canonical' => url_slash('kontakt'),
+            'canonical' => '/kontakt/',
         ]);
     }
 

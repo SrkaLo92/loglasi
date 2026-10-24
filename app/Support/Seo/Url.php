@@ -48,12 +48,30 @@ class Url
     public static function canonical(string $pathOrUrl, array $query = []): string
     {
         if (preg_match('#^https?://#i', $pathOrUrl)) {
-            $url = $pathOrUrl;
+            $url = static::rebase($pathOrUrl);
         } else {
             $url = config('seo.base_url').static::normalizePath($pathOrUrl);
         }
 
         return $query === [] ? $url : $url.'?'.http_build_query($query);
+    }
+
+    /**
+     * A URL on the app's own domain (APP_URL, e.g. from url_slash()) moves to the canonical
+     * domain, so every page type gives the same host; other domains stay as they are.
+     */
+    public static function rebase(string $url): string
+    {
+        $parts = parse_url($url);
+        $own = parse_url((string) config('app.url'), PHP_URL_HOST);
+        $base = parse_url((string) config('seo.base_url'), PHP_URL_HOST);
+        $host = $parts['host'] ?? null;
+
+        if ($host === null || $host === $base || ($host !== $own && $host !== request()->getHost())) {
+            return $url;
+        }
+
+        return config('seo.base_url').static::normalizePath($parts['path'] ?? '/').(isset($parts['query']) ? '?'.$parts['query'] : '');
     }
 
     /** Odredište preusmerenja: apsolutni URL na domenu zahteva (da lokalna provera ne skače na živi sajt). */

@@ -25,7 +25,7 @@ class ZaFirmeController extends Controller
             'phoneText' => Telefon::display($phone),
             'title' => 'Za firme: Biznis paket i profil firme | loglasi.rs',
             'description' => 'Predstavite svoju firmu kupcima iz Loznice: profil sa logoom, radnim vremenom, mapom i svim oglasima na jednom mestu.',
-            'canonical' => url_slash('za-firme'),
+            'canonical' => '/za-firme/',
         ]);
     }
 }

@@ -60,7 +60,7 @@ class StraniceTest extends TestCase
             ->assertSee('class="lg-footer"', false)
             ->assertSee('class="lg-mnav"', false)
             ->assertSee('loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu.')
-            ->assertSee('<link rel="canonical" href="'.url_slash($url).'">', false)
+            ->assertSee('<link rel="canonical" href="'.config('seo.base_url').rtrim($url, '/').'/">', false)
             ->assertSee('css/stranice.css', false);
     }
 

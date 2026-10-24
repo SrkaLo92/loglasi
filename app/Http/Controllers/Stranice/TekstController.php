@@ -30,7 +30,7 @@ class TekstController extends Controller
             'body' => PageText::html($page.'.tekst'),
             'title' => $heading.' | loglasi.rs',
             'description' => self::PAGES[$page]['opis'],
-            'canonical' => url_slash(self::PAGES[$page]['putanja']),
+            'canonical' => '/'.trim(self::PAGES[$page]['putanja'], '/').'/',
         ]);
     }
 
@@ -51,7 +51,7 @@ class TekstController extends Controller
             'items' => $items,
             'title' => 'Česta pitanja | loglasi.rs',
             'description' => 'Odgovori na česta pitanja o postavljanju oglasa, ceni, isticanju, Biznis paketu i bezbednoj kupovini na loglasi.rs.',
-            'canonical' => url_slash('faq'),
+            'canonical' => '/faq/',
         ]);
     }
 }
