@@ -43,6 +43,11 @@ class LegacyUrls
             return $this->hit(config('seo.targets.wp_login'), 301, 'wp-login');
         }
 
+        // Old data deletion page (its slug had a typo) and the earlier short address.
+        if (in_array(rtrim($path, '/'), ['/birsanje-licnih-podataka', '/brisanje-podataka'], true)) {
+            return $this->hit('/brisanje-licnih-podataka/', 301, 'brisanje-podataka');
+        }
+
         // WooCommerce ostaci.
         if (preg_match('#^/product/[^/]+/?$#', $path)) {
             return $this->hit(config('seo.targets.woo_product'), 301, 'woo-product');

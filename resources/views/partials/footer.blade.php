@@ -1,4 +1,4 @@
-{{-- Site footer, structured like the old live site: contact and social, useful links, categories. --}}
+{{-- Site footer, structured like the old live site: news line, contact, useful links, categories, newest listings and social. --}}
 @use('App\Support\Home\FooterSections')
 @use('App\Support\Phone')
 @use('App\Support\Settings')
@@ -10,8 +10,8 @@
 		'kontakt' => 'Kontakt',
 		'faq' => 'Česta pitanja',
 		'cenovnik' => 'Cenovnik',
-		'za_firme' => 'Za firme',
 		'privatnost' => 'Politika privatnosti',
+		'brisanje' => 'Brisanje ličnih podataka',
 		'uslovi' => 'Uslovi korišćenja',
 	];
 	$lgCurrent = url_slash(request()->path());
@@ -20,36 +20,32 @@
 	$lgEmail = (string) Settings::get('contact_email');
 	$lgAddress = (string) Settings::get('contact_address');
 	$lgSocial = [
-		'Facebook' => ['url' => 'https://www.facebook.com/profile.php?id=61571911496798', 'path' => '<path d="M14 8h3V4h-3a4 4 0 0 0-4 4v3H7v4h3v6h4v-6h3l1-4h-4V8z" fill="currentColor"/>'],
-		'Instagram' => ['url' => 'https://www.instagram.com/loglasi.rs/', 'path' => '<rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/>'],
-		'TikTok' => ['url' => 'https://www.tiktok.com/@loglasi.rs', 'path' => '<path d="M14 3h3a4.5 4.5 0 0 0 4 4v3a7.5 7.5 0 0 1-4-1.2V15a6 6 0 1 1-6-6h.5v3.2A2.8 2.8 0 1 0 14 15V3z" fill="currentColor"/>'],
+		'Facebook' => ['url' => 'https://www.facebook.com/profile.php?id=61571911496798', 'path' => '<path d="M15 3h-3a4 4 0 0 0-4 4v3H5v4h3v7h4v-7h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>'],
+		'Instagram' => ['url' => 'https://www.instagram.com/loglasi.rs/', 'path' => '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5"/>'],
+		'TikTok' => ['url' => 'https://www.tiktok.com/@loglasi.rs', 'path' => '<path d="M14 3v11a3.5 3.5 0 1 1-3.5-3.5M14 3c.5 3 2.5 4.5 5 4.5"/>'],
 	];
 @endphp
 <footer class="lg-footer">
+	<div class="lg-wrap lg-footer__vrh">
+		<p class="lg-footer__vesti">Prijavite se da biste primali najnovija ažuriranja i vesti</p>
+		<a class="lg-btn lg-btn--orange lg-footer__postavi" href="{{ url_slash('/postavi-oglas') }}">{{ Ikonice::svg('plus', 18) }}Postavite oglas</a>
+	</div>
+
 	<div class="lg-wrap lg-footer__in">
 		<div class="lg-footer__col lg-footer__brend">
 			@include('partials.logo', ['logoClass' => 'lg-footer__logo', 'logoTheme' => 'light'])
 			<p class="lg-footer__tekst">loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu.</p>
 			<ul class="lg-footer__kontakt">
+				@if ($lgAddress !== '')
+					<li><span>{{ $lgAddress }}</span></li>
+				@endif
 				@if ($lgPhone !== '')
-					<li><a href="tel:{{ $lgPhone }}">{{ Ikonice::svg('phone', 18) }}{{ Phone::display($lgPhone) }}</a></li>
+					<li><a href="tel:{{ $lgPhone }}">{{ Phone::display($lgPhone) }}</a></li>
 				@endif
 				@if ($lgEmail !== '')
-					<li><a href="mailto:{{ $lgEmail }}">{{ Ikonice::svg('mail', 18) }}{{ $lgEmail }}</a></li>
-				@endif
-				@if ($lgAddress !== '')
-					<li><span>{{ Ikonice::svg('pin', 18) }}{{ $lgAddress }}</span></li>
+					<li><a href="mailto:{{ $lgEmail }}">{{ $lgEmail }}</a></li>
 				@endif
 			</ul>
-			<a class="lg-btn lg-btn--orange lg-footer__postavi" href="{{ url_slash('/postavi-oglas') }}">{{ Ikonice::svg('plus', 18) }}Postavite oglas</a>
-			<div class="lg-footer__mreze">
-				<p class="lg-footer__mreze-naslov">Pratite nas na društvenim mrežama</p>
-				<ul>
-					@foreach ($lgSocial as $name => $social)
-						<li><a href="{{ $social['url'] }}" target="_blank" rel="noopener" aria-label="loglasi.rs na mreži {{ $name }} (otvara se u novom prozoru)"><svg class="lg-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">{!! $social['path'] !!}</svg></a></li>
-					@endforeach
-				</ul>
-			</div>
 		</div>
 
 		<nav class="lg-footer__col" aria-labelledby="lg-footer-linkovi">
@@ -62,20 +58,71 @@
 			</ul>
 		</nav>
 
-		@if ($lgFooter['categories'])
-			<nav class="lg-footer__col" aria-labelledby="lg-footer-kategorije">
-				<h2 class="lg-footer__naslov" id="lg-footer-kategorije">Kategorije</h2>
-				<ul class="lg-footer__lista">
-					@foreach ($lgFooter['categories'] as $item)
-						<li><a href="{{ $item['url'] }}">{{ $item['name'] }}</a></li>
-					@endforeach
-					<li><a class="lg-footer__sve" href="{{ url_slash('/oglasi') }}">Svi oglasi</a></li>
-				</ul>
-			</nav>
-		@endif
+		<nav class="lg-footer__col" aria-labelledby="lg-footer-kategorije">
+			<h2 class="lg-footer__naslov" id="lg-footer-kategorije">Kategorije</h2>
+			<ul class="lg-footer__lista">
+				@foreach ($lgFooter['categories'] as $item)
+					<li><a href="{{ $item['url'] }}">{{ $item['name'] }}</a></li>
+				@endforeach
+				<li><a class="lg-footer__sve" href="{{ url_slash('/oglasi') }}">Svi oglasi</a></li>
+			</ul>
+		</nav>
 
+		<div class="lg-footer__col">
+			<h2 class="lg-footer__naslov" id="lg-footer-najnoviji">Najnoviji oglasi</h2>
+			<ul class="lg-footer__lista lg-footer__najnoviji" data-lg-najnoviji="{{ url_slash('/podnozje/najnoviji-oglasi') }}" aria-labelledby="lg-footer-najnoviji">
+				<li><a class="lg-footer__sve" href="{{ url_slash('/oglasi') }}">Pogledajte sve oglase</a></li>
+			</ul>
+			<h2 class="lg-footer__naslov lg-footer__naslov--mreze">Pratite nas</h2>
+			<ul class="lg-footer__mreze">
+				@foreach ($lgSocial as $name => $social)
+					<li><a href="{{ $social['url'] }}" target="_blank" rel="noopener" aria-label="loglasi.rs na mreži {{ $name }} (otvara se u novom prozoru)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">{!! $social['path'] !!}</svg></a></li>
+				@endforeach
+			</ul>
+		</div>
 	</div>
-	<div class="lg-footer__dno">
-		<div class="lg-wrap"><p>© {{ now()->year }} loglasi.rs – Vaš lokalni portal za kupovinu, prodaju i razmenu proizvoda i usluga. Sva prava zadržana.</p></div>
+
+	<div class="lg-wrap lg-footer__dno">
+		<p>© {{ now()->year }} loglasi.rs · Vaš lokalni portal za kupovinu, prodaju i razmenu. Sva prava zadržana.</p>
+		<a href="https://alphasoft.dev/" target="_blank" rel="noopener">Alphasoft Development</a>
 	</div>
 </footer>
+<script>
+(function () {
+	var list = document.querySelector('[data-lg-najnoviji]');
+	if (!list || !window.fetch) return;
+	var load = function () {
+		fetch(list.getAttribute('data-lg-najnoviji'), {headers: {Accept: 'application/json'}})
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (json) {
+				if (!json || !json.data || !json.data.length) return;
+				var items = document.createDocumentFragment();
+				json.data.forEach(function (item) {
+					var li = document.createElement('li');
+					var a = document.createElement('a');
+					var title = document.createElement('span');
+					var price = document.createElement('span');
+					a.href = item.url;
+					a.className = 'lg-footer__oglas';
+					title.textContent = item.title;
+					price.textContent = item.price;
+					price.className = 'lg-footer__cena';
+					a.appendChild(title);
+					a.appendChild(price);
+					li.appendChild(a);
+					items.appendChild(li);
+				});
+				list.insertBefore(items, list.firstChild);
+			})
+			.catch(function () {});
+	};
+	if ('IntersectionObserver' in window) {
+		var seen = new IntersectionObserver(function (entries) {
+			if (entries[0].isIntersecting) { seen.disconnect(); load(); }
+		}, {rootMargin: '400px'});
+		seen.observe(list);
+	} else {
+		load();
+	}
+})();
+</script>

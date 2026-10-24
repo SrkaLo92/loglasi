@@ -163,7 +163,7 @@ MD,
         ['pitanje' => 'Šta je Biznis paket?', 'odgovor' => 'Biznis paket je profil firme sa logoom, radnim vremenom, mapom i oznakom „Firma” na svakom oglasu. {ponuda_firme} Više na strani [Za firme](/za-firme/).'],
         ['pitanje' => 'Kako da prijavim sumnjiv oglas?', 'odgovor' => 'Na strani oglasa kliknite na „Prijavi oglas” i ukratko napišite šta nije u redu. Svaku prijavu pregledamo.'],
         ['pitanje' => 'Kako da kupujem bezbedno?', 'odgovor' => 'Robu pogledajte uživo pre plaćanja, ne plaćajte unapred nepoznatim osobama i nikome ne šaljite kodove koje dobijete SMS porukom.'],
-        ['pitanje' => 'Kako da obrišem nalog i svoje podatke?', 'odgovor' => 'Uputstvo je na strani [Brisanje podataka](/brisanje-podataka/). Možete i da nam pišete preko [kontakt forme](/kontakt/).'],
+        ['pitanje' => 'Kako da obrišem nalog i svoje podatke?', 'odgovor' => 'Uputstvo je na strani [Brisanje ličnih podataka](/brisanje-licnih-podataka/). Možete i da nam pišete preko [kontakt forme](/kontakt/).'],
     ],
 
     /* Uslovi korišćenja --------------------------------------------------- */
@@ -224,6 +224,33 @@ MD,
 
     /* Politika privatnosti ------------------------------------------------ */
 
+    'brisanje.naslov' => 'Brisanje ličnih podataka',
+    'brisanje.tekst' => <<<'MD'
+Svoj nalog i lične podatke možete da obrišete u svakom trenutku, bez obrazloženja.
+
+## Sami, iz naloga
+
+1. Prijavite se na loglasi.rs.
+2. Otvorite [Moj nalog](/moj-nalog/) i izaberite „Obriši nalog”.
+3. Upišite lozinku, potvrdite i nalog se briše odmah.
+
+## Na zahtev
+
+Ako ne možete da se prijavite, pišite nam preko [kontakt forme](/kontakt/) ili na {email}, sa adrese e-pošte kojom ste se registrovali. Nalog brišemo najkasnije u roku od 30 dana i javljamo vam kad je gotovo.
+
+## Šta se briše
+
+- ime, adresa e-pošte, broj telefona, lozinka i slika profila
+- svi vaši oglasi, sa slikama
+- razgovori i poruke, omiljeni oglasi i sačuvane pretrage
+- profil firme, ako ste ga imali
+- prijave na aplikaciji i uređaji za obaveštenja
+
+Podatke o plaćenim uslugama čuvamo bez ličnih podataka, onoliko koliko zakon traži za knjigovodstvo. Posle brisanja možete ponovo da se registrujete istom adresom e-pošte.
+
+Više o tome kako postupamo sa podacima piše u [Politici privatnosti](/politika-privatnosti/).
+MD,
+
     'privatnost.naslov' => 'Politika privatnosti',
     'privatnost.tekst' => <<<'MD'
 Ova politika objašnjava koje podatke o ličnosti prikupljamo na sajtu loglasi.rs i u mobilnoj aplikaciji, zašto ih prikupljamo i koja prava imate. Podatke obrađujemo u skladu sa Zakonom o zaštiti podataka o ličnosti.
@@ -258,7 +285,7 @@ Sajt koristi kolačiće koji su neophodni za rad: prijavu na nalog i zaštitu fo
 
 ## Vaša prava
 
-Imate pravo da tražite uvid u svoje podatke, ispravku, brisanje i ograničenje obrade, kao i pravo da podnesete pritužbu Povereniku za informacije od javnog značaja i zaštitu podataka o ličnosti. Uputstvo za brisanje naloga je na strani [Brisanje podataka](/brisanje-podataka/).
+Imate pravo da tražite uvid u svoje podatke, ispravku, brisanje i ograničenje obrade, kao i pravo da podnesete pritužbu Povereniku za informacije od javnog značaja i zaštitu podataka o ličnosti. Uputstvo za brisanje naloga je na strani [Brisanje ličnih podataka](/brisanje-licnih-podataka/).
 
 ## Kontakt
 

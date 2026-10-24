@@ -10,7 +10,7 @@ return [
         'poruke' => '/moj-nalog/poruke/',
         'nalog' => '/moj-nalog/',
         'prijava' => '/login-registracija/',
-        'brisanje' => '/brisanje-podataka/',
+        'brisanje' => '/brisanje-licnih-podataka/',
         'cenovnik' => '/cenovnik/',
         'za_firme' => '/za-firme/',
         'kontakt' => '/kontakt/',

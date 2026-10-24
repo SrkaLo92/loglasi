@@ -14,6 +14,7 @@ class TekstController extends Controller
     private const PAGES = [
         'o_nama' => ['putanja' => 'o-nama', 'opis' => 'loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu. Ko smo, šta nudimo i kako da nas kontaktirate.'],
         'uslovi' => ['putanja' => 'uslovi-koriscenja', 'opis' => 'Uslovi korišćenja sajta loglasi.rs: nalog, oglasi, zabranjen sadržaj, plaćene usluge i odgovornost.'],
+        'brisanje' => ['putanja' => 'brisanje-licnih-podataka', 'opis' => 'Kako da obrišete nalog i lične podatke sa loglasi.rs: sami iz naloga ili na zahtev, i šta se tačno briše.'],
         'privatnost' => ['putanja' => 'politika-privatnosti', 'opis' => 'Koje podatke o ličnosti prikuplja loglasi.rs, zašto ih koristimo, koliko ih čuvamo i koja su vaša prava.'],
     ];
 

@@ -45,7 +45,9 @@
 	--lg-border: #e3e7e4;
 	--lg-input: #c9d1cc;
 	--lg-error: #b42318;
-	--lg-footer: #1d2b26;
+	--lg-footer: #374b5c;      /* podnožje, kao na starom sajtu */
+	--lg-footer-line: #4c6072;
+	--lg-footer-text: #dce3e9;
 	--lg-radius: 14px;
 	--lg-radius-sm: 12px;
 	--lg-max: 1240px;
@@ -272,19 +274,35 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .lg-footer {
 	margin-top: 48px;
 	background: var(--lg-footer);
-	color: #c9d3ce;
+	color: var(--lg-footer-text);
 }
+.lg-footer a,
+.lg-footer a:visited { color: var(--lg-footer-text); text-decoration: none; }
+.lg-footer a:hover { color: #fff; text-decoration: underline; }
+.lg-footer__vrh {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px 20px;
+	padding-top: 28px;
+	padding-bottom: 28px;
+	border-bottom: 1px solid var(--lg-footer-line);
+}
+.lg-footer__vesti { margin: 0; color: #fff; font-size: 18px; font-weight: 700; line-height: 1.4; }
+.lg-footer a.lg-footer__postavi,
+.lg-footer a.lg-footer__postavi:visited { color: #fff; text-decoration: none; }
 .lg-footer__in {
 	display: grid;
-	grid-template-columns: minmax(0, 1.6fr) repeat(2, minmax(0, 1fr));
-	gap: 32px 40px;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 32px 36px;
 	padding-top: 44px;
-	padding-bottom: 36px;
+	padding-bottom: 40px;
 }
 .lg-footer__col { min-width: 0; }
-.lg-footer__brend { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
-.lg-footer__logo,
-.lg-footer__logo:visited {
+.lg-footer__brend { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.lg-footer a.lg-footer__logo,
+.lg-footer a.lg-footer__logo:visited {
 	display: inline-flex;
 	color: #fff;
 	font-size: 22px;
@@ -292,27 +310,22 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	line-height: 1.3;
 	text-decoration: none;
 }
-.lg-footer__logo:hover { color: #fff; }
-.lg-footer__logo span { color: #6fcbae; }
+.lg-footer__logo span { color: #8fd8c1; }
 .lg-footer__logo img { display: block; height: 36px; width: auto; }
-.lg-footer__tekst { margin: 0; font-size: 14px; line-height: 1.6; }
+.lg-footer__tekst { margin: 0; font-size: 15px; line-height: 1.6; }
 .lg-footer__kontakt { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; font-size: 15px; }
 .lg-footer__kontakt a,
-.lg-footer__kontakt a:visited,
-.lg-footer__kontakt span {
-	display: inline-flex;
-	align-items: center;
-	gap: 10px;
-	min-height: 36px;
-	color: #fff;
-	text-decoration: none;
-	overflow-wrap: anywhere;
-}
-.lg-footer__kontakt a:hover { text-decoration: underline; }
-.lg-footer__kontakt .lg-icon { color: #6fcbae; }
-.lg-footer__postavi { margin-top: 2px; }
-.lg-footer__mreze-naslov { margin: 4px 0 8px; font-size: 14px; font-weight: 700; color: #fff; }
-.lg-footer__mreze ul { display: flex; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.lg-footer__kontakt span { display: inline-flex; align-items: center; min-height: 32px; overflow-wrap: anywhere; }
+.lg-footer__naslov { margin: 4px 0 10px; color: #fff; font-size: 16px; font-weight: 800; }
+.lg-footer__naslov--mreze { margin-top: 18px; }
+.lg-footer__lista { margin: 0; padding: 0; list-style: none; }
+.lg-footer__lista a { display: inline-flex; align-items: center; min-height: 36px; font-size: 15px; }
+.lg-footer__lista a[aria-current="page"] { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
+.lg-footer a.lg-footer__sve { color: #fff; font-weight: 700; }
+.lg-footer__lista a.lg-footer__oglas { display: flex; justify-content: space-between; gap: 10px; max-width: 100%; }
+.lg-footer__oglas span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-footer__cena { flex: 0 0 auto; color: #fff; font-weight: 700; }
+.lg-footer__mreze { display: flex; gap: 10px; margin: 0; padding: 0; list-style: none; }
 .lg-footer__mreze a,
 .lg-footer__mreze a:visited {
 	display: inline-flex;
@@ -321,31 +334,26 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	width: 44px;
 	height: 44px;
 	border-radius: 50%;
-	background: rgba(255, 255, 255, .1);
+	background: var(--lg-footer-line);
 	color: #fff;
 }
-.lg-footer__mreze a:hover { background: var(--lg-brand); }
-.lg-footer__naslov { margin: 6px 0 12px; color: #fff; font-size: 16px; font-weight: 800; }
-.lg-footer__lista { margin: 0; padding: 0; list-style: none; }
-.lg-footer__lista a,
-.lg-footer__lista a:visited {
-	display: inline-flex;
-	align-items: center;
-	min-height: 40px;
-	color: #c9d3ce;
-	font-size: 15px;
-	text-decoration: none;
-}
-.lg-footer__lista a:hover { color: #fff; text-decoration: underline; }
-.lg-footer__lista a[aria-current="page"] { color: #fff; text-decoration: underline; text-decoration-color: #6fcbae; text-underline-offset: 4px; }
-.lg-footer__sve, .lg-footer__sve:visited { color: #6fcbae !important; font-weight: 700; }
+.lg-footer__mreze a:hover { background: var(--lg-brand); color: #fff; }
 .lg-footer :focus-visible { outline-color: #fff; box-shadow: 0 0 0 4px var(--lg-accent); }
-.lg-footer__dno { border-top: 1px solid rgba(255, 255, 255, .12); }
-.lg-footer__dno p { margin: 0; padding: 16px 0; font-size: 13px; line-height: 1.5; color: #c9d3ce; }
+.lg-footer__dno {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 8px 16px;
+	padding-top: 18px;
+	padding-bottom: 18px;
+	border-top: 1px solid var(--lg-footer-line);
+	font-size: 14px;
+	line-height: 1.5;
+}
+.lg-footer__dno p { margin: 0; }
 
 @media (max-width: 1100px) {
 	.lg-footer__in { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-	.lg-footer__brend { grid-column: 1 / -1; }
 }
 
 /* Donja navigacija (samo telefon) -------------------------------------- */
@@ -396,9 +404,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	.lg-header__nav { grid-column: 1 / -1; justify-content: space-between; }
 
 	.lg-footer { margin-top: 32px; }
-	.lg-footer__in { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; padding-top: 32px; padding-bottom: 20px; }
-	.lg-footer__brend { grid-column: 1 / -1; }
-	.lg-footer__lista a, .lg-footer__lista a:visited { font-size: 14px; }
+	.lg-footer__vrh { padding-top: 24px; padding-bottom: 24px; }
+	.lg-footer__vesti { font-size: 16px; }
+	.lg-footer__in { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 16px; padding-top: 32px; padding-bottom: 24px; }
+	.lg-footer__brend, .lg-footer__col:last-child { grid-column: 1 / -1; }
+	.lg-footer__lista a { font-size: 14px; }
 	.lg-footer__naslov { margin-bottom: 4px; }
 
 	.lg-mnav {

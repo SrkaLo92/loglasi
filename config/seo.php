@@ -56,7 +56,7 @@ return [
     // Javne strane koje ulaze u /sitemap-strane.xml (i koje skripta provere očekuje kao 200 + index).
     'pages' => [
         '/', '/oglasi/', '/o-nama/', '/faq/', '/kontakt/', '/cenovnik/', '/za-firme/',
-        '/uslovi-koriscenja/', '/politika-privatnosti/',
+        '/uslovi-koriscenja/', '/politika-privatnosti/', '/brisanje-licnih-podataka/',
     ],
 
     // Narodna fraza po slugu kategorije (keyword mapa): naziv za title i H1, „za” = akuzativ za opis.

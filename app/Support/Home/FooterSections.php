@@ -3,12 +3,16 @@
 namespace App\Support\Home;
 
 use App\Models\Category;
+use App\Models\Listing;
 use App\Services\Catalog;
+use App\Services\ListingSearch;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Footer column from the old site: the biggest categories.
+ * Footer columns from the old site: the biggest categories and the newest listings.
  * Plain values cached for 60 s and cleared together with the home sections.
+ * The newest listings are loaded by the page with a small JSON request, so listing
+ * titles never end up in the HTML of every page.
  */
 class FooterSections
 {
@@ -18,9 +22,26 @@ class FooterSections
 
     public const CATEGORIES = 5;
 
+    public const LATEST_KEY = 'footer.latest';
+
+    public const LATEST = 4;
+
     public static function flush(): void
     {
         Cache::forget(self::CACHE_KEY);
+        Cache::forget(self::LATEST_KEY);
+    }
+
+    /** @return list<array{title: string, price: string, url: string}> */
+    public static function latest(): array
+    {
+        return Cache::remember(self::LATEST_KEY, self::TTL, function () {
+            $search = app(ListingSearch::class);
+
+            return $search->listings($search->ids(['featured_first' => false], self::LATEST))
+                ->map(fn (Listing $l) => ['title' => (string) $l->title, 'price' => $l->priceLabel(), 'url' => url_slash('oglas/'.$l->slug)])
+                ->values()->all();
+        });
     }
 
     /** @return array{categories: list<array{name: string, url: string}>} */
