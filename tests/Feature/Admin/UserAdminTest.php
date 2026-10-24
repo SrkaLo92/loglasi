@@ -14,7 +14,6 @@ use App\Models\Firm;
 use App\Models\Listing;
 use App\Models\RefreshToken;
 use App\Models\User;
-use App\Support\Settings;
 use Livewire\Livewire;
 use Tests\Feature\Admin\Concerns\ActsAsStaff;
 use Tests\TestCase;
@@ -26,7 +25,7 @@ class UserAdminTest extends TestCase
     public function test_verify_phone_in_one_click(): void
     {
         $user = User::factory()->create(['phone' => '+381651234567']);
-        $this->signIn($mod = $this->moderator());
+        $this->signIn($mod = $this->admin());
 
         Livewire::withQueryParams(['tab' => 'phone'])->test(ListUsers::class)
             ->assertCanSeeTableRecords([$user])
@@ -80,14 +79,15 @@ class UserAdminTest extends TestCase
     public function test_moderator_cannot_block_admin_or_change_roles_or_make_firm(): void
     {
         $other = $this->admin();
-        $user = User::factory()->create();
+        $user = User::factory()->create(['phone' => '+381651234567']);
         $this->signIn($this->moderator());
 
         Livewire::test(ViewUser::class, ['record' => $other->id])->assertActionHidden('block');
         Livewire::test(ViewUser::class, ['record' => $user->id])
             ->assertActionHidden('changeRole')
             ->assertActionHidden('makeFirm')
-            ->assertActionHidden('grantBiznis');
+            ->assertActionHidden('verifyPhone')
+            ->assertActionHidden('firmPackage');
     }
 
     public function test_make_firm_creates_profile_and_back_to_private(): void
@@ -106,31 +106,6 @@ class UserAdminTest extends TestCase
         $this->assertNotNull(Firm::where('user_id', $user->id)->first());
         $this->assertDatabaseHas('audit_logs', ['action' => 'user.make_firm']);
         $this->assertDatabaseHas('audit_logs', ['action' => 'user.make_private']);
-    }
-
-    public function test_grant_biznis_with_founding_counter(): void
-    {
-        Settings::set('founding_firms_total', 1);
-        $first = User::factory()->create();
-        $second = User::factory()->create();
-        $this->signIn($this->admin());
-
-        $until = now()->addYear()->startOfMinute();
-        Livewire::test(ViewUser::class, ['record' => $first->id])->callAction('grantBiznis', ['until' => $until->format('Y-m-d H:i'), 'founding_free' => true]);
-
-        $firm = $first->refresh()->firm;
-        $this->assertSame(AccountType::Firm, $first->account_type);
-        $this->assertTrue($firm->founding_free);
-        $this->assertTrue($firm->biznis_until->equalTo($until));
-
-        // The only free slot is taken.
-        Livewire::test(ViewUser::class, ['record' => $second->id])->callAction('grantBiznis', ['until' => $until->format('Y-m-d H:i'), 'founding_free' => true]);
-        $this->assertNull($second->refresh()->firm);
-
-        Livewire::test(ViewUser::class, ['record' => $first->id])->callAction('revokeBiznis');
-        $this->assertNull($first->refresh()->firm->biznis_until);
-        $this->assertSame(1, AuditLog::where('action', 'user.grant_biznis')->count());
-        $this->assertSame(1, AuditLog::where('action', 'user.revoke_biznis')->count());
     }
 
     public function test_admin_changes_role_but_not_own(): void

@@ -8,9 +8,6 @@ use App\Enums\UserStatus;
 use App\Models\AuditLog;
 use App\Models\Firm;
 use App\Models\User;
-use App\Support\Settings;
-use App\Support\Stranice\Cenovnik;
-use Carbon\CarbonInterface;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
@@ -90,54 +87,6 @@ class UserAdministration
         return $user;
     }
 
-    /**
-     * Grants the Biznis package until a date. A founding (free) slot can be used
-     * only while one of the founding_firms_total slots is free.
-     */
-    public function grantBiznis(User $user, CarbonInterface $until, bool $foundingFree = false): Firm
-    {
-        if ($foundingFree && ! $user->firm?->founding_free && static::foundingLeft() < 1) {
-            throw new DomainException('Sva besplatna mesta za firme su popunjena.');
-        }
-
-        $firm = $user->firm ?? $this->makeFirm($user);
-
-        $before = ['biznis_until' => $firm->biznis_until?->toIso8601String(), 'founding_free' => $firm->founding_free];
-
-        $firm->forceFill([
-            'biznis_until' => $until,
-            'founding_free' => $foundingFree || $firm->founding_free,
-        ])->save();
-
-        if ($user->account_type !== AccountType::Firm) {
-            $user->forceFill(['account_type' => AccountType::Firm])->save();
-        }
-
-        Cenovnik::forgetFounding();
-        AuditLog::record('user.grant_biznis', $user, [
-            'firm_id' => $firm->id,
-            'before' => $before,
-            'biznis_until' => $firm->biznis_until->toIso8601String(),
-            'founding_free' => $firm->founding_free,
-        ]);
-
-        return $firm;
-    }
-
-    public function revokeBiznis(User $user): ?Firm
-    {
-        $firm = $user->firm;
-        if ($firm === null) {
-            return null;
-        }
-
-        $before = $firm->biznis_until?->toIso8601String();
-        $firm->forceFill(['biznis_until' => null])->save();
-        AuditLog::record('user.revoke_biznis', $user, ['firm_id' => $firm->id, 'biznis_until' => [$before, null]]);
-
-        return $firm;
-    }
-
     public function changeRole(User $user, Role $role): User
     {
         $before = $user->role;
@@ -150,20 +99,5 @@ class UserAdministration
         AuditLog::record('user.change_role', $user, ['role' => [$before?->value, $role->value]]);
 
         return $user;
-    }
-
-    public static function foundingTotal(): int
-    {
-        return max(0, (int) Settings::get('founding_firms_total'));
-    }
-
-    public static function foundingTaken(): int
-    {
-        return Firm::query()->where('founding_free', true)->count();
-    }
-
-    public static function foundingLeft(): int
-    {
-        return max(0, static::foundingTotal() - static::foundingTaken());
     }
 }

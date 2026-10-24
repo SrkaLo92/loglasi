@@ -4,17 +4,15 @@ namespace App\Filament\Resources\Users;
 
 use App\Enums\AccountType;
 use App\Enums\Role;
+use App\Filament\Resources\Firms\FirmResource;
 use App\Filament\Support\Notify;
 use App\Filament\Support\Options;
 use App\Models\User;
 use App\Services\Admin\UserAdministration;
 use Filament\Actions\Action;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 
 /** Account actions (users table, user page, reports). Permissions come from UserPolicy. */
@@ -25,13 +23,21 @@ class UserActions
         return app(UserAdministration::class);
     }
 
+    /** Moderators work on listings and reports only; account changes other than blocking are for admins. */
+    private static function isAdmin(): bool
+    {
+        $user = auth()->user();
+
+        return $user instanceof User && $user->isAdmin();
+    }
+
     public static function verifyPhone(): Action
     {
         return Action::make('verifyPhone')
             ->label('Potvrdi telefon')
             ->icon(Heroicon::OutlinedDevicePhoneMobile)
             ->color('success')
-            ->visible(fn (User $record) => filled($record->phone) && ! $record->isPhoneVerified() && Gate::allows('verifyPhone', $record))
+            ->visible(fn (User $record) => filled($record->phone) && ! $record->isPhoneVerified() && self::isAdmin())
             ->action(fn (User $record) => Notify::run(fn () => self::service()->verifyPhone($record), 'Telefon je potvrđen.'));
     }
 
@@ -41,7 +47,7 @@ class UserActions
             ->label('Skini potvrdu telefona')
             ->icon(Heroicon::OutlinedNoSymbol)
             ->color('gray')
-            ->visible(fn (User $record) => $record->isPhoneVerified() && Gate::allows('verifyPhone', $record))
+            ->visible(fn (User $record) => $record->isPhoneVerified() && self::isAdmin())
             ->requiresConfirmation()
             ->action(fn (User $record) => Notify::run(fn () => self::service()->unverifyPhone($record), 'Potvrda telefona je skinuta.'));
     }
@@ -85,7 +91,7 @@ class UserActions
                     ->required()->maxLength(255),
             ])
             ->modalHeading('Napraviti nalog firme')
-            ->modalDescription('Nalog dobija profil firme i oznaku „Firma”. Biznis paket se uključuje posebno.')
+            ->modalDescription('Nalog dobija profil firme i oznaku „Firma”. Paket se dodeljuje na strani firme.')
             ->modalSubmitActionLabel('Pretvori u firmu')
             ->action(fn (User $record, array $data) => Notify::run(fn () => self::service()->makeFirm($record, $data['firm_name']), 'Nalog je sada nalog firme.'));
     }
@@ -102,47 +108,15 @@ class UserActions
             ->action(fn (User $record) => Notify::run(fn () => self::service()->makePrivate($record), 'Nalog je vraćen na privatno lice.'));
     }
 
-    public static function grantBiznis(): Action
+    /** Packages are managed on the firm page (FirmActions). */
+    public static function firmPackage(): Action
     {
-        return Action::make('grantBiznis')
-            ->label('Biznis paket')
+        return Action::make('firmPackage')
+            ->label('Paket firme')
             ->icon(Heroicon::OutlinedSparkles)
             ->color('warning')
-            ->visible(fn (User $record) => Gate::allows('changeAccountType', $record))
-            ->fillForm(fn (User $record) => [
-                'until' => ($record->firm?->biznis_until && $record->firm->biznis_until->isFuture())
-                    ? $record->firm->biznis_until
-                    : now()->addDays(365)->endOfDay(),
-                'founding_free' => (bool) $record->firm?->founding_free,
-            ])
-            ->schema([
-                DateTimePicker::make('until')->label('Važi do')->seconds(false)->required()->after('now'),
-                Toggle::make('founding_free')
-                    ->label('Besplatno (jedna od prvih firmi)')
-                    ->helperText(fn () => sprintf(
-                        'Zauzeto %d od %d besplatnih mesta.',
-                        UserAdministration::foundingTaken(),
-                        UserAdministration::foundingTotal(),
-                    )),
-            ])
-            ->modalHeading('Uključiti Biznis paket')
-            ->modalDescription('Ako nalog još nije firma, postaje firma.')
-            ->modalSubmitActionLabel('Sačuvaj')
-            ->action(fn (User $record, array $data) => Notify::run(
-                fn () => self::service()->grantBiznis($record, Carbon::parse($data['until']), (bool) $data['founding_free']),
-                'Biznis paket je uključen.',
-            ));
-    }
-
-    public static function revokeBiznis(): Action
-    {
-        return Action::make('revokeBiznis')
-            ->label('Isključi Biznis paket')
-            ->icon(Heroicon::OutlinedXMark)
-            ->color('gray')
-            ->visible(fn (User $record) => (bool) $record->firm?->hasBiznis() && Gate::allows('changeAccountType', $record))
-            ->requiresConfirmation()
-            ->action(fn (User $record) => Notify::run(fn () => self::service()->revokeBiznis($record), 'Biznis paket je isključen.'));
+            ->visible(fn (User $record) => $record->firm !== null && Gate::allows('changeAccountType', $record))
+            ->url(fn (User $record) => FirmResource::getUrl('edit', ['record' => $record->firm]));
     }
 
     public static function changeRole(): Action
@@ -156,7 +130,7 @@ class UserActions
             ->schema([
                 Select::make('role')->label('Uloga')->options(Options::enum(Role::class))->required(),
             ])
-            ->modalDescription('Moderator odobrava oglase, proverava telefone i rešava prijave. Administrator može sve, i podešavanja i cene.')
+            ->modalDescription('Moderator odobrava oglase i rešava prijave. Administrator može sve, i podešavanja, cene i narudžbine.')
             ->modalSubmitActionLabel('Sačuvaj')
             ->action(fn (User $record, array $data) => Notify::run(fn () => self::service()->changeRole($record, Role::from($data['role'])), 'Uloga je promenjena.'));
     }
@@ -169,8 +143,7 @@ class UserActions
             self::unverifyPhone(),
             self::makeFirm(),
             self::makePrivate(),
-            self::grantBiznis(),
-            self::revokeBiznis(),
+            self::firmPackage(),
             self::changeRole(),
             self::block(),
             self::unblock(),

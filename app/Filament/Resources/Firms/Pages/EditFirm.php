@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources\Firms\Pages;
 
+use App\Filament\Resources\Firms\FirmActions;
 use App\Filament\Resources\Firms\FirmResource;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Support\AuditHooks;
 use App\Models\AuditLog;
 use App\Models\Firm;
+use App\Support\Firms\WorkingHoursInput;
+use App\Support\Listing\WorkingHours;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Icons\Heroicon;
@@ -19,8 +22,9 @@ class EditFirm extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            ...FirmActions::all(),
             Action::make('user')
-                ->label('Nalog i Biznis paket')
+                ->label('Nalog')
                 ->icon(Heroicon::OutlinedUser)
                 ->color('gray')
                 ->url(fn () => UserResource::getUrl('view', ['record' => $this->getRecord()->user_id])),
@@ -37,14 +41,7 @@ class EditFirm extends EditRecord
     {
         $data['verified'] = $this->getRecord()->verified_at !== null;
 
-        // Hours imported as [{day, open, close}] are shown per day as well.
-        $hours = (array) ($data['working_hours'] ?? []);
-        if (array_is_list($hours)) {
-            $data['working_hours'] = collect($hours)
-                ->filter(fn ($row) => is_array($row) && isset($row['day'], $row['open'], $row['close']))
-                ->mapWithKeys(fn ($row) => [strtolower(substr((string) $row['day'], 0, 3)) => $row['open'].'-'.$row['close']])
-                ->all();
-        }
+        $data['working_hours'] = WorkingHours::days($data['working_hours'] ?? null);
 
         return $data;
     }
@@ -55,11 +52,7 @@ class EditFirm extends EditRecord
         $verified = (bool) ($data['verified'] ?? false);
         unset($data['verified']);
 
-        $data['working_hours'] = collect((array) ($data['working_hours'] ?? []))
-            ->only(array_keys(FirmResource::DAYS))
-            ->map(fn ($v) => trim((string) $v) === '' ? null : preg_replace('/\s*-\s*/', '-', trim((string) $v)))
-            ->filter()
-            ->all() ?: null;
+        $data['working_hours'] = WorkingHoursInput::fromInput((array) ($data['working_hours'] ?? []));
 
         $before = $record->getOriginal();
         $record->fill($data);

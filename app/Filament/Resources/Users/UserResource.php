@@ -14,6 +14,7 @@ use App\Filament\Resources\Users\RelationManagers\OrdersRelationManager;
 use App\Filament\Support\Options;
 use App\Models\User;
 use App\Rules\PhoneNumber;
+use App\Support\Firms\FirmPackage;
 use App\Support\Phone;
 use BackedEnum;
 use Filament\Actions\ActionGroup;
@@ -159,9 +160,16 @@ class UserResource extends Resource
                 ->schema([
                     TextEntry::make('firm.name')
                         ->label('Naziv')
-                        ->url(fn (User $record) => $record->firm ? FirmResource::getUrl('edit', ['record' => $record->firm]) : null),
-                    TextEntry::make('firm.biznis_until')->label('Biznis paket do')->dateTime('j. n. Y.')->placeholder('Nema paket'),
-                    IconEntry::make('firm.founding_free')->label('Besplatno (prvih 30)')->boolean(),
+                        ->url(fn (User $record) => $record->firm && auth()->user()?->isAdmin() ? FirmResource::getUrl('edit', ['record' => $record->firm]) : null),
+                    TextEntry::make('firm_package')
+                        ->label('Paket')
+                        ->state(fn (User $record) => FirmPackage::label($record->firm))
+                        ->placeholder('Nema paket'),
+                    TextEntry::make('firm_package_ends_at')
+                        ->label('Važi do')
+                        ->state(fn (User $record) => FirmPackage::isActive($record->firm) ? $record->firm->package_ends_at : null)
+                        ->dateTime('j. n. Y.')
+                        ->placeholder('—'),
                 ]),
         ]);
     }
