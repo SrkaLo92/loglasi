@@ -45,6 +45,14 @@ class OrderFlowTest extends PaymentsTestCase
             ->assertSee('Probni režim');
     }
 
+    public function test_benefit_text_uses_serbian_plurals(): void
+    {
+        $user = $this->seller();
+
+        $this->actingAs($user)->get('/moj-nalog/narudzbine/nova/?usluga=listing_slots_3')
+            ->assertOk()->assertSee('Još 3 aktivna oglasa, pored besplatnih, tokom 30 dana od uplate.');
+    }
+
     public function test_unknown_or_display_only_product_is_404(): void
     {
         $user = $this->seller();
