@@ -3,13 +3,13 @@
 namespace App\Providers;
 
 use App\Console\Commands\SendSavedSearchAlerts;
-use App\Models\Message;
-use App\Models\User;
-use App\Notifications\NewMessageNotification;
+use App\Events\MessageSent;
+use App\Notifications\Listeners\NotifyMessageRecipient;
 use App\Support\ApiError;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -29,16 +29,9 @@ class NotificationsServiceProvider extends ServiceProvider
                 )),
         ]);
 
-        // Every new message notifies the other side (push always, mail throttled).
-        Message::created(function (Message $message) {
-            $conversation = $message->conversation()->first(['id', 'buyer_id', 'seller_id']);
-            $recipientId = $conversation?->buyer_id === $message->sender_id ? $conversation?->seller_id : $conversation?->buyer_id;
-            $recipient = $recipientId ? User::query()->find($recipientId) : null;
-
-            if ($recipient !== null && $recipient->id !== $message->sender_id && ! $recipient->isBlocked()) {
-                $recipient->notify(new NewMessageNotification($message));
-            }
-        });
+        // The messages module fires MessageSent after commit and sends nothing itself.
+        // (Listener lives outside app/Listeners so event discovery does not register it twice.)
+        Event::listen(MessageSent::class, NotifyMessageRecipient::class);
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             $schedule->command(SendSavedSearchAlerts::class)->hourly()->withoutOverlapping(30);

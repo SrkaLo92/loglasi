@@ -15,9 +15,10 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 /**
- * "Nova poruka": push for every message, mail at most once per conversation per
- * notifications.message_mail_throttle_minutes. Sent automatically when a Message is
- * created (NotificationsServiceProvider), so the messages module does not send its own.
+ * "Nova poruka": push for every message; mail at most once per conversation per
+ * notifications.message_mail_throttle_minutes, and not when the recipient has already
+ * read the conversation by the time the queued mail runs. Sent from MessageSent
+ * (App\Notifications\Listeners\NotifyMessageRecipient); the messages module sends nothing.
  */
 class NewMessageNotification extends Notification implements ShouldQueue
 {
@@ -49,6 +50,19 @@ class NewMessageNotification extends Notification implements ShouldQueue
         }
 
         return $channels;
+    }
+
+    /** The mail waits in the queue; if the recipient opened the conversation meanwhile, it is dropped. */
+    public function shouldSend(User $notifiable, string $channel): bool
+    {
+        if ($channel !== 'mail') {
+            return true;
+        }
+
+        // Unread counter of the recipient (messages module): 0 = opened after this message.
+        $conversation = $this->message->conversation()->first();
+
+        return $conversation !== null && $conversation->unreadFor($notifiable) > 0;
     }
 
     public function toMail(User $notifiable): BrandedMailMessage
