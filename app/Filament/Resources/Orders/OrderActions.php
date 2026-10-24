@@ -126,7 +126,10 @@ class OrderActions
                 TextInput::make('refund_receipt_number')->label('Broj storno računa / knjižnog odobrenja')->maxLength(64),
                 Textarea::make('reason')->label('Razlog povraćaja')->required()->rows(2)->maxLength(1000),
             ])
-            ->modalDescription('Usluga se isključuje. Novac se vraća uplatom sa računa firme; ovde se samo evidentira.')
+            ->modalDescription(fn (Order $record) => 'Usluga se isključuje. Novac se vraća uplatom sa računa firme; ovde se samo evidentira. '
+                .($record->consent_at
+                    ? 'Kupac je dao saglasnost za početak usluge '.$record->consent_at->format('j. n. Y. \u H:i').'.'
+                    : 'Nema saglasnosti potrošača za početak usluge (firma ili stara narudžbina).'))
             ->modalSubmitActionLabel('Evidentiraj povraćaj')
             ->action(fn (Order $record, array $data) => Notify::run(
                 fn () => self::service()->refund($record, auth()->user(), (string) $data['reason'], $data['refund_receipt_number'] ?? null, (int) $data['amount_rsd']),

@@ -114,7 +114,11 @@ class OrderResource extends Resource
             TextColumn::make('receipt_number')->label('Broj računa')->searchable()->placeholder('—')
                 ->description(fn (Order $r) => $r->advance_receipt_number ? 'Avansni: '.$r->advance_receipt_number : null),
             TextColumn::make('service_ends_at')->label('Usluga do')->dateTime('j. n. Y.')->placeholder('—')->toggleable(),
-            TextColumn::make('consent_at')->label('Saglasnost')->dateTime('j. n. Y. H:i')->description(fn (Order $r) => $r->consent_ip)->toggleable(isToggledHiddenByDefault: true),
+            // Consumer's consent that the service starts on payment (withdrawal right ends for the performed part).
+            TextColumn::make('consent_at')->label('Saglasnost za početak usluge')->dateTime('j. n. Y. H:i')->placeholder('—')
+                ->description(fn (Order $r) => $r->consent_at ? trim('IP '.$r->consent_ip) : null)
+                ->tooltip(fn (Order $r) => $r->terms_accepted_at ? 'Uslovi prihvaćeni '.$r->terms_accepted_at->format('j. n. Y. H:i') : null)
+                ->toggleable(),
             TextColumn::make('refund_amount_rsd')->label('Vraćeno')
                 ->formatStateUsing(fn ($state) => number_format((int) $state, 0, ',', '.')."\u{00A0}RSD")
                 ->description(fn (Order $r) => $r->refund_receipt_number ? 'Storno: '.$r->refund_receipt_number : null)
