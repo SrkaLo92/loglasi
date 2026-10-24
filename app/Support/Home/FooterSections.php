@@ -39,7 +39,7 @@ class FooterSections
             $search = app(ListingSearch::class);
 
             return $search->listings($search->ids(['featured_first' => false], self::LATEST))
-                ->map(fn (Listing $l) => ['title' => (string) $l->title, 'price' => $l->priceLabel(), 'url' => url_slash('oglas/'.$l->slug)])
+                ->map(fn (Listing $l) => ['title' => (string) $l->title, 'price' => $l->priceLabel(), 'url' => '/oglas/'.$l->slug.'/'])
                 ->values()->all();
         });
     }

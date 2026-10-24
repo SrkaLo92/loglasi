@@ -54,7 +54,7 @@ class FooterAndFaqTest extends TestCase
         $this->getJson('/podnozje/najnoviji-oglasi/')->assertOk()
             ->assertHeader('X-Robots-Tag', 'noindex')
             ->assertJsonPath('data.0.title', 'Golf 4 dizel')
-            ->assertJsonPath('data.0.url', url_slash('oglas/'.$listing->slug))
+            ->assertJsonPath('data.0.url', '/oglas/'.$listing->slug.'/')
             ->assertJsonCount(1, 'data');
     }
 

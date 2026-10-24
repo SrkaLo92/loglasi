@@ -508,6 +508,10 @@
 	overflow-wrap: anywhere;
 }
 
+.hm-faq__uvod a[href^="tel:"] {
+	white-space: nowrap;
+}
+
 .hm-faq__sve {
 	display: inline-flex;
 	align-items: center;
