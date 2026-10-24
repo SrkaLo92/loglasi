@@ -62,6 +62,7 @@ class ListingLimits
     {
         return Listing::withTrashed()
             ->where('user_id', $user->id)
+            ->where('status', '!=', 'draft') // an unfinished draft does not use a slot
             ->where('created_at', '>=', static::monthStart())
             ->count();
     }

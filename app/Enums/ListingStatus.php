@@ -9,6 +9,7 @@ enum ListingStatus: string
     case Published = 'published';
     case Rejected = 'rejected';
     case Expired = 'expired';
+    case Sold = 'sold';
 
     public function label(): string
     {
@@ -18,6 +19,7 @@ enum ListingStatus: string
             self::Published => 'Aktivan',
             self::Rejected => 'Odbijen',
             self::Expired => 'Istekao',
+            self::Sold => 'Prodat',
         };
     }
 }

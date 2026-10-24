@@ -55,6 +55,7 @@
 			<p>Postavili ste <strong>{{ $limits['used_this_month'] }} od {{ $limits['monthly_limit'] }}</strong> besplatnih oglasa. Preostalo: {{ $limits['remaining'] }}.</p>
 			<p class="lgn-help">Novi oglasi su opet dostupni od 1. u mesecu.</p>
 		@endif
+		<p><a href="{{ url_slash('moj-nalog/oglasi') }}">Moji oglasi</a></p>
 	</section>
 
 	<div class="lgn-grid">
