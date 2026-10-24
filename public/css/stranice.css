@@ -1412,3 +1412,128 @@ main:focus { outline: none; }
 	.lgx-greska { padding: 24px 0; }
 	.lgx-greska__dugmad, .lgx-greska__dugmad .lgx-btn { width: 100%; }
 }
+
+/* FAQ: questions left, help box right (old site structure) ------------- */
+
+.lgx-putanja ol {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin: 0 0 16px;
+	padding: 0;
+	list-style: none;
+	font-size: 14px;
+	color: var(--lg-muted, #5B6470);
+}
+
+.lgx-putanja li + li::before {
+	content: "›";
+	margin-right: 4px;
+}
+
+.lgx-putanja a,
+.lgx-putanja a:visited {
+	color: var(--lg-muted, #5B6470);
+	text-decoration: none;
+}
+
+.lgx-putanja a:hover {
+	color: var(--lg-green-dark, #1f5b4a);
+	text-decoration: underline;
+}
+
+
+.lgx-faq-strana {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 340px;
+	gap: 32px;
+	align-items: start;
+}
+
+.lgx-faq-pomoc {
+	position: sticky;
+	top: 16px;
+	padding: 28px 24px;
+	border: 1px solid var(--lg-border, #e3e7e4);
+	border-radius: 16px;
+	background: var(--lg-mint, #e9f4f0);
+}
+
+.lgx-faq-pomoc__ikona {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 52px;
+	height: 52px;
+	border-radius: 12px;
+	background: #fff;
+	color: var(--lg-green, #2b7a64);
+}
+
+.lgx .lgx-faq-pomoc__naslov {
+	margin: 16px 0 8px;
+	font-size: 20px;
+	font-weight: 800;
+	line-height: 1.3;
+}
+
+.lgx .lgx-faq-pomoc p {
+	margin: 0 0 18px;
+	color: var(--lg-text-2, #3f4a45);
+	font-size: 15px;
+}
+
+.lgx-faq-pomoc .lgx-btn {
+	width: 100%;
+}
+
+.lgx-faq-pomoc__kontakt {
+	display: grid;
+	gap: 2px;
+	margin: 16px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.lgx-faq-pomoc__kontakt a,
+.lgx-faq-pomoc__kontakt a:visited {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	min-height: 40px;
+	color: var(--lg-text, #1D2B26);
+	font-size: 15px;
+	font-weight: 600;
+	text-decoration: none;
+	overflow-wrap: anywhere;
+}
+
+.lgx-faq-pomoc__kontakt a:hover {
+	text-decoration: underline;
+}
+
+.lgx-faq-pomoc__kontakt .lg-icon {
+	color: var(--lg-green, #2b7a64);
+}
+
+@media (max-width: 900px) {
+	.lgx-faq-strana {
+		grid-template-columns: 1fr;
+	}
+
+	.lgx-faq-pomoc {
+		position: static;
+	}
+}
+
+/* Za firme: business packages after the free period */
+.lgx-paketi__uvod { margin: 0 0 16px; color: var(--lg-muted, #5B6470); }
+.lgx-paketi { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.lgx-paket { border: 1px solid var(--lg-border, #e5e5e5); border-radius: 12px; padding: 20px; background: #fff; }
+.lgx-paket__naziv { margin: 0 0 8px; font-size: 1.125rem; }
+.lgx-paket__cena { margin: 0; font-size: 1.375rem; font-weight: 700; }
+.lgx-paket__cena span { font-size: .9375rem; font-weight: 400; }
+.lgx-paket__godisnje { margin: 4px 0 0; color: var(--lg-muted, #5B6470); font-size: .9375rem; }
+.lgx-paket__stavke { margin: 12px 0 0; padding-left: 18px; }
+.lgx-paket__stavke li { margin: 4px 0; }
+.lgx-paketi__link { margin: 16px 0 0; }

@@ -1,0 +1,84 @@
+{{--
+    Listing card used on every list (home, search, similar listings, profiles).
+    Props: listing (Listing with ListingSearch::cardRelations() loaded; with fieldValues
+    loaded the card also shows up to three field values), highlight (orange frame of the
+    featured section), eager (first visible images), layout ("grid" or "list": a row on phones),
+    heading (h2-h4).
+--}}
+@props(['listing', 'highlight' => false, 'eager' => false, 'layout' => 'grid', 'heading' => 'h3'])
+@use('App\Support\Search\CategoryIcons')
+@use('App\Support\Search\Favorites')
+@use('App\Support\Search\ImageUrls')
+@use('App\Support\Search\TimeAgo')
+@use('App\Services\ListingFields')
+@once
+	@push('head')
+		<link rel="stylesheet" href="{{ asset_v('css/listing-card.css') }}">
+	@endpush
+@endonce
+@php
+	/** @var \App\Models\Listing $listing */
+	$lcImage = $listing->coverImage;
+	$lcTime = $listing->bumped_at ?? $listing->published_at ?? $listing->created_at;
+	$lcFirm = $listing->user?->isFirm() ?? false;
+	$lcFeatured = $listing->isFeatured();
+	$lcTag = in_array($heading, ['h2', 'h3', 'h4'], true) ? $heading : 'h3';
+	$lcSpecs = [];
+	if ($listing->relationLoaded('fieldValues')) {
+		foreach (app(ListingFields::class)->values($listing) as $value) {
+			if ($value['display'] !== '' && $value['display'] !== 'Da') {
+				$lcSpecs[] = $value['display'];
+			}
+			if (count($lcSpecs) === 3) {
+				break;
+			}
+		}
+	}
+	$lcFav = auth()->check() ? app(Favorites::class)->has((int) $listing->id) : null;
+@endphp
+<article {{ $attributes->class(['lc', 'lc--featured' => $highlight, 'lc--list' => $layout === 'list']) }}>
+	<a class="lc__link" href="{{ url_slash('/oglas/'.$listing->slug) }}">
+		<div class="lc__media">
+			@if ($lcImage)
+				@php($lcFallback = ImageUrls::fallback($lcImage, 'medium'))
+				<picture>
+					@if ($lcFallback)
+						<source type="image/webp" srcset="{{ ImageUrls::url($lcImage, 'thumb') }} 400w, {{ ImageUrls::url($lcImage, 'medium') }} 800w" sizes="(max-width: 767px) 50vw, 300px">
+					@endif
+					<img class="lc__img" src="{{ $lcFallback ?? ImageUrls::url($lcImage, 'medium') }}" alt="" width="400" height="300" loading="{{ $eager ? 'eager' : 'lazy' }}" decoding="async" @if ($eager) fetchpriority="high" @endif>
+				</picture>
+			@else
+				<span class="lc__ph" aria-hidden="true">
+					{{ CategoryIcons::forCategory($listing->category, 32) }}
+					@if ($listing->category)<span class="lc__ph-label">{{ $listing->category->name }}</span>@endif
+				</span>
+			@endif
+			@if ($lcFeatured || $lcFirm)
+				<span class="lc__badges">
+					@if ($lcFeatured)<span class="lc__badge lc__badge--featured">Istaknuto</span>@endif
+					@if ($lcFirm)<span class="lc__badge lc__badge--firm">Firma</span>@endif
+				</span>
+			@endif
+		</div>
+		<div class="lc__body">
+			<{{ $lcTag }} class="lc__title">{{ $listing->title }}</{{ $lcTag }}>
+			@if ($lcSpecs)
+				<p class="lc__specs">{{ implode(' · ', $lcSpecs) }}</p>
+			@endif
+			<p class="lc__price">{{ $listing->priceLabel() }}</p>
+			<p class="lc__meta">
+				@if ($listing->location)
+					{{ CategoryIcons::svg('pin', 14) }}<span class="lg-visually-hidden">Mesto: </span><span class="lc__place">{{ $listing->location->name }}</span>
+				@endif
+				@if ($listing->location && $lcTime)<span class="lc__sep" aria-hidden="true">·</span>@endif
+				@if ($lcTime)<time datetime="{{ $lcTime->toIso8601String() }}">{{ TimeAgo::format($lcTime) }}</time>@endif
+			</p>
+		</div>
+	</a>
+	@if ($lcFav !== null)
+		<form class="lc__fav" method="post" action="{{ Favorites::url((int) $listing->id) }}">
+			@csrf
+			<button class="lc__fav-btn" type="submit" aria-pressed="{{ $lcFav ? 'true' : 'false' }}" aria-label="{{ $lcFav ? 'Ukloni iz omiljenih' : 'Sačuvaj u omiljene' }}: {{ $listing->title }}">{{ CategoryIcons::svg('heart', 20, '2') }}</button>
+		</form>
+	@endif
+</article>

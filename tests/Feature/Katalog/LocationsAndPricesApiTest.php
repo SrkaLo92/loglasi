@@ -42,8 +42,8 @@ class LocationsAndPricesApiTest extends TestCase
         $response = $this->getJson('/api/v1/prices')->assertOk();
 
         $response->assertExactJson([
-            ['product' => 'bump', 'label' => 'Podizanje oglasa', 'amount' => 50],
-            ['product' => 'featured_7d', 'label' => 'Istaknut oglas 7 dana', 'amount' => 300],
+            ['product' => 'bump', 'label' => 'Podizanje oglasa', 'amount' => 49],
+            ['product' => 'featured_7d', 'label' => 'Istaknut oglas 7 dana', 'amount' => 199],
             ['product' => 'featured_30d', 'label' => 'Istaknut oglas 30 dana', 'amount' => 800],
             ['product' => 'business_year', 'label' => 'Biznis paket 12 meseci', 'amount' => 6000],
         ]);

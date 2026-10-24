@@ -1,0 +1,252 @@
+{{-- Home page: eight sections ported from loglasi-core inc/home. Data: HomeSections (cached 60 s). --}}
+@extends('layouts.app')
+@use('App\Support\Home\HomeSettings')
+@use('App\Support\Phone')
+@use('App\Support\Search\CategoryIcons')
+@use('App\Support\Search\TimeAgo')
+@use('App\Support\Seo')
+@use('App\Support\Stranice\Cenovnik')
+@use('App\Support\Settings')
+@use('App\Support\Stranice\PageText')
+
+@push('head')
+	<link rel="stylesheet" href="{{ asset_v('css/home.css') }}">
+@endpush
+@push('scripts')
+	<script src="{{ asset_v('js/home.js') }}" defer></script>
+@endpush
+
+@php
+	$hmTotal = $sections['total'];
+	$hmWhy = PageText::list('pocetna.zasto');
+	$hmFaq = array_slice(array_values(array_filter(PageText::list('faq.pitanja'), fn ($q) => is_array($q) && ! empty($q['pitanje']) && ! empty($q['odgovor']))), 0, 5);
+	$hmEmail = (string) Settings::get('contact_email');
+	$hmPhone = (string) Settings::get('contact_phone');
+	$hmAll = url_slash('/oglasi');
+	$hmMobileLatest = HomeSettings::int('home.latest_mobile_count', 1, 24);
+	$hmCatTotal = $sections['categories_total'];
+	$hmFirms = $sections['firms'];
+	$hmAbout = HomeSettings::get('home.about');
+	$hmCount = number_format($hmTotal, 0, ',', '.');
+	// „Pogledajte svih 30 oglasa”, „Pogledajte sva 3 oglasa”, „Pogledajte sve oglase (21)”
+	$hmMore = match (true) {
+		$hmTotal === 1 => 'Pogledajte oglas',
+		$hmTotal % 10 === 1 && $hmTotal % 100 !== 11 => 'Pogledajte sve oglase ('.$hmCount.')',
+		default => 'Pogledajte '.Cenovnik::plural($hmTotal, 'svih', 'sva', 'svih').' '.$hmCount.' oglasa',
+	};
+@endphp
+
+@section('content')
+{{-- 1. Intro --}}
+<section class="hm-intro">
+	<div class="lg-wrap">
+		<h1 class="hm-intro__title">{{ Seo::get()->getH1() }}</h1>
+		<p class="hm-intro__text">{{ HomeSettings::get('home.intro_text') }}</p>
+		@if ($sections['chips'])
+			<div class="hm-chips">
+				<span class="hm-chips__label" id="hm-chips-label">{{ HomeSettings::get('home.intro_label') }}</span>
+				<ul class="hm-chips__list" aria-labelledby="hm-chips-label">
+					@foreach ($sections['chips'] as $chip)
+						<li><a class="hm-chip" href="{{ $chip['url'] }}">{{ $chip['label'] }}</a></li>
+					@endforeach
+				</ul>
+			</div>
+		@endif
+	</div>
+</section>
+
+<div class="lg-wrap hm">
+	{{-- 2. Categories --}}
+	@if ($sections['categories'])
+		<section class="hm-sec" aria-labelledby="hm-cats-title">
+			<div class="hm-sec__head">
+				<h2 class="hm-sec__title" id="hm-cats-title">{{ HomeSettings::get('home.categories_title') }}</h2>
+				<a class="hm-sec__link hm-hide-m" href="{{ $hmAll }}">Sve kategorije ({{ $hmCatTotal }})</a>
+				<a class="hm-sec__link hm-show-m" href="{{ $hmAll }}">Sve ({{ $hmCatTotal }})</a>
+			</div>
+			<ul class="hm-cats">
+				@foreach ($sections['categories'] as $item)
+					<li class="{{ $loop->index >= 7 ? 'hm-hide-m' : '' }}">
+						<a class="hm-cat" href="{{ $item['category']->url() }}">
+							<span class="hm-cat__icon">{{ CategoryIcons::forCategory($item['category'], 20) }}</span>
+							<span class="hm-cat__text">
+								<span class="hm-cat__name">{{ $item['category']->name }}</span>
+								<span class="hm-cat__count">{{ TimeAgo::listings($item['count']) }}</span>
+							</span>
+						</a>
+					</li>
+				@endforeach
+				<li>
+					<a class="hm-cat hm-cat--all" href="{{ $hmAll }}">
+						<span class="hm-cat__icon">{{ CategoryIcons::svg('grid', 20) }}</span>
+						<span class="hm-cat__text">
+							<span class="hm-cat__name">Sve kategorije</span>
+							<span class="hm-cat__count">{{ $hmCatTotal }} {{ Cenovnik::plural($hmCatTotal, 'kategorija', 'kategorije', 'kategorija') }}</span>
+						</span>
+					</a>
+				</li>
+			</ul>
+		</section>
+	@endif
+
+	{{-- 3. Featured (nothing when there are none) --}}
+	@if ($sections['featured']->isNotEmpty())
+		<section class="hm-sec" aria-labelledby="hm-featured-title">
+			<div class="hm-sec__head">
+				<h2 class="hm-sec__title" id="hm-featured-title">{{ HomeSettings::get('home.featured_title') }}</h2>
+				<a class="hm-sec__link" href="{{ HomeSettings::url('home.featured_link_url') }}">{{ HomeSettings::get('home.featured_link_text') }}</a>
+			</div>
+			<div class="hm-grid">
+				@foreach ($sections['featured'] as $listing)
+					<x-listing-card :listing="$listing" highlight :eager="$loop->index < 2" />
+				@endforeach
+			</div>
+		</section>
+	@endif
+
+	{{-- 4. Latest --}}
+	<section class="hm-sec" aria-labelledby="hm-latest-title">
+		<div class="hm-sec__head">
+			<h2 class="hm-sec__title" id="hm-latest-title">{{ HomeSettings::get('home.latest_title') }}</h2>
+			@if ($hmTotal > 0)
+				<a class="hm-sec__link" href="{{ $hmAll }}">Pogledajte sve</a>
+			@endif
+		</div>
+		@if ($sections['latest']->isEmpty())
+			<div class="hm-empty">
+				<p>Još nema oglasa. Budite prvi koji će postaviti oglas za Loznicu i okolinu.</p>
+				<a class="lg-btn lg-btn--orange" href="{{ url_slash('/postavi-oglas') }}">Postavite oglas</a>
+			</div>
+		@else
+			<div class="hm-grid">
+				@foreach ($sections['latest'] as $listing)
+					<x-listing-card :listing="$listing" :eager="$sections['featured']->isEmpty() && $loop->index < 2" @class(['hm-hide-m' => $loop->index >= $hmMobileLatest]) />
+				@endforeach
+			</div>
+			<p class="hm-more">
+				<a class="lg-btn lg-btn--outline" href="{{ $hmAll }}">{{ $hmMore }}</a>
+			</p>
+		@endif
+	</section>
+
+	{{-- 5. Tabs (desktop; without JavaScript every panel shows with its heading) --}}
+	@if ($sections['tabs'])
+		<section class="hm-sec hm-tabs" aria-labelledby="hm-tabs-title" data-tabs>
+			<h2 class="hm-sec__title" id="hm-tabs-title">{{ HomeSettings::get('home.tabs_title') }}</h2>
+			<div class="hm-tabs__list" role="tablist" aria-labelledby="hm-tabs-title" hidden>
+				@foreach ($sections['tabs'] as $tab)
+					<button class="hm-tabs__tab" type="button" role="tab" id="hm-tab-{{ $loop->index }}" aria-controls="hm-panel-{{ $loop->index }}" aria-selected="{{ $loop->first ? 'true' : 'false' }}" tabindex="{{ $loop->first ? '0' : '-1' }}">{{ $tab['category']->name }} ({{ number_format($tab['count'], 0, ',', '.') }})</button>
+				@endforeach
+			</div>
+			@foreach ($sections['tabs'] as $tab)
+				<div class="hm-tabs__panel" id="hm-panel-{{ $loop->index }}" role="tabpanel" aria-labelledby="hm-tab-{{ $loop->index }}" tabindex="0">
+					<h3 class="hm-tabs__heading">{{ $tab['category']->name }}</h3>
+					<div class="hm-grid">
+						@foreach ($tab['listings'] as $listing)
+							<x-listing-card :listing="$listing" heading="h4" />
+						@endforeach
+					</div>
+					<p class="hm-tabs__all"><a href="{{ $tab['category']->url() }}">Svi oglasi u kategoriji {{ $tab['category']->name }} ({{ number_format($tab['count'], 0, ',', '.') }})</a></p>
+				</div>
+			@endforeach
+		</section>
+	@endif
+
+	{{-- 6. Firms: cards for local firms and a small sign-up box; only when firms exist --}}
+	@if ($hmFirms['items'])
+		<section class="hm-sec hm-firms" aria-labelledby="hm-firms-title">
+			<div class="hm-sec__head hm-firms__head">
+				<div>
+					<h2 class="hm-sec__title" id="hm-firms-title">{{ HomeSettings::get('home.firms_title') }}</h2>
+					@if (HomeSettings::get('home.firms_text') !== '')
+						<p class="hm-firms__text">{{ HomeSettings::get('home.firms_text') }}</p>
+					@endif
+				</div>
+				@if (Route::has('firms.directory'))
+					<a class="hm-sec__link" href="{{ url_slash('/firme') }}">Sve firme ({{ number_format($hmFirms['total'], 0, ',', '.') }}){{ CategoryIcons::svg('arrow', 18, '2') }}</a>
+				@endif
+			</div>
+			<ul class="hm-firms__list">
+				@foreach ($hmFirms['items'] as $firm)
+					<li>
+						<a class="hm-firm hm-firm--{{ $loop->index % 4 }}" href="{{ $firm['url'] }}">
+							<span class="hm-firm__cover">
+								@if ($firm['cover'])
+									<img src="{{ $firm['cover'] }}" alt="" width="320" height="96" loading="lazy" decoding="async">
+								@endif
+							</span>
+							<span class="hm-firm__body">
+								<span class="hm-firm__logo">
+									@if ($firm['logo'])
+										<img src="{{ $firm['logo'] }}" alt="" width="64" height="64" loading="lazy" decoding="async">
+									@else
+										<span aria-hidden="true">{{ $firm['initials'] }}</span>
+									@endif
+								</span>
+								<span class="hm-firm__title"><span class="hm-firm__name">{{ $firm['name'] }}</span><span class="hm-firm__badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true" focusable="false"><path d="M5 12l5 5L20 7"/></svg>Firma</span></span>
+								@if ($firm['activity'] !== '' || $firm['place'] !== '')
+									<span class="hm-firm__meta">{{ implode(' · ', array_filter([$firm['activity'], $firm['place']])) }}</span>
+								@endif
+								<span class="hm-firm__foot"><span class="hm-firm__count">{{ number_format($firm['count'], 0, ',', '.') }} {{ Cenovnik::plural($firm['count'], 'oglas', 'oglasa', 'oglasa') }}</span><span class="hm-firm__more">Pogledaj profil</span></span>
+							</span>
+						</a>
+					</li>
+				@endforeach
+			</ul>
+			<div class="hm-firms__cta">
+				<span class="hm-firms__cta-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/></svg></span>
+				<div class="hm-firms__cta-text">
+					<h3>{{ HomeSettings::get('home.firms_cta_title') }}</h3>
+					@if (Cenovnik::offerOpen())
+						<p>Prvih {{ Cenovnik::foundingTotal() }} firmi koristi loglasi.rs besplatno 12 meseci. {{ sprintf(Cenovnik::plural(Cenovnik::foundingLeft(), 'Ostalo je još %d mesto.', 'Ostala su još %d mesta.', 'Ostalo je još %d mesta.'), Cenovnik::foundingLeft()) }}</p>
+					@else
+						<p>{{ HomeSettings::get('home.firms_cta_text') }}</p>
+					@endif
+				</div>
+				<a class="lg-btn hm-firms__btn" href="{{ HomeSettings::url('home.firms_url') }}">{{ HomeSettings::get('home.firms_button') }}</a>
+			</div>
+		</section>
+	@endif
+
+	{{-- 7. Why choose us (the old site's feature block, texts in PageText) --}}
+	@if ($hmWhy)
+		<section class="hm-sec" aria-labelledby="hm-why-title">
+			<h2 class="hm-sec__title" id="hm-why-title">{{ PageText::get('pocetna.zasto.naslov') }}</h2>
+			<ul class="hm-why">
+				@foreach ($hmWhy as $item)
+					<li class="hm-why__item">
+						<span class="hm-why__icon">{{ CategoryIcons::svg((string) ($item['ikonica'] ?? 'tag'), 24) }}</span>
+						<h3 class="hm-why__title">{{ PageText::replace((string) ($item['naslov'] ?? '')) }}</h3>
+						<p>{{ PageText::replace((string) ($item['tekst'] ?? '')) }}</p>
+					</li>
+				@endforeach
+			</ul>
+		</section>
+	@endif
+
+	{{-- 8. Frequently asked questions: the first ones from the FAQ page, the rest on /faq/ --}}
+	@if ($hmFaq)
+		<section class="hm-sec hm-faq" aria-labelledby="hm-faq-title">
+			<div class="hm-faq__uvod">
+				<h2 class="hm-sec__title" id="hm-faq-title">{{ PageText::get('pocetna.pitanja.naslov') }}</h2>
+				<p>Niste našli odgovor?@if ($hmEmail !== '') Pišite nam na <a href="mailto:{{ $hmEmail }}">{{ $hmEmail }}</a>@endif@if ($hmPhone !== ''){{ $hmEmail !== '' ? ' ili pozovite' : ' Pozovite' }} <a href="tel:{{ $hmPhone }}">{{ Phone::display($hmPhone) }}</a>@endif.</p>
+				<a class="hm-faq__sve" href="{{ url_slash('/faq') }}">Sva pitanja{{ CategoryIcons::svg('arrow', 18, '2') }}</a>
+			</div>
+			<div class="hm-faq__lista">
+				@foreach ($hmFaq as $item)
+					<details class="hm-faq__stavka">
+						<summary class="hm-faq__pitanje"><span>{{ PageText::replace((string) $item['pitanje']) }}</span>{{ CategoryIcons::svg('chevron', 20, '2.5') }}</summary>
+						<p class="hm-faq__odgovor">{{ PageText::inline((string) $item['odgovor']) }}</p>
+					</details>
+				@endforeach
+			</div>
+		</section>
+	@endif
+
+	{{-- 9. About the site --}}
+	<details class="hm-about">
+		<summary class="hm-about__summary"><h2 class="hm-about__title">{{ HomeSettings::get('home.about_title') }}</h2>{{ CategoryIcons::svg('chevron', 20, '2') }}</summary>
+		<div class="hm-about__text">{{ PageText::markdown($hmAbout !== '' ? $hmAbout : HomeSettings::ABOUT_DEFAULT) }}</div>
+	</details>
+</div>
+@endsection

@@ -20,10 +20,13 @@ return [
 
     // Slika za Open Graph kad strana nema svoju (putanja iz public/ ili apsolutni URL).
     'default_image' => env('SEO_DEFAULT_IMAGE', '/img/loglasi-og.png'),
-    'logo' => env('SEO_LOGO', '/img/loglasi-logo.png'),
+    'logo' => env('SEO_LOGO', '/img/brand/logo.png'),
 
     'organization' => [
-        'email' => 'kontakt.loglasi.rs@gmail.com',
+        'email' => 'kontakt@loglasi.rs',
+        'postal_code' => '15300',
+        'city' => 'Loznica',
+        'area_served' => ['Loznica', 'Banja Koviljača', 'Lešnica', 'Krupanj', 'Ljubovija', 'Mali Zvornik'],
         'same_as' => [
             'https://www.facebook.com/profile.php?id=61571911496798',
             'https://www.instagram.com/loglasi.rs/',
@@ -56,7 +59,7 @@ return [
     // Javne strane koje ulaze u /sitemap-strane.xml (i koje skripta provere očekuje kao 200 + index).
     'pages' => [
         '/', '/oglasi/', '/o-nama/', '/faq/', '/kontakt/', '/cenovnik/', '/za-firme/', '/firme/',
-        '/uslovi-koriscenja/', '/politika-privatnosti/',
+        '/uslovi-koriscenja/', '/politika-privatnosti/', '/brisanje-licnih-podataka/',
     ],
 
     // Narodna fraza po slugu kategorije (keyword mapa): naziv za title i H1, „za” = akuzativ za opis.
@@ -85,9 +88,26 @@ return [
     'targets' => [
         'kategorija_unknown' => '/oglasi/',
         'marka_automobila' => '/oglasi/automobili/',
-        'woo_product' => '/oglasi/',
-        'woo_shop' => '/oglasi/',
-        'woo_account' => '/',
+        // WooCommerce and checkout pages go to the price list (seo-sta-mora-da-ostane.md, section 7).
+        'woo_product' => '/cenovnik/',
+        'woo_shop' => '/cenovnik/',
+        'woo_account' => '/moj-nalog/',
+        'woo_cart' => '/cenovnik/',
+        // Old account panel and its tabs (za-laravel.md, section 7).
+        'panel' => '/moj-nalog/',
+        'panel_tabs' => [
+            'create' => '/postavi-oglas/',
+            'kreiraj' => '/postavi-oglas/',
+            'messages' => '/moj-nalog/poruke/',
+            'poruke' => '/moj-nalog/poruke/',
+            'listings' => '/moj-nalog/oglasi/',
+            'oglasi' => '/moj-nalog/oglasi/',
+            'favorites' => '/moj-nalog/omiljeni/',
+            'omiljeni' => '/moj-nalog/omiljeni/',
+            'saved' => '/moj-nalog/omiljeni/',
+            'business' => '/za-firme/',
+            'biznis' => '/za-firme/',
+        ],
         'wp_admin' => '/admin/',
         'wp_login' => '/prijava/',
     ],

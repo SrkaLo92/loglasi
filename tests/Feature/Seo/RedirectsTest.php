@@ -56,7 +56,25 @@ class RedirectsTest extends SeoTestCase
 
         $response = $this->get('/oglasi/?kategorija=automobili&cena-do=5000');
 
-        $this->assertNotContains($response->getStatusCode(), [301, 302, 308]);
+        // No permanent redirect; the list itself may move the category to the path (302).
+        $this->assertNotContains($response->getStatusCode(), [301, 308]);
+    }
+
+    public function test_comma_subcategory_urls_redirect_to_the_subcategory(): void
+    {
+        $parent = Category::factory()->create(['slug' => 'nekretnine']);
+        Category::factory()->create(['slug' => 'stanovi-prodaja', 'parent_id' => $parent->id]);
+
+        $this->get('/oglasi/nekretnine,stanovi-prodaja/?utm_source=x')->assertStatus(301)->assertTarget('/oglasi/stanovi-prodaja/');
+        $this->get('/oglasi/?kategorija=nekretnine,stanovi-prodaja')->assertStatus(301)->assertTarget('/oglasi/stanovi-prodaja/');
+        $this->get('/oglasi/nekretnine,nema/')->assertStatus(301)->assertTarget('/oglasi/');
+    }
+
+    public function test_old_pagination_parameter_redirects_to_page_path(): void
+    {
+        $this->get('/oglasi/?paginacija=2')->assertStatus(301)->assertTarget('/oglasi/page/2/');
+        $this->get('/oglasi/automobili/?paginacija=3&utm_source=x')->assertStatus(301)->assertTarget('/oglasi/automobili/page/3/');
+        $this->get('/oglasi/?paginacija=1')->assertStatus(301)->assertTarget('/oglasi/');
     }
 
     public function test_marka_automobila_redirects_to_cars(): void
@@ -81,13 +99,19 @@ class RedirectsTest extends SeoTestCase
             'yoast woo kat' => ['/product_cat-sitemap.xml', '/sitemap.xml'],
             'wp core sitemap' => ['/wp-sitemap.xml', '/sitemap.xml'],
             'wp core deo' => ['/wp-sitemap-posts-listivo_listing-1.xml', '/sitemap.xml'],
-            'woo proizvod' => ['/product/biznis-paket/', '/oglasi/'],
-            'woo proizvod bez kose crte' => ['/product/biznis-paket', '/oglasi/'],
-            'woo kategorija' => ['/product-category/paketi/', '/oglasi/'],
-            'woo prodavnica' => ['/shop/', '/oglasi/'],
-            'woo korpa' => ['/cart/', '/'],
-            'woo naplata' => ['/checkout/', '/'],
-            'woo nalog' => ['/my-account/orders/', '/'],
+            'woo proizvod' => ['/product/biznis-paket/', '/cenovnik/'],
+            'woo proizvod bez kose crte' => ['/product/biznis-paket', '/cenovnik/'],
+            'woo kategorija' => ['/product-category/paketi/', '/cenovnik/'],
+            'woo prodavnica' => ['/shop/', '/cenovnik/'],
+            'woo korpa' => ['/cart/', '/cenovnik/'],
+            'woo naplata' => ['/checkout/', '/cenovnik/'],
+            'naplata' => ['/naplata/', '/cenovnik/'],
+            'woo nalog' => ['/my-account/orders/', '/moj-nalog/'],
+            'panel' => ['/panel/', '/moj-nalog/'],
+            'panel novi oglas' => ['/panel/?tab=create', '/postavi-oglas/'],
+            'panel poruke' => ['/panel/?tab=messages', '/moj-nalog/poruke/'],
+            'panel nepoznat tab' => ['/panel/?tab=nesto', '/moj-nalog/'],
+            'panel kreiraj' => ['/panel/kreiraj/', '/postavi-oglas/'],
             'wp admin' => ['/wp-admin/', '/admin/'],
             'wp admin strana' => ['/wp-admin/edit.php', '/admin/'],
             'wp login' => ['/wp-login.php', '/prijava/'],
@@ -192,8 +216,8 @@ class RedirectsTest extends SeoTestCase
 
     public function test_api_and_admin_are_not_touched(): void
     {
-        Redirect::create(['from_path' => '/api/v1/listings/', 'to_path' => '/nesto/']);
+        Redirect::create(['from_path' => '/api/v1/nema-ovoga/', 'to_path' => '/nesto/']);
 
-        $this->get('/api/v1/listings')->assertNotFound();
+        $this->get('/api/v1/nema-ovoga')->assertNotFound();
     }
 }
