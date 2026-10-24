@@ -4,7 +4,7 @@ namespace App\Filament\Resources\Orders\Pages;
 
 use App\Enums\OrderStatus;
 use App\Filament\Resources\Orders\OrderResource;
-use App\Support\Settings;
+use App\Support\Payments\PaymentMode;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Contracts\Support\Htmlable;
@@ -18,7 +18,7 @@ class ListOrders extends ListRecords
     /** While payments are in test mode the page says so in a banner. */
     public function getSubheading(): string|Htmlable|null
     {
-        if (! (bool) Settings::get('payments.test_mode', true)) {
+        if (! PaymentMode::testMode()) {
             return null;
         }
 
@@ -34,7 +34,9 @@ class ListOrders extends ListRecords
                 ->modifyQueryUsing($status(OrderStatus::Pending))
                 ->badge(fn () => OrderResource::getNavigationBadge())
                 ->badgeColor('warning'),
-            'paid' => Tab::make('Plaćeno')->modifyQueryUsing($status(OrderStatus::Paid)),
+            'paid' => Tab::make('Plaćeno, nije uključeno')->modifyQueryUsing($status(OrderStatus::Paid)),
+            'activated' => Tab::make('Aktivirano')->modifyQueryUsing($status(OrderStatus::Activated)),
+            'refunded' => Tab::make('Refundirano')->modifyQueryUsing($status(OrderStatus::Refunded)),
             'cancelled' => Tab::make('Otkazano')->modifyQueryUsing($status(OrderStatus::Cancelled)),
             'all' => Tab::make('Sve'),
         ];

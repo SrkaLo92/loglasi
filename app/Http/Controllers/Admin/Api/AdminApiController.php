@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Api;
 use App\Enums\AccountType;
 use App\Enums\ListingStatus;
 use App\Enums\OrderStatus;
+use App\Exceptions\OrderException;
 use App\Http\Api\ApiError;
 use App\Http\Api\ApiResponse;
 use App\Http\Api\ListingFormatter;
@@ -136,6 +137,7 @@ class AdminApiController extends Controller
 
     public function verifyPhone(Request $request, int $id): JsonResponse
     {
+        $this->adminOnly($request);
         $user = User::query()->find($id) ?? throw ApiError::notFound('Korisnik ne postoji.');
         Gate::authorize('verifyPhone', $user);
 
@@ -152,6 +154,7 @@ class AdminApiController extends Controller
 
     public function orders(Request $request): Response|JsonResponse
     {
+        $this->adminOnly($request);
         $data = $request->validate([
             'status' => ['sometimes', 'string', 'in:awaiting_payment,paid,cancelled'],
             'page' => ['sometimes', 'integer', 'min:1', 'max:10000'],
@@ -161,8 +164,8 @@ class AdminApiController extends Controller
         ]);
 
         $statuses = match ($data['status'] ?? 'awaiting_payment') {
-            'paid' => array_values(array_filter([OrderStatus::Paid->value, OrderStatus::tryFrom('activated')?->value])),
-            'cancelled' => array_values(array_filter([OrderStatus::Cancelled->value, OrderStatus::tryFrom('refunded')?->value])),
+            'paid' => [OrderStatus::Paid->value, OrderStatus::Activated->value],
+            'cancelled' => [OrderStatus::Cancelled->value, OrderStatus::Refunded->value],
             default => [OrderStatus::Pending->value],
         };
 
@@ -178,16 +181,20 @@ class AdminApiController extends Controller
 
     public function markPaid(Request $request, int $id): JsonResponse
     {
+        $this->adminOnly($request);
         $data = $request->validate([
             'receipt_number' => ['sometimes', 'nullable', 'string', 'max:64'],
             'note' => ['sometimes', 'nullable', 'string', 'max:1000'],
+        ], [
+            'receipt_number.*' => 'Broj računa može imati najviše 64 znaka.',
+            'note.*' => 'Napomena može imati najviše 1000 znakova.',
         ]);
 
         $order = Order::query()->find($id) ?? throw ApiError::notFound('Narudžbina ne postoji.');
 
         try {
-            app(OrderAdministration::class)->markPaid($order, $request->user(), $data['note'] ?? null, $data['receipt_number'] ?? null);
-        } catch (DomainException $e) {
+            app(OrderAdministration::class)->markPaid($order, $request->user(), $data['receipt_number'] ?? null, note: $data['note'] ?? null);
+        } catch (DomainException|OrderException $e) {
             throw new ApiError('order_not_payable', $e->getMessage(), 409);
         }
 
@@ -201,6 +208,14 @@ class AdminApiController extends Controller
         ], ['period.in' => 'Period mora biti today, 7d ili 30d.']);
 
         return ApiResponse::json($request, app(AdminStats::class)->api($data['period'] ?? '7d'), ApiResponse::CACHE_PRIVATE);
+    }
+
+    /** Moderators work on listings only; accounts and money are for admins. */
+    private function adminOnly(Request $request): void
+    {
+        if (! $request->user()?->isAdmin()) {
+            throw ApiError::forbidden('Ovo može samo administrator.');
+        }
     }
 
     private function listing(int $id): Listing

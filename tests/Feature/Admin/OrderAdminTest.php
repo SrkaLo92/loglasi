@@ -2,148 +2,144 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Enums\AccountType;
 use App\Enums\OrderStatus;
 use App\Filament\Resources\Orders\Pages\ListOrders;
 use App\Models\AuditLog;
-use App\Models\Firm;
-use App\Models\Listing;
 use App\Models\Order;
-use App\Models\Product;
-use App\Models\User;
 use App\Services\OrderFulfillment;
-use Database\Seeders\ProductSeeder;
-use DomainException;
+use App\Support\Payments\PaymentMode;
+use App\Support\Settings;
 use Livewire\Livewire;
 use Tests\Feature\Admin\Concerns\ActsAsStaff;
-use Tests\TestCase;
+use Tests\Feature\Payments\PaymentsTestCase;
 
-class OrderAdminTest extends TestCase
+/** The orders screen drives the payments module (OrderFulfillment, OrderService). */
+class OrderAdminTest extends PaymentsTestCase
 {
     use ActsAsStaff;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(ProductSeeder::class);
+        // Real mode: receipt numbers come from the admin (manual fiscalisation).
+        Settings::set(PaymentMode::TEST_MODE, false);
     }
 
-    private function order(string $code, ?Listing $listing = null, ?User $user = null): Order
+    private function featuredOrder(string $code = 'featured_7'): Order
     {
-        $product = Product::byCode($code);
-        $user ??= $listing?->user ?? User::factory()->create();
+        $seller = $this->seller();
 
-        return Order::create([
-            'user_id' => $user->id,
-            'product_id' => $product->id,
-            'listing_id' => $listing?->id,
-            'amount_rsd' => $product->price_rsd,
-            'reference' => 'LG-'.fake()->unique()->numerify('######'),
-        ]);
+        return $this->order($seller, $code, $this->listingOf($seller, ['featured_until' => null]), $this->firmBuyer());
     }
 
-    public function test_mark_paid_featured_7_from_panel(): void
+    public function test_mark_paid_from_panel_records_receipt_and_activates(): void
     {
-        $listing = Listing::factory()->create(['featured_until' => null]);
-        $order = $this->order(Product::FEATURED_7, $listing);
+        $order = $this->featuredOrder();
         $this->signIn($admin = $this->admin());
 
-        Livewire::test(ListOrders::class)->callTableAction('markPaid', $order, ['note' => 'Uplata 24. 10.'])->assertHasNoTableActionErrors();
+        Livewire::test(ListOrders::class)
+            ->callTableAction('markPaid', $order, ['paid_at' => now()->toDateString(), 'receipt_number' => 'F-2026-17', 'note' => 'Uplata 24. 10.'])
+            ->assertHasNoTableActionErrors();
 
         $order->refresh();
-        $this->assertSame(OrderStatus::Paid, $order->status);
-        $this->assertNotNull($order->paid_at);
+        $this->assertSame(OrderStatus::Activated, $order->status);
+        $this->assertSame('F-2026-17', $order->receipt_number);
         $this->assertSame($admin->id, $order->marked_paid_by);
-        $this->assertSame('Uplata 24. 10.', $order->note);
-        $this->assertTrue($listing->refresh()->featured_until->between(now()->addDays(7)->subMinute(), now()->addDays(7)->addMinute()));
-        $log = AuditLog::where('action', 'order.mark_paid')->first();
-        $this->assertSame($order->reference, $log->changes['reference']);
-        $this->assertSame($admin->id, $log->user_id);
+        $this->assertStringContainsString('Uplata 24. 10.', (string) $order->note);
+        $this->assertTrue($order->listing->refresh()->featured_until->isFuture());
+        $this->assertSame($admin->id, AuditLog::where('action', 'order.paid')->where('subject_id', $order->id)->value('user_id'));
     }
 
-    public function test_featured_30_extends_a_running_feature(): void
+    public function test_paid_date_cannot_be_in_the_future(): void
     {
-        $listing = Listing::factory()->create(['featured_until' => now()->addDays(5)]);
-        $order = $this->order(Product::FEATURED_30, $listing);
-
-        app(OrderFulfillment::class)->markPaid($order, $this->admin());
-
-        $this->assertTrue($listing->refresh()->featured_until->between(now()->addDays(35)->subMinute(), now()->addDays(35)->addMinute()));
-    }
-
-    public function test_bump_sets_bumped_at_now(): void
-    {
-        $listing = Listing::factory()->create(['bumped_at' => now()->subMonth()]);
-        app(OrderFulfillment::class)->markPaid($this->order(Product::BUMP, $listing), $this->admin());
-
-        $this->assertTrue($listing->refresh()->bumped_at->isAfter(now()->subMinute()));
-    }
-
-    public function test_biznis_adds_365_days_and_makes_a_firm(): void
-    {
-        $private = User::factory()->create();
-        app(OrderFulfillment::class)->markPaid($this->order(Product::BIZNIS_12M, user: $private), $this->admin());
-
-        $private->refresh();
-        $this->assertSame(AccountType::Firm, $private->account_type);
-        $this->assertTrue($private->firm->biznis_until->between(now()->addDays(365)->subMinute(), now()->addDays(365)->addMinute()));
-
-        $firmUser = User::factory()->create(['account_type' => AccountType::Firm]);
-        $firm = Firm::factory()->for($firmUser)->create();
-        $firm->forceFill(['biznis_until' => now()->addDays(10)])->save();
-        app(OrderFulfillment::class)->markPaid($this->order(Product::BIZNIS_12M, user: $firmUser), $this->admin());
-        $this->assertTrue($firm->refresh()->biznis_until->between(now()->addDays(375)->subMinute(), now()->addDays(375)->addMinute()));
-    }
-
-    public function test_mark_paid_is_idempotent(): void
-    {
-        $listing = Listing::factory()->create(['featured_until' => null]);
-        $order = $this->order(Product::FEATURED_7, $listing);
-        $admin = $this->admin();
-
-        app(OrderFulfillment::class)->markPaid($order, $admin);
-        $first = $listing->refresh()->featured_until;
-        app(OrderFulfillment::class)->markPaid($order->fresh(), $admin);
-
-        $this->assertTrue($listing->refresh()->featured_until->equalTo($first));
-    }
-
-    public function test_cancel_and_cancelled_cannot_be_paid(): void
-    {
-        $listing = Listing::factory()->create(['featured_until' => null]);
-        $order = $this->order(Product::FEATURED_7, $listing);
+        $order = $this->featuredOrder();
         $this->signIn($this->admin());
 
-        Livewire::test(ListOrders::class)->callTableAction('cancel', $order, ['note' => 'Nije uplaćeno.']);
-        $this->assertSame(OrderStatus::Cancelled, $order->refresh()->status);
-        $this->assertDatabaseHas('audit_logs', ['action' => 'order.cancel', 'subject_id' => $order->id]);
-
-        Livewire::withQueryParams(['tab' => 'all'])->test(ListOrders::class)->assertTableActionHidden('markPaid', $order);
-
-        $this->expectException(DomainException::class);
-        app(OrderFulfillment::class)->markPaid($order, $this->admin());
-    }
-
-    public function test_listing_product_without_listing_is_rejected_and_rolled_back(): void
-    {
-        $order = $this->order(Product::FEATURED_7);
-
-        try {
-            app(OrderFulfillment::class)->markPaid($order, $this->admin());
-            $this->fail('Expected DomainException');
-        } catch (DomainException) {
-        }
+        Livewire::test(ListOrders::class)
+            ->callTableAction('markPaid', $order, ['paid_at' => now()->addDays(2)->toDateString()])
+            ->assertHasTableActionErrors(['paid_at']);
 
         $this->assertSame(OrderStatus::Pending, $order->refresh()->status);
     }
 
-    public function test_moderator_can_mark_paid(): void
+    public function test_receipt_number_can_be_entered_later(): void
     {
-        $listing = Listing::factory()->create();
-        $order = $this->order(Product::BUMP, $listing);
+        $order = $this->featuredOrder();
+        app(OrderFulfillment::class)->markPaid($order, $this->admin());
+        $this->assertNull($order->refresh()->receipt_number);
+        $this->signIn($this->admin());
+
+        Livewire::withQueryParams(['tab' => 'all'])->test(ListOrders::class)
+            ->callTableAction('recordReceipt', $order, ['receipt_number' => 'F-2026-18'])
+            ->assertHasNoTableActionErrors();
+
+        $this->assertSame('F-2026-18', $order->refresh()->receipt_number);
+    }
+
+    public function test_cancel_then_late_payment_is_still_accepted(): void
+    {
+        $order = $this->featuredOrder();
+        $this->signIn($this->admin());
+
+        Livewire::test(ListOrders::class)->callTableAction('cancel', $order, ['note' => 'Nije uplaćeno.']);
+        $this->assertSame(OrderStatus::Cancelled, $order->refresh()->status);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'order.cancelled_by_admin', 'subject_id' => $order->id]);
+
+        Livewire::withQueryParams(['tab' => 'all'])->test(ListOrders::class)
+            ->assertTableActionHidden('cancel', $order)
+            ->callTableAction('markPaid', $order, ['paid_at' => now()->toDateString()]);
+
+        $this->assertSame(OrderStatus::Activated, $order->refresh()->status);
+    }
+
+    public function test_refund_defaults_to_the_pro_rata_amount(): void
+    {
+        $order = $this->pay($this->featuredOrder('featured_30'));
+        $this->travel(10)->days();
+        $expected = app(OrderFulfillment::class)->refundableAmount($order->fresh());
+        $this->assertGreaterThan(0, $expected);
+        $this->assertLessThan($order->amount_rsd, $expected);
+        $this->signIn($this->admin());
+
+        Livewire::withQueryParams(['tab' => 'all'])->test(ListOrders::class)
+            ->mountTableAction('refund', $order)
+            ->assertTableActionDataSet(['amount_rsd' => $expected])
+            ->setTableActionData(['reason' => 'Kupac je prodao auto.', 'refund_receipt_number' => 'KO-1'])
+            ->callMountedTableAction()
+            ->assertHasNoTableActionErrors();
+
+        $order->refresh();
+        $this->assertSame(OrderStatus::Refunded, $order->status);
+        $this->assertSame($expected, (int) $order->refund_amount_rsd);
+        $this->assertSame('KO-1', $order->refund_receipt_number);
+        $this->assertStringContainsString('Kupac je prodao auto.', (string) $order->note);
+    }
+
+    public function test_refund_needs_a_reason(): void
+    {
+        $order = $this->pay($this->featuredOrder());
+        $this->signIn($this->admin());
+
+        Livewire::withQueryParams(['tab' => 'all'])->test(ListOrders::class)
+            ->callTableAction('refund', $order, ['reason' => '', 'amount_rsd' => 10])
+            ->assertHasTableActionErrors(['reason']);
+
+        $this->assertSame(OrderStatus::Activated, $order->refresh()->status);
+    }
+
+    public function test_test_mode_banner(): void
+    {
+        $this->signIn($this->admin());
+        $this->get('/admin/orders')->assertOk()->assertDontSee('TEST REŽIM');
+
+        Settings::set(PaymentMode::TEST_MODE, true);
+        $this->get('/admin/orders')->assertOk()->assertSee('TEST REŽIM');
+    }
+
+    public function test_moderator_has_no_access_to_orders(): void
+    {
         $this->signIn($this->moderator());
 
-        Livewire::test(ListOrders::class)->callTableAction('markPaid', $order);
-        $this->assertSame(OrderStatus::Paid, $order->refresh()->status);
+        $this->get('/admin/orders')->assertForbidden();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Orders;
 
+use App\Enums\BuyerType;
 use App\Enums\OrderStatus;
 use App\Filament\Resources\Listings\ListingResource;
 use App\Filament\Resources\Orders\Pages\ListOrders;
@@ -11,19 +12,23 @@ use App\Filament\Support\StaffAccess;
 use App\Models\Order;
 use App\Models\Product;
 use BackedEnum;
+use Filament\Actions\ActionGroup;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\PaginationMode;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Schema;
 use UnitEnum;
 
-/** Bank transfer orders. Read-only table; writes go through OrderFulfillment. */
+/** Bank transfer orders. No form; every write is an action that goes through the payments module. */
 class OrderResource extends Resource
 {
     use StaffAccess;
+
+    protected static bool $adminOnly = true;
 
     protected static bool $readOnly = true;
 
@@ -83,7 +88,9 @@ class OrderResource extends Resource
                 ->formatStateUsing(fn (OrderStatus $state) => $state->label())
                 ->color(fn (OrderStatus $state) => match ($state) {
                     OrderStatus::Pending => 'warning',
-                    OrderStatus::Paid => 'success',
+                    OrderStatus::Paid => 'info',
+                    OrderStatus::Activated => 'success',
+                    OrderStatus::Refunded => 'danger',
                     OrderStatus::Cancelled => 'gray',
                     default => 'info',
                 }),
@@ -92,41 +99,28 @@ class OrderResource extends Resource
         ]));
     }
 
-    /** @var array<string, bool> */
-    private static array $columnCache = [];
-
-    /** Columns added by the payments module are shown only once they exist. */
-    public static function hasColumn(string $column): bool
-    {
-        return self::$columnCache[$column] ??= Schema::hasColumn('orders', $column);
-    }
-
     /** @return list<TextColumn> */
     public static function paymentColumns(): array
     {
-        $optional = [
-            'buyer_type' => fn () => TextColumn::make('buyer_type')->label('Kupac')->formatStateUsing(fn ($state) => match ((string) ($state instanceof BackedEnum ? $state->value : $state)) {
-                'firm' => 'Firma',
-                'private' => 'Fizičko lice',
-                default => (string) ($state instanceof BackedEnum ? $state->value : $state),
+        return [
+            TextColumn::make('buyer_type')->label('Kupac')->formatStateUsing(fn (?BuyerType $state) => match ($state) {
+                BuyerType::Firm => 'Firma',
+                BuyerType::Private => 'Fizičko lice',
+                default => '—',
             }),
-            'buyer_name' => fn () => TextColumn::make('buyer_name')->label('Naziv kupca')->searchable()->placeholder('—'),
-            'buyer_pib' => fn () => TextColumn::make('buyer_pib')->label('PIB')->placeholder('—')->toggleable(),
-            'buyer_mb' => fn () => TextColumn::make('buyer_mb')->label('MB')->placeholder('—')->toggleable(isToggledHiddenByDefault: true),
-            'receipt_number' => fn () => TextColumn::make('receipt_number')->label('Broj računa')->searchable()->placeholder('—'),
-            'consent_at' => fn () => TextColumn::make('consent_at')->label('Saglasnost')->dateTime('j. n. Y. H:i')->description(fn (Order $r) => static::hasColumn('consent_ip') ? $r->consent_ip : null)->toggleable(isToggledHiddenByDefault: true),
-            'refund_of_receipt' => fn () => TextColumn::make('refund_of_receipt')->label('Storno računa')->placeholder('—')->toggleable(isToggledHiddenByDefault: true),
-            'refunded_at' => fn () => TextColumn::make('refunded_at')->label('Vraćeno')->dateTime('j. n. Y. H:i')->placeholder('—')->toggleable(isToggledHiddenByDefault: true),
+            TextColumn::make('buyer_name')->label('Naziv kupca')->searchable()->placeholder('—'),
+            TextColumn::make('buyer_pib')->label('PIB')->placeholder('—')->toggleable(),
+            TextColumn::make('buyer_mb')->label('MB')->placeholder('—')->toggleable(isToggledHiddenByDefault: true),
+            TextColumn::make('receipt_number')->label('Broj računa')->searchable()->placeholder('—')
+                ->description(fn (Order $r) => $r->advance_receipt_number ? 'Avansni: '.$r->advance_receipt_number : null),
+            TextColumn::make('service_ends_at')->label('Usluga do')->dateTime('j. n. Y.')->placeholder('—')->toggleable(),
+            TextColumn::make('consent_at')->label('Saglasnost')->dateTime('j. n. Y. H:i')->description(fn (Order $r) => $r->consent_ip)->toggleable(isToggledHiddenByDefault: true),
+            TextColumn::make('refund_amount_rsd')->label('Vraćeno')
+                ->formatStateUsing(fn ($state) => number_format((int) $state, 0, ',', '.').' din')
+                ->description(fn (Order $r) => $r->refund_receipt_number ? 'Storno: '.$r->refund_receipt_number : null)
+                ->placeholder('—')->toggleable(isToggledHiddenByDefault: true),
+            TextColumn::make('is_test')->label('Test')->formatStateUsing(fn ($state) => $state ? 'TEST' : '')->badge()->color('warning')->toggleable(),
         ];
-
-        $out = [];
-        foreach ($optional as $column => $make) {
-            if (static::hasColumn($column)) {
-                $out[] = $make();
-            }
-        }
-
-        return $out;
     }
 
     public static function table(Table $table): Table
@@ -143,12 +137,17 @@ class OrderResource extends Resource
                 SelectFilter::make('product_id')
                     ->label('Usluga')
                     ->options(fn () => Product::query()->orderBy('sort')->pluck('name', 'id')->all()),
+                TernaryFilter::make('is_test')->label('Test narudžbine')->trueLabel('Samo test')->falseLabel('Bez test'),
             ])
+            ->paginationMode(PaginationMode::Simple)
             ->recordActions([
                 OrderActions::markPaid(),
-                OrderActions::activate(),
-                OrderActions::refund(),
-                OrderActions::cancel(),
+                ActionGroup::make([
+                    OrderActions::activate(),
+                    OrderActions::recordReceipt(),
+                    OrderActions::refund(),
+                    OrderActions::cancel(),
+                ]),
             ]);
     }
 

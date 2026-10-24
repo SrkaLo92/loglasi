@@ -2,6 +2,7 @@
 
 namespace App\Filament\Support;
 
+use App\Exceptions\OrderException;
 use DomainException;
 use Filament\Notifications\Notification;
 
@@ -12,7 +13,7 @@ class Notify
     {
         try {
             $callback();
-        } catch (DomainException $e) {
+        } catch (DomainException|OrderException $e) {
             Notification::make()->title($e->getMessage())->danger()->send();
 
             return false;

@@ -3,106 +3,124 @@
 namespace App\Services\Admin;
 
 use App\Enums\OrderStatus;
-use App\Models\AuditLog;
 use App\Models\Order;
 use App\Models\User;
 use App\Services\OrderFulfillment;
+use App\Services\OrderService;
+use App\Services\Payments\PaymentConfirmation;
+use Carbon\CarbonInterface;
 use DomainException;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
-/** Admin side of orders: "Označi kao plaćeno" (through OrderFulfillment) and cancelling. Writes the audit log. */
+/**
+ * Admin side of orders. The work is done by the payments module (OrderFulfillment, OrderService),
+ * which locks the order, is idempotent and writes the audit log; this class only checks input.
+ */
 class OrderAdministration
 {
-    public function __construct(private readonly OrderFulfillment $fulfillment) {}
+    public function __construct(
+        private readonly OrderFulfillment $fulfillment,
+        private readonly OrderService $orders,
+    ) {}
 
-    /**
-     * @throws DomainException when the order is cancelled
-     */
-    public function markPaid(Order $order, User $by, ?string $note = null, ?string $receiptNumber = null): Order
-    {
-        $order->refresh();
-
-        if ($order->status === OrderStatus::Cancelled) {
-            throw new DomainException('Otkazana narudžbina ne može da se označi kao plaćena.');
+    public function markPaid(
+        Order $order,
+        User $by,
+        ?string $receiptNumber = null,
+        ?string $advanceReceiptNumber = null,
+        ?CarbonInterface $paidAt = null,
+        ?string $note = null,
+    ): Order {
+        if ($paidAt !== null && $paidAt->isFuture()) {
+            throw new DomainException('Datum uplate ne može biti u budućnosti.');
         }
-        if ($order->status === OrderStatus::Paid) {
-            return $order;
-        }
-
-        // receipt_number comes with the payments module; it is saved before the effect runs.
-        if ($receiptNumber !== null && trim($receiptNumber) !== '' && Schema::hasColumn('orders', 'receipt_number')) {
-            $order->forceFill(['receipt_number' => mb_substr(trim($receiptNumber), 0, 64)])->save();
-        }
-
-        $this->fulfillment->markPaid($order, $by);
-        $order->refresh();
-
-        if ($note !== null && trim($note) !== '') {
-            $order->forceFill(['note' => trim($note)])->save();
+        if ($order->status->isPaid()) {
+            throw new DomainException('Narudžbina je već plaćena.');
         }
 
-        $order->loadMissing(['product', 'listing', 'user.firm']);
-        AuditLog::record('order.mark_paid', $order, array_filter([
-            'reference' => $order->reference,
-            'receipt_number' => $receiptNumber !== null && trim($receiptNumber) !== '' ? trim($receiptNumber) : null,
-            'product' => $order->product?->code,
-            'amount_rsd' => (int) $order->amount_rsd,
-            'listing_id' => $order->listing_id,
-            'featured_until' => $order->listing?->featured_until?->toIso8601String(),
-            'biznis_until' => $order->user?->firm?->biznis_until?->toIso8601String(),
-        ], fn ($v) => $v !== null));
+        $this->fulfillment->markPaid($order, $by, new PaymentConfirmation(
+            paidAt: $paidAt,
+            receiptNumber: self::clean($receiptNumber),
+            advanceReceiptNumber: self::clean($advanceReceiptNumber),
+        ));
+        $this->appendNote($order, $note);
 
         return $order;
     }
 
+    /** Retries activation of a paid order (e.g. after the listing was restored). */
     public function activate(Order $order, User $by): Order
     {
-        $this->fulfillment->activate($order, $by);
-        AuditLog::record('order.activate', $order, ['reference' => $order->reference]);
+        if (! $this->fulfillment->activate($order, $by)) {
+            throw new DomainException('Narudžbina ne čeka aktivaciju.');
+        }
 
-        return $order->refresh();
+        return $order;
     }
 
-    public function refund(Order $order, User $by, string $reason): Order
+    public function recordReceipt(Order $order, User $by, ?string $receiptNumber, ?string $advanceReceiptNumber = null): Order
+    {
+        if (self::clean($receiptNumber) === null && self::clean($advanceReceiptNumber) === null) {
+            throw new DomainException('Upišite broj računa.');
+        }
+
+        $this->fulfillment->recordReceipt($order, new PaymentConfirmation(
+            receiptNumber: self::clean($receiptNumber),
+            advanceReceiptNumber: self::clean($advanceReceiptNumber),
+        ), $by);
+
+        return $order;
+    }
+
+    /** Pro-rata by default; $amountRsd overrides it (capped at the paid amount by the payments module). */
+    public function refund(Order $order, User $by, string $reason, ?string $refundReceiptNumber = null, ?int $amountRsd = null): Order
     {
         $reason = trim($reason);
         if ($reason === '') {
             throw new DomainException('Upišite razlog povraćaja.');
         }
-
-        $this->fulfillment->refund($order, $by, $reason);
-        AuditLog::record('order.refund', $order->refresh(), ['reference' => $order->reference, 'reason' => $reason]);
+        if ($amountRsd !== null && ($amountRsd < 0 || $amountRsd > (int) $order->amount_rsd)) {
+            throw new DomainException('Iznos povraćaja mora biti između 0 i plaćenog iznosa.');
+        }
+        if (! $this->fulfillment->refund($order, self::clean($refundReceiptNumber), 'Povraćaj: '.$reason, $by, $amountRsd)) {
+            throw new DomainException('Narudžbina je već refundirana.');
+        }
 
         return $order;
     }
 
-    /** Statuses after payment: "paid", and "activated" once the payments module adds it. */
-    public static function paidStatuses(): array
+    public function refundableAmount(Order $order): int
     {
-        return array_values(array_filter([OrderStatus::Paid, OrderStatus::tryFrom('activated')]));
+        return $this->fulfillment->refundableAmount($order);
     }
 
-    /** @throws DomainException when the order is not pending */
-    public function cancel(Order $order, ?string $note = null): Order
+    public function cancel(Order $order, User $by, ?string $note = null): Order
     {
-        return DB::transaction(function () use ($order, $note) {
-            /** @var Order $locked */
-            $locked = Order::query()->whereKey($order->getKey())->lockForUpdate()->firstOrFail();
+        if (! $this->orders->cancel($order, $by, 'order.cancelled_by_admin')) {
+            throw new DomainException('Otkazati se može samo narudžbina koja čeka uplatu.');
+        }
+        $this->appendNote($order, $note);
 
-            if ($locked->status !== OrderStatus::Pending) {
-                throw new DomainException('Otkazati se može samo narudžbina koja čeka uplatu.');
-            }
+        return $order;
+    }
 
-            $locked->forceFill([
-                'status' => OrderStatus::Cancelled,
-                'note' => $note !== null && trim($note) !== '' ? trim($note) : $locked->note,
-            ])->save();
+    /** @return list<OrderStatus> */
+    public static function paidStatuses(): array
+    {
+        return [OrderStatus::Paid, OrderStatus::Activated];
+    }
 
-            AuditLog::record('order.cancel', $locked, ['reference' => $locked->reference]);
-            $order->setRawAttributes($locked->getAttributes(), true);
+    private function appendNote(Order $order, ?string $note): void
+    {
+        $note = trim((string) $note);
+        if ($note !== '') {
+            $order->forceFill(['note' => trim(($order->note ? $order->note."\n" : '').mb_substr($note, 0, 1000))])->save();
+        }
+    }
 
-            return $order;
-        });
+    private static function clean(?string $value): ?string
+    {
+        $value = trim((string) $value);
+
+        return $value === '' ? null : mb_substr($value, 0, 64);
     }
 }
