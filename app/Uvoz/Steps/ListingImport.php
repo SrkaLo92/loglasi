@@ -5,6 +5,7 @@ namespace App\Uvoz\Steps;
 use App\Enums\Currency;
 use App\Enums\FieldType;
 use App\Enums\ListingStatus;
+use App\Support\Catalog\FieldValue;
 use App\Support\Price;
 use App\Uvoz\Importer;
 use App\Uvoz\Phone;
@@ -245,8 +246,8 @@ class ListingImport extends Step
                 continue;
             }
             $amount = Text::amount($values[0] ?? '');
-            if ($amount === null) {
-                continue;
+            if ($amount === null || $amount <= 0) {
+                continue; // Listivo saves an empty price as 0: "Dogovor"
             }
             $code = $this->currencyForTerm((int) $m[1]);
             $found[$code] ??= $amount;
@@ -379,12 +380,15 @@ class ListingImport extends Step
                 continue;
             }
 
-            if ($type === FieldType::Number) {
+            if ($type === FieldType::Number || $type === FieldType::Year) {
                 $num = Text::number($values[0]);
                 if ($num === null) {
                     $this->report->note('field_values', "#{$listingId} {$field->key}: „{$values[0]}” nije broj");
 
                     continue;
+                }
+                if (! FieldValue::meaningful($type, $num)) {
+                    continue; // Listivo saves every empty number field as 0
                 }
                 $rows[] = ['listing_id' => $listingId, 'field_id' => $field->id, 'value' => rtrim(rtrim(number_format($num, 2, '.', ''), '0'), '.'), 'value_num' => $num];
             } elseif (in_array($type, [FieldType::Multiselect], true)) {

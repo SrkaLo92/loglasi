@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Field;
 use App\Models\Listing;
 use App\Models\ListingFieldValue;
+use App\Support\Catalog\FieldValue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Collection;
@@ -31,7 +32,7 @@ class ListingFields
     /** Najveći broj koji staje u value_num (decimal 16,2). */
     private const NUMBER_MAX = 99999999999999;
 
-    private const YEAR_MIN = 1900;
+    public const YEAR_MIN = 1900;
 
     public function __construct(private readonly Catalog $catalog) {}
 
@@ -210,7 +211,7 @@ class ListingFields
                 continue;
             }
 
-            $raw = $rows->pluck('value')->filter(fn ($v) => $v !== null && $v !== '')->values()->all();
+            $raw = $rows->pluck('value')->filter(fn ($v) => FieldValue::meaningful($field->type, $v))->values()->all();
             if ($raw === []) {
                 continue;
             }

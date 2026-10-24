@@ -184,6 +184,40 @@ class UvozWordpressTest extends UvozTestCase
         $this->assertEqualsCanonicalizing(['listivo_1910', 'listivo_1911', 'listivo_945', 'listivo_1912', 'loglasi_moguca_zamena'], $automobili->fields->pluck('wp_key')->all());
     }
 
+    public function test_empty_numbers_saved_as_zero_are_not_imported(): void
+    {
+        // Listivo keeps every empty number field as 0, also fields of other categories
+        $this->wp()->table('postmeta')->insert([
+            ['post_id' => 5002, 'meta_key' => 'listivo_1912', 'meta_value' => '0'],
+            ['post_id' => 5003, 'meta_key' => 'listivo_130_listivo_435', 'meta_value' => '0'],
+        ]);
+
+        $this->import()->assertSuccessful();
+
+        $km = Field::where('wp_key', 'listivo_1912')->first();
+        $this->assertFalse(DB::table('listing_field_values')->where('listing_id', 5002)->where('field_id', $km->id)->exists());
+        $stan = Listing::find(5002);
+        $this->assertNotContains('listivo_1912', $stan->category->fields->pluck('wp_key')->all());
+        $this->assertNull(Listing::find(5003)->price);
+    }
+
+    public function test_clean_fields_command_repairs_an_older_import(): void
+    {
+        $this->import()->assertSuccessful();
+        $km = Field::where('wp_key', 'listivo_1912')->first();
+        $stan = Listing::find(5002);
+        DB::table('listing_field_values')->insert(['listing_id' => 5002, 'field_id' => $km->id, 'value' => '0', 'value_num' => 0]);
+        DB::table('category_field')->insert(['category_id' => $stan->category_id, 'field_id' => $km->id, 'required' => false, 'sort' => 0]);
+
+        $this->artisan('uvoz:ocisti-polja')->expectsOutputToContain('Removed 1 empty field values (1 listings) and 1 unused')->assertSuccessful();
+
+        $this->assertFalse(DB::table('listing_field_values')->where('listing_id', 5002)->where('field_id', $km->id)->exists());
+        $this->assertFalse(DB::table('category_field')->where('category_id', $stan->category_id)->where('field_id', $km->id)->exists());
+        $automobili = Category::where('slug', 'automobili')->first();
+        $this->assertContains('listivo_1912', $automobili->fields()->pluck('wp_key')->all());
+        $this->assertSame('185000.00', DB::table('listing_field_values')->where('listing_id', 5001)->where('field_id', $km->id)->value('value_num'));
+    }
+
     public function test_field_definitions_can_be_overridden_in_config(): void
     {
         config(['uvoz.fields' => ['listivo_1912' => ['key' => 'km', 'unit' => 'km']]]);

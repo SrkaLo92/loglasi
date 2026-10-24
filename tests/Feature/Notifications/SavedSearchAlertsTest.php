@@ -223,7 +223,7 @@ class SavedSearchAlertsTest extends TestCase
     public function test_old_sent_matches_are_pruned(): void
     {
         $search = $this->search();
-        $listing = Listing::factory()->create();
+        $listing = Listing::factory()->create(['published_at' => now()->subDays(40)]); // outside the alert window, so it never matches again
         SavedSearchMatch::create(['saved_search_id' => $search->id, 'listing_id' => $listing->id, 'created_at' => now()->subDays(40), 'notified_at' => now()->subDays(40)]);
 
         $this->runAlerts();
