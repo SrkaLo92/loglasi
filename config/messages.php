@@ -17,11 +17,6 @@ return [
     'duplicate_conversations' => 3,
     'duplicate_window_hours' => 24,
 
-    // Email to the recipient: at most one per conversation in this many minutes,
-    // sent after a short delay so a recipient who is reading the conversation gets none.
-    'mail_window_minutes' => 15,
-    'mail_delay_seconds' => 120,
-
     // Page sizes.
     'inbox_per_page' => 20,
     'messages_per_page' => 50,

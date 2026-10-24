@@ -1,6 +1,6 @@
 # Messages module: buyer–seller conversations and favourites
 
-Private messages between a buyer and a seller about a listing, read receipts, unread counters, recipient email, and saved listings ("Omiljeni"). Site pages and the mobile API share one service (`App\Services\Messages\Messenger`), so the same rules hold on both.
+Private messages between a buyer and a seller about a listing, read receipts, unread counters, blocking and reporting, and saved listings ("Omiljeni"). Email and push to the recipient belong to the notifications module (it listens to `MessageSent`). Site pages and the mobile API share one service (`App\Services\Messages\Messenger`), so the same rules hold on both.
 
 ## Site pages (Blade, work without JS, all `noindex,follow`)
 
@@ -11,9 +11,11 @@ Private messages between a buyer and a seller about a listing, read receipts, un
 | `POST /moj-nalog/poruke/novo/` | `messages.store` | Fields `oglas`, `body`. Redirects to the conversation. |
 | `GET /moj-nalog/poruke/{id}/` | `messages.show` | Conversation: listing summary, last 50 messages (`?before={id}` for older), "Pročitano" under my last message, reply form. Marks the conversation read. |
 | `POST /moj-nalog/poruke/{id}/` | `messages.reply` | Reply (`body`). |
+| `POST`/`DELETE /moj-nalog/poruke/{id}/blokiraj/` | `messages.block`, `messages.unblock` | Block or unblock the other participant. |
+| `POST /moj-nalog/poruke/{id}/prijava/` | `messages.report` | Report the other participant (`reason` from `ReportReasons`, optional `details`); a `reports` row for the user with "Razgovor #id" in the details. One open report per reporter and user. 6 per 10 min. |
 | `GET /moj-nalog/poruke/{id}/nove/?after={id}` | `messages.poll` | JSON for `public/js/messages.js`: `{html, last_id, read_until}`. The script polls every 20 s only while the tab is visible (`visibilitychange`), and once right when it becomes visible. |
-| `GET /moj-nalog/omiljeni/` | `favorites.index` | Saved listings, newest saved first; deleted and non-public (pending, rejected, draft) are hidden, expired are shown with "Istekao". Keyset paging. |
-| `POST /moj-nalog/omiljeni/{listing}/` | `favorites.store` | Save. Without JS redirects back with a status message; with `Accept: application/json` returns `{favorite, message}`. |
+| `GET /moj-nalog/omiljeni/` | `favorites.index` | Saved listings as `<x-listing-card>`, newest saved first; deleted and non-public (pending, rejected, draft) are hidden, expired and sold are shown with "Istekao" / "Prodato". Keyset paging. |
+| `POST /moj-nalog/omiljeni/{listing}/` | `favorites.store` | **Toggle** (the card heart always posts): saves, or removes when already saved. Without JS redirects back with a status message; with `Accept: application/json` returns `{favorite, message}`. |
 | `DELETE /moj-nalog/omiljeni/{listing}/` | `favorites.destroy` | Remove (form with `@method('DELETE')`). Same responses. |
 
 The listing page links to `/moj-nalog/poruke/novo/?oglas={id}`; the listing card heart posts to `/moj-nalog/omiljeni/{id}/`.
@@ -42,7 +44,8 @@ Errors (`{code, message, fields}`):
 | 403 | `email_not_verified` | sender has not confirmed the email |
 | 403 | `account_blocked` | sender is blocked (normally the token is already refused) |
 | 403 | `own_listing` | message to own listing |
-| 403 | `recipient_unavailable` | the other user is blocked or deleted |
+| 403 | `recipient_unavailable` | the other user is blocked by the moderators or deleted |
+| 403 | `user_blocked` | one participant blocked the other |
 | 404 | `not_found` | listing not live (new conversation), conversation of other users, unknown id |
 | 422 | `validation_failed` | `fields.body` (empty after removing HTML, over 2000 characters), `fields.listing_id` |
 | 429 | `too_many_requests` | rate limit (with `Retry-After`), same text to many sellers, too many new conversations |
@@ -51,7 +54,8 @@ Errors (`{code, message, fields}`):
 
 - Login and a verified email. Site: `verified` middleware on the new-conversation form; the service also refuses replies from unverified accounts (message with a link to resend the confirmation).
 - No message to your own listing. A new conversation needs a live listing (published, not deleted, `expires_at` in the future). Replies in an existing conversation keep working after the listing expires or is deleted.
-- Blocked or deleted users cannot send and cannot receive.
+- Accounts blocked by the moderators, or deleted, cannot send and cannot receive.
+- A user can block another user (`user_blocks`, from the conversation view): then neither can write to the other, in any conversation, until it is lifted. The API has no block endpoint in the contract; it only enforces it.
 - One conversation per listing and buyer (unique key; parallel first messages end in the same row via `createOrFirst`).
 - Body: HTML tags, comments, `<script>`/`<style>` blocks and control characters are removed (text like `<3` or `a < b` stays), at most 2000 characters, not empty. Stored as plain text; shown escaped with line breaks; `http(s)://` and `www.` links get `rel="nofollow ugc noopener"` and `target="_blank"`.
 - Rate limits per user, shared by site and API (`throttle:messages-send`): 10 per minute, 100 per day. Polling: 30 per minute. Favourites: 60 per minute.
@@ -66,9 +70,9 @@ Errors (`{code, message, fields}`):
 - Total for the header: `SUM` of the user's side over his conversations (two index lookups), cached 5 min per user (`messages.unread.{id}`) and forgotten on every send and read.
 - Imported conversations start with 0 unread (the importer marks them read).
 
-## Recipient email
+## Event for notifications
 
-`App\Events\MessageSent` → `App\Listeners\QueueNewMessageMail` (found by event discovery). If the recipient is active, has a verified email and `notification_settings.messages` is on, and no mail went out for this conversation to this recipient in the last 15 minutes (`Cache::add`), the queued job `SendNewMessageMail` runs after 2 minutes. It checks again and skips when the recipient has read everything meanwhile; otherwise `NewMessageMail` (plain text, Serbian) says how many unread messages there are, quotes the latest one and links to the conversation. Push notifications can listen to the same event.
+`App\Events\MessageSent` (`ShouldDispatchAfterCommit`) carries the stored message with `conversation` loaded. This module sends no email or push; the notifications module listens to the event. The unread counters and read timestamps let it skip messages that were already read and batch per conversation.
 
 ## Scale
 
@@ -80,6 +84,7 @@ Indexes added (migration `2026_10_26_000100_messages_inbox_columns_and_indexes`)
 | `conversations (seller_id, last_message_at, id)` | inbox, seller side; unread sum |
 | `messages (sender_id, created_at)` | spam guard |
 | `favorites (user_id, created_at, listing_id)` | favourites list (covering) |
+| `user_blocks (blocker_id, blocked_id)` primary, `(blocked_id)` | block checks on send (two PK lookups) |
 | existing `messages (conversation_id, id)` | thread, keyset `before`, last message |
 
 The inbox runs two index range scans (buyer side and seller side, each `LIMIT n+1` from the keyset cursor) and merges them in PHP; one `buyer_id = ? OR seller_id = ?` query could not use an index for the order. Messages page by id (`before`/`after`), favourites by `(created_at, listing_id)`. No `COUNT(*)` on big tables per request.
@@ -115,17 +120,17 @@ DB_DATABASE=lb_messages php artisan db:seed --class=MessagesScaleSeeder   # wipe
 | `app/Services/Messages/Favorites.php` | canSave, add, remove, has, page, savedIds |
 | `app/Services/Messages/MessageBody.php` | clean (storage), html (display with links), excerpt |
 | `app/Services/Messages/MessageRejected.php` | rule violations with code, Serbian message and status |
-| `app/Services/Messages/InboxCursor.php`, `ListingStats.php`, `ListingThumb.php` | keyset cursor, daily stats upsert, image URL |
+| `app/Services/Messages/InboxCursor.php`, `ListingStats.php` | keyset cursor, daily stats upsert (`listing_daily_stats` only; `Support\Listing\Stats::increment` also needs a `listings` column, which messages and favourites do not have) |
 | `app/Http/Controllers/Messages/` | `InboxController`, `ConversationController`, `FavoriteController`, `Api/ConversationApiController`, `Api/FavoriteApiController`, `Api/MessagesPresenter` |
 | `app/Http/Requests/Messages/SendMessageRequest.php` | body cleaning and validation (site and API) |
 | `app/Policies/ConversationPolicy.php` | only the two participants; others get 404 |
-| `app/Events/MessageSent.php`, `app/Listeners/QueueNewMessageMail.php`, `app/Jobs/SendNewMessageMail.php`, `app/Mail/NewMessageMail.php` | email |
+| `app/Events/MessageSent.php` | event for the notifications module |
 | `app/Providers/MessagesServiceProvider.php` | rate limiters, view composer |
 | `routes/web/messages.php`, `routes/api/messages.php`, `config/messages.php` | |
-| `resources/views/messages/`, `public/css/messages.css`, `public/js/messages.js` | pages, mail text |
+| `resources/views/messages/`, `public/css/messages.css`, `public/js/messages.js` | pages |
 | `database/factories/ConversationFactory.php`, `MessageFactory.php`, `database/seeders/MessagesScaleSeeder.php` | tests and measurements |
 
-Shared files touched: `bootstrap/providers.php` (one line), `app/Models/Conversation.php` (new relation `lastMessage`, helpers, casts for the two new columns). `app/Http/Api/ListingFormatter.php` is a minimal stand-in with the same class, method and output as the listing module's formatter; when that module is merged, its file replaces this one.
+Shared files touched: `bootstrap/providers.php` (one line), `app/Models/Conversation.php` (new relation `lastMessage`, helpers, casts for the two new columns). Listing shapes come from the listing module (`ListingFormatter::card()`, `<x-listing-card>`, `ListingImage::sizeUrl()`). No writes touch `listings`, so the search index needs no sync.
 
 ## Tests
 
@@ -133,4 +138,4 @@ Shared files touched: `bootstrap/providers.php` (one line), `app/Models/Conversa
 DB_DATABASE=lb_messages_test php artisan test tests/Feature/Messages tests/Unit/MessageBodyTest.php
 ```
 
-Every route and rule: login and verification, own listing, live listing, blocked and deleted users, body cleaning and length, links and escaping, rate limits per minute and day, spam guard, new conversations per day, read receipts, unread counters and the bottom nav badge, inbox grouping and keyset pages, polling, email batching and settings, favourites (site and API) with stats, contract shapes and error codes.
+Every route and rule: login and verification, own listing, live listing, blocked and deleted users, user blocks, reports, the `MessageSent` event (and that no mail is sent), body cleaning and length, links and escaping, rate limits per minute and day, spam guard, new conversations per day, read receipts, unread counters and the bottom nav badge, inbox grouping and keyset pages, polling, favourites (site toggle and API) with stats and sold/expired marks, contract shapes and error codes.

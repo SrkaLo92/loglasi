@@ -23,24 +23,11 @@
 	@else
 		<ul class="lgm-favs">
 			@foreach ($items as $item)
-				@php($listing = $item['listing'])
-				<li class="lgm-fav{{ $item['expired'] ? ' lgm-fav--expired' : '' }}">
-					<a class="lgm-fav__link" href="{{ $listing->url() }}">
-						<span class="lgm-fav__img" aria-hidden="true">
-							@if ($item['thumb'])<img src="{{ $item['thumb'] }}" alt="" width="320" height="240" loading="lazy">@endif
-						</span>
-						<span class="lgm-fav__title">{{ $listing->title }}</span>
-					</a>
-					<span class="lgm-fav__price">{{ $listing->priceLabel() }}</span>
-					<span class="lgm-fav__meta">
-						@if ($listing->location){{ $listing->location->name }}@endif
-						@if ($item['expired'])<span class="lgm-badge">Istekao</span>@endif
-					</span>
-					<form method="post" action="{{ url_slash('moj-nalog/omiljeni/'.$listing->id) }}">
-						@csrf
-						@method('DELETE')
-						<button class="lgm-link" type="submit" aria-label="Ukloni iz omiljenih: {{ $listing->title }}">Ukloni</button>
-					</form>
+				<li class="lgm-fav{{ $item['state'] ? ' lgm-fav--expired' : '' }}">
+					@if ($item['state'])
+						<p class="lgm-fav__state"><span class="lgm-badge">{{ $item['state'] }}</span></p>
+					@endif
+					<x-listing-card :listing="$item['listing']" heading="h2" />
 				</li>
 			@endforeach
 		</ul>

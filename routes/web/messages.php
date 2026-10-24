@@ -17,6 +17,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/moj-nalog/poruke/{conversation}', [ConversationController::class, 'show'])->whereNumber('conversation')->name('messages.show');
     Route::post('/moj-nalog/poruke/{conversation}', [ConversationController::class, 'reply'])->whereNumber('conversation')->middleware('throttle:messages-send')->name('messages.reply');
+    Route::post('/moj-nalog/poruke/{conversation}/blokiraj', [ConversationController::class, 'block'])->whereNumber('conversation')->middleware('throttle:messages-favorites')->name('messages.block');
+    Route::delete('/moj-nalog/poruke/{conversation}/blokiraj', [ConversationController::class, 'block'])->whereNumber('conversation')->middleware('throttle:messages-favorites')->name('messages.unblock');
+    Route::post('/moj-nalog/poruke/{conversation}/prijava', [ConversationController::class, 'report'])->whereNumber('conversation')->middleware('throttle:6,10')->name('messages.report');
     Route::get('/moj-nalog/poruke/{conversation}/nove', [ConversationController::class, 'poll'])->whereNumber('conversation')->middleware('throttle:messages-poll')->name('messages.poll');
 
     Route::get('/moj-nalog/omiljeni', [FavoriteController::class, 'index'])->name('favorites.index');

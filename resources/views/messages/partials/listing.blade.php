@@ -1,7 +1,11 @@
 {{-- Small listing summary (title, price, image, state). $listing may be null or deleted. --}}
 @php
 	$gone = ! $listing || $listing->trashed();
-	$expired = ! $gone && ($listing->status !== \App\Enums\ListingStatus::Published || ($listing->expires_at && $listing->expires_at->isPast()));
+	$state = $gone ? null : match (true) {
+		$listing->status === \App\Enums\ListingStatus::Sold => 'Prodato',
+		! $listing->isActive() => 'Istekao',
+		default => null,
+	};
 @endphp
 <div class="lgm-listing">
 	<div class="lgm-listing__img" aria-hidden="true">
@@ -15,8 +19,8 @@
 		@else
 			<a class="lgm-listing__title" href="{{ $listing->url() }}">{{ $listing->title }}</a>
 			<span class="lgm-listing__price">{{ $listing->priceLabel() }}</span>
-			@if ($expired)
-				<span class="lgm-badge">Istekao</span>
+			@if ($state)
+				<span class="lgm-badge">{{ $state }}</span>
 			@endif
 		@endif
 	</div>

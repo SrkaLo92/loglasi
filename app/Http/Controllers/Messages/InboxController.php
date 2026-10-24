@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Messages;
 
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
-use App\Services\Messages\ListingThumb;
 use App\Services\Messages\Messenger;
 use Illuminate\Http\Request;
 
@@ -23,14 +22,14 @@ class InboxController extends Controller
         $user = $request->user();
         $page = $this->messenger->inbox($user, $this->cursor($request), (int) config('messages.inbox_per_page'));
         $page['items']->load(['listing' => fn ($q) => $q->withTrashed()->select('id', 'title', 'slug', 'status', 'price', 'currency', 'expires_at', 'deleted_at')
-            ->with(['images' => fn ($q) => $q->select('id', 'listing_id', 'path', 'variants', 'sort')])]);
+            ->with('coverImage')]);
 
         // Group the page by listing, keeping the order of the newest conversation in each group.
         $groups = $page['items']
             ->groupBy(fn (Conversation $c) => $c->listing_id ?? 'none-'.$c->id)
             ->map(fn ($items) => [
                 'listing' => $items->first()->listing,
-                'thumb' => ListingThumb::url($items->first()->listing?->images->first()),
+                'thumb' => $items->first()->listing?->coverImage?->sizeUrl('sm'),
                 'conversations' => $items,
             ])
             ->values();

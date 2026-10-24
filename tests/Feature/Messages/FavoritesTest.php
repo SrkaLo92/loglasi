@@ -32,15 +32,31 @@ class FavoritesTest extends TestCase
         $this->assertDatabaseHas('favorites', ['user_id' => $user->id, 'listing_id' => $listing->id]);
         $this->assertSame(1, $this->stat($listing));
 
-        // Saving twice is harmless and counts once.
-        $this->actingAs($user)->from('/oglasi/')->post('/moj-nalog/omiljeni/'.$listing->id.'/')->assertRedirect('/oglasi/');
-        $this->assertDatabaseCount('favorites', 1);
-        $this->assertSame(1, $this->stat($listing));
-
-        $this->actingAs($user)->from('/oglasi/')->delete('/moj-nalog/omiljeni/'.$listing->id.'/')
+        // The card heart always posts: a second POST removes (toggle), stats are not reduced.
+        $this->actingAs($user)->from('/oglasi/')->post('/moj-nalog/omiljeni/'.$listing->id.'/')
             ->assertRedirect('/oglasi/')
             ->assertSessionHas('status', 'Oglas je uklonjen iz omiljenih.');
         $this->assertDatabaseCount('favorites', 0);
+        $this->assertSame(1, $this->stat($listing));
+
+        // DELETE always removes and is idempotent.
+        $this->actingAs($user)->post('/moj-nalog/omiljeni/'.$listing->id.'/');
+        $this->actingAs($user)->from('/oglasi/')->delete('/moj-nalog/omiljeni/'.$listing->id.'/')
+            ->assertRedirect('/oglasi/')
+            ->assertSessionHas('status', 'Oglas je uklonjen iz omiljenih.');
+        $this->actingAs($user)->delete('/moj-nalog/omiljeni/'.$listing->id.'/')->assertRedirect();
+        $this->assertDatabaseCount('favorites', 0);
+    }
+
+    public function test_listing_card_heart_posts_to_the_toggle(): void
+    {
+        $listing = Listing::factory()->create();
+        $user = User::factory()->create();
+        DB::table('favorites')->insert(['user_id' => $user->id, 'listing_id' => $listing->id, 'created_at' => now()]);
+
+        $this->actingAs($user)->get('/moj-nalog/omiljeni/')
+            ->assertSee('action="'.url_slash('moj-nalog/omiljeni/'.$listing->id).'"', false)
+            ->assertSee('aria-pressed="true"', false);
     }
 
     public function test_json_response_for_scripts(): void
@@ -49,6 +65,8 @@ class FavoritesTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)->postJson('/moj-nalog/omiljeni/'.$listing->id.'/')->assertOk()->assertJson(['favorite' => true]);
+        $this->actingAs($user)->postJson('/moj-nalog/omiljeni/'.$listing->id.'/')->assertOk()->assertJson(['favorite' => false]);
+        $this->actingAs($user)->postJson('/moj-nalog/omiljeni/'.$listing->id.'/');
         $this->actingAs($user)->deleteJson('/moj-nalog/omiljeni/'.$listing->id.'/')->assertOk()->assertJson(['favorite' => false]);
         $this->actingAs($user)->postJson('/moj-nalog/omiljeni/999999/')->assertNotFound()->assertJson(['favorite' => false]);
     }
@@ -78,12 +96,14 @@ class FavoritesTest extends TestCase
         $expired = Listing::factory()->create(['title' => 'Istekao oglas']);
         $deleted = Listing::factory()->create(['title' => 'Obrisan oglas']);
         $pending = Listing::factory()->create(['title' => 'Oglas na čekanju']);
-        foreach ([$live, $expired, $deleted, $pending] as $i => $listing) {
+        $sold = Listing::factory()->create(['title' => 'Prodat oglas']);
+        foreach ([$live, $expired, $deleted, $pending, $sold] as $i => $listing) {
             DB::table('favorites')->insert(['user_id' => $user->id, 'listing_id' => $listing->id, 'created_at' => now()->subMinutes($i)]);
         }
         $expired->update(['expires_at' => now()->subDay()]);
         $deleted->delete();
         $pending->update(['status' => 'pending']);
+        $sold->update(['status' => 'sold']);
 
         $this->actingAs($user)->get('/moj-nalog/omiljeni/')
             ->assertOk()
@@ -91,10 +111,11 @@ class FavoritesTest extends TestCase
             ->assertSee('Aktivan oglas')
             ->assertSee('Istekao oglas')
             ->assertSee('Istekao</span>', false)
+            ->assertSee('Prodat oglas')
+            ->assertSee('Prodato</span>', false)
             ->assertDontSee('Obrisan oglas')
             ->assertDontSee('Oglas na čekanju')
-            ->assertSee('noindex', false)
-            ->assertSee('action="'.url_slash('moj-nalog/omiljeni/'.$live->id).'"', false);
+            ->assertSee('noindex', false);
     }
 
     public function test_favorites_page_keyset_pages_and_empty_state(): void

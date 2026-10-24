@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers\Messages;
 
+use App\Enums\ListingStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Listing;
+use App\Services\ListingSearch;
 use App\Services\Messages\Favorites;
-use App\Services\Messages\ListingThumb;
 use Illuminate\Http\Request;
 
-/** /moj-nalog/omiljeni/: saved listings; POST/DELETE /moj-nalog/omiljeni/{listing}/ from the listing card (works without JS). */
+/**
+ * /moj-nalog/omiljeni/: saved listings. The listing card heart always POSTs, so POST toggles
+ * (save, or remove when already saved); DELETE always removes. Works without JS.
+ */
 class FavoriteController extends Controller
 {
     public function __construct(private Favorites $favorites) {}
@@ -16,16 +20,16 @@ class FavoriteController extends Controller
     public function index(Request $request)
     {
         $cursor = is_string($request->query('cursor')) ? $request->query('cursor') : null;
-        $page = $this->favorites->page($request->user(), $cursor, (int) config('messages.favorites_per_page'), 1, [
-            'location:id,name,slug',
-            'images' => fn ($q) => $q->select('id', 'listing_id', 'path', 'variants', 'sort'),
-        ]);
+        $page = $this->favorites->page($request->user(), $cursor, (int) config('messages.favorites_per_page'), 1, ListingSearch::cardRelations());
 
         return view('messages.favorites', [
             'items' => $page['items']->map(fn (Listing $l) => [
                 'listing' => $l,
-                'thumb' => ListingThumb::url($l->images->first()),
-                'expired' => ! $this->favorites->canSave($l),
+                'state' => match (true) {
+                    $l->status === ListingStatus::Sold => 'Prodato',
+                    ! $l->isActive() => 'Istekao',
+                    default => null,
+                },
             ]),
             'next' => $page['next'],
             'isFirstPage' => $cursor === null,
@@ -34,6 +38,10 @@ class FavoriteController extends Controller
 
     public function store(Request $request, int $listing)
     {
+        if ($this->favorites->has($request->user(), $listing)) {
+            return $this->destroy($request, $listing);
+        }
+
         $model = Listing::query()->find($listing);
         if (! $model || ! $this->favorites->canSave($model)) {
             return $this->respond($request, false, 'Oglas ne postoji ili više nije aktivan.', 404);

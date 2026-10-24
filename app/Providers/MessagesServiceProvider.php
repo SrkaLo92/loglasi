@@ -12,7 +12,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View as ViewInstance;
 use Throwable;
 
-/** Messages and favourites: service, rate limits, recipient email, unread count for the header and bottom nav. */
+/** Messages and favourites: service, rate limits, unread count for the header and bottom nav. */
 class MessagesServiceProvider extends ServiceProvider
 {
     public function register(): void
@@ -24,7 +24,7 @@ class MessagesServiceProvider extends ServiceProvider
     {
         $this->rateLimits();
 
-        // App\Listeners\QueueNewMessageMail handles App\Events\MessageSent (found by event discovery).
+        // App\Events\MessageSent is fired on every stored message; the notifications module listens to it.
 
         // $unreadMessages for partials.bottom-nav (and the header, when it shows a badge).
         View::composer(['partials.bottom-nav', 'partials.header'], function (ViewInstance $view) {

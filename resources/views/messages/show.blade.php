@@ -35,7 +35,11 @@
 
 	<p class="lgm-safety">Ne šaljite novac unapred i ne plaćajte preko linkova koje dobijete porukom. Stvar pogledajte uživo.</p>
 
-	@if ($otherAvailable)
+	@if ($iBlocked)
+		<p class="lgm-alert lgm-alert--warn">Blokirali ste ovog korisnika. Ne možete da razmenjujete poruke dok ga ne odblokirate.</p>
+	@elseif ($blockedMe)
+		<p class="lgm-alert lgm-alert--warn">Ovaj korisnik ne prima vaše poruke.</p>
+	@elseif ($otherAvailable)
 		<form class="lgm-form" method="post" action="{{ url_slash('moj-nalog/poruke/'.$conversation->id) }}" novalidate>
 			@csrf
 			<label for="lgm-body">Vaša poruka</label>
@@ -51,6 +55,40 @@
 		</form>
 	@else
 		<p class="lgm-alert lgm-alert--warn">Ovaj korisnik više ne prima poruke.</p>
+	@endif
+
+	@if ($other)
+		<div class="lgm-actions">
+			<form method="post" action="{{ url_slash('moj-nalog/poruke/'.$conversation->id.'/blokiraj') }}">
+				@csrf
+				@if ($iBlocked)
+					@method('DELETE')
+					<button class="lgm-link lgm-link--green" type="submit">Odblokiraj korisnika</button>
+				@else
+					<button class="lgm-link" type="submit">Blokiraj korisnika</button>
+				@endif
+			</form>
+
+			@php($reportErrors = $errors->getBag('report'))
+			<details class="lgm-report" @if ($reportErrors->any()) open @endif>
+				<summary>Prijavi korisnika</summary>
+				<form class="lgm-form" method="post" action="{{ url_slash('moj-nalog/poruke/'.$conversation->id.'/prijava') }}">
+					@csrf
+					<label for="lgm-reason">Razlog</label>
+					<select id="lgm-reason" name="reason" required @if ($reportErrors->has('reason')) aria-invalid="true" aria-describedby="lgm-reason-error" @endif>
+						<option value="">Izaberite razlog</option>
+						@foreach (\App\Support\Listing\ReportReasons::ALL as $key => $label)
+							<option value="{{ $key }}" @selected(old('reason') === $key)>{{ $label }}</option>
+						@endforeach
+					</select>
+					@if ($reportErrors->has('reason'))<p class="lgm-error" id="lgm-reason-error" role="alert">{{ $reportErrors->first('reason') }}</p>@endif
+					<label for="lgm-details">Opis (nije obavezno)</label>
+					<textarea id="lgm-details" name="details" rows="3" maxlength="1000">{{ old('details') }}</textarea>
+					@if ($reportErrors->has('details'))<p class="lgm-error" role="alert">{{ $reportErrors->first('details') }}</p>@endif
+					<button class="lg-btn lg-btn--orange" type="submit">Pošalji prijavu</button>
+				</form>
+			</details>
+		</div>
 	@endif
 </div>
 @endsection

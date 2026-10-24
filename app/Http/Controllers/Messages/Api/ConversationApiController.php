@@ -35,7 +35,7 @@ class ConversationApiController extends Controller
 
         $user = $request->user();
         $page = $this->messenger->inbox($user, $query['cursor'] ?? null, (int) ($query['per_page'] ?? config('messages.inbox_per_page')), (int) ($query['page'] ?? 1));
-        $page['items']->load(['listing' => fn ($q) => $q->withTrashed()->with(['category', 'location', 'user', 'images'])]);
+        $page['items']->load(['listing' => fn ($q) => $q->withTrashed()->with(ListingFormatter::CARD_RELATIONS)]);
 
         $data = $page['items']->map(fn (Conversation $c) => MessagesPresenter::conversation($c, $user))->values();
 

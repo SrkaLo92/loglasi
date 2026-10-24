@@ -15,9 +15,7 @@ class Favorites
     /** Only a live listing can be saved. */
     public function canSave(Listing $listing): bool
     {
-        return ! $listing->trashed()
-            && $listing->status === ListingStatus::Published
-            && ($listing->expires_at === null || $listing->expires_at->isFuture());
+        return $listing->isActive();
     }
 
     /** Idempotent. A new save counts in listing_daily_stats.favorites (not when the owner saves his own listing). */
@@ -49,7 +47,7 @@ class Favorites
 
     /**
      * Saved listings, newest saved first. Deleted listings and listings that are not public
-     * (pending, rejected, draft) are left out; expired ones stay and are marked.
+     * (pending, rejected, draft) are left out; expired and sold ones stay and are marked.
      * Keyset on (favorites.created_at, favorites.listing_id), index favorites_user_created_index.
      *
      * @param  string[]  $with  relations to eager load
@@ -62,7 +60,7 @@ class Favorites
         $rows = Listing::query()
             ->join('favorites', 'favorites.listing_id', '=', 'listings.id')
             ->where('favorites.user_id', $user->id)
-            ->whereIn('listings.status', [ListingStatus::Published->value, ListingStatus::Expired->value])
+            ->whereIn('listings.status', [ListingStatus::Published->value, ListingStatus::Expired->value, ListingStatus::Sold->value])
             ->when($after, fn ($q) => $q->where(fn ($q) => $q
                 ->where('favorites.created_at', '<', $after['at'])
                 ->orWhere(fn ($q) => $q->where('favorites.created_at', $after['at'])->where('favorites.listing_id', '<', $after['id']))))

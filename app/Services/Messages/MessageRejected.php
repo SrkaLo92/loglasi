@@ -40,6 +40,16 @@ class MessageRejected extends RuntimeException
         return new self('recipient_unavailable', 'Ovaj korisnik više ne prima poruke.', 403);
     }
 
+    public static function blockedByRecipient(): self
+    {
+        return new self('user_blocked', 'Ovaj korisnik ne prima vaše poruke.', 403);
+    }
+
+    public static function youBlocked(): self
+    {
+        return new self('user_blocked', 'Blokirali ste ovog korisnika. Odblokirajte ga da biste mu pisali.', 403);
+    }
+
     public static function duplicate(): self
     {
         return new self('too_many_requests', 'Istu poruku ste već poslali većem broju prodavaca. Napišite poruku za ovaj oglas ili pokušajte sutra.', 429);

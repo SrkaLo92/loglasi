@@ -2,7 +2,6 @@
 
 namespace App\Services\Messages;
 
-use App\Enums\ListingStatus;
 use App\Events\MessageSent;
 use App\Models\Conversation;
 use App\Models\Listing;
@@ -41,7 +40,7 @@ class Messenger
         }
 
         $seller = $listing->user;
-        $this->ensureRecipientAllowed($seller);
+        $this->ensureRecipientAllowed($buyer, $seller);
         $this->ensureNotDuplicate($buyer, $body, null);
 
         $started = Conversation::query()
@@ -68,7 +67,7 @@ class Messenger
         }
 
         $this->ensureSenderAllowed($sender);
-        $this->ensureRecipientAllowed(User::query()->find($conversation->otherId($sender)));
+        $this->ensureRecipientAllowed($sender, User::query()->find($conversation->otherId($sender)));
         $this->ensureNotDuplicate($sender, $body, $conversation->id);
 
         return $this->store($sender, $conversation, $body);
@@ -77,9 +76,26 @@ class Messenger
     /** Listing that can receive a first message: published, not deleted, not past its end date. */
     public function acceptsMessages(Listing $listing): bool
     {
-        return ! $listing->trashed()
-            && $listing->status === ListingStatus::Published
-            && ($listing->expires_at === null || $listing->expires_at->isFuture());
+        return $listing->isActive();
+    }
+
+    /** $blocker stops all messages with $blockedId (both directions). Idempotent. */
+    public function block(User $blocker, int $blockedId): void
+    {
+        if ($blocker->id === $blockedId) {
+            return;
+        }
+        DB::table('user_blocks')->insertOrIgnore(['blocker_id' => $blocker->id, 'blocked_id' => $blockedId, 'created_at' => now()]);
+    }
+
+    public function unblock(User $blocker, int $blockedId): void
+    {
+        DB::table('user_blocks')->where('blocker_id', $blocker->id)->where('blocked_id', $blockedId)->delete();
+    }
+
+    public function hasBlocked(int $blockerId, int $blockedId): bool
+    {
+        return DB::table('user_blocks')->where('blocker_id', $blockerId)->where('blocked_id', $blockedId)->exists();
     }
 
     /** Marks everything in the conversation as read for $user (read receipt + unread counter). */
@@ -236,10 +252,16 @@ class Messenger
         }
     }
 
-    private function ensureRecipientAllowed(?User $recipient): void
+    private function ensureRecipientAllowed(User $sender, ?User $recipient): void
     {
         if ($recipient === null || $recipient->trashed() || $recipient->isBlocked()) {
             throw MessageRejected::recipientUnavailable();
+        }
+        if ($this->hasBlocked($sender->id, $recipient->id)) {
+            throw MessageRejected::youBlocked();
+        }
+        if ($this->hasBlocked($recipient->id, $sender->id)) {
+            throw MessageRejected::blockedByRecipient();
         }
     }
 
