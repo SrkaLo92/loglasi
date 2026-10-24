@@ -126,7 +126,8 @@ class MyListingsApiTest extends PostingTestCase
         $user = $this->as();
         $this->published($user);
 
-        $this->postJson('/api/v1/me/listings', $this->input())->assertForbidden()->assertJsonPath('code', 'limit_reached');
+        $this->postJson('/api/v1/me/listings', $this->input())->assertForbidden()->assertJsonPath('code', 'limit_reached')
+            ->assertJsonPath('message', fn (string $message) => str_starts_with($message, 'Imate već 1 aktivan oglas, koliko je besplatno'));
     }
 
     public function test_duplicates_are_422(): void

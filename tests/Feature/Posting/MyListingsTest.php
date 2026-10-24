@@ -56,6 +56,15 @@ class MyListingsTest extends PostingTestCase
         $this->actingAs($this->user())->get('/moj-nalog/oglasi/'.$listing->id.'/statistika/')->assertForbidden();
     }
 
+    public function test_listing_card_stats_use_serbian_plurals(): void
+    {
+        $user = $this->user();
+        $listing = $this->published($user);
+        DB::table('listings')->where('id', $listing->id)->update(['views' => 21, 'phone_reveals' => 1]);
+
+        $this->actingAs($user)->get('/moj-nalog/oglasi/')->assertSee('21 pregled<', false)->assertSee('1 prikaz broja');
+    }
+
     public function test_renew_expired_listing_for_free(): void
     {
         $user = $this->user();

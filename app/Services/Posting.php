@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Listing;
 use App\Models\ListingImage;
 use App\Models\User;
+use App\Support\Listing\Text;
 use App\Support\ListingLimits;
 use App\Support\Phone;
 use App\Support\Posting\ListingSlug;
@@ -99,8 +100,8 @@ class Posting
             $limits = ListingLimits::for($user);
 
             throw new PostingRefused('limit_reached', $user->isFirm()
-                ? 'Imate '.$limits['monthly_limit'].' aktivnih oglasa, koliko dozvoljava vaš paket. Mesto se oslobađa kad oglas istekne ili ga obrišete.'
-                : 'Imate već '.$limits['monthly_limit'].' aktivnih oglasa, koliko je besplatno za privatna lica. Mesto se oslobađa kad oglas istekne, prodate ga ili obrišete, a dodatna mesta možete kupiti.', field: 'limit');
+                ? 'Imate '.Text::activeListings($limits['monthly_limit']).', koliko dozvoljava vaš paket. Mesto se oslobađa kad oglas istekne ili ga obrišete.'
+                : 'Imate već '.Text::activeListings($limits['monthly_limit']).', koliko je besplatno za privatna lica. Mesto se oslobađa kad oglas istekne, prodate ga ili obrišete, a dodatna mesta možete kupiti.', field: 'limit');
         }
     }
 
