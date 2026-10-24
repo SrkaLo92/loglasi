@@ -1,6 +1,6 @@
 # Modul SEO
 
-Preusmerenja sa starog sajta, 410, kosa crta na kraju URL-a, `<head>` (title, opis, canonical, robots, Open Graph, JSON-LD), sitemap, robots.txt, llms.txt, feed i provera URL-ova iz Google Search Console-a.
+Preusmerenja sa starog sajta, 410, kosa crta na kraju URL-a, `<head>` (title, opis, canonical, robots, Open Graph, JSON-LD), sitemap, robots.txt, llms.txt i provera URL-ova iz Google Search Console-a.
 
 Izvor pravila: `09-deploy-seo.md` (razvojni paket), mapa ključnih reči (šabloni za title, H1 i opis) i plan za vidljivost u pretragama.
 
@@ -15,7 +15,7 @@ Izvor pravila: `09-deploy-seo.md` (razvojni paket), mapa ključnih reči (šablo
 | `app/Support/Seo.php` | podaci za `<head>` jedne strane |
 | `app/Support/Seo/Sitemap.php` | pravljenje i keš sitemapa |
 | `resources/views/partials/seo-head.blade.php` | ispis `<head>` dela |
-| `routes/web/seo.php` | `/sitemap*.xml`, `/robots.txt`, `/llms.txt`, `/feed/`, `/stranica-404/` |
+| `routes/web/seo.php` | `/sitemap*.xml`, `/robots.txt`, `/llms.txt`, `/stranica-404/` |
 | `app/Console/Commands/SeoProvera.php` | `php artisan seo:provera` |
 | `app/Console/Commands/SeoSitemap.php` | `php artisan seo:sitemap` (raspored: svakog sata) |
 | `resources/seo/llms.txt` | tekst za `/llms.txt`, bez izmena u odnosu na odobreni |
@@ -85,7 +85,7 @@ Ne diraju se `/api/*`, `/admin*`, `/up`.
 5. WooCommerce (po SEO dokumentu, odeljak 7): proizvodi, `/shop/`, `/cart/`, `/checkout/…`, `/naplata/…` → `/cenovnik/`; `/my-account/…` → `/moj-nalog/`.
 5a. Stari panel: `/panel/…` → `/moj-nalog/`; `?tab=create` → `/postavi-oglas/`, `messages` → `/moj-nalog/poruke/`, `listings` → `/moj-nalog/oglasi/`, `favorites` → `/moj-nalog/omiljeni/`, `business` → `/za-firme/` (`config('seo.panel_tabs')`).
 5b. Kategorije sa zarezom: `/oglasi/a,b/` i `?kategorija=a,b` → poslednja aktivna kategorija (`/oglasi/{slug}/`), inače `/oglasi/`. `?paginacija=N` → `/…/page/N/`.
-6. Feedovi: `/comments/feed/` → `/feed/`; `/oglas/{slug}/feed/` → `/oglas/{slug}/`; `/oglasi/{kategorija}/feed/` → `/oglasi/{kategorija}/`.
+6. Feeds: the site has none. Every URL ending in `/feed/` (`/feed/`, `/comments/feed/`, `/oglas/{slug}/feed/`, `/oglasi/.../feed/`, `/korisnik/.../feed/`) returns 410 from the Gone middleware.
 7. `/oglasi/?kategorija={slug}`: ako je `kategorija` jedini parametar (pored onih za praćenje) i kategorija postoji i aktivna je → `/oglasi/{slug}/`; nepostojeća ili ugašena → `/oglasi/`. Sa drugim filterima nema preusmerenja (200, noindex, canonical na čistu stranu). Isto i za `/oglasi?kategorija=` bez kose crte (jedan skok).
 8. `/oglasi/?marka-automobila={marka}` (sam ili uz `kategorija`) → `/oglasi/automobili/`.
 9. `/?attachment_id={N}` → oglas kome slika pripada (`listing_images.wp_attachment_id`).
@@ -144,11 +144,11 @@ Ne ulaze: istekli, nacrti, na čekanju, odbijeni i obrisani oglasi, privatni pro
 
 `Content-Type: application/xml; charset=UTF-8`, `Cache-Control: public, max-age=3600`, bez sesije i kolačića. XML se kešira; keš se briše kad se promeni oglas (status, slug, naslov, opis, cena, kategorija, mesto, rok), kategorija, mesto, firma ili nalog (slug, tip, status). Pregledi i otkrivanja telefona ne brišu keš. `php artisan seo:sitemap` pravi sve iznova i zakazan je svakog sata (za oglase kojima je rok istekao bez izmene u bazi). Na serveru mora da radi `php artisan schedule:run` iz cron-a.
 
-### 6. robots.txt, llms.txt, feed, 404
+### 6. robots.txt, llms.txt, 404
 
 - `/robots.txt`: na produkciji (`SEO_INDEXABLE=true`) tačan blok iz SEO dokumenta: grupa `*` sa `Disallow` za /admin, /api/, /panel/, /nalog/, /naplata/, /uporedite-oglase/ i `/*?*kljucna-rec=`, zatim imenovani botovi (Googlebot, Bingbot, OAI-SearchBot, ChatGPT-User, GPTBot, ClaudeBot, Claude-SearchBot, Claude-User, PerplexityBot, Google-Extended, Applebot-Extended) sa `Allow: /` i istim zabranama, pa `Sitemap: https://loglasi.rs/sitemap.xml`. Van produkcije: `Disallow: /` za sve. Fizički `public/robots.txt` je uklonjen da ne zaseni rutu.
 - `/llms.txt`: tekst iz `resources/seo/llms.txt` (linkovi kategorija samo za postojeće vidljive kategorije, adresa iz `SEO_BASE_URL`), `text/plain; charset=utf-8`, keš 1 dan, nije u sitemapu.
-- `/feed/`: RSS sa 30 najnovijih aktivnih oglasa, `X-Robots-Tag: noindex`.
+- `/feed/` and every other feed URL: 410 (SEO decision 2026-10-24).
 - `/stranica-404/` vraća pravi 404. Nepostojeće adrese su 404, nikad preusmerenje na početnu.
 
 ### 6a. Google tag i Search Console

@@ -115,9 +115,6 @@ class RedirectsTest extends SeoTestCase
             'wp admin' => ['/wp-admin/', '/admin/'],
             'wp admin strana' => ['/wp-admin/edit.php', '/admin/'],
             'wp login' => ['/wp-login.php', '/prijava/'],
-            'feed komentara' => ['/comments/feed/', '/feed/'],
-            'feed oglasa' => ['/oglas/golf-4/feed/', '/oglas/golf-4/'],
-            'feed kategorije' => ['/oglasi/automobili/feed/', '/oglasi/automobili/'],
         ];
     }
 

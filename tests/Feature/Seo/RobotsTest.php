@@ -3,8 +3,6 @@
 namespace Tests\Feature\Seo;
 
 use App\Models\Category;
-use App\Models\Listing;
-use DOMDocument;
 
 class RobotsTest extends SeoTestCase
 {
@@ -71,19 +69,11 @@ TXT;
         $this->assertStringContainsString('max-age=86400', $response->headers->get('Cache-Control'));
     }
 
-    public function test_feed_is_rss_with_noindex_header(): void
+    public function test_every_feed_url_is_gone(): void
     {
-        Listing::factory()->create(['title' => 'Golf 4', 'slug' => 'golf-4']);
-        Listing::factory()->expired()->create(['title' => 'Istekao']);
-
-        $response = $this->get('/feed/')->assertOk()
-            ->assertHeader('X-Robots-Tag', 'noindex')
-            ->assertHeader('Content-Type', 'application/rss+xml; charset=UTF-8');
-
-        $dom = new DOMDocument;
-        $this->assertTrue($dom->loadXML($response->getContent()));
-        $this->assertSame(1, $dom->getElementsByTagName('item')->length);
-        $this->assertStringContainsString('https://loglasi.rs/oglas/golf-4/', $response->getContent());
+        foreach (['/feed/', '/feed', '/comments/feed/', '/oglasi/feed/', '/oglasi/automobili/feed/', '/oglas/golf-4/feed/', '/korisnik/pera/feed/'] as $url) {
+            $this->get($url)->assertStatus(410);
+        }
     }
 
     public function test_stranica_404_returns_real_404(): void
