@@ -30,7 +30,7 @@ class PostingRulesTest extends PostingTestCase
 
         $this->actingAs($user)->get('/postavi-oglas/')->assertOk()
             ->assertSee('Sva besplatna mesta su popunjena')
-            ->assertSee('Imate već 2 aktivnih oglasa')
+            ->assertSee('Imate već 2 aktivna oglasa')
             ->assertDontSee('Izaberite kategoriju');
         $this->post('/postavi-oglas/', ['category_id' => $this->services->id])->assertSessionHasErrors('limit');
 
