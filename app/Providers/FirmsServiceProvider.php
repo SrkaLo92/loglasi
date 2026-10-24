@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\FirmBenefits;
 use App\Support\ApiError;
 use App\Support\Firms\FirmDirectory;
+use App\Support\Scheduling\InProcess;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
@@ -51,7 +52,7 @@ class FirmsServiceProvider extends ServiceProvider
         User::deleted(fn (User $user) => $user->isFirm() ? $forget() : null);
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
-            $schedule->command('firms:package-reminders')->dailyAt('09:00')->withoutOverlapping()->onOneServer();
+            InProcess::command($schedule, 'firms:package-reminders')->dailyAt('09:00')->withoutOverlapping()->onOneServer();
         });
     }
 }

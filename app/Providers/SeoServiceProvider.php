@@ -9,6 +9,7 @@ use App\Models\Listing;
 use App\Models\Location;
 use App\Models\Redirect;
 use App\Models\User;
+use App\Support\Scheduling\InProcess;
 use App\Support\Seo;
 use App\Support\Seo\Hits;
 use App\Support\Seo\Sitemap;
@@ -66,7 +67,7 @@ class SeoServiceProvider extends ServiceProvider
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             // Istekli oglasi ispadaju iz sitemapa i bez izmene u bazi.
-            $schedule->command('seo:sitemap')->hourly()->withoutOverlapping();
+            InProcess::command($schedule, 'seo:sitemap')->hourly()->withoutOverlapping();
         });
     }
 }

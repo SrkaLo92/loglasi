@@ -6,6 +6,7 @@ use App\Services\Payments\FakeReceiptIssuer;
 use App\Services\Payments\FiscalReceiptIssuer;
 use App\Services\Payments\ManualReceiptIssuer;
 use App\Support\Payments\PaymentMode;
+use App\Support\Scheduling\InProcess;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
@@ -31,7 +32,7 @@ class PaymentsServiceProvider extends ServiceProvider
         ]);
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
-            $schedule->command('orders:cancel-stale')->dailyAt('03:15')->withoutOverlapping()->onOneServer();
+            InProcess::command($schedule, 'orders:cancel-stale')->dailyAt('03:15')->withoutOverlapping()->onOneServer();
         });
     }
 }

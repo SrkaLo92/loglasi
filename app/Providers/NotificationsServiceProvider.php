@@ -7,6 +7,7 @@ use App\Events\MessageSent;
 use App\Http\Middleware\SavePendingSearch;
 use App\Notifications\Listeners\NotifyMessageRecipient;
 use App\Support\ApiError;
+use App\Support\Scheduling\InProcess;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
@@ -38,7 +39,7 @@ class NotificationsServiceProvider extends ServiceProvider
         Event::listen(MessageSent::class, NotifyMessageRecipient::class);
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
-            $schedule->command(SendSavedSearchAlerts::class)->hourly()->withoutOverlapping(30);
+            InProcess::command($schedule, SendSavedSearchAlerts::class)->hourly()->withoutOverlapping(30);
         });
     }
 }

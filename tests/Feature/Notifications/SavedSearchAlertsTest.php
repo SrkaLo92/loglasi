@@ -44,7 +44,7 @@ class SavedSearchAlertsTest extends TestCase
 
     public function test_command_is_scheduled_hourly(): void
     {
-        $event = collect(app(Schedule::class)->events())->first(fn ($e) => str_contains($e->command, 'notifications:saved-searches'));
+        $event = collect(app(Schedule::class)->events())->first(fn ($e) => str_contains((string) $e->description, 'notifications:saved-searches'));
         $this->assertNotNull($event);
         $this->assertSame('0 * * * *', $event->expression);
     }

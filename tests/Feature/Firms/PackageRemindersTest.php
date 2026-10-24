@@ -132,7 +132,7 @@ class PackageRemindersTest extends TestCase
 
     public function test_command_is_scheduled_daily(): void
     {
-        $events = collect(app(Schedule::class)->events())->filter(fn ($e) => str_contains((string) $e->command, 'firms:package-reminders'));
+        $events = collect(app(Schedule::class)->events())->filter(fn ($e) => str_contains((string) $e->description, 'firms:package-reminders'));
 
         $this->assertCount(1, $events);
         $this->assertSame('0 9 * * *', $events->first()->expression);

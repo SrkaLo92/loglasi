@@ -8,6 +8,7 @@ use App\Services\DuplicateListings;
 use App\Services\ListingImages;
 use App\Services\Posting;
 use App\Support\ApiError;
+use App\Support\Scheduling\InProcess;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
@@ -47,9 +48,9 @@ class PostingServiceProvider extends ServiceProvider
         ]);
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
-            $schedule->command('listings:expire')->hourly()->withoutOverlapping();
-            $schedule->command('images:prune')->dailyAt('04:10')->withoutOverlapping();
-            $schedule->command('images:variants')->everyTenMinutes()->withoutOverlapping();
+            InProcess::command($schedule, 'listings:expire')->hourly()->withoutOverlapping();
+            InProcess::command($schedule, 'images:prune')->dailyAt('04:10')->withoutOverlapping();
+            InProcess::command($schedule, 'images:variants')->everyTenMinutes()->withoutOverlapping();
         });
     }
 
