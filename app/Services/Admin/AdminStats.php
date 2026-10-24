@@ -24,21 +24,37 @@ class AdminStats
 
     private const TTL = 120;
 
+    private const QUEUE_KEY = 'admin.stats.queue';
+
     public function __construct(private readonly Catalog $catalog) {}
 
     /**
-     * "Waiting for you" counters (not cached: they change with every action).
+     * "Waiting for you" counters. Cached briefly (indexed counts, but the dashboard polls);
+     * admin actions call forgetQueue() so the numbers follow the work.
      *
      * @return array{listings: int, phones: int, orders: int, reports: int}
      */
     public function queue(): array
     {
-        return [
+        return Cache::remember(self::QUEUE_KEY, 30, fn () => [
             'listings' => Listing::query()->where('status', ListingStatus::Pending)->count(),
             'phones' => $this->phonesToVerify()->count(),
             'orders' => Order::query()->where('status', OrderStatus::Pending)->count(),
             'reports' => Report::query()->where('status', ReportStatus::Open)->count(),
-        ];
+        ]);
+    }
+
+    public static function forgetQueue(): void
+    {
+        Cache::forget(self::QUEUE_KEY);
+    }
+
+    /** Real (non-test) orders whose money arrived; revenue is net of refunds. */
+    private function paidOrders()
+    {
+        return Order::query()
+            ->whereIn('status', [OrderStatus::Paid, OrderStatus::Activated, OrderStatus::Refunded])
+            ->where('is_test', false);
     }
 
     /** Users with a phone number that is not verified yet. */
@@ -58,7 +74,7 @@ class AdminStats
     /**
      * Totals for one period.
      *
-     * @return array{listings: int, users: int, firms: int, views: int, reveals: int, revenue: int}
+     * @return array{listings: int, users: int, firms: int, views: int, reveals: int, orders: int, revenue: int}
      */
     public function totals(string $period): array
     {
@@ -75,7 +91,8 @@ class AdminStats
                 'firms' => Firm::query()->where('created_at', '>=', $since)->count(),
                 'views' => (int) $stats->views,
                 'reveals' => (int) $stats->reveals,
-                'revenue' => (int) Order::query()->where('status', OrderStatus::Paid)->where('paid_at', '>=', $since)->sum('amount_rsd'),
+                'orders' => $this->paidOrders()->where('paid_at', '>=', $since)->count(),
+                'revenue' => (int) $this->paidOrders()->where('paid_at', '>=', $since)->sum(DB::raw('amount_rsd - COALESCE(refund_amount_rsd, 0)')),
             ];
         });
     }
@@ -83,7 +100,7 @@ class AdminStats
     /**
      * Per day for the last N days, every day present (0 when empty).
      *
-     * @return array{labels: list<string>, dates: list<string>, listings: list<int>, users: list<int>, views: list<int>}
+     * @return array{labels: list<string>, dates: list<string>, listings: list<int>, users: list<int>, views: list<int>, orders: list<int>, revenue: list<int>}
      */
     public function daily(int $days = 30): array
     {
@@ -100,7 +117,15 @@ class AdminStats
                 ->mapWithKeys(fn ($n, $d) => [substr((string) $d, 0, 10) => (int) $n])
                 ->all();
 
-            $out = ['labels' => [], 'dates' => [], 'listings' => [], 'users' => [], 'views' => []];
+            $orders = $this->paidOrders()
+                ->where('paid_at', '>=', $since)
+                ->groupByRaw('DATE(paid_at)')
+                ->selectRaw('DATE(paid_at) AS d, COUNT(*) AS n, SUM(amount_rsd - COALESCE(refund_amount_rsd, 0)) AS r')
+                ->toBase()
+                ->get()
+                ->keyBy(fn ($row) => substr((string) $row->d, 0, 10));
+
+            $out = ['labels' => [], 'dates' => [], 'listings' => [], 'users' => [], 'views' => [], 'orders' => [], 'revenue' => []];
             for ($i = 0; $i < $days; $i++) {
                 $date = $since->addDays($i)->toDateString();
                 $out['dates'][] = $date;
@@ -108,6 +133,8 @@ class AdminStats
                 $out['listings'][] = $listings[$date] ?? 0;
                 $out['users'][] = $users[$date] ?? 0;
                 $out['views'][] = $views[$date] ?? 0;
+                $out['orders'][] = (int) ($orders[$date]->n ?? 0);
+                $out['revenue'][] = (int) ($orders[$date]->r ?? 0);
             }
 
             return $out;

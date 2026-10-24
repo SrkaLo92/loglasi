@@ -28,8 +28,13 @@ class PeriodStats extends Widget
             'firms' => 'Nove firme',
             'views' => 'Pregledi oglasa',
             'reveals' => 'Otkriveni telefoni',
-            'revenue' => 'Prihod (plaćene narudžbine)',
+            'orders' => 'Plaćene narudžbine',
+            'revenue' => 'Prihod (bez test narudžbina i povraćaja)',
         ];
+        // Money is for admins; moderators see listings and users.
+        if (! auth()->user()?->isAdmin()) {
+            unset($rows['orders'], $rows['revenue']);
+        }
 
         return compact('periods', 'totals', 'rows');
     }

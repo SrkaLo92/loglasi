@@ -24,11 +24,13 @@ class QueueCounters extends Widget
     {
         $queue = app(AdminStats::class)->queue();
 
-        return ['items' => [
+        $admin = (bool) auth()->user()?->isAdmin();
+
+        return ['items' => array_values(array_filter([
             ['label' => 'Oglasi na čekanju', 'count' => $queue['listings'], 'url' => ListingResource::getUrl('index', ['tab' => 'pending'])],
-            ['label' => 'Telefoni za proveru', 'count' => $queue['phones'], 'url' => UserResource::getUrl('index', ['tab' => 'phone'])],
-            ['label' => 'Narudžbine čekaju uplatu', 'count' => $queue['orders'], 'url' => OrderResource::getUrl('index', ['tab' => 'pending'])],
+            $admin ? ['label' => 'Telefoni za proveru', 'count' => $queue['phones'], 'url' => UserResource::getUrl('index', ['tab' => 'phone'])] : null,
+            $admin ? ['label' => 'Narudžbine čekaju uplatu', 'count' => $queue['orders'], 'url' => OrderResource::getUrl('index', ['tab' => 'pending'])] : null,
             ['label' => 'Otvorene prijave', 'count' => $queue['reports'], 'url' => ReportResource::getUrl('index', ['tab' => 'open'])],
-        ]];
+        ]))];
     }
 }

@@ -7,7 +7,9 @@ use App\Filament\Pages\Dashboard;
 use App\Filament\Support\AuditHooks;
 use App\Http\Middleware\Admin\EnsureAdminLogin;
 use App\Http\Middleware\Admin\SetAdminLocale;
+use App\Models\AuditLog;
 use App\Models\Setting;
+use App\Services\Admin\AdminStats;
 use App\Support\Settings;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\FontProviders\LocalFontProvider;
@@ -40,6 +42,8 @@ class AdminPanelProvider extends PanelProvider
         // Settings edited as rows (key/value page) must not stay stale in the settings cache.
         Setting::saved(fn () => Settings::flush());
         Setting::deleted(fn () => Settings::flush());
+        // Every admin write is audit-logged, so a new entry means the dashboard counters may have moved.
+        AuditLog::created(fn () => AdminStats::forgetQueue());
 
         RateLimiter::for('admin-api', fn (Request $request) => Limit::perMinute(120)->by('admin-api:'.($request->user()?->id ?? $request->ip())));
     }
