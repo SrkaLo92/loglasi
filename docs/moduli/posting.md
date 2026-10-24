@@ -31,7 +31,7 @@ Submitting a listing does the following:
 
 Editing a published listing keeps its slug. A substantial edit goes back to review when moderation applies.
 
-The "new condition only for firms" rule is behind the `new_condition_firms_only` setting, which is off by default.
+The "new condition only for firms" rule is behind the `new_condition_firms_only` setting, which is on by default (owner's decision); admins can turn it off.
 
 ## Images
 
