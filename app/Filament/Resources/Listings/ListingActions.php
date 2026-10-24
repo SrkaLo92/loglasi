@@ -8,6 +8,7 @@ use App\Models\Listing;
 use App\Services\Admin\ListingModeration;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\Icons\Heroicon;
@@ -52,30 +53,36 @@ class ListingActions
     public static function feature(): Action
     {
         return Action::make('feature')
-            ->label('Istakni besplatno')
+            ->label('Promoviši besplatno')
             ->icon(Heroicon::OutlinedStar)
             ->color('warning')
-            ->visible(fn (Listing $record) => ! $record->trashed())
+            ->visible(fn (Listing $record) => ! $record->trashed() && $record->status === ListingStatus::Published)
             ->schema([
+                Select::make('promotion')
+                    ->label('Vrsta')
+                    ->options(ListingModeration::PROMOTIONS)
+                    ->default('featured_until')
+                    ->required()
+                    ->native(false),
                 TextInput::make('days')
                     ->label('Broj dana')
-                    ->helperText('Ako je oglas već istaknut, dani se dodaju na postojeći rok.')
+                    ->helperText('Ako promocija već traje, dani se dodaju na postojeći rok.')
                     ->integer()->minValue(1)->maxValue(365)->default(7)->required(),
             ])
-            ->modalHeading('Istaći oglas bez plaćanja')
-            ->modalSubmitActionLabel('Istakni')
-            ->action(fn (Listing $record, array $data) => Notify::run(fn () => self::service()->feature($record, (int) $data['days']), 'Oglas je istaknut.'));
+            ->modalHeading('Promovisati oglas bez plaćanja')
+            ->modalSubmitActionLabel('Promoviši')
+            ->action(fn (Listing $record, array $data) => Notify::run(fn () => self::service()->feature($record, (int) $data['days'], (string) ($data['promotion'] ?? 'featured_until')), 'Oglas je promovisan.'));
     }
 
     public static function unfeature(): Action
     {
         return Action::make('unfeature')
-            ->label('Skini isticanje')
+            ->label('Skini promocije')
             ->icon(Heroicon::OutlinedNoSymbol)
             ->color('gray')
-            ->visible(fn (Listing $record) => $record->isFeatured())
+            ->visible(fn (Listing $record) => collect(array_keys(ListingModeration::PROMOTIONS))->contains(fn (string $column) => $record->{$column}?->isFuture() === true))
             ->requiresConfirmation()
-            ->action(fn (Listing $record) => Notify::run(fn () => self::service()->unfeature($record), 'Isticanje je skinuto.'));
+            ->action(fn (Listing $record) => Notify::run(fn () => self::service()->unfeature($record), 'Promocije su skinute.'));
     }
 
     public static function bump(): Action
@@ -88,6 +95,18 @@ class ListingActions
             ->requiresConfirmation()
             ->modalDescription('Oglas se vraća na vrh liste, kao da je upravo postavljen.')
             ->action(fn (Listing $record) => Notify::run(fn () => self::service()->bump($record), 'Oglas je podignut na vrh.'));
+    }
+
+    public static function expire(): Action
+    {
+        return Action::make('expire')
+            ->label('Neka istekne')
+            ->icon(Heroicon::OutlinedClock)
+            ->color('gray')
+            ->visible(fn (Listing $record) => ! $record->trashed() && $record->status === ListingStatus::Published)
+            ->requiresConfirmation()
+            ->modalDescription('Oglas odmah ističe i nestaje iz pretrage. Vlasnik može da ga obnovi kao posle isteka roka.')
+            ->action(fn (Listing $record) => Notify::run(fn () => self::service()->expire($record), 'Oglas je istekao.'));
     }
 
     public static function open(): Action

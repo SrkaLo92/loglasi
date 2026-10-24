@@ -293,6 +293,7 @@ class ListingResource extends Resource
                     ListingActions::feature(),
                     ListingActions::unfeature(),
                     ListingActions::bump(),
+                    ListingActions::expire(),
                     ListingActions::open(),
                     DeleteAction::make(),
                     RestoreAction::make(),

@@ -76,6 +76,37 @@ class ListingAdminTest extends TestCase
         Livewire::test(ListListings::class)->callTableAction('feature', $listing, ['days' => 0])->assertHasTableActionErrors(['days']);
     }
 
+    public function test_top_and_premium_home_promotions(): void
+    {
+        $listing = Listing::factory()->create();
+        $this->signIn($this->admin());
+
+        Livewire::test(ListListings::class)->callTableAction('feature', $listing, ['promotion' => 'top_until', 'days' => 7]);
+        Livewire::test(ListListings::class)->callTableAction('feature', $listing, ['promotion' => 'premium_home_until', 'days' => 3]);
+
+        $listing->refresh();
+        $this->assertSame(3, $listing->promotionRank());
+        $this->assertTrue($listing->isPremiumXl());
+        $this->assertTrue($listing->premium_home_until->isFuture());
+
+        Livewire::test(ListListings::class)->callTableAction('unfeature', $listing);
+        $this->assertSame(0, $listing->refresh()->promotionRank());
+        $this->assertFalse($listing->isPremiumXl());
+    }
+
+    public function test_expire_ends_a_published_listing(): void
+    {
+        $listing = Listing::factory()->create(['expires_at' => now()->addDays(20)]);
+        $this->signIn($this->moderator());
+
+        Livewire::test(ListListings::class)->callTableAction('expire', $listing);
+
+        $listing->refresh();
+        $this->assertSame(ListingStatus::Expired, $listing->status);
+        $this->assertFalse($listing->expires_at->isFuture());
+        $this->assertDatabaseHas('audit_logs', ['action' => 'listing.expire', 'subject_id' => $listing->id]);
+    }
+
     public function test_unfeature_and_bump(): void
     {
         $listing = Listing::factory()->featured()->create(['bumped_at' => now()->subWeek()]);

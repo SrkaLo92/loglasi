@@ -67,32 +67,74 @@ class ListingModeration
         return $listing;
     }
 
-    /** Free manual featuring for N days (from now, or from the current end). */
-    public function feature(Listing $listing, int $days): Listing
+    /** Manual promotions (free), by the listing column the payments module also uses. */
+    public const PROMOTIONS = [
+        'featured_until' => 'Istaknut oglas',
+        'priority_until' => 'Prioritetni oglas',
+        'top_until' => 'TOP oglas',
+        'premium_xl_until' => 'Premium XL kartica',
+        'premium_home_until' => 'Premium XL + početna',
+    ];
+
+    /** Free manual promotion for N days (from now, or from the current end). */
+    public function feature(Listing $listing, int $days, string $promotion = 'featured_until'): Listing
     {
         if ($days < 1 || $days > 365) {
             throw new DomainException('Broj dana mora biti od 1 do 365.');
         }
+        if (! array_key_exists($promotion, self::PROMOTIONS)) {
+            throw new DomainException('Nepoznata vrsta promocije.');
+        }
+        if ($listing->trashed() || $listing->status !== ListingStatus::Published) {
+            throw new DomainException('Promoviše se samo objavljen oglas.');
+        }
 
-        $before = $listing->featured_until;
-        $until = $before !== null && $before->isFuture() ? $before->copy()->addDays($days) : now()->addDays($days);
-        $listing->forceFill(['featured_until' => $until])->save();
+        $columns = $promotion === 'premium_home_until' ? ['premium_xl_until', 'premium_home_until'] : [$promotion];
+        $changes = ['days' => $days, 'free' => true];
+        foreach ($columns as $column) {
+            $before = $listing->{$column};
+            $until = $before !== null && $before->isFuture() ? $before->copy()->addDays($days) : now()->addDays($days);
+            $listing->forceFill([$column => $until]);
+            $changes[$column] = [$before?->toIso8601String(), $until->toIso8601String()];
+        }
+        $listing->save();
 
-        AuditLog::record('listing.feature', $listing, [
-            'days' => $days,
-            'featured_until' => [$before?->toIso8601String(), $until->toIso8601String()],
-            'free' => true,
-        ]);
+        AuditLog::record('listing.feature', $listing, $changes);
 
         return $listing;
     }
 
+    /** Ends every running promotion. */
     public function unfeature(Listing $listing): Listing
     {
-        $before = $listing->featured_until;
-        $listing->forceFill(['featured_until' => null])->save();
+        $changes = [];
+        foreach (array_keys(self::PROMOTIONS) as $column) {
+            if ($listing->{$column}?->isFuture()) {
+                $changes[$column] = [$listing->{$column}->toIso8601String(), null];
+                $listing->forceFill([$column => null]);
+            }
+        }
+        $listing->save();
 
-        AuditLog::record('listing.unfeature', $listing, ['featured_until' => [$before?->toIso8601String(), null]]);
+        AuditLog::record('listing.unfeature', $listing, $changes);
+
+        return $listing;
+    }
+
+    /** Ends a published listing now (the owner can renew it as after normal expiry). */
+    public function expire(Listing $listing): Listing
+    {
+        if ($listing->status !== ListingStatus::Published) {
+            throw new DomainException('Ističe samo objavljen oglas.');
+        }
+
+        $before = $listing->expires_at;
+        $listing->forceFill(['status' => ListingStatus::Expired, 'expires_at' => now()])->save();
+
+        AuditLog::record('listing.expire', $listing, [
+            'status' => [ListingStatus::Published->value, ListingStatus::Expired->value],
+            'expires_at' => [$before?->toIso8601String(), $listing->expires_at->toIso8601String()],
+        ]);
 
         return $listing;
     }
