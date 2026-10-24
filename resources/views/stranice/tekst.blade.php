@@ -12,5 +12,8 @@
 	<article class="lgx-tekst lgx-tekst--{{ $page }}">
 		{{ $body }}
 	</article>
+	@if ($page === 'odustanak')
+		@include('stranice.partials.obrazac-odustanak')
+	@endif
 </div>
 @endsection

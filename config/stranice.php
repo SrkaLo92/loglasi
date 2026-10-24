@@ -18,6 +18,9 @@ return [
         'faq' => '/faq/',
         'uslovi' => '/uslovi-koriscenja/',
         'privatnost' => '/politika-privatnosti/',
+        'placanje' => '/uslovi-placanja/',
+        'odustanak' => '/odustanak-od-ugovora/',
+        'reklamacije' => '/reklamacije/',
     ],
 
     // Kontakt forma: najmanje sekundi od otvaranja do slanja, najduže važenje forme, broj poruka po IP adresi.

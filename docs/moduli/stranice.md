@@ -1,6 +1,6 @@
 # Modul „Stranice”: izgled sajta i sadržajne strane
 
-Zaglavlje, podnožje i donja navigacija za telefon (po odobrenoj maketi početne), sadržajne strane (Cenovnik, Za firme, Kontakt, O nama, Česta pitanja, Uslovi korišćenja, Politika privatnosti), strane grešaka i zajednički srpski rečnik.
+Zaglavlje, podnožje i donja navigacija za telefon (po odobrenoj maketi početne), sadržajne strane (Cenovnik, Za firme, Kontakt, O nama, Česta pitanja, Uslovi korišćenja, Politika privatnosti, pravni tekstovi za plaćene usluge), strane grešaka i zajednički srpski rečnik.
 
 ## Adrese
 
@@ -13,6 +13,9 @@ Zaglavlje, podnožje i donja navigacija za telefon (po odobrenoj maketi početne
 | Česta pitanja | `/faq/` | `stranice.faq` |
 | Uslovi korišćenja | `/uslovi-koriscenja/` | `stranice.uslovi` |
 | Politika privatnosti | `/politika-privatnosti/` | `stranice.privatnost` |
+| Uslovi kupovine i plaćanja | `/uslovi-placanja/` | `stranice.placanje` |
+| Odustanak od ugovora (sa obrascem) | `/odustanak-od-ugovora/` | `stranice.odustanak` |
+| Reklamacije i povraćaj novca | `/reklamacije/` | `stranice.reklamacije` |
 
 `/kontakt/`, `/cenovnik/`, `/za-firme/`, `/o-nama/` i `/faq/` su potvrđeni u dokumentima (09-deploy-seo.md, llms.txt lista, NAPOMENE-stranice.md). **Uslovi i privatnost: slugovi nisu nađeni u dokumentima**, pre prelaska proveriti u GSC izvozu i po potrebi promeniti putanju u `routes/web/stranice.php` i `config/stranice.php` (ili dodati 301).
 
@@ -30,10 +33,11 @@ Ostale putanje koje zaglavlje i navigacija koriste (`/oglasi/`, `/postavi-oglas/
 | `public/css/stranice.css` | Sadržajne strane (klase `lgx-`, preneto iz `assets/stranice/stranice.css`), forma, tekst, greške. Učitava se samo na ovim stranama. |
 | `public/js/stranice.js` | Samo dugme „Kopiraj” za broj računa; učitava se kad je račun unet. |
 | `public/fonts/` | Manrope (OFL), latinica i proširena latinica, varijabilni 200–800. |
-| `app/Support/Stranice/` | `PageText` (tekstovi), `Cenovnik` (cene, brojač firmi, podaci za uplatu), `Navigacija` (kategorije i mesta za pretragu, aktivna stavka), `Telefon` (E.164 i prikaz), `Ikonice` (SVG). |
+| `app/Support/Stranice/` | `PageText` (tekstovi), `Cenovnik` (cene, brojač firmi, podaci za uplatu, spisak usluga za uslove plaćanja), `Prodavac` (podaci o prodavcu iz podešavanja), `Navigacija` (kategorije i mesta za pretragu, aktivna stavka), `Telefon` (E.164 i prikaz), `Ikonice` (SVG). |
 | `app/Http/Controllers/Stranice/` | `CenovnikController`, `ZaFirmeController`, `KontaktController`, `TekstController`. |
 | `app/Mail/KontaktPoruka.php`, `resources/views/stranice/mail/kontakt.blade.php` | Poruka sa forme, ide u red (queue). |
 | `resources/stranice/tekstovi.php` | Podrazumevani tekstovi svih strana. |
+| `resources/views/stranice/partials/obrazac-odustanak.blade.php` | Obrazac za odustanak (ispod teksta strane `/odustanak-od-ugovora/`), štampa se sam (`@media print` u `stranice.css`). |
 | `resources/views/errors/` | 401, 403, 404, 410, 419, 429, 500, 503 i rezervne 4xx/5xx. |
 | `lang/sr/` | `validation.php`, `auth.php`, `passwords.php`, `pagination.php`, `ui.php` (zajednički nazivi dugmadi i oznaka). |
 
@@ -43,7 +47,8 @@ Svaki tekst se čita iz podešavanja pod ključem `page_text.<ključ>` (npr. `pa
 
 - Kratki tekstovi su obični stringovi, dugi (O nama, Uslovi, Privatnost) su Markdown: `## naslov`, `- stavka`, `**masno**`, `[tekst](/putanja/)`. HTML se ne prihvata (escapuje se), nebezbedni linkovi se izbacuju.
 - Liste (pitanja, koraci, prednosti) su nizovi: pitanje je `{pitanje, odgovor}`, korak `{naslov, tekst}`, prednost `{ikonica, naslov, tekst}`. Pitanje na Cenovniku ima i `uslov` (šifra proizvoda): ako proizvod nije aktivan, pitanje se ne prikazuje.
-- Zamene u tekstu se popunjavaju iz baze, pa cena nikad nije upisana ručno: `{cena_podizanje}`, `{cena_istaknuto_7}`, `{cena_istaknuto_30}`, `{cena_biznis}`, `{besplatni_oglasi}` („do 10 novih oglasa”), `{trajanje_oglasa}` („mesec dana”), `{besplatne_firme}`, `{ponuda_firme}`, `{email}`.
+- Zamene u tekstu se popunjavaju iz baze, pa cena nikad nije upisana ručno: `{cena_podizanje}`, `{cena_istaknuto_7}`, `{cena_istaknuto_30}`, `{cena_biznis}`, `{besplatni_oglasi}` („do 10 novih oglasa”), `{trajanje_oglasa}` („mesec dana”), `{besplatne_firme}`, `{ponuda_firme}`, `{email}`, `{telefon}` (link `tel:`).
+- Zamene za pravne tekstove: `{usluge_cenovnik}` (spisak usluga koje mogu da se naruče, sa nazivom, cenom i trajanjem iz `products`), `{prodavac}` (spisak: naziv i adresa iz `payment_recipient`, a bez druge linije adresa iz `contact_address`; `payment_pib`, `payment_mb`, `payment_account`, `contact_email`, `contact_phone`; prazno se izostavlja), `{pdv_napomena}` (`payment_vat_note`, prazno dok nije uneto), `{rok_uplate}` („7 dana”, `payments.pending_days`). Vrednosti iz podešavanja se ne tumače kao Markdown.
 - Prikaz u Blade-u: `PageText::get()` (tekst), `PageText::html()` (Markdown), `PageText::inline()` (jedan red sa linkom), `PageText::list()`.
 
 Tekstovi strana 500 i 503 su u samom šablonu, jer se prikazuju i kad baza ne radi.
@@ -56,6 +61,17 @@ Tekstovi strana 500 i 503 su u samom šablonu, jer se prikazuju i kad baza ne ra
 - **Uplata (prazno dok admin ne unese, račun se nigde ne izmišlja):** `payment_recipient`, `payment_account`, `payment_model`, `payment_reference`, `payment_purpose`. Dok primalac i račun nisu uneti, piše „Podatke za uplatu šaljemo na zahtev…”. Formatiranje računa (3-13-2) radi admin pri upisu.
 - **Kontakt:** `contact_email` (prima poruke sa forme), `contact_phone` (bilo koji oblik, prikaz „+381 65 123 4567”, link `tel:+381…`), `contact_hours` (red po red).
 - **Pretraga u zaglavlju:** glavne aktivne kategorije i mesta, keš 10 minuta (`Navigacija::forget()`); ako baza ne radi, izbor se ne prikazuje.
+
+## Pravni tekstovi za plaćene usluge
+
+**Pravni tekstovi: nacrt, pregledati sa knjigovođom/pravnikom.** Na javnoj strani nema oznake nacrta.
+
+Napisani prema Zakonu o zaštiti potrošača (Sl. glasnik RS 88/2021) i istraživanju `pravno/naplata-fiskalizacija.md`; ključevi `placanje.*`, `odustanak.*` (i `odustanak.obrazac.*` za obrazac), `reklamacije.*`, `seo.placanje|odustanak|reklamacije.*`. U podnožju („Korisni linkovi”), u `config/seo.php` → `pages` (sitemap strana), kanonski URL na sebe.
+
+- **Uslovi kupovine i plaćanja:** prodavac, usluge i cene iz baze, naručivanje (predračun, IPS QR, poziv na broj = broj narudžbine), otkazivanje neplaćene narudžbine posle `payments.pending_days`, početak usluge po evidentiranju uplate, cene u RSD i napomena o PDV-u samo kad je uneta, fiskalni račun / faktura, povraćaj uplatom na račun.
+- **Odustanak od ugovora:** 14 dana, izuzetak za izvršenu uslugu uz izričitu saglasnost (čekboks na narudžbini, `orders.consent_at`), povraćaj srazmerno kao `OrderFulfillment::refundableAmount()` (pre uključenja ceo iznos; posle: celi neiskorišćeni dani / dani perioda, tekući dan je iskorišćen; paket podizanja po neiskorišćenim podizanjima; pojedinačno podizanje ništa; admin može da upiše drugi iznos), povraćaj u roku od 14 dana, obrazac za štampu sa poljima za popunjavanje.
+- **Reklamacije:** načini podnošenja, šta je potrebno, potvrda prijema, odgovor za 8 dana, rešenje za 15 dana, evidencija reklamacija, povraćaj za 14 dana, vansudsko rešavanje sporova.
+- **Politika privatnosti:** dodat odeljak „Podaci o plaćanju” (narudžbine, podaci firme za račun, podaci iz izvoda banke, fiskalizacija, čuvanje po Zakonu o računovodstvu); ništa nije uklonjeno.
 
 ## Kontakt forma
 
@@ -77,7 +93,7 @@ Poruka ide kao `KontaktPoruka` (ShouldQueue) na `contact_email`, „Odgovori na�
 
 ## Testovi
 
-`tests/Feature/Stranice/`: svaka strana 200 sa očekivanim naslovom i jednim H1, bez engleskih reči u tekstu i atributima, bez „lorem”; kanonski URL; cene iz baze (izmena, neaktivan proizvod, opis iz baze); brojač firmi (oblici, popunjeno, ukupno iz podešavanja); podaci za uplatu; kontakt forma (validacija, zamka, vremenska zamka, istek, limit, poruka u redu, tekst poruke); strane grešaka; zaglavlje, navigacija i fontovi; telefon.
+`tests/Feature/Stranice/`: pravni tekstovi (`PravniTekstoviTest`: 200, SEO, kanonski URL, sitemap, podnožje, cene i prodavac iz baze, PDV napomena, obrazac, rokovi); svaka strana 200 sa očekivanim naslovom i jednim H1, bez engleskih reči u tekstu i atributima, bez „lorem”; kanonski URL; cene iz baze (izmena, neaktivan proizvod, opis iz baze); brojač firmi (oblici, popunjeno, ukupno iz podešavanja); podaci za uplatu; kontakt forma (validacija, zamka, vremenska zamka, istek, limit, poruka u redu, tekst poruke); strane grešaka; zaglavlje, navigacija i fontovi; telefon.
 
 ```bash
 DB_DATABASE=lb_stranice_test php artisan test tests/Feature/Stranice
@@ -87,5 +103,6 @@ DB_DATABASE=lb_stranice_test php artisan test tests/Feature/Stranice
 
 - Slugovi Uslova i Politike privatnosti na sadašnjem sajtu.
 - Nazivi parametara pretrage (`keyword`, `kategorija`, `mesto`) treba da se poklope sa modulom oglasa; `keyword` i `kategorija` su kao na sadašnjem sajtu.
+- Pravni tekstovi za plaćanje (vidi gore) su nacrt: pregledati sa knjigovođom i pravnikom pre prve prave uplate.
 - Tekstovi O nama, Uslovi i Politika privatnosti su napisani nanovo (u referentnom kodu ih nema); vlasnik treba da ih pročita, a uslove i politiku privatnosti i pravnik (naziv rukovaoca podacima, povraćaj uplate, analitika i kolačići ako se uvedu).
 - FAQPage schema za `/faq/` je posao modula SEO; pitanja su u `PageText::list('faq.pitanja')`.

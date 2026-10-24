@@ -21,4 +21,9 @@ Route::get('/uslovi-koriscenja', [TekstController::class, 'show'])->defaults('st
 Route::get('/brisanje-licnih-podataka', [TekstController::class, 'show'])->defaults('strana', 'brisanje')->name('stranice.brisanje');
 Route::get('/politika-privatnosti', [TekstController::class, 'show'])->defaults('strana', 'privatnost')->name('stranice.privatnost');
 
+// Pravni tekstovi za plaćene usluge (Zakon o zaštiti potrošača).
+Route::get('/uslovi-placanja', [TekstController::class, 'show'])->defaults('strana', 'placanje')->name('stranice.placanje');
+Route::get('/odustanak-od-ugovora', [TekstController::class, 'show'])->defaults('strana', 'odustanak')->name('stranice.odustanak');
+Route::get('/reklamacije', [TekstController::class, 'show'])->defaults('strana', 'reklamacije')->name('stranice.reklamacije');
+
 Route::get('/podnozje/najnoviji-oglasi', [FooterController::class, 'latest'])->middleware('throttle:60,1')->name('stranice.podnozje.najnoviji');

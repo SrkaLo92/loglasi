@@ -2,6 +2,8 @@
 
 namespace App\Support\Stranice;
 
+use App\Support\Payments\PaymentDetails;
+use App\Support\Phone;
 use App\Support\Settings;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -97,6 +99,11 @@ class PageText
             '{besplatne_firme}' => (string) Cenovnik::foundingTotal(),
             '{ponuda_firme}' => Cenovnik::offerText(),
             '{email}' => $emailMd,
+            '{telefon}' => self::phone(),
+            '{rok_uplate}' => self::pendingDays(),
+            '{pdv_napomena}' => Prodavac::escape(PaymentDetails::vatNote()),
+            '{prodavac}' => Prodavac::markdown(),
+            '{usluge_cenovnik}' => Cenovnik::servicesMarkdown(),
         ];
 
         foreach (Cenovnik::PLACEHOLDERS as $placeholder => $code) {
@@ -105,6 +112,22 @@ class PageText
         }
 
         return $vars;
+    }
+
+    /** "+381 65 541 5128" as a tel: link, or a pointer to the contact page when no phone is set. */
+    private static function phone(): string
+    {
+        $phone = trim((string) Settings::get('contact_phone'));
+
+        return $phone === '' ? 'telefon sa strane [Kontakt](/kontakt/)' : '['.Phone::display($phone).'](tel:'.$phone.')';
+    }
+
+    /** "7 dana": unpaid orders are cancelled after this (config payments.pending_days). */
+    private static function pendingDays(): string
+    {
+        $days = max(1, (int) config('payments.pending_days', 7));
+
+        return $days.' '.Cenovnik::plural($days, 'dan', 'dana', 'dana');
     }
 
     /** @return array<string, mixed> */

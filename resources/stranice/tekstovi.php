@@ -241,6 +241,7 @@ Oglase pregledamo i možemo da uklonimo oglas koji krši ove uslove, bez prethod
 - Plaća se uplatom na račun, najlakše skeniranjem IPS QR koda u aplikaciji banke, uz poziv na broj sa predračuna. Ako uplata ne stigne u roku od 7 dana, porudžbina se otkazuje.
 - Usluga počinje odmah posle potvrde uplate i traje koliko piše na Cenovniku. Paket kupljen tokom besplatne prve godine počinje kad ona istekne.
 - Za isticanje, dodatne oglase i pakete, ako odustanete pre isteka, vraćamo srazmeran deo cene za dane koji nisu iskorišćeni; podizanje se izvrši odmah. Ako usluga ne može da se pruži našom greškom, vraćamo ceo iznos.
+- Sve o naručivanju, plaćanju, računima, odustanku i reklamacijama piše na stranama [Uslovi kupovine i plaćanja](/uslovi-placanja/), [Odustanak od ugovora](/odustanak-od-ugovora/) i [Reklamacije i povraćaj novca](/reklamacije/).
 
 ## 7. Odgovornost
 
@@ -320,9 +321,189 @@ Sajt koristi kolačiće koji su neophodni za rad: prijavu na nalog i zaštitu fo
 
 Imate pravo da tražite uvid u svoje podatke, ispravku, brisanje i ograničenje obrade, kao i pravo da podnesete pritužbu Povereniku za informacije od javnog značaja i zaštitu podataka o ličnosti. Uputstvo za brisanje naloga je na strani [Brisanje ličnih podataka](/brisanje-licnih-podataka/).
 
+## Podaci o plaćanju
+
+Kada naručite plaćenu uslugu, obrađujemo podatke koji su potrebni da bismo zaključili i izvršili ugovor i ispunili obaveze iz poreskih i računovodstvenih propisa:
+
+- **Narudžbina:** usluga, oglas na koji se odnosi, iznos, broj narudžbine (poziv na broj), datum i status, vreme kada ste prihvatili uslove i dali saglasnost da usluga počne odmah, i IP adresa sa koje ste to uradili.
+- **Podaci za račun firme:** naziv, PIB, matični broj, adresa i e-pošta na koju šaljemo račun, ako plaćate kao firma ili preduzetnik.
+- **Podaci o uplati:** iz izvoda banke vidimo ime i račun platioca, iznos, datum i poziv na broj. Koristimo ih samo da uplatu povežemo sa narudžbinom i, kada je potrebno, da vratimo novac. Podatke o platnim karticama ne prikupljamo.
+- **Računi:** fizičkom licu izdajemo fiskalni račun preko sistema elektronske fiskalizacije Poreske uprave, uz aplikaciju ovlašćenog pružaoca usluge fiskalizacije. Na fiskalni račun ne upisujemo Vaše ime, već samo uslugu, iznos i način plaćanja. Firmi izdajemo račun sa podacima firme. Račun Vam šaljemo e-poštom.
+
+Narudžbine, račune i podatke o uplatama čuvamo onoliko dugo koliko propisuju Zakon o računovodstvu i poreski propisi, i posle brisanja naloga. Pristup im imaju samo administratori sajta i lice koje vodi naše poslovne knjige.
+
 ## Kontakt
 
 Za sva pitanja o podacima o ličnosti pišite nam preko [kontakt forme](/kontakt/) ili na {email}.
+MD,
+
+    /* Pravni tekstovi za plaćene usluge (nacrt, vidi docs/moduli/stranice.md) --
+     * Zamene: {usluge_cenovnik} (spisak usluga i cena iz tabele products), {prodavac}
+     * (podaci o prodavcu iz podešavanja payment_* i contact_*), {pdv_napomena}
+     * (payment_vat_note, prazno dok nije uneto), {rok_uplate} (payments.pending_days), {telefon}. */
+
+    'placanje.naslov' => 'Uslovi kupovine i plaćanja',
+    'placanje.tekst' => <<<'MD'
+Ovi uslovi važe kada na sajtu loglasi.rs naručite i platite neku od plaćenih usluga. Postavljanje oglasa je besplatno; plaća se samo ono što sami izaberete. Za korišćenje sajta važe i [Uslovi korišćenja](/uslovi-koriscenja/).
+
+## 1. Prodavac
+
+{prodavac}
+
+## 2. Plaćene usluge
+
+Trenutno možete da naručite:
+
+{usluge_cenovnik}
+
+Opis svake usluge i važeće cene su na strani [Cenovnik](/cenovnik/). Cena koja važi za Vašu narudžbinu je ona koja piše na strani narudžbine i na predračunu.
+
+Ako paket Vaše firme uključuje podizanja, isticanja ili Premium XL karticu, ili ste ranije kupili paket podizanja, uslugu uključujete bez nove narudžbine i bez plaćanja.
+
+## 3. Kako se naručuje
+
+1. Izaberete uslugu na strani oglasa, na Cenovniku ili u svom nalogu, i oglas na koji se odnosi.
+2. Izaberete da li plaćate kao fizičko lice ili kao firma (preduzetnik). Firma upisuje naziv, PIB, matični broj, adresu i e-poštu za račun.
+3. Prihvatate ove uslove. Kao fizičko lice dajete i saglasnost da usluga počne odmah po evidentiranju uplate (vidite [Odustanak od ugovora](/odustanak-od-ugovora/)).
+4. Potvrdite narudžbinu. Odmah dobijate predračun na ekranu i e-poštom, sa podacima za uplatu i IPS QR kodom. Sve narudžbine su u [Mom nalogu](/moj-nalog/narudzbine/).
+
+## 4. Plaćanje
+
+- Plaća se uplatom na račun prodavca, u dinarima. Najlakše je da u aplikaciji svoje banke izaberete plaćanje skeniranjem IPS QR koda sa predračuna. Možete da platite i nalogom za prenos u banci, pošti ili elektronskom bankarstvu.
+- Poziv na broj (model 97) je broj Vaše narudžbine. Upišite ga tačno, jer po njemu povezujemo uplatu sa narudžbinom.
+- Plaćanje platnom karticom za sada nije moguće.
+- Ako uplata ne stigne u roku od {rok_uplate}, narudžbina se sama otkazuje. Narudžbinu koja čeka uplatu možete i sami da otkažete u svom nalogu, bez ikakvih troškova.
+
+## 5. Cene
+
+Sve cene su u dinarima (RSD). Iznos na predračunu je iznos koji plaćate; mi ne naplaćujemo nikakve dodatne troškove. Proviziju banke za uplatu, ako je Vaša banka naplaćuje, plaćate banci. {pdv_napomena}
+
+## 6. Kada usluga počinje
+
+- Usluga se uključuje kada evidentiramo uplatu po pozivu na broj. O tome Vam šaljemo e-poruku.
+- Trajanje promocije i dodatnih oglasa računa se od uključenja. Ako je ista promocija na oglasu već aktivna, novo trajanje se nadovezuje na postojeće.
+- Podizanje se izvrši odmah, jednom. Kupljena podizanja iz paketa koristite kada želite.
+- Paket za firme kupljen tokom besplatne prve godine počinje kada besplatna godina istekne.
+- Nema automatske obnove ni automatske naplate. Kada usluga istekne, sami birate da li ćete je ponovo naručiti.
+
+## 7. Računi
+
+- Fizičkom licu izdajemo fiskalni račun i šaljemo ga e-poštom.
+- Firmi ili preduzetniku izdajemo račun (fakturu) na podatke iz narudžbine i šaljemo ga na e-poštu za račun.
+
+## 8. Odustanak, reklamacije i povraćaj novca
+
+- Kao potrošač imate pravo da odustanete od ugovora u roku od 14 dana, uz izuzetak za uslugu koja je izvršena. Sve o tome, i obrazac, je na strani [Odustanak od ugovora](/odustanak-od-ugovora/).
+- Ako usluga nije pružena kako je opisano, podnesite reklamaciju. Kako i u kom roku odgovaramo piše na strani [Reklamacije i povraćaj novca](/reklamacije/).
+- Novac vraćamo uplatom na Vaš tekući račun, najkasnije u roku od 14 dana. Za povraćaj nam je potreban broj računa na koji vraćamo novac.
+
+## 9. Kontakt
+
+Pitanja o narudžbinama i plaćanju pošaljite na {email}, preko [kontakt forme](/kontakt/) ili pozovite {telefon}. Uz pitanje navedite broj narudžbine.
+MD,
+
+    'odustanak.naslov' => 'Odustanak od ugovora',
+    'odustanak.tekst' => <<<'MD'
+Ugovor o plaćenoj usluzi na loglasi.rs zaključuje se na daljinu, preko sajta. Prema Zakonu o zaštiti potrošača („Službeni glasnik RS”, br. 88/2021), kao potrošač (fizičko lice koje uslugu kupuje za lične potrebe) imate pravo da odustanete od takvog ugovora, bez navođenja razloga.
+
+## Rok za odustanak
+
+Rok je 14 dana od dana zaključenja ugovora, odnosno od dana kada ste potvrdili narudžbinu. Rok je ispoštovan ako izjavu o odustanku pošaljete pre nego što istekne.
+
+## Kada pravo na odustanak prestaje
+
+Usluge na loglasi.rs su digitalne i počinju odmah: podizanje se izvrši u trenutku uključenja, a promocije i dodatni oglasi rade od uključenja. Zato pri naručivanju, kao fizičko lice, izričito tražite da usluga počne odmah po evidentiranju uplate i potvrđujete da znate da time gubite pravo na odustanak za izvršenu uslugu. Vreme te saglasnosti čuvamo uz narudžbinu.
+
+- **Usluga koja je u potpunosti izvršena** (na primer obavljeno podizanje, ili promocija čije je trajanje isteklo): pravo na odustanak više ne postoji.
+- **Usluga koja još traje** (istaknut oglas, TOP, Premium XL, dodatni oglasi, paket): možete da odustanete, a mi vraćamo deo cene za vreme koje niste iskoristili.
+- **Narudžbina koja još nije plaćena:** ne morate da šaljete izjavu, otkažite je u svom nalogu ili samo nemojte da platite.
+
+## Koliko novca vraćamo
+
+- Ako uplata jeste evidentirana, a usluga još nije uključena, vraćamo ceo iznos.
+- Za promocije, dodatne oglase i pakete za firme vraćamo deo cene srazmeran broju celih dana koji su ostali do kraja usluge. Dan u kome primimo izjavu o odustanku računa se kao iskorišćen. Na primer, za uslugu od 7 dana koju ste koristili 2 dana i deo trećeg vraćamo 4/7 cene.
+- Za paket podizanja vraćamo deo cene srazmeran broju podizanja koja niste iskoristili.
+- Pojedinačno podizanje izvrši se odmah, pa se za njega novac ne vraća.
+- Ako usluga nije mogla da se pruži našom greškom, vraćamo ceo iznos, bez obzira na ova pravila.
+
+Kada odustanete, usluga se isključuje za vreme koje nije iskorišćeno.
+
+## Kako da odustanete
+
+Pošaljite nam jasnu izjavu da odustajete od ugovora. Možete da koristite obrazac ispod, ali ne morate.
+
+- **E-poštom** na {email}, sa adrese kojom ste registrovani, ili
+- **poštom** na adresu prodavca iz obrasca.
+
+Navedite broj narudžbine (poziv na broj) i broj tekućeg računa na koji da vratimo novac. Prijem izjave potvrđujemo e-poštom bez odlaganja.
+
+## Povraćaj novca
+
+Novac vraćamo najkasnije u roku od 14 dana od dana kada primimo izjavu o odustanku, uplatom na Vaš tekući račun, jer ste i platili prenosom na račun. Za povraćaj ne plaćate nikakvu naknadu. Uz povraćaj izdajemo i dokument o povraćaju (refundaciju fiskalnog računa ili knjižno odobrenje za firmu), vezan za prvobitni račun.
+
+## Firme i preduzetnici
+
+Zakonsko pravo na odustanak imaju potrošači. Firmama i preduzetnicima koji odustanu od usluge koja još traje vraćamo novac po istim pravilima, na isti način.
+MD,
+
+    'odustanak.obrazac.naslov' => 'Obrazac za odustanak od ugovora zaključenog na daljinu',
+    'odustanak.obrazac.uvod' => '(popunite i pošaljite ovaj obrazac samo ako želite da odustanete od ugovora)',
+    'odustanak.obrazac.primalac' => 'Primalac',
+    'odustanak.obrazac.izjava' => 'Ovim obaveštavam da odustajem od ugovora o pružanju sledeće usluge:',
+    'odustanak.obrazac.polja' => [
+        'Usluga (naziv usluge i naslov ili broj oglasa)',
+        'Broj narudžbine (poziv na broj)',
+        'Datum zaključenja ugovora (datum narudžbine)',
+        'Ime i prezime potrošača',
+        'Adresa potrošača',
+        'E-pošta ili telefon',
+        'Broj tekućeg računa za povraćaj novca',
+    ],
+    'odustanak.obrazac.potpis' => 'Potpis potrošača (samo ako se obrazac šalje na papiru)',
+    'odustanak.obrazac.datum' => 'Datum',
+    'odustanak.obrazac.uputstvo' => 'Polja možete da popunite ovde, pa da obrazac odštampate ili sačuvate kao PDF i pošaljete na {email}. Možete i da odštampate prazan obrazac i da ga popunite rukom.',
+    'odustanak.obrazac.stampa' => 'Odštampajte obrazac',
+
+    'reklamacije.naslov' => 'Reklamacije i povraćaj novca',
+    'reklamacije.tekst' => <<<'MD'
+Ako plaćena usluga nije pružena kako je opisano, imate pravo na reklamaciju, u skladu sa Zakonom o zaštiti potrošača („Službeni glasnik RS”, br. 88/2021). Na primer: uplata je evidentirana a usluga nije uključena, oglas nije istaknut ili podignut, usluga je trajala kraće nego što je plaćeno, iznos nije tačan ili račun nije stigao.
+
+## Kako da podnesete reklamaciju
+
+- **E-poštom** na {email},
+- preko [kontakt forme](/kontakt/),
+- **poštom** na adresu prodavca navedenu ispod, ili
+- **telefonom** na {telefon}; reklamaciju primljenu telefonom zapisujemo i potvrđujemo e-poštom.
+
+## Šta nam je potrebno
+
+- broj narudžbine (poziv na broj) i naziv usluge,
+- naslov ili broj oglasa na koji se usluga odnosi,
+- kratak opis problema i od kada postoji,
+- šta tražite: da uslugu ispravno pružimo, da je produžimo ili da vratimo novac,
+- Vaše ime i e-pošta ili telefon za odgovor,
+- račun ili drugi dokaz o kupovini, na primer potvrda o uplati. Broj narudžbine je dovoljan da je pronađemo.
+
+## Rokovi
+
+- Prijem reklamacije potvrđujemo bez odlaganja i javljamo Vam broj pod kojim je zavedena.
+- Najkasnije u roku od **8 dana** od prijema reklamacije pisanim putem Vam odgovaramo da li je prihvatamo i šta predlažemo.
+- Reklamaciju rešavamo najkasnije u roku od **15 dana** od dana kada je podneta.
+- Svaku reklamaciju upisujemo u evidenciju primljenih reklamacija.
+
+## Povraćaj novca
+
+Ako je rešenje povraćaj novca, novac vraćamo uplatom na Vaš tekući račun, najkasnije u roku od **14 dana**, bez ikakve naknade. Za povraćaj nam je potreban broj računa na koji vraćamo novac. Uz povraćaj izdajemo dokument o povraćaju vezan za prvobitni račun (refundaciju fiskalnog računa ili knjižno odobrenje za firmu).
+
+Ako usluga nije mogla da se pruži našom greškom, vraćamo ceo iznos. Za uslugu koja je delimično pružena vraćamo deo cene za vreme koje nije iskorišćeno, kao što piše na strani [Odustanak od ugovora](/odustanak-od-ugovora/).
+
+## Ako niste zadovoljni odgovorom
+
+Ako reklamaciju ne prihvatimo ili niste zadovoljni rešenjem, možete da pokrenete postupak vansudskog rešavanja potrošačkog spora pred telom sa spiska tela za vansudsko rešavanje potrošačkih sporova koji vodi ministarstvo nadležno za zaštitu potrošača, ili da se obratite sudu.
+
+## Prodavac
+
+{prodavac}
 MD,
 
     /* Greške (500 i 503 su u šablonu, jer se prikazuju i bez baze) -------- */
@@ -363,6 +544,12 @@ MD,
     'seo.uslovi.description' => 'Pravila korišćenja sajta loglasi.rs: šta smete da oglašavate, obaveze oglašivača i kupaca, odgovornost i uklanjanje oglasa.',
     'seo.privatnost.title' => 'Politika privatnosti | loglasi.rs',
     'seo.privatnost.description' => 'Kako loglasi.rs prikuplja, koristi i čuva vaše lične podatke, koja su vaša prava i kako nas možete kontaktirati u vezi sa privatnošću.',
+    'seo.placanje.title' => 'Uslovi kupovine i plaćanja | loglasi.rs',
+    'seo.placanje.description' => 'Kako se naručuju i plaćaju promocije oglasa i paketi za firme na loglasi.rs: cene u dinarima, uplata preko IPS QR koda, računi i povraćaj novca.',
+    'seo.odustanak.title' => 'Odustanak od ugovora i obrazac | loglasi.rs',
+    'seo.odustanak.description' => 'Pravo na odustanak od ugovora zaključenog na daljinu u roku od 14 dana: kako da odustanete, kada pravo prestaje i obrazac za odustanak.',
+    'seo.reklamacije.title' => 'Reklamacije i povraćaj novca | loglasi.rs',
+    'seo.reklamacije.description' => 'Kako da podnesete reklamaciju za plaćenu uslugu na loglasi.rs, u kom roku odgovaramo i rešavamo reklamaciju i kada vraćamo novac.',
     'seo.brisanje.title' => 'Brisanje ličnih podataka | loglasi.rs',
     'seo.brisanje.description' => 'Uputstvo kako da zatražite brisanje svog naloga i ličnih podataka sa sajta loglasi.rs.',
     'seo.cenovnik.title' => 'Cenovnik: promocije oglasa i paketi za firme | loglasi.rs',

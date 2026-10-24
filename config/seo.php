@@ -60,6 +60,7 @@ return [
     'pages' => [
         '/', '/oglasi/', '/o-nama/', '/faq/', '/kontakt/', '/cenovnik/', '/za-firme/', '/firme/',
         '/uslovi-koriscenja/', '/politika-privatnosti/', '/brisanje-licnih-podataka/',
+        '/uslovi-placanja/', '/odustanak-od-ugovora/', '/reklamacije/',
     ],
 
     // Narodna fraza po slugu kategorije (keyword mapa): naziv za title i H1, „za” = akuzativ za opis.

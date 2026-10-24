@@ -13,6 +13,9 @@
 		'privatnost' => 'Politika privatnosti',
 		'brisanje' => 'Brisanje ličnih podataka',
 		'uslovi' => 'Uslovi korišćenja',
+		'placanje' => 'Uslovi kupovine i plaćanja',
+		'odustanak' => 'Odustanak od ugovora',
+		'reklamacije' => 'Reklamacije i povraćaj novca',
 	];
 	$lgCurrent = url_slash(request()->path());
 	$lgFooter = FooterSections::get();
