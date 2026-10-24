@@ -41,6 +41,12 @@ class FcmClient
     /** @return self::SENT|self::INVALID_TOKEN|self::FAILED|self::DISABLED */
     public function send(string $token, PushMessage $message): string
     {
+        if (config('notifications.hold')) {
+            Log::info('Push held: notifications are on hold.', ['title' => $message->title]);
+
+            return self::DISABLED;
+        }
+
         $credentials = $this->credentials();
         if ($credentials === null) {
             Log::debug('Push not sent: FCM is not configured.', ['title' => $message->title]);

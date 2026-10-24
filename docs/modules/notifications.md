@@ -179,3 +179,13 @@ Shared changes: `bootstrap/providers.php` (provider), `SavePendingSearch` pushed
 ## Tests
 
 `DB_DATABASE=lb_notifications_test php artisan test tests/Feature/Notifications` covers: the layout, text part and headers; escaping; account mail; settings and the signed unsubscribe (GET confirms, POST without CSRF, bad signature); the saved-search pages (normalization, dedupe, JSON, validation, limit, policy, guest search saved after login and after registration); the matcher rules; alerts (schedule, digest content, one per user, daily cooldown, overlapping windows, inactive listings, blocked users and preferences, chunks, pruning, plural forms); the devices API; FCM (JWT verified with the public key, token cache, payload, 404/UNREGISTERED cleanup, 401 retry, no-op); new messages through `Messenger` (throttle, already read, preference, push, unverified address).
+
+## Hold before the launch
+
+`NOTIFICATIONS_HOLD=true` stops every notification to real users (test sites with imported data, and production until the official launch):
+
+- Mail: `HoldOutgoingMail` listens to `MessageSending` and drops any mail with a recipient outside `NOTIFICATIONS_ALLOW` (comma separated emails or `@domain`). Dropped mails are logged as "Mail held".
+- Push: `FcmClient::send()` returns `disabled` and sends nothing.
+- There is no SMS sending in the app.
+
+Saved-search alerts still record their matches while on hold, so turning the hold off does not send a backlog.

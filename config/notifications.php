@@ -4,6 +4,11 @@
 
 return [
 
+    // Before the official launch nothing may reach real users: with hold on, mail goes only to the
+    // addresses (or @domains) in "allow" and push is not sent at all.
+    'hold' => (bool) env('NOTIFICATIONS_HOLD', false),
+    'allow' => array_values(array_filter(array_map('trim', explode(',', (string) env('NOTIFICATIONS_ALLOW', ''))))),
+
     'fcm' => [
         // Absolute path to the Firebase service-account JSON. Empty = push is a no-op.
         'credentials' => env('FCM_CREDENTIALS'),
