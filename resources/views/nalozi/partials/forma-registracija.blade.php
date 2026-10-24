@@ -38,6 +38,10 @@
 		</label>
 		@include('nalozi.partials.greska', ['field' => 'accept_terms', 'prefix' => 'reg-'])
 	</div>
+	<div class="lgn-hp" aria-hidden="true">
+		<label for="reg-website">Sajt</label>
+		<input id="reg-website" type="text" name="website" value="" tabindex="-1" autocomplete="off">
+	</div>
 	<button class="lgn-btn lgn-btn--orange" type="submit">Napravi nalog</button>
 	<p class="lgn-note">Registracijom dobijate nalog privatnog lica. Za nalog firme pišite nam preko <a href="{{ url_slash('za-firme') }}">strane za firme</a>.</p>
 </form>
