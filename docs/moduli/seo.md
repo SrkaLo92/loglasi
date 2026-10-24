@@ -50,22 +50,25 @@ Stari način i dalje radi: promenljive šablona `$title`, `$description`, `$cano
 
 Pomoćne: `Seo::activeListings()` (objavljeni i neistekli oglasi), `Seo::isActive($listing)`, `Seo::countLabel(12)` → „12 oglasa”, `Seo::placeMinListings()`.
 
-## Šabloni (mapa ključnih reči)
+## Šabloni (tekstovi sa stare verzije)
 
-| Strana | Title (do 60 znakova) | H1 | Opis (do 155) |
+Svi naslovi i opisi su u `resources/stranice/tekstovi.php` pod `seo.*` i menjaju se iz podešavanja (`page_text.seo.…`), bez izmene koda. Stalne strane imaju doslovne tekstove sa stare verzije (Yoast izvoz), ostale šablone.
+
+| Strana | Title | H1 | Opis |
 | --- | --- | --- | --- |
-| Početna | Oglasi Loznica – besplatni mali oglasi \| loglasi.rs | Oglasi za Loznicu i okolinu | Kupi i prodaj u Loznici: automobili, stanovi, posao, drva, poljoprivreda. Besplatno objavi oglas. |
-| /oglasi/ | Svi oglasi u Loznici \| loglasi.rs | Svi oglasi u Loznici | {broj} oglasa iz Loznice i okoline: … |
-| Kategorija | {Fraza} Loznica – {broj} oglasa \| loglasi.rs | {Fraza} u Loznici i okolini | {broj} oglasa za {frazu} u Loznici, Banji Koviljači i Lešnici. Pogledaj cene ili besplatno objavi oglas. |
-| Kategorija + mesto | {Fraza} {Mesto} – oglasi \| loglasi.rs | {Fraza} – {Mesto} | {broj} oglasa za {frazu} u mestu {Mesto}, opština Loznica. |
-| Oglas | {Naslov}, {Mesto} – {cena} \| loglasi.rs | {Naslov} | prvih 140 znakova opisa + (mesto) |
-| Firma | {Firma} – {delatnost} Loznica \| loglasi.rs (bez delatnosti: „firma iz Loznice”) | {Firma} | {Delatnost} u Loznici: adresa, telefon i oglasi firme {Firma}. |
-| Privatni profil | {Ime} – oglasi korisnika \| loglasi.rs | {Ime} | Oglasi korisnika {Ime} na loglasi.rs… |
+| Početna | `seo.home.title` + „ \| loglasi.rs” | iz početne | `seo.home.description` (doslovno, ne seče se) |
+| /oglasi/ | Svi oglasi Loznica \| loglasi.rs | Svi oglasi u Loznici | `seo.archive.description` |
+| Kategorija | `seo_title` ili „{kategorija}, oglasi Loznica \| loglasi.rs” | `seo_h1` ili „{kategorija} u Loznici” | `seo_description` (doslovno), pa opis termina, pa šablon |
+| Oglas | {naslov}, {kategorija}, {mesto} (preko 70 znakova bez kategorije) | naslov | tekst oglasa od 60 znakova, inače šablon sa cenom |
+| Firma | {firma}, {mesto} | firma | opis firme ili šablon |
+| Privatni profil | {ime}, oglasi | ime | šablon |
+| Pretraga | Pretraga: {upit} | | |
+| Stalne strane (o nama, kontakt, faq, uslovi, privatnost, brisanje, cenovnik, za firme) | `seo.{strana}.title` | | `seo.{strana}.description` |
+| 404 | Stranica nije pronađena \| loglasi.rs | | |
 
-- {Fraza} je narodni naziv iz `config('seo.phrases')` po slugu (automobili → „Polovni automobili”), inače naziv kategorije. Za opis se koristi akuzativ („za polovne automobile”); kad ga nema u konfiguraciji, piše se „u kategoriji {Naziv}”, da rečenica ostane gramatički tačna.
-- `seo_title` i `seo_description` kategorije (iz admina) imaju prednost nad šablonom.
-- Broj: „1 oglas”, „21 oglas”, „2 oglasa”, „12 oglasa”.
-- Predugačak title: prvo otpada broj oglasa (kategorija), pa se skraćuje sadržaj; sufiks „| loglasi.rs” ostaje dok god staje u 60 znakova.
+- {kategorija} kod potkategorije je naziv bez prefiksa roditelja („Automobili | Hečbek” → „Hečbek”).
+- Strana 2 i dalje: „, strana N” pre sufiksa.
+- Kategorija ima polja `seo_h1`, `seo_intro` (uvodni pasus na strani 1) i `seo_faq` (pitanja ispod liste, FAQPage). Popunjena su iz `database/seeders/data/category-seo-2026-10-24.php` (migracija `seo_category_landing_fields`, samo prazna polja).
 
 ## Pravila
 
@@ -79,7 +82,9 @@ Ne diraju se `/api/*`, `/admin*`, `/up`.
 2. `/wp-json/loglasi/v1/{putanja}` → `/api/v1/{putanja}`, **308** (isti metod i telo), ceo upit ostaje.
 3. Stari sitemapovi → `/sitemap.xml`: `/sitemap_index.xml`, svaki `/{ime}-sitemap{N}.xml` (Yoast: `page-sitemap.xml`, `listivo_listing-sitemap2.xml`, `listivo_14-sitemap.xml`, `listivo_1910…1913`, `4657`, `4661`, `945`, `946`, `9145…9147`, `listivo_template`, `product`, `product_cat`), `/wp-sitemap.xml` i `/wp-sitemap-*.xml`.
 4. `/wp-admin` i sve ispod → `/admin/`; `/wp-login.php` → `/prijava/`.
-5. WooCommerce: `/product/{slug}/` → `/oglasi/`; `/product-category/…`, `/product-tag/…`, `/shop/` → `/oglasi/`; `/cart/`, `/checkout/…`, `/my-account/…` → `/` (Woo se ne koristi, plaćanje je uplatom).
+5. WooCommerce (po SEO dokumentu, odeljak 7): proizvodi, `/shop/`, `/cart/`, `/checkout/…`, `/naplata/…` → `/cenovnik/`; `/my-account/…` → `/moj-nalog/`.
+5a. Stari panel: `/panel/…` → `/moj-nalog/`; `?tab=create` → `/postavi-oglas/`, `messages` → `/moj-nalog/poruke/`, `listings` → `/moj-nalog/oglasi/`, `favorites` → `/moj-nalog/omiljeni/`, `business` → `/za-firme/` (`config('seo.panel_tabs')`).
+5b. Kategorije sa zarezom: `/oglasi/a,b/` i `?kategorija=a,b` → poslednja aktivna kategorija (`/oglasi/{slug}/`), inače `/oglasi/`. `?paginacija=N` → `/…/page/N/`.
 6. Feedovi: `/comments/feed/` → `/feed/`; `/oglas/{slug}/feed/` → `/oglas/{slug}/`; `/oglasi/{kategorija}/feed/` → `/oglasi/{kategorija}/`.
 7. `/oglasi/?kategorija={slug}`: ako je `kategorija` jedini parametar (pored onih za praćenje) i kategorija postoji i aktivna je → `/oglasi/{slug}/`; nepostojeća ili ugašena → `/oglasi/`. Sa drugim filterima nema preusmerenja (200, noindex, canonical na čistu stranu). Isto i za `/oglasi?kategorija=` bez kose crte (jedan skok).
 8. `/oglasi/?marka-automobila={marka}` (sam ili uz `kategorija`) → `/oglasi/automobili/`.
@@ -97,30 +102,30 @@ Keš tabela `redirects` i `gone_urls` briše se sam na svaku izmenu reda (preko 
 
 ### 3. Robots i canonical
 
-`<meta name="robots">` je `index, follow, max-image-preview:large` ili `noindex, follow`. Canonical je uvek na `https://loglasi.rs` (`SEO_BASE_URL`), sa kosom crtom, bez parametara za praćenje.
+`<meta name="robots">` je `index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1` ili `noindex, follow`. Canonical je uvek na `https://loglasi.rs` (`SEO_BASE_URL`), sa kosom crtom, bez parametara za praćenje.
 
 | Slučaj | robots | canonical |
 | --- | --- | --- |
 | Obična strana | index | na sebe |
 | Filter, sortiranje, ključna reč, pretraga `/?s=` (bilo koji parametar osim praćenja i paginacije) | noindex | na čistu stranu (bez upita) |
-| Paginacija `?page=N`, `?paged=N`, `/page/N/` | noindex | na samu sebe (sa brojem strane) |
+| Paginacija `?page=N`, `?paged=N`, `/page/N/` | index | na samu sebe (sa brojem strane) |
 | Strane naloga (`config('seo.noindex_paths')`: prijava, registracija, login-registracija, nalog, moj-nalog, panel, postavi-oglas, poruke, omiljeni, uporedite-oglase, brisanje-podataka, plaćanje…) | noindex | nema |
 | Istekao oglas (status `expired` ili `expires_at` prošao) ili obrisan | noindex | nema |
 | Kategorija bez aktivnih oglasa, `/oglasi/` bez oglasa | noindex | nema |
 | Kategorija + mesto sa manje od 3 aktivna oglasa (prag: podešavanje `seo_place_min_listings`) | noindex | nema |
 | Privatni profil `/korisnik/{slug}/` | noindex | nema |
-| Firma bez aktivnog Biznis paketa | noindex | nema |
-| Profil firme sa Biznis paketom | index | na sebe |
+| Firma bez paketa, opisa, logoa i aktivnog oglasa (`Seo::firmIndexable`) | noindex | nema |
+| Firma sa paketom, opisom, logoom ili bar jednim aktivnim oglasom | index | na sebe |
 
-Pravilo: noindex strana nema canonical, osim paginacije (na sebe) i filtera (na čistu stranu), kako traži 09-deploy-seo.md.
+Pravilo: noindex strana nema canonical, osim filtera (na čistu stranu). Paginacija se indeksira (SEO dokument; za-laravel.md 5.3 je tražio noindex, važi SEO dokument).
 
 ### 4. Open Graph i JSON-LD
 
 - `og:locale`, `og:site_name`, `og:type` (website, product, profile), `og:title`, `og:description`, `og:url`, `og:image`; Twitter kartica `summary_large_image` kad postoji slika. Za oglas i `product:price:amount` / `product:price:currency`.
-- Na svakoj strani jedan `@graph`: **Organization** (ime, opis = jedina rečenica sajta, `areaServed` Loznica, `sameAs` Facebook, Instagram, TikTok, email) i **WebSite** sa **SearchAction** (`/oglasi/?keyword={search_term_string}`, `config('seo.search_url')`).
+- Na svakoj strani jedan `@graph` sa `@id` čvorovima: **Organization** (`#organization`: logo `#logo`, email i telefon u E.164 iz podešavanja, adresa 15300 Loznica, `areaServed` 6 mesta, `sameAs` mreže), **WebSite** (`#website`, `sr-RS`, **SearchAction**), strana (`#webpage`: WebPage, CollectionPage ili ProfilePage) i **BreadcrumbList** (`#breadcrumb`). Kategorija na strani 1 ima i **ItemList** (12 oglasa).
 - **BreadcrumbList** kad strana ima bar dva nivoa.
-- Oglas: **Product** + **Offer** (cena, valuta EUR/RSD iz oglasa, `InStock` / `Discontinued` za istekao, prodavac, mesto). Oglas „Dogovor” nema Offer.
-- Firma: **LocalBusiness** (adresa, mesto, telefon, logo, koordinate, sajt i mreže u `sameAs`, radno vreme ako je u obliku `{"mon": "08:00-16:00"}` ili `[{"day","open","close"}]`).
+- Oglas: `og:type` article. **Product** + **Offer** samo uz cenu veću od 0 i van kategorija usluge i poslovi (valuta iz oglasa, `areaServed`, stanje iz polja oglasa). Oglas „Dogovor” nema Product.
+- Firma: **LocalBusiness** (adresa, mesto, telefon u E.164, izostavlja se kad nije ispravan, logo, koordinate, sajt i mreže u `sameAs`, radno vreme ako je u obliku `{"mon": "08:00-16:00"}` ili `[{"day","open","close"}]`).
 - **FAQPage**: `Seo::get()->faq([...])` na /faq/ i kategorijama sa pitanjima.
 - JSON se ispisuje sa `JSON_HEX_TAG`, pa sadržaj oglasa ne može da zatvori `<script>`.
 
@@ -132,7 +137,7 @@ Pravilo: noindex strana nema canonical, osim paginacije (na sebe) i filtera (na 
 | `/sitemap-strane.xml` | `config('seo.pages')`: /, /oglasi/, /o-nama/, /faq/, /kontakt/, /cenovnik/, /za-firme/, /uslovi-koriscenja/, /politika-privatnosti/ |
 | `/sitemap-kategorije.xml` | aktivne kategorije sa bar jednim aktivnim oglasom (računaju se i oglasi potkategorija) |
 | `/sitemap-mesta.xml` | `/oglasi/{kategorija}/{mesto}/` samo od 3 aktivna oglasa (isti prag kao za noindex); 404 dok nema nijedne |
-| `/sitemap-firme.xml` | aktivni nalozi firmi sa važećim Biznis paketom; 404 dok nema nijedne |
+| `/sitemap-firme.xml` | aktivni nalozi firmi koje se indeksiraju (isto pravilo kao `firmIndexable`); 404 dok nema nijedne |
 | `/sitemap-oglasi-{N}.xml` | objavljeni i neistekli oglasi, po 1.000 (`seo.sitemap.per_file`), `lastmod` = poslednja izmena oglasa |
 
 Ne ulaze: istekli, nacrti, na čekanju, odbijeni i obrisani oglasi, privatni profili, prazne kategorije, strane naloga, feed, llms.txt, ništa sa 410 liste.
@@ -141,10 +146,16 @@ Ne ulaze: istekli, nacrti, na čekanju, odbijeni i obrisani oglasi, privatni pro
 
 ### 6. robots.txt, llms.txt, feed, 404
 
-- `/robots.txt`: na produkciji (`SEO_INDEXABLE=true`, podrazumevano kad je `APP_ENV=production`) `Disallow: /admin/` za sve, eksplicitno `Allow: /` za Googlebot, Bingbot, GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Google-Extended, Applebot, Applebot-Extended, i `Sitemap: https://loglasi.rs/sitemap.xml`. Filteri, paginacija, API i strane naloga se ne blokiraju (Google mora da vidi noindex). Van produkcije: `Disallow: /` za sve. Fizički `public/robots.txt` je uklonjen da ne zaseni rutu.
-- `/llms.txt`: tekst iz `resources/seo/llms.txt`, `text/plain; charset=utf-8`, keš 1 dan, nije u sitemapu.
+- `/robots.txt`: na produkciji (`SEO_INDEXABLE=true`) tačan blok iz SEO dokumenta: grupa `*` sa `Disallow` za /admin, /api/, /panel/, /nalog/, /naplata/, /uporedite-oglase/ i `/*?*kljucna-rec=`, zatim imenovani botovi (Googlebot, Bingbot, OAI-SearchBot, ChatGPT-User, GPTBot, ClaudeBot, Claude-SearchBot, Claude-User, PerplexityBot, Google-Extended, Applebot-Extended) sa `Allow: /` i istim zabranama, pa `Sitemap: https://loglasi.rs/sitemap.xml`. Van produkcije: `Disallow: /` za sve. Fizički `public/robots.txt` je uklonjen da ne zaseni rutu.
+- `/llms.txt`: tekst iz `resources/seo/llms.txt` (linkovi kategorija samo za postojeće vidljive kategorije, adresa iz `SEO_BASE_URL`), `text/plain; charset=utf-8`, keš 1 dan, nije u sitemapu.
 - `/feed/`: RSS sa 30 najnovijih aktivnih oglasa, `X-Robots-Tag: noindex`.
 - `/stranica-404/` vraća pravi 404. Nepostojeće adrese su 404, nikad preusmerenje na početnu.
+
+### 6a. Google tag i Search Console
+
+- Podešavanja `google_tag_id` (GT-MKTJD4NV), `ga4_measurement_id` (G-EKVEVJTR90) i `google_site_verification` (prazno). Partial `partials/google`.
+- gtag se učitava samo na produkciji i samo za ispravan ID (`GT-`, `G-`, `AW-`). Consent mode: podrazumevano odbijeno, traka za kolačiće (`partials/cookie-bar`, „Prihvatam” / „Odbijam”) čuva izbor u `localStorage` (`lg-kolacici`).
+- `<meta name="google-site-verification">` samo kad je polje popunjeno.
 
 ### 7. HTTPS i www
 
