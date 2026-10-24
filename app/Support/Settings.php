@@ -16,7 +16,7 @@ class Settings
     /** Podrazumevane vrednosti kad u bazi nema zapisa. */
     public const DEFAULTS = [
         'eur_rate' => 117.2,               // 1 € = ... din
-        'private_monthly_limit' => 10,     // novi oglasi mesečno za privatna lica
+        'private_active_limit' => 5,       // active listings a private user may have for free
         'listing_duration_days' => 30,     // oglas traje mesec dana, obnova besplatna
         'moderation' => 'new_users',       // all | new_users | none
         'founding_firms_total' => 30,      // prvih 30 firmi besplatno

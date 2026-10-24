@@ -122,7 +122,7 @@ class MyListingsApiTest extends PostingTestCase
 
     public function test_limit_reached_is_403(): void
     {
-        Settings::set('private_monthly_limit', 1);
+        Settings::set('private_active_limit', 1);
         $user = $this->as();
         $this->published($user);
 

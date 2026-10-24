@@ -197,17 +197,20 @@ class MeApiTest extends TestCase
     {
         $this->travelTo('2026-10-23 12:00:00');
         $user = User::factory()->create();
-        Listing::factory()->count(3)->for($user)->create();
-        Listing::factory()->for($user)->create()->delete(); // obrisan se računa
-        Listing::factory()->for($user)->create(['created_at' => '2026-09-30 23:00:00']); // prošli mesec
-        Listing::factory()->create(); // tuđi
+        Listing::factory()->count(2)->for($user)->create();
+        Listing::factory()->for($user)->create(['created_at' => '2026-09-30 23:00:00']); // older, still active: counts
+        Listing::factory()->for($user)->create()->delete(); // deleted: frees the slot
+        Listing::factory()->for($user)->expired()->create(); // expired: frees the slot
+        Listing::factory()->for($user)->create(['status' => 'draft']); // draft: no slot
+        Listing::factory()->create(); // someone else's
 
+        // Active listings against private_active_limit; the contract names stay.
         $this->withToken($this->tokenFor($user))->getJson('/api/v1/me/limits')
             ->assertOk()
             ->assertJson([
-                'monthly_limit' => 10,
-                'used_this_month' => 4,
-                'remaining' => 6,
+                'monthly_limit' => 5,
+                'used_this_month' => 3,
+                'remaining' => 2,
                 'resets_at' => '2026-10-31T23:00:00Z',
                 'unlimited' => false,
             ]);
@@ -215,7 +218,7 @@ class MeApiTest extends TestCase
 
     public function test_limit_comes_from_settings_and_never_negative(): void
     {
-        Settings::set('private_monthly_limit', 2);
+        Settings::set('private_active_limit', 2);
         $user = User::factory()->create();
         Listing::factory()->count(3)->for($user)->create();
 
@@ -244,7 +247,7 @@ class MeApiTest extends TestCase
         Firm::where('user_id', $firm->id)->update(['biznis_until' => now()->subDay()]);
 
         $this->withToken($this->tokenFor($firm))->getJson('/api/v1/me/limits')
-            ->assertJson(['monthly_limit' => 10, 'unlimited' => false]);
+            ->assertJson(['monthly_limit' => 5, 'unlimited' => false]);
     }
 
     public function test_patch_is_rate_limited(): void

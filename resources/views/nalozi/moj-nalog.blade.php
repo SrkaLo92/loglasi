@@ -48,12 +48,12 @@
 	@endunless
 
 	<section class="lgn-card lgn-limit" aria-labelledby="lgn-limit">
-		<h2 id="lgn-limit">Oglasi ovog meseca</h2>
+		<h2 id="lgn-limit">Aktivni oglasi</h2>
 		@if ($limits['unlimited'])
-			<p>Vaš paket nema ograničenje broja oglasa. Ovog meseca ste postavili {{ $limits['used_this_month'] }}.</p>
+			<p>Vaš paket nema ograničenje broja oglasa. Aktivnih oglasa: {{ $limits['used_this_month'] }}.</p>
 		@else
-			<p>Postavili ste <strong>{{ $limits['used_this_month'] }} od {{ $limits['monthly_limit'] }}</strong> besplatnih oglasa. Preostalo: {{ $limits['remaining'] }}.</p>
-			<p class="lgn-help">Novi oglasi su opet dostupni od 1. u mesecu.</p>
+			<p>Imate <strong>{{ $limits['used_this_month'] }} od {{ $limits['monthly_limit'] }}</strong> besplatnih aktivnih oglasa. Preostalo: {{ $limits['remaining'] }}.</p>
+			<p class="lgn-help">Mesto se oslobađa kad oglas istekne, kad ga označite kao prodat ili obrišete.</p>
 		@endif
 		<p><a href="{{ url_slash('moj-nalog/oglasi') }}">Moji oglasi</a></p>
 	</section>

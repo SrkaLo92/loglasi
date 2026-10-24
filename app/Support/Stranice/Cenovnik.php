@@ -93,15 +93,15 @@ class Cenovnik
 
     public static function freeListings(): int
     {
-        return max(0, (int) Settings::get('private_monthly_limit'));
+        return max(0, (int) Settings::get('private_active_limit'));
     }
 
-    /** „do 10 novih oglasa” */
+    /** „do 5 aktivnih oglasa” */
     public static function freeListingsText(): string
     {
         $n = self::freeListings();
 
-        return 'do '.$n.' '.self::plural($n, 'novog oglasa', 'nova oglasa', 'novih oglasa');
+        return 'do '.$n.' '.self::plural($n, 'aktivnog oglasa', 'aktivna oglasa', 'aktivnih oglasa');
     }
 
     /** „mesec dana” ili „45 dana” */

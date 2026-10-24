@@ -97,11 +97,10 @@ class Posting
     {
         if (! ListingLimits::canCreate($user)) {
             $limits = ListingLimits::for($user);
-            $resets = now(config('app.timezone'))->startOfMonth()->addMonth()->format('j. n. Y.');
 
             throw new PostingRefused('limit_reached', $user->isFirm()
-                ? 'Potrošili ste mesečni limit od '.$limits['monthly_limit'].' oglasa za vaš paket. Novi oglasi su dostupni od '.$resets
-                : 'Ovog meseca ste već postavili '.$limits['monthly_limit'].' besplatnih oglasa, koliko je najviše za privatna lica. Novi oglasi su dostupni od '.$resets, field: 'limit');
+                ? 'Imate '.$limits['monthly_limit'].' aktivnih oglasa, koliko dozvoljava vaš paket. Mesto se oslobađa kad oglas istekne ili ga obrišete.'
+                : 'Imate već '.$limits['monthly_limit'].' aktivnih oglasa, koliko je besplatno za privatna lica. Mesto se oslobađa kad oglas istekne, prodate ga ili obrišete, a dodatna mesta možete kupiti.', field: 'limit');
         }
     }
 

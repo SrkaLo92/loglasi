@@ -192,7 +192,7 @@
 			<li class="hm-why__item">
 				<span class="hm-why__icon">{{ CategoryIcons::svg('gift', 24) }}</span>
 				<h3 class="hm-why__title">Postavljanje je besplatno</h3>
-				<p>{{ $hmFree > 0 ? ucfirst(Cenovnik::freeListingsText()).' mesečno bez ikakve naplate.' : 'Oglase postavljate bez ikakve naplate.' }} Nema provizije ni skrivenih troškova, plaćate samo ako želite da istaknete oglas.</p>
+				<p>{{ $hmFree > 0 ? ucfirst(Cenovnik::freeListingsText()).' bez ikakve naplate.' : 'Oglase postavljate bez ikakve naplate.' }} Nema provizije ni skrivenih troškova, plaćate samo ako želite da istaknete oglas.</p>
 			</li>
 			<li class="hm-why__item">
 				<span class="hm-why__icon">{{ CategoryIcons::svg('chat', 24) }}</span>

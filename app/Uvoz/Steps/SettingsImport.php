@@ -29,7 +29,7 @@ class SettingsImport extends Step
 
             return $rate !== null && $rate >= 1 && $rate <= 10000 ? $rate : null;
         });
-        $this->setting($options, 'loglasi_pocetna_besplatni_oglasi', 'private_monthly_limit', fn ($raw) => is_numeric($raw) ? max(0, (int) $raw) : null);
+        // loglasi_pocetna_besplatni_oglasi (new listings per month) is not imported: the rule is now active listings.
         $this->setting($options, 'loglasi_pocetna_biznis_besplatno', 'founding_firms_total', fn ($raw) => is_numeric($raw) ? max(0, (int) $raw) : null);
 
         $this->products($options);

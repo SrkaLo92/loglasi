@@ -79,7 +79,7 @@ class StraniceTest extends TestCase
             ->assertSee('<h2>Naš tim</h2>', false)
             ->assertSee('Tekst iz admina')
             ->assertDontSee('<script>alert(1)</script>', false)
-            ->assertSee('do 10 novih oglasa')
+            ->assertSee('do 5 aktivnih oglasa')
             ->assertDontSee('Zašto lokalni oglasi');
     }
 

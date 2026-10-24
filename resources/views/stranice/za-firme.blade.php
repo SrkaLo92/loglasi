@@ -66,7 +66,7 @@
 			<h2 class="lgx-naslov">{{ PageText::get('za_firme.poredjenje.naslov') }}</h2>
 			@php
 				$redovi = [
-					['Besplatni novi oglasi', $freeListings > 0 ? $freeListings.' mesečno' : 'da', 'prema paketu'],
+					['Besplatni aktivni oglasi', $freeListings > 0 ? 'do '.$freeListings : 'da', 'prema paketu'],
 					['Oznaka „Firma” na oglasima', false, true],
 					['Logo i naslovna slika', false, true],
 					['Oznaka „Proverena firma”', false, true],

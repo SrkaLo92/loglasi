@@ -41,7 +41,7 @@ return [
     'cenovnik.cta.naslov' => 'Imate nešto za prodaju?',
     'cenovnik.cta.tekst' => 'Postavljanje traje par minuta, a prvi oglasi su besplatni.',
     'cenovnik.pitanja' => [
-        ['uslov' => null, 'pitanje' => 'Da li je postavljanje oglasa besplatno?', 'odgovor' => 'Da. Privatni korisnici mogu besplatno da postave {besplatni_oglasi} mesečno. Oglas traje {trajanje_oglasa}, a obnova je besplatna.'],
+        ['uslov' => null, 'pitanje' => 'Da li je postavljanje oglasa besplatno?', 'odgovor' => 'Da. Privatni korisnici besplatno imaju {besplatni_oglasi}. Oglas traje {trajanje_oglasa}, a obnova je besplatna.'],
         ['uslov' => 'bump', 'pitanje' => 'Šta je podizanje oglasa?', 'odgovor' => 'Za {cena_podizanje} vaš oglas se vraća na vrh liste, kao da je upravo postavljen. Sadržaj oglasa i istorija ostaju isti.'],
         ['uslov' => 'featured_7', 'pitanje' => 'Šta dobijam kad istaknem oglas?', 'odgovor' => 'Istaknut oglas se prikazuje u izdvojenim oglasima na početnoj strani i u rezultatima pretrage, sa oznakom „Istaknuto”. Isticanje na 7 dana košta {cena_istaknuto_7}, a 30 dana {cena_istaknuto_30}.'],
         ['uslov' => null, 'pitanje' => 'Kada se usluga uključuje posle uplate?', 'odgovor' => 'Čim vidimo uplatu na računu, obično istog ili sledećeg radnog dana. Ako pošaljete potvrdu o uplati, lakše ćemo je povezati sa vašim oglasom.'],
@@ -101,7 +101,7 @@ Na velikim sajtovima oglas iz Loznice se izgubi među hiljadama oglasa iz cele S
 
 ## Šta možete da radite na sajtu
 
-- Besplatno postavite {besplatni_oglasi} mesečno. Oglas traje {trajanje_oglasa}, a obnova je besplatna.
+- Besplatno imate {besplatni_oglasi}. Oglas traje {trajanje_oglasa}, a obnova je besplatna.
 - Javite se prodavcu pozivom, porukom preko sajta, WhatsApp-om ili Viber-om.
 - Sačuvajte pretragu i vratite se oglasima koji vas zanimaju.
 - Ako imate firmu, otvorite profil firme sa logoom, radnim vremenom i svim oglasima na jednom mestu. Više o tome na strani [Za firme](/za-firme/).
@@ -120,7 +120,7 @@ MD,
     'faq.naslov' => 'Česta pitanja',
     'faq.uvod' => 'Odgovori na pitanja koja nam najčešće postavljate. Ako ne nađete odgovor, [pišite nam](/kontakt/).',
     'faq.pitanja' => [
-        ['pitanje' => 'Da li je postavljanje oglasa besplatno?', 'odgovor' => 'Da. Privatni korisnici mogu besplatno da postave {besplatni_oglasi} mesečno. Plaćaju se samo dodaci koje sami izaberete, kao što su podizanje i isticanje oglasa.'],
+        ['pitanje' => 'Da li je postavljanje oglasa besplatno?', 'odgovor' => 'Da. Privatni korisnici besplatno imaju {besplatni_oglasi}. Plaćaju se samo dodatna mesta za oglase i promocije koje sami izaberete, kao što su podizanje i isticanje.'],
         ['pitanje' => 'Kako da postavim oglas?', 'odgovor' => 'Prijavite se ili napravite nalog, pa kliknite na „Postavite oglas”. Izaberite kategoriju, upišite naslov, opis i cenu, dodajte fotografije i objavite oglas.'],
         ['pitanje' => 'Koliko dugo traje oglas?', 'odgovor' => 'Oglas traje {trajanje_oglasa}. Kad istekne, možete besplatno da ga obnovite iz svog naloga.'],
         ['pitanje' => 'Kako da kontaktiram prodavca?', 'odgovor' => 'Na strani oglasa su dugmad za poziv i poruku preko sajta, a ako je prodavac ostavio broj, i za WhatsApp i Viber.'],
@@ -149,7 +149,7 @@ loglasi.rs je sajt za oglase za Loznicu i okolinu. Sajt povezuje one koji prodaj
 
 ## 3. Oglasi
 
-- Privatni korisnici mogu besplatno da postave {besplatni_oglasi} mesečno, a firme prema svom paketu.
+- Privatni korisnici besplatno imaju {besplatni_oglasi}, a firme prema svom paketu.
 - Oglas traje {trajanje_oglasa}, a obnova je besplatna.
 - Oglas mora da opisuje stvarnu stvar ili uslugu, sa tačnom cenom i fotografijama na koje imate pravo.
 - Jedna stvar se oglašava jednim oglasom. Isti oglas postavljen više puta se briše.

@@ -63,7 +63,7 @@ class CenovnikTest extends TestCase
 
     public function test_free_listings_limit_comes_from_settings(): void
     {
-        Settings::set('private_monthly_limit', 12);
+        Settings::set('private_active_limit', 12);
 
         $this->get('/cenovnik/')->assertSee('Do 12 novih oglasa mesečno za privatne korisnike.');
     }

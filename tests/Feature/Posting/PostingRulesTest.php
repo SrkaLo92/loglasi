@@ -23,15 +23,15 @@ class PostingRulesTest extends PostingTestCase
 
     public function test_private_user_limit_from_settings_blocks_new_drafts_and_submit(): void
     {
-        Settings::set('private_monthly_limit', 2);
+        Settings::set('private_active_limit', 2);
         $user = $this->user();
         $this->published($user, ['title' => 'Prvi oglas']);
         $draft = $this->draft($user, ['title' => 'Drugi oglas']);
         $this->submit($draft);
 
         $this->actingAs($user)->get('/postavi-oglas/')->assertOk()
-            ->assertSee('Mesečni limit je potrošen')
-            ->assertSee('Ovog meseca ste već postavili 2 besplatnih oglasa')
+            ->assertSee('Sva besplatna mesta su popunjena')
+            ->assertSee('Imate već 2 aktivnih oglasa')
             ->assertDontSee('Izaberite kategoriju');
         $this->post('/postavi-oglas/', ['category_id' => $this->services->id])->assertSessionHasErrors('limit');
 
@@ -40,16 +40,23 @@ class PostingRulesTest extends PostingTestCase
         $this->assertSame(ListingStatus::Draft, $another->refresh()->status);
     }
 
-    public function test_drafts_do_not_use_the_limit_and_deleted_listings_do(): void
+    public function test_only_active_listings_use_the_limit(): void
     {
-        Settings::set('private_monthly_limit', 1);
+        Settings::set('private_active_limit', 1);
         $user = $this->user();
         $this->draft($user);
         $this->draft($user, ['title' => 'Još jedan nacrt']);
         $this->assertTrue(ListingLimits::canCreate($user));
 
-        $this->published($user)->delete();
+        $listing = $this->published($user);
         $this->assertFalse(ListingLimits::canCreate($user));
+
+        $listing->delete(); // a deleted listing frees its slot
+        $this->assertTrue(ListingLimits::canCreate($user));
+
+        $expired = $this->published($user, ['title' => 'Istekao']);
+        $expired->forceFill(['expires_at' => now()->subDay()])->save();
+        $this->assertTrue(ListingLimits::canCreate($user));
     }
 
     public function test_submitting_an_old_draft_counts_in_the_month_of_submitting(): void
@@ -59,12 +66,12 @@ class PostingRulesTest extends PostingTestCase
         $this->submit($draft);
 
         $this->assertTrue($draft->refresh()->created_at->isToday());
-        $this->assertSame(1, ListingLimits::usedThisMonth($user));
+        $this->assertSame(1, ListingLimits::activeCount($user));
     }
 
     public function test_firm_with_package_uses_package_limit(): void
     {
-        Settings::set('private_monthly_limit', 1);
+        Settings::set('private_active_limit', 1);
         Product::factory()->create(['code' => Product::BIZNIS_12M, 'listing_limit' => null]);
         $firm = $this->user(['account_type' => 'firm']);
         $firm->firm()->create(['name' => 'Auto Plac']);

@@ -13,7 +13,7 @@
 			<p class="pst-head__back"><a href="{{ url_slash('moj-nalog') }}">Moj nalog</a></p>
 			<h1>{{ \App\Support\Seo::get()->getH1() }}</h1>
 			@unless ($limits['unlimited'])
-				<p class="pst-help">Ovog meseca: {{ $limits['used_this_month'] }} od {{ $limits['monthly_limit'] }} besplatnih oglasa.</p>
+				<p class="pst-help">Aktivni oglasi: {{ $limits['used_this_month'] }} od {{ $limits['monthly_limit'] }} besplatnih.</p>
 			@endunless
 		</div>
 		<a class="pst-btn pst-btn--orange" href="{{ url_slash('postavi-oglas') }}">Postavite oglas</a>
