@@ -28,7 +28,6 @@ class HomePageTest extends SearchTestCase
             ->assertSee('Pogledajte sva 4 oglasa')
             ->assertSee('Najtraženije kategorije')
             ->assertSee('role="tab"', false)
-            ->assertSee('Firme iz Loznice na jednom mestu')
             ->assertSee('Zašto izabrati nas')
             ->assertSee('Sigurnost i poverenje')
             ->assertSee('Podrška korisnicima')
@@ -70,13 +69,28 @@ class HomePageTest extends SearchTestCase
         $this->get('/')->assertSee('Drugi oglas');
     }
 
-    public function test_firm_strip_needs_the_minimum_number_of_firms(): void
+    public function test_firm_section_shows_only_when_firms_exist(): void
     {
-        User::factory()->firm()->count(2)->create();
-        $this->get('/')->assertDontSee('Na loglasi.rs su već');
+        $this->get('/')->assertDontSee('id="hm-firms-title"', false)->assertDontSee('Prijavite svoju firmu');
 
-        User::factory()->firm()->create();
-        $this->get('/')->assertSee('Na loglasi.rs su već 3 firme');
+        $user = User::factory()->firm()->create();
+        $user->firm->update(['name' => 'Auto delovi Drina', 'activity' => 'Auto delovi', 'location_id' => $this->banja->id]);
+        $this->listing(['user_id' => $user->id]);
+        $this->listing(['user_id' => $user->id]);
+        $this->listing(['user_id' => $user->id, 'status' => 'expired', 'expires_at' => now()->subDay()]);
+        Settings::set('founding_firms_total', 30);
+        HomeSections::flush();
+
+        $this->get('/')->assertOk()
+            ->assertSee('Firme iz Loznice')
+            ->assertSee('Auto delovi Drina')
+            ->assertSee('Auto delovi · Banja Koviljača')
+            ->assertSee('2 oglasa')
+            ->assertSee('href="'.url_slash('korisnik/'.$user->slug).'"', false)
+            ->assertSee('Imate radnju ili servis u Loznici?')
+            ->assertSee('Prvih 30 firmi koristi loglasi.rs besplatno 12 meseci.')
+            ->assertSee('Prijavite svoju firmu')
+            ->assertDontSee('Founder');
     }
 
     public function test_settings_change_texts(): void

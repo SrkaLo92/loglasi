@@ -152,22 +152,30 @@
 		</section>
 	@endif
 
-	{{-- 6. Firms --}}
-	<section class="hm-firms" aria-labelledby="hm-firms-title">
-		<span class="hm-firms__badge">FIRMA</span>
-		<h2 class="hm-firms__title" id="hm-firms-title">{{ HomeSettings::get('home.firms_title') }}</h2>
-		<p class="hm-firms__text">{{ HomeSettings::get('home.firms_text') }}</p>
-		@php($hmOffer = Cenovnik::offerText())
-		@if ($hmOffer !== '')
-			<p class="hm-firms__offer">{{ $hmOffer }}@if (HomeSettings::get('home.firms_show_remaining') && Cenovnik::offerOpen()) {{ sprintf(Cenovnik::plural(Cenovnik::foundingLeft(), 'Ostalo je još %d besplatno mesto od %d.', 'Ostala su još %d besplatna mesta od %d.', 'Ostalo je još %d besplatnih mesta od %d.'), Cenovnik::foundingLeft(), Cenovnik::foundingTotal()) }}@endif</p>
-		@endif
-		@if ($hmFirms['items'])
-			<div class="hm-firms__strip">
-				<p class="hm-firms__count">Na loglasi.rs {{ Cenovnik::plural($hmFirms['total'], 'je', 'su', 'su') }} već {{ number_format($hmFirms['total'], 0, ',', '.') }} {{ Cenovnik::plural($hmFirms['total'], 'firma', 'firme', 'firmi') }}</p>
-				<ul class="hm-firms__list">
-					@foreach ($hmFirms['items'] as $firm)
-						<li>
-							<a class="hm-firm" href="{{ $firm['url'] }}">
+	{{-- 6. Firms: cards for local firms and a small sign-up box; only when firms exist --}}
+	@if ($hmFirms['items'])
+		<section class="hm-sec hm-firms" aria-labelledby="hm-firms-title">
+			<div class="hm-sec__head hm-firms__head">
+				<div>
+					<h2 class="hm-sec__title" id="hm-firms-title">{{ HomeSettings::get('home.firms_title') }}</h2>
+					@if (HomeSettings::get('home.firms_text') !== '')
+						<p class="hm-firms__text">{{ HomeSettings::get('home.firms_text') }}</p>
+					@endif
+				</div>
+				@if (Route::has('firms.directory'))
+					<a class="hm-sec__link" href="{{ url_slash('/firme') }}">Sve firme ({{ number_format($hmFirms['total'], 0, ',', '.') }}){{ CategoryIcons::svg('arrow', 18, '2') }}</a>
+				@endif
+			</div>
+			<ul class="hm-firms__list">
+				@foreach ($hmFirms['items'] as $firm)
+					<li>
+						<a class="hm-firm hm-firm--{{ $loop->index % 4 }}" href="{{ $firm['url'] }}">
+							<span class="hm-firm__cover">
+								@if ($firm['cover'])
+									<img src="{{ $firm['cover'] }}" alt="" width="320" height="96" loading="lazy" decoding="async">
+								@endif
+							</span>
+							<span class="hm-firm__body">
 								<span class="hm-firm__logo">
 									@if ($firm['logo'])
 										<img src="{{ $firm['logo'] }}" alt="" width="64" height="64" loading="lazy" decoding="async">
@@ -175,15 +183,30 @@
 										<span aria-hidden="true">{{ $firm['initials'] }}</span>
 									@endif
 								</span>
-								<span class="hm-firm__name">{{ $firm['name'] }}</span>
-							</a>
-						</li>
-					@endforeach
-				</ul>
+								<span class="hm-firm__title"><span class="hm-firm__name">{{ $firm['name'] }}</span><span class="hm-firm__badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true" focusable="false"><path d="M5 12l5 5L20 7"/></svg>Firma</span></span>
+								@if ($firm['activity'] !== '' || $firm['place'] !== '')
+									<span class="hm-firm__meta">{{ implode(' · ', array_filter([$firm['activity'], $firm['place']])) }}</span>
+								@endif
+								<span class="hm-firm__foot"><span class="hm-firm__count">{{ number_format($firm['count'], 0, ',', '.') }} {{ Cenovnik::plural($firm['count'], 'oglas', 'oglasa', 'oglasa') }}</span><span class="hm-firm__more">Pogledaj profil</span></span>
+							</span>
+						</a>
+					</li>
+				@endforeach
+			</ul>
+			<div class="hm-firms__cta">
+				<span class="hm-firms__cta-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/></svg></span>
+				<div class="hm-firms__cta-text">
+					<h3>{{ HomeSettings::get('home.firms_cta_title') }}</h3>
+					@if (Cenovnik::offerOpen())
+						<p>Prvih {{ Cenovnik::foundingTotal() }} firmi koristi loglasi.rs besplatno 12 meseci. {{ sprintf(Cenovnik::plural(Cenovnik::foundingLeft(), 'Ostalo je još %d mesto.', 'Ostala su još %d mesta.', 'Ostalo je još %d mesta.'), Cenovnik::foundingLeft()) }}</p>
+					@else
+						<p>{{ HomeSettings::get('home.firms_cta_text') }}</p>
+					@endif
+				</div>
+				<a class="lg-btn hm-firms__btn" href="{{ HomeSettings::url('home.firms_url') }}">{{ HomeSettings::get('home.firms_button') }}</a>
 			</div>
-		@endif
-		<a class="hm-firms__btn" href="{{ HomeSettings::url('home.firms_url') }}">{{ HomeSettings::get('home.firms_button') }}{{ CategoryIcons::svg('arrow', 18, '2') }}</a>
-	</section>
+		</section>
+	@endif
 
 	{{-- 7. Why choose us (the old site's feature block, texts in PageText) --}}
 	@if ($hmWhy)

@@ -10,6 +10,7 @@ use App\Services\Catalog;
 use App\Services\ListingSearch;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -171,29 +172,55 @@ class HomeSections
      *
      * @return array{total: int, items: list<array{name: string, url: string, logo: ?string, initials: string}>}
      */
+    /**
+     * Firm cards: active firm accounts, Biznis first, with their place and number of active listings.
+     *
+     * @return array{total: int, items: list<array<string, mixed>>}
+     */
     private function firms(): array
     {
         $query = Firm::query()->whereHas('user', fn ($u) => $u
             ->where('account_type', AccountType::Firm)->where('status', UserStatus::Active));
         $total = (clone $query)->count();
 
-        if ($total < HomeSettings::int('home.firms_min', 1, 100)) {
+        if ($total === 0 || $total < HomeSettings::int('home.firms_min', 1, 100)) {
             return ['total' => $total, 'items' => []];
         }
 
-        $items = $query->with('user:id,slug')
+        $firms = $query->with('user:id,slug')
             ->orderByRaw('(biznis_until IS NOT NULL AND biznis_until > ?) DESC', [now()])
             ->orderByDesc('id')
             ->limit(HomeSettings::int('home.firms_max', 1, 24))
-            ->get(['id', 'user_id', 'name', 'logo_path'])
-            ->map(fn (Firm $f) => [
-                'name' => $f->name,
-                'url' => url_slash('/korisnik/'.$f->user->slug),
-                'logo' => $f->logo_path ? (preg_match('~^https?://~i', $f->logo_path) ? $f->logo_path : Storage::disk('public')->url($f->logo_path)) : null,
-                'initials' => self::initials($f->name),
-            ])->all();
+            ->get(['id', 'user_id', 'name', 'activity', 'location_id', 'logo_path', 'cover_path']);
+
+        // One grouped query for all cards (listing_search holds only visible listings).
+        $counts = DB::table('listing_search')
+            ->whereIn('user_id', $firms->pluck('user_id')->all())
+            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->groupBy('user_id')
+            ->pluck(DB::raw('COUNT(*)'), 'user_id');
+
+        $items = $firms->map(fn (Firm $f) => [
+            'name' => $f->name,
+            'url' => url_slash('/korisnik/'.$f->user->slug),
+            'logo' => self::storageUrl($f->logo_path),
+            'cover' => self::storageUrl($f->cover_path),
+            'initials' => self::initials($f->name),
+            'activity' => trim((string) $f->activity),
+            'place' => $f->location_id ? (string) $this->catalog->location((int) $f->location_id)?->name : '',
+            'count' => (int) ($counts[$f->user_id] ?? 0),
+        ])->values()->all();
 
         return ['total' => $total, 'items' => $items];
+    }
+
+    private static function storageUrl(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+
+        return preg_match('~^https?://~i', $path) ? $path : Storage::disk('public')->url($path);
     }
 
     public static function initials(string $name): string

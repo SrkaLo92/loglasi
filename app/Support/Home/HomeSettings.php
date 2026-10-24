@@ -34,13 +34,14 @@ class HomeSettings
         'home.tabs_categories' => 'automobili,nekretnine,usluge,bicikli-i-delovi',
         'home.tabs_count' => 4,
         // 6. Firms
-        'home.firms_title' => 'Firme iz Loznice na jednom mestu',
-        'home.firms_text' => 'Predstavite svoju radnju, servis ili zanat kupcima iz Loznice i okoline. Biznis paket donosi profil firme sa logoom, kontaktom i svim vašim oglasima na jednom mestu, uz oznaku „Firma” na svakom oglasu.',
+        'home.firms_title' => 'Firme iz Loznice',
+        'home.firms_text' => 'Proverene lokalne radnje, servisi i zanatlije sa svojim oglasima',
+        'home.firms_cta_title' => 'Imate radnju ili servis u Loznici?',
+        'home.firms_cta_text' => 'Predstavite svoju radnju, servis ili zanat kupcima iz Loznice i okoline, sa profilom firme i svim oglasima na jednom mestu.',
         'home.firms_button' => 'Prijavite svoju firmu',
         'home.firms_url' => '/za-firme/',
-        'home.firms_min' => 3,                // strip of firm logos from this many firms
-        'home.firms_max' => 12,
-        'home.firms_show_remaining' => false, // „Ostalo je još N besplatnih mesta od 30.”
+        'home.firms_min' => 1,                // the section shows from this many firms
+        'home.firms_max' => 4,
         // 8. About the site (Markdown; empty = default text)
         'home.about_title' => 'O sajtu loglasi.rs',
         'home.about' => '',
