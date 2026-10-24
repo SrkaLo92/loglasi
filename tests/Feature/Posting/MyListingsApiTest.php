@@ -181,12 +181,13 @@ class MyListingsApiTest extends PostingTestCase
         $user = $this->as();
         $listing = $this->published($user, ['title' => 'Stari', 'slug' => 'stari', 'category_id' => $this->cars->id]);
 
-        $this->patchJson('/api/v1/me/listings/'.$listing->id, ['title' => 'Novi naslov', 'price' => 100, 'currency' => 'RSD', 'fields' => ['godiste' => '2010'], 'condition' => 'novo'])
-            ->assertOk()->assertJsonPath('title', 'Novi naslov')->assertJsonPath('price_label', '100 din')->assertJsonPath('condition', 'novo');
+        $this->patchJson('/api/v1/me/listings/'.$listing->id, ['title' => 'Novi naslov', 'price' => 100, 'currency' => 'RSD', 'fields' => ['godiste' => '2010'], 'condition' => 'polovno'])
+            ->assertOk()->assertJsonPath('title', 'Novi naslov')->assertJsonPath('price_label', '100 din')->assertJsonPath('condition', 'polovno');
         $this->assertSame('stari', $listing->refresh()->slug);
 
         $this->patchJson('/api/v1/me/listings/'.$listing->id, ['price_negotiable' => true])->assertOk()->assertJsonPath('price', null);
-        $this->patchJson('/api/v1/me/listings/'.$listing->id, ['condition' => 'polovno'])->assertOk()->assertJsonPath('condition', 'polovno');
+        // "novo" is for firms only
+        $this->patchJson('/api/v1/me/listings/'.$listing->id, ['condition' => 'novo'])->assertStatus(422);
         $this->assertSame('2010', app(ListingFields::class)->value('godiste', $listing->fresh()));
     }
 

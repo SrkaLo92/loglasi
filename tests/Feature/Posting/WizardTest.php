@@ -203,17 +203,16 @@ class WizardTest extends PostingTestCase
         $this->assertSame(ListingStatus::Draft, $listing->refresh()->status);
     }
 
-    public function test_new_condition_only_for_firms_when_setting_is_on(): void
+    public function test_new_condition_only_for_firms_by_default(): void
     {
         $user = $this->user();
         $listing = $this->draft($user, ['category_id' => $this->cars->id]);
         $url = '/postavi-oglas/'.$listing->id.'/detalji/';
 
-        // off by default: the current site has no such rule
-        $this->actingAs($user)->put($url, ['fields' => ['godiste' => '2010', 'stanje' => 'novo']])->assertSessionHasNoErrors();
+        $this->actingAs($user)->put($url, ['fields' => ['godiste' => '2010', 'stanje' => 'novo']])->assertSessionHasErrors('fields.stanje');
 
-        Settings::set('new_condition_firms_only', true);
-        $this->put($url, ['fields' => ['godiste' => '2010', 'stanje' => 'novo']])->assertSessionHasErrors('fields.stanje');
+        Settings::set('new_condition_firms_only', false);
+        $this->put($url, ['fields' => ['godiste' => '2010', 'stanje' => 'novo']])->assertSessionHasNoErrors();
 
         $firm = $this->user(['account_type' => 'firm']);
         $firmListing = $this->draft($firm, ['category_id' => $this->cars->id]);

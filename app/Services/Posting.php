@@ -86,10 +86,10 @@ class Posting
             && $this->catalog->children($category)->isEmpty();
     }
 
-    /** "Novo" (new) only for firms: off unless the setting new_condition_firms_only is on. */
+    /** "Novo" (new) only for firms, unless the setting new_condition_firms_only is turned off. */
     public function newConditionAllowed(User $user): bool
     {
-        return $user->isFirm() || ! Settings::get('new_condition_firms_only', false);
+        return $user->isFirm() || ! Settings::get('new_condition_firms_only', true);
     }
 
     /** @throws PostingRefused */

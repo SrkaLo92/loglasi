@@ -21,6 +21,7 @@ class Settings
         'moderation' => 'new_users',       // all | new_users | none
         'founding_firms_total' => 30,      // prvih 30 firmi besplatno
         'contact_email' => 'kontakt.loglasi.rs@gmail.com',
+        'new_condition_firms_only' => true,
     ];
 
     public static function get(string $key, mixed $default = null): mixed
