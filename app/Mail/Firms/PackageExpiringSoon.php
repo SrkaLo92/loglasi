@@ -20,7 +20,7 @@ class PackageExpiringSoon extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
-        $what = $this->firm->free_program ? 'Besplatna godina' : 'Paket '.$this->label();
+        $what = $this->firm->onFreeYear() ? 'Besplatna godina' : 'Paket '.$this->label();
 
         return new Envelope(subject: $this->daysLeft <= 3
             ? $what.' ističe za '.static::days($this->daysLeft)
@@ -32,7 +32,7 @@ class PackageExpiringSoon extends Mailable implements ShouldQueue
         return new Content(text: 'firms.mail.package-expiring', with: [
             'name' => $this->firm->name,
             'label' => $this->label(),
-            'free' => (bool) $this->firm->free_program,
+            'free' => $this->firm->onFreeYear(),
             'until' => $this->until(),
             'days' => static::days($this->daysLeft),
             'renewUrl' => url_slash('cenovnik'),
@@ -48,7 +48,7 @@ class PackageExpiringSoon extends Mailable implements ShouldQueue
 
     private function label(): string
     {
-        return FirmPackage::definition($this->firm->free_program ? FirmPackage::FREE : $this->firm->package)['label'] ?? 'za firme';
+        return FirmPackage::definition($this->firm->onFreeYear() ? FirmPackage::FREE : $this->firm->package)['label'] ?? 'za firme';
     }
 
     private function until(): string

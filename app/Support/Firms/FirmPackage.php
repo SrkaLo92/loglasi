@@ -25,7 +25,7 @@ class FirmPackage
         return $firm !== null
             && $firm->package_ends_at !== null
             && $firm->package_ends_at->isFuture()
-            && ($firm->free_program || in_array($firm->package, self::PACKAGES, true));
+            && ($firm->onFreeYear() || in_array($firm->package, self::PACKAGES, true));
     }
 
     /** 'start' | 'pro' | 'max' | 'free', or null without an active term. */
@@ -35,7 +35,7 @@ class FirmPackage
             return null;
         }
 
-        return $firm->free_program ? self::FREE : $firm->package;
+        return $firm->onFreeYear() ? self::FREE : $firm->package;
     }
 
     /** @return array{label: string, listing_limit: ?int, credits: array{bumps: int, highlights: int, premium_xl: int}, advanced_stats: bool, products?: array}|null */
@@ -93,14 +93,32 @@ class FirmPackage
     }
 
     /**
-     * Starts or extends a term (for the payments module and the admin): a running term of the same
-     * package is extended from its end, otherwise the new term starts now.
+     * Starts or extends a term (for the payments module and the admin). A running term of the same
+     * package is extended from its end, any other package starts now. During the free first year
+     * the package is queued: it starts when the free year ends and never cuts it short.
      */
     public static function grant(Firm $firm, string $package, string $period): void
     {
         abort_unless(in_array($package, self::PACKAGES, true) && in_array($period, self::PERIODS, true), 500, 'Unknown package.');
 
-        $running = static::isActive($firm) && ! $firm->free_program && $firm->package === $package;
+        if ($firm->onFreeYear()) {
+            $freeEnds = ($firm->free_program_ends_at ?? $firm->package_ends_at)->copy();
+            // The same package already queued is extended; another one replaces the queued one.
+            $queued = $firm->package === $package && $firm->package_ends_at->greaterThan($freeEnds);
+            $from = $queued ? $firm->package_ends_at->copy() : $freeEnds->copy();
+
+            $firm->forceFill([
+                'package' => $package,
+                'package_period' => $period,
+                'package_starts_at' => $freeEnds,
+                'package_ends_at' => $period === 'yearly' ? $from->addYear() : $from->addMonth(),
+                'free_program_ends_at' => $freeEnds,
+            ])->save();
+
+            return;
+        }
+
+        $running = static::isActive($firm) && $firm->package === $package;
         $from = $running ? $firm->package_ends_at->copy() : now();
         $ends = $period === 'yearly' ? $from->copy()->addYear() : $from->copy()->addMonth();
 
@@ -110,18 +128,21 @@ class FirmPackage
             'package_starts_at' => $running ? $firm->package_starts_at : now(),
             'package_ends_at' => $ends,
             'free_program' => false,
+            'free_program_ends_at' => null,
         ])->save();
     }
 
     /** The free first year of the first 30 firms (admin action); counts as one of the 30 places. */
     public static function grantFreeYear(Firm $firm): void
     {
+        $ends = now()->addMonths((int) config('firms.free_program.months', 12));
         $firm->forceFill([
             'package' => null,
             'package_period' => null,
             'package_starts_at' => now(),
-            'package_ends_at' => now()->addMonths((int) config('firms.free_program.months', 12)),
+            'package_ends_at' => $ends,
             'free_program' => true,
+            'free_program_ends_at' => $ends,
             'founding_free' => true,
         ])->save();
     }

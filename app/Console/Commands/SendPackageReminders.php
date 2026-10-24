@@ -39,7 +39,7 @@ class SendPackageReminders extends Command
                     if (! $benefits->hasPackage($firm)) {
                         continue;
                     }
-                    $steps = array_map('intval', (array) config($firm->package_period === 'monthly' && ! $firm->free_program
+                    $steps = array_map('intval', (array) config($firm->package_period === 'monthly' && ! $firm->onFreeYear()
                         ? 'firms.reminder_days_monthly' : 'firms.reminder_days'));
                     $left = (int) $benefits->daysLeft($firm);
                     // The smallest reminder step that the remaining days have reached.

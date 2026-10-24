@@ -81,9 +81,9 @@ class FirmAccount
         return [
             'state' => $state,
             'code' => $code,
-            'label' => $benefits->packageLabel($firm) ?? (FirmPackage::definition($firm->free_program ? FirmPackage::FREE : $firm->package)['label'] ?? null),
-            'period' => $firm->free_program ? null : $firm->package_period,
-            'free_program' => (bool) $firm->free_program,
+            'label' => $benefits->packageLabel($firm) ?? (FirmPackage::definition($firm->onFreeYear() ? FirmPackage::FREE : $firm->package)['label'] ?? null),
+            'period' => $firm->onFreeYear() ? null : $firm->package_period,
+            'free_program' => $firm->onFreeYear(),
             'until' => $firm->package_ends_at,
             'days_left' => $daysLeft,
             'verified' => $firm->verified_at !== null,
