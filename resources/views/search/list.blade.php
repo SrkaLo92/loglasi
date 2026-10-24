@@ -54,8 +54,17 @@
 		<p class="sr-intro">{{ trim(strip_tags((string) $category->seo_intro)) }}</p>
 	@endif
 
-	<div class="sr-mtools">
-		<a class="sr-mtools__btn{{ $srCount ? ' is-active' : '' }}" href="#filteri">{{ CategoryIcons::svg('filter', 18, '2') }}Filteri{{ $srCount ? ' ('.$srCount.')' : '' }}</a>
+	{{-- Phone: "Filteri" and quick filters in one row (OLX, KP); a quick filter opens only its own part of the panel. --}}
+	@php
+		$srQuick = collect([['key' => 'cena', 'label' => 'Cena']])
+			->concat(collect($fieldFilters)->reject(fn ($f) => ! empty($f['depends_on']) || $f['type'] === 'checkbox')->take(3)->map(fn ($f) => ['key' => $f['key'], 'label' => $f['label']]))
+			->when($locations->isNotEmpty(), fn ($c) => $c->push(['key' => 'mesto', 'label' => 'Mesto']));
+	@endphp
+	<div class="sr-mtools" role="toolbar" aria-label="Filteri">
+		<a class="sr-mtools__btn{{ $srCount ? ' is-active' : '' }}" href="#filteri" data-sr-quick="">{{ CategoryIcons::svg('filter', 18, '2') }}Filteri{{ $srCount ? ' ('.$srCount.')' : '' }}</a>
+		@foreach ($srQuick as $quick)
+			<a class="sr-mtools__chip" href="#filteri" data-sr-quick="{{ $quick['key'] }}" data-label="{{ $quick['label'] }}"><span>{{ $quick['label'] }}</span>{{ CategoryIcons::svg('chevron', 16, '2.2') }}</a>
+		@endforeach
 	</div>
 
 	<div class="sr-layout">
@@ -63,6 +72,7 @@
 			<div class="sr-filters__panel">
 				<div class="sr-filters__head">
 					<h2 class="sr-filters__title" id="sr-filters-title">Filteri</h2>
+					<a class="sr-filters__clear" href="{{ $filters->urlFor($category) }}" data-sr-clear>Obriši</a>
 					<a class="sr-filters__close" href="#sadrzaj" aria-label="Zatvori filtere">{{ CategoryIcons::svg('close', 22, '2') }}</a>
 				</div>
 
@@ -82,12 +92,12 @@
 				</nav>
 
 				<form class="sr-form" id="sr-form" method="get" action="{{ $filters->formAction() }}">
-					<div class="sr-group">
+					<div class="sr-group" data-sr-key="keyword" data-sr-fixed>
 						<label class="sr-group__title" for="sr-keyword">Ključna reč</label>
 						<input class="sr-input" id="sr-keyword" type="search" name="keyword" value="{{ $filters->query['keyword'] ?? '' }}" maxlength="100" placeholder="npr. Golf, stan, bicikl" enterkeyhint="search">
 					</div>
 
-					<fieldset class="sr-group">
+					<fieldset class="sr-group" data-sr-key="cena">
 						<legend class="sr-group__title">Cena</legend>
 						<div class="sr-range">
 							<label>Od<input class="sr-input" type="text" inputmode="numeric" pattern="[0-9 .]*" name="cena_od" value="{{ $filters->query['cena_od'] ?? '' }}" placeholder="0" autocomplete="off"></label>
@@ -100,7 +110,7 @@
 					</fieldset>
 
 					@if ($locations->isNotEmpty())
-						<div class="sr-group">
+						<div class="sr-group" data-sr-key="mesto">
 							<label class="sr-group__title" for="sr-place">Mesto</label>
 							<select class="sr-input" id="sr-place" name="mesto" data-pick>
 								<option value="">Loznica i okolina</option>
@@ -111,25 +121,11 @@
 						</div>
 					@endif
 
-					{{-- The most used filters first (KP style); the rest fold away and open when one of them is in use. --}}
-					@php
-						$mainFilters = collect($fieldFilters)->take(6);
-						$moreFilters = collect($fieldFilters)->slice(6);
-						$moreActive = $moreFilters->contains(fn ($f) => $filters->fieldValue($f['key']).$filters->fieldValue($f['key'].'_od').$filters->fieldValue($f['key'].'_do') !== '');
-					@endphp
-					@foreach ($mainFilters as $field)
+					@foreach ($fieldFilters as $field)
 						@include('search.partials.field', ['field' => $field, 'allFields' => $fieldFilters])
 					@endforeach
-					@if ($moreFilters->isNotEmpty())
-						<details class="sr-morefilters" @if ($moreActive) open @endif>
-							<summary>Više filtera ({{ $moreFilters->count() }})</summary>
-							@foreach ($moreFilters as $field)
-								@include('search.partials.field', ['field' => $field, 'allFields' => $fieldFilters])
-							@endforeach
-						</details>
-					@endif
 
-					<fieldset class="sr-group">
+					<fieldset class="sr-group" data-sr-key="prodavac">
 						<legend class="sr-group__title">Prodavac</legend>
 						@foreach (['' => 'Svi', 'privatno' => 'Privatna lica', 'firma' => 'Samo firme'] as $value => $label)
 							<label class="sr-check"><input type="radio" name="prodavac" value="{{ $value }}" @checked(($filters->query['prodavac'] ?? '') === $value)>{{ $label }}</label>
@@ -137,7 +133,7 @@
 					</fieldset>
 
 					<div class="sr-form__actions">
-						<button class="lg-btn lg-btn--green" type="submit">Prikaži oglase</button>
+						<button class="lg-btn lg-btn--green" type="submit" data-sr-submit>{{ $total ? 'Prikaži '.number_format($total, 0, ',', '.').' '.($total % 10 === 1 && $total % 100 !== 11 ? 'oglas' : 'oglasa') : 'Prikaži oglase' }}</button>
 						@if ($filters->hasFilters() || $location)
 							<a class="sr-form__clear" href="{{ $filters->urlFor($category) }}">Obriši filtere</a>
 						@endif
@@ -169,7 +165,7 @@
 					@endauth
 					<div class="sr-sort">
 						<label for="sr-sort">Poređaj</label>
-						<select class="sr-input" id="sr-sort" name="sortiranje" form="sr-form" data-autosubmit>
+						<select class="sr-input" id="sr-sort" name="sortiranje" form="sr-form" data-autosubmit data-pick>
 							@foreach (WebFilters::SORT_LABELS as $value => $label)
 								@continue($value === 'relevantnost' && ! isset($filters->query['keyword']))
 								<option value="{{ $value }}" @selected($filters->sort() === $value)>{{ $label }}</option>

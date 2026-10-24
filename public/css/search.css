@@ -608,30 +608,55 @@ a.sr-pages__step:hover {
 		margin-bottom: 12px;
 	}
 
+	/* "Filteri" and the quick filters: one row that scrolls sideways (OLX, KP). */
 	.sr-mtools {
+		position: sticky;
+		top: 0;
+		z-index: 20;
 		display: flex;
-		gap: 10px;
-		margin-bottom: 14px;
+		gap: 8px;
+		margin: 0 calc(var(--lg-gutter) * -1) 12px;
+		padding: 10px var(--lg-gutter);
+		overflow-x: auto;
+		background: var(--lg-bg);
+		scrollbar-width: none;
+	}
+
+	.sr-mtools::-webkit-scrollbar {
+		display: none;
 	}
 
 	.sr-mtools__btn,
-	.sr-mtools__btn:visited {
+	.sr-mtools__btn:visited,
+	.sr-mtools__chip,
+	.sr-mtools__chip:visited {
 		display: inline-flex;
+		flex: 0 0 auto;
 		align-items: center;
-		gap: 8px;
-		min-height: 44px;
-		padding: 8px 16px;
+		gap: 6px;
+		min-height: 40px;
+		padding: 0 12px 0 14px;
 		border: 1px solid var(--lg-input);
-		border-radius: 10px;
+		border-radius: 999px;
 		background: #fff;
 		color: var(--lg-text);
+		font-size: 14px;
 		font-weight: 700;
+		white-space: nowrap;
 		text-decoration: none;
 	}
 
-	.sr-mtools__btn.is-active {
+	.sr-mtools__chip span {
+		max-width: 160px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.sr-mtools__btn.is-active,
+	.sr-mtools__chip.is-active {
 		border-color: var(--lg-green);
-		color: var(--lg-green-dark);
+		background: var(--lg-green);
+		color: #fff;
 	}
 
 	.sr-layout {
@@ -652,6 +677,15 @@ a.sr-pages__step:hover {
 
 	.sr-filters:target {
 		display: block;
+	}
+
+	/* A quick filter: only its section, as a sheet from the bottom. */
+	.sr-filters.is-single {
+		top: auto;
+		max-height: 78vh;
+		max-height: 78dvh;
+		border-radius: 20px 20px 0 0;
+		box-shadow: 0 -10px 40px rgba(16, 24, 20, .35), 0 0 0 100vmax rgba(16, 24, 20, .45);
 	}
 
 	.sr-filters__panel {
@@ -752,4 +786,139 @@ a.sr-pages__step:hover {
 
 .sr-morefilters[open] > summary {
 	margin-bottom: 8px;
+}
+
+/* Filter sections that fold (search.js): title, what is chosen, chevron. */
+.sr-sec.sr-group {
+	margin: 0;
+	border-bottom: 1px solid var(--lg-border);
+}
+
+.sr-sec__label {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+.sr-sec__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	width: 100%;
+	min-height: 56px;
+	padding: 8px 0;
+	border: 0;
+	background: transparent;
+	color: var(--lg-text);
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.sr-sec__head:focus-visible {
+	outline: 2px solid var(--lg-green);
+	outline-offset: 2px;
+}
+
+.sr-sec__text {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.sr-sec__title {
+	font-size: 15px;
+	font-weight: 800;
+}
+
+.sr-sec__value {
+	overflow: hidden;
+	color: var(--lg-muted);
+	font-size: 13px;
+	font-weight: 600;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.sr-sec__head.has-value .sr-sec__value {
+	color: var(--lg-green);
+}
+
+.sr-sec__chev {
+	display: inline-flex;
+	flex: 0 0 auto;
+	color: var(--lg-muted);
+	transition: transform .18s ease-out;
+}
+
+.sr-sec.is-open .sr-sec__chev {
+	transform: rotate(180deg);
+}
+
+.sr-sec__body {
+	padding: 0 0 16px;
+}
+
+.sr-sec__body[hidden] {
+	display: none;
+}
+
+.sr-filters.is-single .sr-cats,
+.sr-filters.is-single .sr-group:not(.is-only) {
+	display: none;
+}
+
+.sr-filters.is-single .sr-sec__head {
+	display: none;
+}
+
+.sr-filters.is-single .sr-sec__body {
+	padding-top: 8px;
+}
+
+.sr-filters__clear,
+.sr-filters__clear:visited {
+	margin-left: auto;
+	padding: 10px 8px;
+	color: var(--lg-green);
+	font-size: 14px;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+/* The button stays in view at the bottom of the panel on a computer too. */
+@media (min-width: 768px) {
+	.sr-form__actions {
+		position: sticky;
+		bottom: 0;
+		z-index: 2;
+		margin: 16px -18px -18px;
+		padding: 14px 18px 18px;
+		border-top: 1px solid var(--lg-border);
+		background: #fff;
+	}
+}
+
+[data-sr-submit].is-counting {
+	opacity: .75;
+}
+
+[data-sr-submit].is-empty {
+	background: var(--lg-muted);
+	border-color: var(--lg-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sr-sec__chev {
+		transition: none;
+	}
+}
+
+.sr-form.has-sections .sr-form__clear {
+	display: none;
 }

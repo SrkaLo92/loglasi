@@ -77,6 +77,12 @@ class ListingListController extends Controller
         }
 
         $results = $this->search->paginate($filters->params);
+        if ($request->headers->get('X-Lg-Count') === '1') {
+            // "Prikaži 123 oglasa" on the filter button while the filters change.
+            return response()->json(['count' => $results->total()])
+                ->header('Cache-Control', 'no-store')
+                ->header('Vary', 'X-Lg-Count');
+        }
         if ($page > 1 && $page > $results->lastPage()) {
             throw new NotFoundHttpException;
         }

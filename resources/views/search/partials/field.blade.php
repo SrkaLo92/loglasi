@@ -3,7 +3,7 @@
 	$fid = 'sr-f-'.$field['key'];
 @endphp
 @if ($field['filter'] === 'range')
-	<fieldset class="sr-group">
+	<fieldset class="sr-group" data-sr-key="{{ $field['key'] }}">
 		<legend class="sr-group__title">{{ $field['label'] }}{{ $field['unit'] ? ' ('.$field['unit'].')' : '' }}</legend>
 		<div class="sr-range sr-range--two">
 			@if ($field['type'] === 'year')
@@ -24,7 +24,7 @@
 		</div>
 	</fieldset>
 @elseif ($field['type'] === 'checkbox')
-	<div class="sr-group sr-group--tight">
+	<div class="sr-group sr-group--tight" data-sr-key="{{ $field['key'] }}" data-sr-fixed>
 		<label class="sr-check"><input type="checkbox" name="f[{{ $field['key'] }}]" value="1" @checked($filters->fieldValue($field['key']) === '1')>{{ $field['label'] }}</label>
 	</div>
 @elseif ($field['filter'] === 'multi')
@@ -36,9 +36,8 @@
 		$rest = $all->slice(12);
 		$open = $rest->contains(fn ($o) => in_array($o['value'], $chosen, true));
 	@endphp
-	<fieldset class="sr-group">
+	<fieldset class="sr-group" data-sr-key="{{ $field['key'] }}">
 		<legend class="sr-group__title">{{ $field['label'] }}</legend>
-		@if ($rest->isNotEmpty())<div data-pick-multi="{{ $field['label'] }}" data-pick-hint="Sve">@endif
 		<div class="sr-pills">
 			@foreach ($first as $option)
 				<label class="sr-pill"><input type="checkbox" data-field-key="{{ $field['key'] }}" name="f[{{ $field['key'] }}][]" value="{{ $option['value'] }}" @checked(in_array($option['value'], $chosen, true))><span>{{ $option['label'] }}</span></label>
@@ -54,7 +53,6 @@
 				</div>
 			</details>
 		@endif
-		@if ($rest->isNotEmpty())</div>@endif
 	</fieldset>
 @elseif (! empty($field['depends_on']))
 	{{-- Dependent select (model on make): only the chosen parent's options, otherwise all grouped by parent. --}}
@@ -65,7 +63,7 @@
 		$shown = collect($field['options'])->when($chosenParents !== [], fn ($c) => $c->filter(fn ($o) => in_array($o['parent'] ?? '', $chosenParents, true)));
 		$groups = count($chosenParents) === 1 ? ['' => $shown->all()] : $shown->groupBy(fn ($o) => $parentLabels[$o['parent'] ?? ''] ?? '')->all();
 	@endphp
-	<div class="sr-group">
+	<div class="sr-group" data-sr-key="{{ $field['key'] }}">
 		<label class="sr-group__title" for="{{ $fid }}">{{ $field['label'] }}</label>
 		<select class="sr-input" id="{{ $fid }}" name="f[{{ $field['key'] }}]" data-pick data-field-key="{{ $field['key'] }}" data-depends-on="{{ $field['depends_on'] }}" data-placeholder="Sve">
 			<option value="">Sve</option>
@@ -79,7 +77,7 @@
 		</select>
 	</div>
 @else
-	<div class="sr-group">
+	<div class="sr-group" data-sr-key="{{ $field['key'] }}">
 		<label class="sr-group__title" for="{{ $fid }}">{{ $field['label'] }}</label>
 		<select class="sr-input" id="{{ $fid }}" name="f[{{ $field['key'] }}]" data-pick @if (isset(\App\Services\ListingFields::POPULAR[$field['key']])) data-pick-popular="{{ implode(',', \App\Services\ListingFields::POPULAR[$field['key']]) }}" @endif data-field-key="{{ $field['key'] }}">
 			<option value="">Sve</option>

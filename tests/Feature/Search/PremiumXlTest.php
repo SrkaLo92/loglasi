@@ -92,7 +92,7 @@ class PremiumXlTest extends SearchTestCase
         // 12 listings: two wide cards (XL 1 and XL 2); XL 3 keeps its rank on a normal card.
         $this->assertSame(2, $this->xlCards($html));
         $this->assertLessThan(strpos($html, 'Običan 1'), strpos($html, 'XL 3'));
-        $this->assertSame(1, preg_match('~<article class="lc lc--list">\s*<a class="lc__link" href="[^"]*/xl-3/~', $html));
+        $this->assertSame(1, preg_match('~<article class="lc">\s*<a class="lc__link" href="[^"]*/xl-3/~', $html));
     }
 
     public function test_pick_and_excerpt(): void

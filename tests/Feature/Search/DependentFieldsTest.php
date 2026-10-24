@@ -120,15 +120,22 @@ class DependentFieldsTest extends SearchTestCase
         $this->get('/oglasi/automobili/')->assertOk()->assertSee('<optgroup label="Volkswagen">', false)->assertSee('Gorivo');
     }
 
-    public function test_less_used_filters_fold_away_and_open_when_used(): void
+    public function test_filter_panel_sections_quick_filters_and_live_count(): void
     {
-        $page = $this->get('/oglasi/automobili/')->assertOk();
-        $page->assertSee('<details class="sr-morefilters" >', false)
-            ->assertSee('<select class="sr-input" data-pick="year" name="f[godina_od]">', false)
-            ->assertSee('data-pick-popular="volkswagen,opel,audi', false);
-        $this->assertMatchesRegularExpression('/Više filtera \(\d+\)/', $page->getContent());
+        $this->car('Audi A4 2009', $this->limuzina, ['marka_automobila' => 'audi', 'godina' => '2009']);
+        $this->car('Golf 4', $this->karavan, ['marka_automobila' => 'volkswagen', 'godina' => '2002']);
 
-        $this->assertMatchesRegularExpression('/<details class="sr-morefilters"\s+open\s*>/', $this->get('/oglasi/automobili/?f[snaga_od]=50')->assertOk()->getContent());
+        $page = $this->get('/oglasi/automobili/')->assertOk();
+        $page->assertSee('data-sr-key="marka_automobila"', false)
+            ->assertSee('data-sr-quick="marka_automobila"', false)
+            ->assertSee('<select class="sr-input" data-pick="year" name="f[godina_od]">', false)
+            ->assertSee('Prikaži 2 oglasa');
+        $this->assertMatchesRegularExpression('/data-pick\s+data-pick-popular="volkswagen,opel,audi/', $page->getContent());
+
+        // The button counts before the search is sent.
+        $this->getJson('/oglasi/automobili/?f[marka_automobila]=audi', ['X-Lg-Count' => '1'])
+            ->assertOk()->assertExactJson(['count' => 1])->assertHeader('Cache-Control', 'no-store, private');
+        $this->get('/oglasi/automobili/?f[marka_automobila]=audi')->assertSee('Prikaži 1 oglas<', false);
     }
 
     public function test_listing_page_shows_equipment_as_a_list(): void
