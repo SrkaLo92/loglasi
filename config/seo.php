@@ -20,7 +20,7 @@ return [
 
     // Slika za Open Graph kad strana nema svoju (putanja iz public/ ili apsolutni URL).
     'default_image' => env('SEO_DEFAULT_IMAGE', '/img/loglasi-og.png'),
-    'logo' => env('SEO_LOGO', '/img/loglasi-logo.png'),
+    'logo' => env('SEO_LOGO', '/img/brand/logo.png'),
 
     'organization' => [
         'email' => 'kontakt@loglasi.rs',
