@@ -23,7 +23,7 @@ class NotificationSettingsTest extends TestCase
         $html = $this->actingAs($user)->get('/moj-nalog/obavestenja/')->assertOk()
             ->assertSee('<h1>Obaveštenja</h1>', false)
             ->assertSee('Nove poruke')->assertSee('Novi oglasi za sačuvane pretrage')->assertSee('Istek oglasa')
-            ->assertSee('Biznis paket')->assertSee('Novosti sa loglasi.rs')
+            ->assertSee('Novosti sa loglasi.rs')
             ->assertSee('noindex', false)
             ->getContent();
 
@@ -43,7 +43,7 @@ class NotificationSettingsTest extends TestCase
 
         $user->refresh();
         $this->assertSame([
-            'messages' => true, 'saved_searches' => false, 'expiring' => false, 'biznis_reminders' => false, 'newsletter' => true,
+            'messages' => true, 'saved_searches' => false, 'expiring' => false, 'newsletter' => true,
         ], NotificationPreferences::all($user));
         $this->assertFalse($user->notification_settings['payments']);
         $this->assertFalse($user->notificationSettings()['expiring']); // same key as the app

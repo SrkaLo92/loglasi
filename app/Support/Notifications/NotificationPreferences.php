@@ -15,6 +15,9 @@ use InvalidArgumentException;
  *
  *   NotificationPreferences::allows($user, 'saved_searches');   // check before sending
  *   NotificationPreferences::unsubscribeUrl($user, 'newsletter'); // signed, never expires
+ *
+ * Account and money mails are transactional and always sent: email confirmation, password,
+ * orders and payments (payments module), Biznis package reminders (firms module).
  */
 class NotificationPreferences
 {
@@ -24,8 +27,6 @@ class NotificationPreferences
 
     public const EXPIRING = 'expiring';
 
-    public const BIZNIS_REMINDERS = 'biznis_reminders';
-
     public const NEWSLETTER = 'newsletter';
 
     /** Categories shown on /moj-nalog/obavestenja/ with their default value. */
@@ -33,7 +34,6 @@ class NotificationPreferences
         self::MESSAGES => true,
         self::SAVED_SEARCHES => true,
         self::EXPIRING => true,
-        self::BIZNIS_REMINDERS => true,
         self::NEWSLETTER => false,
     ];
 
@@ -52,10 +52,6 @@ class NotificationPreferences
             self::EXPIRING => [
                 'label' => 'Istek oglasa',
                 'help' => 'Podsetnik pre nego što oglas istekne, da ga besplatno obnovite.',
-            ],
-            self::BIZNIS_REMINDERS => [
-                'label' => 'Biznis paket',
-                'help' => 'Podsetnik pre isteka Biznis paketa i obaveštenja o uplati.',
             ],
             self::NEWSLETTER => [
                 'label' => 'Novosti sa loglasi.rs',

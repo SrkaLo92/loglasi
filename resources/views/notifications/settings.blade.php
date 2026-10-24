@@ -33,6 +33,6 @@
 		</form>
 	</section>
 
-	<p class="lgn-note">Mejlove o nalogu (potvrda adrese, nova lozinka, uplate) šaljemo uvek. Pretrage o kojima vas obaveštavamo birate na stranici <a href="{{ url_slash('moj-nalog/pretrage') }}">Sačuvane pretrage</a>.</p>
+	<p class="lgn-note">Mejlove o nalogu (potvrda adrese, nova lozinka), narudžbinama i uplatama i podsetnike za Biznis paket šaljemo uvek. Pretrage o kojima vas obaveštavamo birate na stranici <a href="{{ url_slash('moj-nalog/pretrage') }}">Sačuvane pretrage</a>.</p>
 </div>
 @endsection
