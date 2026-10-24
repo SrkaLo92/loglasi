@@ -345,6 +345,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 @media (max-width: 1100px) {
 	.lg-footer__in { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.lg-footer__brend { grid-column: 1 / -1; }
 }
 
 /* Donja navigacija (samo telefon) -------------------------------------- */
@@ -395,7 +396,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	.lg-header__nav { grid-column: 1 / -1; justify-content: space-between; }
 
 	.lg-footer { margin-top: 32px; }
-	.lg-footer__in { grid-template-columns: 1fr; gap: 24px; padding-top: 32px; padding-bottom: 20px; }
+	.lg-footer__in { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; padding-top: 32px; padding-bottom: 20px; }
+	.lg-footer__brend { grid-column: 1 / -1; }
+	.lg-footer__lista a, .lg-footer__lista a:visited { font-size: 14px; }
 	.lg-footer__naslov { margin-bottom: 4px; }
 
 	.lg-mnav {
