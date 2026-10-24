@@ -80,7 +80,7 @@ class OrderResource extends Resource
                 ->url(fn (Order $record) => $record->listing ? ListingResource::getUrl('edit', ['record' => $record->listing]) : null),
             TextColumn::make('amount_rsd')
                 ->label('Iznos')
-                ->formatStateUsing(fn ($state) => number_format((int) $state, 0, ',', '.').' din')
+                ->formatStateUsing(fn ($state) => number_format((int) $state, 0, ',', '.')."\u{00A0}RSD")
                 ->sortable(),
             TextColumn::make('status')
                 ->label('Status')
@@ -116,7 +116,7 @@ class OrderResource extends Resource
             TextColumn::make('service_ends_at')->label('Usluga do')->dateTime('j. n. Y.')->placeholder('—')->toggleable(),
             TextColumn::make('consent_at')->label('Saglasnost')->dateTime('j. n. Y. H:i')->description(fn (Order $r) => $r->consent_ip)->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('refund_amount_rsd')->label('Vraćeno')
-                ->formatStateUsing(fn ($state) => number_format((int) $state, 0, ',', '.').' din')
+                ->formatStateUsing(fn ($state) => number_format((int) $state, 0, ',', '.')."\u{00A0}RSD")
                 ->description(fn (Order $r) => $r->refund_receipt_number ? 'Storno: '.$r->refund_receipt_number : null)
                 ->placeholder('—')->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('is_test')->label('Test')->formatStateUsing(fn ($state) => $state ? 'TEST' : '')->badge()->color('warning')->toggleable(),

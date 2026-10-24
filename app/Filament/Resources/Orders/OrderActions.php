@@ -24,7 +24,7 @@ class OrderActions
 
     private static function money(int $amount): string
     {
-        return number_format($amount, 0, ',', '.').' din';
+        return number_format($amount, 0, ',', '.')."\u{00A0}RSD";
     }
 
     public static function markPaid(): Action

@@ -15,7 +15,7 @@
                         <tr>
                             <th scope="row">{{ $label }}</th>
                             @foreach (array_keys($periods) as $period)
-                                <td>{{ number_format($totals[$period][$key], 0, ',', '.') }}{{ $key === 'revenue' ? ' din' : '' }}</td>
+                                <td>{{ number_format($totals[$period][$key], 0, ',', '.') }}@if ($key === 'revenue')&nbsp;RSD@endif</td>
                             @endforeach
                         </tr>
                     @endforeach
