@@ -157,7 +157,8 @@ Pravila po tipu: tekst do 255 znakova; broj ≥ 0; godina ceo broj od 1900 do sl
 
 ```php
 $oglasi->load('fieldValues');                 // za listu, bez N+1
-$fields->values($oglas);  // [['key' => 'kilometraza', 'label' => 'Kilometraža', 'value' => '180000', 'display' => '180.000 km'], ...]
+$fields->values($oglas);  // [['key' => 'kilometraza', 'label' => 'Kilometraža', 'value' => '180000', 'display' => '180.000 km', 'type' => 'number', 'items' => []], ...]
+                          // 'items' ima nazive za više izbora (oprema: ['ABS', 'Klima']), da se prikažu kao oznake
 $fields->value('stanje', $oglas);            // 'polovno'
 $fields->condition($oglas);                   // 'novo' | 'polovno' | null (polje `condition` iz ugovora)
 ```
@@ -200,6 +201,13 @@ $fields->apply($upit, $uslovi);  // jedan WHERE EXISTS po polju, koristi indekse
 - prenosi i sačuvane pretrage (`f[model_automobila]`).
 
 `--dry-run` broji izmene bez upisa. Pokreće se sama na kraju `uvoz:wordpress` (isključuje se sa `UVOZ_CATALOG_DEFINITION=false`). Izmene ovih polja u adminu briše sledeće pokretanje; trajne izmene idu u fajlove. Admin za polje sa mnogo opcija (modeli) prikazuje tekst „vrednost | Naziv | roditelj”, red po opciji.
+
+## Prikaz na sajtu
+
+- Izbor kategorije pri postavljanju: pretraga (`?trazi=`, uživo preko JavaScript-a) nudi samo kategorije poslednjeg nivoa sa putanjom („Vozila › Automobili”); ispod je stablo jedan nivo po strani (`?grupa=`), vrh kao pločice sa ikonama.
+- Korak „Detalji”: „Osnovni podaci” (izbor, broj, godina, tekst) u dve kolone na širem ekranu, godina kao spisak (sledeća godina do 1900), jedinica u samom polju; svako „više izbora” polje kao oznake (posle 12 „Prikaži još”), pa „Dodatno” (da/ne).
+- Filteri: prvih 6 polja kategorije su vidljiva, ostala su pod „Više filtera (N)” koje je otvoreno kad je neki od njih izabran; godište od/do kao spisak.
+- Stranica oglasa: pojedinačne vrednosti u tabeli „Karakteristike”, polja sa više izbora kao oznake ispod svog naslova.
 
 ## Podaci za lokalni razvoj
 

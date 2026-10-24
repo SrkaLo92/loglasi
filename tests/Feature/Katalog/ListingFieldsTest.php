@@ -146,13 +146,13 @@ class ListingFieldsTest extends TestCase
         $this->assertDatabaseHas('listing_field_values', ['listing_id' => $listing->id, 'value' => '180000', 'value_num' => 180000]);
 
         $this->assertSame([
-            ['key' => 'stanje', 'label' => 'Stanje', 'value' => 'polovno', 'display' => 'Polovno'],
-            ['key' => 'marka', 'label' => 'Marka', 'value' => 'skoda', 'display' => 'Škoda'],
-            ['key' => 'model', 'label' => 'Model', 'value' => 'Octavia', 'display' => 'Octavia'],
-            ['key' => 'godiste', 'label' => 'Godište', 'value' => '2014', 'display' => '2014.'],
-            ['key' => 'kilometraza', 'label' => 'Kilometraža', 'value' => '180000', 'display' => '180.000 km'],
-            ['key' => 'oprema', 'label' => 'Oprema', 'value' => 'klima,navigacija', 'display' => 'Klima, Navigacija'],
-            ['key' => 'moguca_zamena', 'label' => 'Moguća zamena', 'value' => '1', 'display' => 'Da'],
+            ['key' => 'stanje', 'label' => 'Stanje', 'value' => 'polovno', 'display' => 'Polovno', 'type' => 'select', 'items' => []],
+            ['key' => 'marka', 'label' => 'Marka', 'value' => 'skoda', 'display' => 'Škoda', 'type' => 'select', 'items' => []],
+            ['key' => 'model', 'label' => 'Model', 'value' => 'Octavia', 'display' => 'Octavia', 'type' => 'text', 'items' => []],
+            ['key' => 'godiste', 'label' => 'Godište', 'value' => '2014', 'display' => '2014.', 'type' => 'year', 'items' => []],
+            ['key' => 'kilometraza', 'label' => 'Kilometraža', 'value' => '180000', 'display' => '180.000 km', 'type' => 'number', 'items' => []],
+            ['key' => 'oprema', 'label' => 'Oprema', 'value' => 'klima,navigacija', 'display' => 'Klima, Navigacija', 'type' => 'multiselect', 'items' => ['Klima', 'Navigacija']],
+            ['key' => 'moguca_zamena', 'label' => 'Moguća zamena', 'value' => '1', 'display' => 'Da', 'type' => 'checkbox', 'items' => []],
         ], $this->fields->values($listing->fresh()));
 
         $this->assertSame('polovno', $this->fields->condition($listing->fresh()));

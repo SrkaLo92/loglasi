@@ -4,6 +4,7 @@ namespace Tests\Feature\Posting;
 
 use App\Enums\Currency;
 use App\Enums\ListingStatus;
+use App\Http\Controllers\Posting\WizardController;
 use App\Models\Listing;
 use App\Support\Settings;
 
@@ -27,6 +28,43 @@ class WizardTest extends PostingTestCase
 
         $this->get('/postavi-oglas/?grupa='.$this->vehicles->id)->assertOk()
             ->assertSee('name="category_id" value="'.$this->cars->id.'"', false);
+    }
+
+    public function test_category_search_finds_last_level_categories_by_any_word(): void
+    {
+        $this->actingAs($this->user());
+
+        // Without JavaScript: ?trazi= lists matching last-level categories with their path.
+        $this->get('/postavi-oglas/?trazi=AUTOMOB')->assertOk()
+            ->assertSee('Kategorije za „AUTOMOB”', false)
+            ->assertSee('Vozila › Automobili')
+            ->assertSee('class="pst-cat pst-cat--result" type="submit" name="category_id" value="'.$this->cars->id.'"', false);
+        $this->get('/postavi-oglas/?trazi=xyzq')->assertOk()->assertSee('Nema kategorije za „xyzq”', false);
+
+        // Every word must match, letters without diacritics too; groups are never offered.
+        $leaves = [
+            ['id' => 1, 'name' => 'Frižideri', 'path' => 'Bela tehnika › Frižideri'],
+            ['id' => 2, 'name' => 'Džip/SUV', 'path' => 'Automobili › Džip/SUV'],
+            ['id' => 3, 'name' => 'Auto delovi', 'path' => 'Automobili › Auto delovi'],
+        ];
+        $this->assertSame([1], array_column(WizardController::matchLeaves($leaves, 'frizider'), 'id'));
+        $this->assertSame([2], array_column(WizardController::matchLeaves($leaves, 'dzip'), 'id'));
+        $this->assertSame([3], array_column(WizardController::matchLeaves($leaves, 'auto delov'), 'id'));
+        $this->assertSame([], WizardController::matchLeaves($leaves, ''));
+    }
+
+    public function test_details_step_offers_years_as_a_list(): void
+    {
+        $this->actingAs($this->user())->post('/postavi-oglas/', ['category_id' => $this->cars->id]);
+        $listing = Listing::sole();
+
+        $this->get('/postavi-oglas/'.$listing->id.'/detalji/')->assertOk()
+            ->assertSee('Osnovni podaci')
+            ->assertSee('<option value="'.date('Y').'" >'.date('Y').'.</option>', false)
+            ->assertSee('<option value="1900" >1900.</option>', false);
+
+        $this->put('/postavi-oglas/'.$listing->id.'/detalji/', ['fields' => ['godiste' => '2009']])->assertSessionHasNoErrors();
+        $this->get('/postavi-oglas/'.$listing->id.'/detalji/')->assertSee('<option value="2009" selected>2009.</option>', false);
     }
 
     public function test_draft_is_created_only_in_a_category_without_subcategories(): void

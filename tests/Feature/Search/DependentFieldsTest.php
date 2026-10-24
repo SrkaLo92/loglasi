@@ -2,8 +2,11 @@
 
 namespace Tests\Feature\Search;
 
+use App\Enums\FieldFilter;
+use App\Enums\FieldType;
 use App\Enums\ListingStatus;
 use App\Models\Category;
+use App\Models\Field;
 use App\Models\Listing;
 use App\Services\Catalog;
 use App\Services\ListingFields;
@@ -115,6 +118,38 @@ class DependentFieldsTest extends SearchTestCase
         // Only Audi's models are offered once Audi is chosen; without a make they come grouped by make.
         $page->assertSee('data-depends-on="marka_automobila"', false)->assertSee('>A4<', false)->assertDontSee('>Golf 4<', false);
         $this->get('/oglasi/automobili/')->assertOk()->assertSee('<optgroup label="Volkswagen">', false)->assertSee('Gorivo');
+    }
+
+    public function test_less_used_filters_fold_away_and_open_when_used(): void
+    {
+        $page = $this->get('/oglasi/automobili/')->assertOk();
+        $page->assertSee('<details class="sr-morefilters" >', false)
+            ->assertSee('<select class="sr-input" name="f[godina_od]">', false);
+        $this->assertMatchesRegularExpression('/Više filtera \(\d+\)/', $page->getContent());
+
+        $this->assertMatchesRegularExpression('/<details class="sr-morefilters"\s+open\s*>/', $this->get('/oglasi/automobili/?f[snaga_od]=50')->assertOk()->getContent());
+    }
+
+    public function test_listing_page_shows_equipment_as_a_list(): void
+    {
+        // The equipment options come from the WordPress import, so the field is made here.
+        $field = Field::create(['key' => 'oprema_test', 'label' => 'Oprema', 'type' => FieldType::Multiselect, 'filter' => FieldFilter::Multi,
+            'options' => [['value' => 'abs', 'label' => 'ABS'], ['value' => 'klima', 'label' => 'Klima']]]);
+        $this->limuzina->fields()->attach($field->id, ['sort' => 99, 'required' => false]);
+        app(Catalog::class)->flush();
+        $listing = $this->car('Audi A4', $this->limuzina, ['marka_automobila' => 'audi', 'godina' => '2009']);
+        app(ListingFields::class)->save($listing, app(ListingFields::class)->validate($this->limuzina, [
+            'marka_automobila' => 'audi', 'godina' => '2009', 'stanje' => 'korisceno', 'oprema_test' => ['abs', 'klima'],
+        ]));
+
+        $values = collect(app(ListingFields::class)->values($listing->fresh()->load('fieldValues')))->keyBy('key');
+        $this->assertSame(['ABS', 'Klima'], $values['oprema_test']['items']);
+        $this->assertSame('multiselect', $values['oprema_test']['type']);
+        $this->assertSame([], $values['godina']['items']);
+
+        $this->followingRedirects()->get($listing->fresh()->url())->assertOk()
+            ->assertSee('<h3 class="lgo-fields__sub">Oprema</h3>', false)
+            ->assertSee('<li>Klima</li>', false);
     }
 
     public function test_posting_form_offers_the_models_of_the_make(): void

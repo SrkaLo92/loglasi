@@ -762,6 +762,44 @@
 	color: var(--lgo-text);
 }
 
+.lgo-fields__group {
+	margin-top: 18px;
+}
+
+.lgo-fields__sub {
+	margin: 0 0 10px;
+	font-size: 16px;
+	font-weight: 800;
+	color: var(--lgo-text);
+}
+
+.lgo-fields__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.lgo-fields__chips li {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 12px;
+	border: 1px solid var(--lgo-border);
+	border-radius: 999px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--lgo-text);
+}
+
+.lgo-fields__chips li::before {
+	content: "✓";
+	color: var(--lgo-green);
+	font-weight: 800;
+}
+
 .lgo-fields--bare {
 	margin: 0 0 16px;
 }

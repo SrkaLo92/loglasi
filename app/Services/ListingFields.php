@@ -305,11 +305,15 @@ class ListingFields
                 continue;
             }
 
+            $labels = $field->type === FieldType::Multiselect ? $this->optionLabels($field) : [];
             $out[] = [
                 'key' => $field->key,
                 'label' => $field->label,
                 'value' => implode(',', $raw),
                 'display' => $this->display($field, $raw),
+                'type' => $field->type->value,
+                // Multiselect values one by one (equipment as a list of chips on the listing page).
+                'items' => $field->type === FieldType::Multiselect ? array_map(fn ($v) => $labels[$v] ?? $v, $raw) : [],
             ];
         }
 

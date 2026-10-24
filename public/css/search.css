@@ -642,7 +642,8 @@ a.sr-pages__step:hover {
 		display: none;
 		position: fixed;
 		inset: 0;
-		z-index: 1000;
+		/* Above the bottom app bar (9990), below the cookie notice (9995). */
+		z-index: 9992;
 		max-height: none;
 		border: 0;
 		border-radius: 0;
@@ -680,9 +681,9 @@ a.sr-pages__step:hover {
 
 	.sr-form__actions {
 		position: sticky;
-		bottom: -32px;
+		bottom: 0;
 		margin: 0 calc(var(--lg-gutter) * -1) -32px;
-		padding: 12px var(--lg-gutter) 16px;
+		padding: 12px var(--lg-gutter) calc(16px + env(safe-area-inset-bottom, 0px));
 		border-top: 1px solid var(--lg-border);
 		background: #fff;
 	}
@@ -709,4 +710,40 @@ a.sr-pages__step:hover {
 	.sr-pages__step {
 		padding: 0 10px;
 	}
+}
+
+/* "Više filtera": the less used field filters, folded under the main ones. */
+.sr-morefilters {
+	border-top: 1px solid var(--lg-border);
+	border-bottom: 1px solid var(--lg-border);
+	margin: 4px 0 16px;
+}
+
+.sr-morefilters > summary {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	min-height: 48px;
+	color: var(--lg-green);
+	font-weight: 700;
+	cursor: pointer;
+	list-style: none;
+}
+
+.sr-morefilters > summary::-webkit-details-marker {
+	display: none;
+}
+
+.sr-morefilters > summary::after {
+	content: "+";
+	font-size: 22px;
+	line-height: 1;
+}
+
+.sr-morefilters[open] > summary::after {
+	content: "−";
+}
+
+.sr-morefilters[open] > summary {
+	margin-bottom: 8px;
 }

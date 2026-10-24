@@ -6,8 +6,21 @@
 	<fieldset class="sr-group">
 		<legend class="sr-group__title">{{ $field['label'] }}{{ $field['unit'] ? ' ('.$field['unit'].')' : '' }}</legend>
 		<div class="sr-range sr-range--two">
+			@if ($field['type'] === 'year')
+				@php $years = range((int) date('Y') + 1, \App\Services\ListingFields::YEAR_MIN); @endphp
+				@foreach (['_od' => 'Od', '_do' => 'Do'] as $suffix => $word)
+					@php $picked = (string) ($filters->fieldValue($field['key'].$suffix) ?? ''); @endphp
+					<label>{{ $word }}<select class="sr-input" name="f[{{ $field['key'] }}{{ $suffix }}]">
+						<option value="">Sve</option>
+						@foreach ($years as $year)
+							<option value="{{ $year }}" @selected($picked === (string) $year)>{{ $year }}.</option>
+						@endforeach
+					</select></label>
+				@endforeach
+			@else
 			<label>Od<input class="sr-input" type="text" inputmode="numeric" name="f[{{ $field['key'] }}_od]" value="{{ $filters->fieldValue($field['key'].'_od') }}" autocomplete="off"></label>
 			<label>Do<input class="sr-input" type="text" inputmode="numeric" name="f[{{ $field['key'] }}_do]" value="{{ $filters->fieldValue($field['key'].'_do') }}" autocomplete="off"></label>
+			@endif
 		</div>
 	</fieldset>
 @elseif ($field['type'] === 'checkbox')

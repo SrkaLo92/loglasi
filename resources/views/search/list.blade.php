@@ -109,9 +109,23 @@
 						</div>
 					@endif
 
-					@foreach ($fieldFilters as $field)
+					{{-- The most used filters first (KP style); the rest fold away and open when one of them is in use. --}}
+					@php
+						$mainFilters = collect($fieldFilters)->take(6);
+						$moreFilters = collect($fieldFilters)->slice(6);
+						$moreActive = $moreFilters->contains(fn ($f) => $filters->fieldValue($f['key']).$filters->fieldValue($f['key'].'_od').$filters->fieldValue($f['key'].'_do') !== '');
+					@endphp
+					@foreach ($mainFilters as $field)
 						@include('search.partials.field', ['field' => $field, 'allFields' => $fieldFilters])
 					@endforeach
+					@if ($moreFilters->isNotEmpty())
+						<details class="sr-morefilters" @if ($moreActive) open @endif>
+							<summary>Više filtera ({{ $moreFilters->count() }})</summary>
+							@foreach ($moreFilters as $field)
+								@include('search.partials.field', ['field' => $field, 'allFields' => $fieldFilters])
+							@endforeach
+						</details>
+					@endif
 
 					<fieldset class="sr-group">
 						<legend class="sr-group__title">Prodavac</legend>

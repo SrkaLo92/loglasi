@@ -45,11 +45,27 @@
 			@if ($fieldValues)
 				<section class="lgo lgo-card lgo-fields lgo-o6" aria-labelledby="lgo-fields-title">
 					<h2 class="lgo-fields__title" id="lgo-fields-title">Karakteristike</h2>
-					<dl class="lgo-fields__list">
-						@foreach ($fieldValues as $field)
-							<div class="lgo-fields__row lgo-fields__row--{{ $field['key'] }}"><dt>{{ $field['label'] }}</dt><dd>{{ $field['display'] }}</dd></div>
-						@endforeach
-					</dl>
+					{{-- Single values as a table; equipment-like lists (Oprema, Sigurnost...) as chips under their own title. --}}
+					@php
+						[$fieldLists, $fieldSingles] = collect($fieldValues)->partition(fn ($f) => ($f['items'] ?? []) !== []);
+					@endphp
+					@if ($fieldSingles->isNotEmpty())
+						<dl class="lgo-fields__list">
+							@foreach ($fieldSingles as $field)
+								<div class="lgo-fields__row lgo-fields__row--{{ $field['key'] }}"><dt>{{ $field['label'] }}</dt><dd>{{ $field['display'] }}</dd></div>
+							@endforeach
+						</dl>
+					@endif
+					@foreach ($fieldLists as $field)
+						<div class="lgo-fields__group lgo-fields__group--{{ $field['key'] }}">
+							<h3 class="lgo-fields__sub">{{ $field['label'] }}</h3>
+							<ul class="lgo-fields__chips" role="list">
+								@foreach ($field['items'] as $item)
+									<li>{{ $item }}</li>
+								@endforeach
+							</ul>
+						</div>
+					@endforeach
 				</section>
 			@endif
 
