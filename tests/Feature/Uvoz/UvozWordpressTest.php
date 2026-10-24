@@ -209,6 +209,7 @@ class UvozWordpressTest extends UvozTestCase
         DB::table('listing_field_values')->insert(['listing_id' => 5002, 'field_id' => $km->id, 'value' => '0', 'value_num' => 0]);
         DB::table('category_field')->insert(['category_id' => $stan->category_id, 'field_id' => $km->id, 'required' => false, 'sort' => 0]);
 
+        $this->artisan('uvoz:ocisti-polja', ['--dry-run' => true])->expectsOutputToContain('Would remove 1 empty field values (1 listings) and 1 unused')->assertSuccessful();
         $this->artisan('uvoz:ocisti-polja')->expectsOutputToContain('Removed 1 empty field values (1 listings) and 1 unused')->assertSuccessful();
 
         $this->assertFalse(DB::table('listing_field_values')->where('listing_id', 5002)->where('field_id', $km->id)->exists());

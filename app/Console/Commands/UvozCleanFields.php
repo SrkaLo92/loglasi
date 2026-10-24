@@ -31,12 +31,14 @@ class UvozCleanFields extends Command
                     ->orWhereRaw("TRIM(COALESCE(v.value, '')) = ''");
             });
         $listingIds = (clone $empty)->distinct()->pluck('v.listing_id')->all();
-        $emptyCount = $dry ? (clone $empty)->count() : DB::table('listing_field_values')->whereIn('id', (clone $empty)->pluck('v.id'))->delete();
+        $emptyIds = (clone $empty)->pluck('v.id')->all();
+        $emptyCount = $dry ? count($emptyIds) : DB::table('listing_field_values')->whereIn('id', $emptyIds)->delete();
 
         // A field stays on a category when a listing in it or in a subcategory has a value for it.
         $parents = DB::table('categories')->pluck('parent_id', 'id')->all();
         $keep = [];
         $used = DB::table('listing_field_values as v')->join('listings as l', 'l.id', '=', 'v.listing_id')
+            ->when($dry && $emptyIds, fn ($q) => $q->whereNotIn('v.id', $emptyIds)) // a dry run counts as if they were gone
             ->distinct()->get(['l.category_id', 'v.field_id']);
         foreach ($used as $row) {
             for ($id = (int) $row->category_id, $guard = 0; $id && $guard < 20; $id = (int) ($parents[$id] ?? 0), $guard++) {
