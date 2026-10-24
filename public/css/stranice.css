@@ -1203,8 +1203,8 @@ main:focus { outline: none; }
 .lgx-polje select:focus,
 .lgx-polje textarea:focus {
 	border-color: var(--lgx-green);
-	outline: 2px solid var(--lgx-accent);
-	outline-offset: 1px;
+	outline: 2px solid var(--lg-orange, #B8501A);
+	outline-offset: 2px;
 }
 
 .lgx-polje ::placeholder {

@@ -84,6 +84,14 @@ a:hover { color: var(--lg-green-dark); }
 	outline-offset: 2px;
 }
 
+/* Text fields: always a clearly visible ring (#B8501A has 3:1+ contrast on white). */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+	outline: 2px solid var(--lg-orange);
+	outline-offset: 2px;
+}
+
 button, input, select, textarea { font: inherit; color: inherit; }
 
 .lg-wrap { max-width: var(--lg-max); margin: 0 auto; padding: 0 var(--lg-gutter); }
@@ -178,7 +186,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	overflow: hidden;
 	background: #fff;
 }
-.lg-search:focus-within { outline: 2px solid var(--lg-accent); outline-offset: 2px; }
+.lg-search:focus-within { outline: 2px solid var(--lg-orange); outline-offset: 2px; }
 .lg-search :focus-visible { outline: none; }
 .lg-search__izbor:focus-visible,
 .lg-search__dugme:focus-visible,
