@@ -8,11 +8,12 @@ use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/** Contact form with the fields of the old "Pomoć" form: name, e-mail or phone, topic, message. */
 class KontaktRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // forma je javna; zaštita je u kontroleru (zamka, vreme, limit)
+        return true; // public form; bot protection lives in the controller (honeypot, timing, rate limit)
     }
 
     /** @return array<string, mixed> */
@@ -20,15 +21,13 @@ class KontaktRequest extends FormRequest
     {
         return [
             'ime' => ['required', 'string', 'max:80'],
-            'email' => ['required', 'string', 'email:rfc', 'max:190'],
-            'telefon' => ['nullable', 'string', 'max:30', function (string $attribute, mixed $value, Closure $fail) {
-                if (is_string($value) && trim($value) !== '' && Telefon::normalize($value) === '') {
-                    $fail('Unesite ispravan broj telefona, npr. 65 123 4567.');
+            'kontakt' => ['required', 'string', 'max:120', function (string $attribute, mixed $value, Closure $fail) {
+                if (is_string($value) && self::email($value) === null && Telefon::normalize($value) === '') {
+                    $fail(PageText::get('kontakt.poruka.kontakt'));
                 }
             }],
             'tema' => ['required', 'string', Rule::in(PageText::list('kontakt.teme'))],
             'poruka' => ['required', 'string', 'min:10', 'max:2000'],
-            'saglasnost' => ['accepted'],
         ];
     }
 
@@ -36,30 +35,26 @@ class KontaktRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.email' => 'Unesite ispravnu adresu e-pošte.',
-            'tema.in' => 'Izaberite temu sa liste.',
-            'saglasnost.accepted' => 'Potvrdite da se slažete da se podaci koriste za odgovor na poruku.',
+            'required' => PageText::get('kontakt.poruka.obavezno'),
+            'max' => PageText::get('kontakt.poruka.predugacak'),
+            'min' => PageText::get('kontakt.poruka.prekratak'),
+            'tema.in' => PageText::get('kontakt.poruka.tema'),
         ];
     }
 
-    /** @return array<string, string> */
-    public function attributes(): array
+    /** The address when the contact field holds a valid e-mail, otherwise null. */
+    public static function email(string $value): ?string
     {
-        return [
-            'ime' => 'ime i prezime',
-            'email' => 'e-pošta',
-            'telefon' => 'telefon',
-            'tema' => 'tema',
-            'poruka' => 'poruka',
-            'saglasnost' => 'saglasnost',
-        ];
+        $value = trim($value);
+
+        return str_contains($value, '@') && filter_var($value, FILTER_VALIDATE_EMAIL) !== false ? $value : null;
     }
 
     protected function prepareForValidation(): void
     {
         $this->merge([
             'ime' => is_string($this->ime) ? trim($this->ime) : $this->ime,
-            'email' => is_string($this->email) ? trim($this->email) : $this->email,
+            'kontakt' => is_string($this->kontakt) ? trim($this->kontakt) : $this->kontakt,
         ]);
     }
 }

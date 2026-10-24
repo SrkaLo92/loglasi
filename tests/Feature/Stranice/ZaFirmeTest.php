@@ -85,7 +85,7 @@ class ZaFirmeTest extends TestCase
     {
         $this->get('/za-firme/')->assertSee(url_slash('kontakt').'?tema=firma#forma', false);
 
-        $this->get('/kontakt/?tema=firma')->assertSee('<option value="Prijava firme (Biznis paket)" selected>', false);
+        $this->get('/kontakt/?tema=firma')->assertSee('<option value="Za firme" selected>', false);
     }
 
     public function test_phone_from_settings_is_shown_in_e164_link(): void

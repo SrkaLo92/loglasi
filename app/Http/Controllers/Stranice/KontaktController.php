@@ -18,14 +18,16 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 
-/** Kontakt: sopstvena forma umesto CF7, sa zamkom za botove, vremenskom zamkom i limitom po IP adresi. */
+/** Contact: own form in place of CF7, with a honeypot, a timing check and a per-IP rate limit. */
 class KontaktController extends Controller
 {
     public function show(Request $request): View
     {
         $teme = PageText::list('kontakt.teme');
-        // ?tema=firma sa strane Za firme bira „Prijava firme (Biznis paket)”.
-        $izabrana = $request->query('tema') === 'firma' ? ($teme[1] ?? null) : null;
+        // ?tema=firma from the firms page preselects the "Za firme" topic.
+        $izabrana = $request->query('tema') === 'firma'
+            ? (collect($teme)->first(fn ($t) => is_string($t) && str_contains(mb_strtolower($t), 'firm')))
+            : null;
         $phone = (string) Settings::get('contact_phone', '');
 
         return view('stranice.kontakt', [
@@ -52,7 +54,7 @@ class KontaktController extends Controller
             $minutes = max(1, (int) ceil(RateLimiter::availableIn($key) / 60));
 
             return back()->withInput()->withErrors([
-                'forma' => sprintf('Poslali ste više poruka za kratko vreme. Pokušajte ponovo za %d %s.', $minutes, Cenovnik::plural($minutes, 'minut', 'minuta', 'minuta')),
+                'forma' => strtr(PageText::get('kontakt.poruka.limit'), ['{minuta}' => $minutes.' '.Cenovnik::plural($minutes, 'minut', 'minuta', 'minuta')]),
             ]);
         }
 
@@ -68,7 +70,7 @@ class KontaktController extends Controller
         $sentAt = $this->formTime((string) $request->input('_t', ''));
         if ($sentAt === null || now()->getTimestamp() - $sentAt > (int) $cfg['max_sati'] * 3600) {
             return back()->withInput()->withErrors([
-                'forma' => 'Forma je istekla. Proverite podatke i pošaljite poruku ponovo.',
+                'forma' => PageText::get('kontakt.poruka.istekla'),
             ]);
         }
 
@@ -82,8 +84,8 @@ class KontaktController extends Controller
 
         Mail::to((string) Settings::get('contact_email'))->queue(new KontaktPoruka([
             'ime' => $data['ime'],
-            'email' => $data['email'],
-            'telefon' => Telefon::normalize($data['telefon'] ?? ''),
+            'email' => KontaktRequest::email($data['kontakt']) ?? '',
+            'telefon' => KontaktRequest::email($data['kontakt']) === null ? Telefon::normalize($data['kontakt']) : '',
             'tema' => $data['tema'],
             'poruka' => $data['poruka'],
             'ip' => $request->ip(),

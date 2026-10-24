@@ -8,7 +8,7 @@
 
 @section('content')
 @php
-	$polja = ['ime', 'email', 'telefon', 'tema', 'poruka', 'saglasnost'];
+	$polja = ['ime', 'kontakt', 'tema', 'poruka'];
 	$greske = collect($polja)->filter(fn ($p) => $errors->has($p))->values();
 	$opis = fn (string $polje) => $errors->has($polje) ? 'greska-'.$polje : null;
 @endphp
@@ -29,38 +29,30 @@
 			@if ($errors->has('forma'))
 				<p class="lgx-poruka lgx-poruka--greska" role="alert">{{ $errors->first('forma') }}</p>
 			@elseif ($greske->isNotEmpty())
-				<p class="lgx-poruka lgx-poruka--greska" role="alert">Neka polja nisu dobro popunjena. Proverite označena polja i pošaljite ponovo.</p>
+				<p class="lgx-poruka lgx-poruka--greska" role="alert">{{ PageText::get('kontakt.poruka.validacija') }}</p>
 			@endif
 
-			<form class="lgx-forma" action="{{ route('stranice.kontakt.posalji') }}" method="post" novalidate>
+			<form class="lgx-forma" aria-label="Kontakt forma" action="{{ route('stranice.kontakt.posalji') }}" method="post" novalidate>
 				@csrf
 				<input type="hidden" name="_t" value="{{ $token }}">
 
 				<div class="lgx-polje">
-					<label for="k-ime">Ime i prezime</label>
+					<label for="k-ime">{{ PageText::get('kontakt.polje.ime') }}</label>
 					<input id="k-ime" type="text" name="ime" value="{{ old('ime') }}" autocomplete="name" maxlength="80" required aria-required="true" @if ($errors->has('ime')) aria-invalid="true" aria-describedby="greska-ime" @endif>
 					@error('ime')<p class="lgx-polje__greska" id="greska-ime">{{ $message }}</p>@enderror
 				</div>
 
 				<div class="lgx-polje">
-					<label for="k-email">E-pošta</label>
-					<input id="k-email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" inputmode="email" maxlength="190" required aria-required="true" @if ($errors->has('email')) aria-invalid="true" aria-describedby="greska-email" @endif>
-					@error('email')<p class="lgx-polje__greska" id="greska-email">{{ $message }}</p>@enderror
+					<label for="k-kontakt">{{ PageText::get('kontakt.polje.kontakt') }}</label>
+					<input id="k-kontakt" type="text" name="kontakt" value="{{ old('kontakt') }}" autocomplete="email" maxlength="120" required aria-required="true" aria-describedby="{{ trim('pomoc-kontakt '.($opis('kontakt') ?? '')) }}" @if ($errors->has('kontakt')) aria-invalid="true" @endif>
+					<p class="lgx-polje__pomoc" id="pomoc-kontakt">{{ PageText::get('kontakt.polje.kontakt_pomoc') }}</p>
+					@error('kontakt')<p class="lgx-polje__greska" id="greska-kontakt">{{ $message }}</p>@enderror
 				</div>
 
-				<div class="lgx-polje">
-					<label for="k-telefon">Telefon <span class="lgx-polje__opciono">(nije obavezno)</span></label>
-					<span class="lgx-tel">
-						<span class="lgx-tel__prefiks" aria-hidden="true">+381</span>
-						<input id="k-telefon" type="tel" name="telefon" value="{{ old('telefon') }}" autocomplete="tel-national" inputmode="tel" placeholder="65 123 4567" maxlength="30" aria-describedby="{{ trim('pomoc-telefon '.($opis('telefon') ?? '')) }}" @if ($errors->has('telefon')) aria-invalid="true" @endif>
-					</span>
-					<p class="lgx-polje__pomoc" id="pomoc-telefon">Može i sa nulom: 065 123 4567.</p>
-					@error('telefon')<p class="lgx-polje__greska" id="greska-telefon">{{ $message }}</p>@enderror
-				</div>
-
-				<div class="lgx-polje">
-					<label for="k-tema">Tema</label>
+				<div class="lgx-polje lgx-polje--puno">
+					<label for="k-tema">{{ PageText::get('kontakt.polje.tema') }}</label>
 					<select id="k-tema" name="tema" required aria-required="true" @if ($errors->has('tema')) aria-invalid="true" aria-describedby="greska-tema" @endif>
+						<option value="">{{ PageText::get('kontakt.polje.tema_prazno') }}</option>
 						@foreach ($teme as $tema)
 							<option value="{{ $tema }}" @selected($izabranaTema === $tema)>{{ $tema }}</option>
 						@endforeach
@@ -69,7 +61,7 @@
 				</div>
 
 				<div class="lgx-polje lgx-polje--puno">
-					<label for="k-poruka">Poruka</label>
+					<label for="k-poruka">{{ PageText::get('kontakt.polje.poruka') }}</label>
 					<textarea id="k-poruka" name="poruka" rows="5" minlength="10" maxlength="2000" required aria-required="true" @if ($errors->has('poruka')) aria-invalid="true" aria-describedby="greska-poruka" @endif>{{ old('poruka') }}</textarea>
 					@error('poruka')<p class="lgx-polje__greska" id="greska-poruka">{{ $message }}</p>@enderror
 				</div>
@@ -80,15 +72,8 @@
 				</div>
 
 				<div class="lgx-polje lgx-polje--puno">
-					<label class="lgx-saglasnost" for="k-saglasnost">
-						<input id="k-saglasnost" type="checkbox" name="saglasnost" value="1" @checked(old('saglasnost')) required aria-required="true" @if ($errors->has('saglasnost')) aria-invalid="true" aria-describedby="greska-saglasnost" @endif>
-						<span>Slažem se da se moji podaci koriste samo za odgovor na ovu poruku.</span>
-					</label>
-					@error('saglasnost')<p class="lgx-polje__greska" id="greska-saglasnost">{{ $message }}</p>@enderror
-				</div>
-
-				<div class="lgx-polje lgx-polje--puno">
-					<button class="lgx-btn lgx-btn--green lgx-forma__dugme" type="submit">Pošalji poruku</button>
+					<p class="lgx-polje__pomoc">{{ PageText::inline(PageText::get('kontakt.napomena')) }}</p>
+					<button class="lgx-btn lgx-btn--green lgx-forma__dugme" type="submit">{{ PageText::get('kontakt.dugme') }}</button>
 				</div>
 			</form>
 		</section>
