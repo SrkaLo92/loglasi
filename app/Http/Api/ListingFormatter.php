@@ -60,6 +60,8 @@ class ListingFormatter
         $listing->loadMissing(static::DETAIL_RELATIONS);
         $fields = app(ListingFields::class);
         $mine = $viewer !== null && $viewer->id === $listing->user_id;
+        $fieldValues = $fields->values($listing);
+        $highlights = ListingFields::highlights($fieldValues);
 
         return static::card($listing) + [
             'description' => (string) $listing->description,
@@ -71,7 +73,8 @@ class ListingFormatter
                 'display' => (string) $f['display'],
                 'type' => (string) $f['type'],
                 'items' => array_values($f['items']),
-            ], $fields->values($listing)),
+                'highlight' => in_array($f['key'], $highlights, true),
+            ], $fieldValues),
             'condition' => $fields->condition($listing),
             'seller' => $listing->user ? static::seller($listing->user) : null,
             'views' => (int) $listing->views,

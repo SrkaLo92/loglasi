@@ -13,10 +13,8 @@
 		@endif
 	</div>
 	@php
-		$lgoFacts = collect($fieldValues ?? [])
-			->filter(fn ($f) => in_array($f['key'], \App\Services\ListingFields::HIGHLIGHTS, true) && ($f['items'] ?? []) === [])
-			->sortBy(fn ($f) => array_search($f['key'], \App\Services\ListingFields::HIGHLIGHTS, true))
-			->take(4);
+		$lgoFactKeys = \App\Services\ListingFields::highlights($fieldValues ?? []);
+		$lgoFacts = collect($fieldValues ?? [])->keyBy('key')->only($lgoFactKeys)->sortBy(fn ($f) => array_search($f['key'], $lgoFactKeys, true));
 	@endphp
 	@if ($lgoFacts->isNotEmpty())
 		<dl class="lgo-facts">

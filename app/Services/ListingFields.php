@@ -51,6 +51,19 @@ class ListingFields
 
     public function __construct(private readonly Catalog $catalog) {}
 
+    /**
+     * Keys of the key facts for a listing, from the rows of values(): the first four HIGHLIGHTS it has.
+     *
+     * @param  list<array{key: string, items?: list<string>}>  $values
+     * @return list<string>
+     */
+    public static function highlights(array $values): array
+    {
+        $have = array_column(array_filter($values, fn (array $f) => ($f['items'] ?? []) === []), 'key');
+
+        return array_slice(array_values(array_intersect(self::HIGHLIGHTS, $have)), 0, 4);
+    }
+
     // ---------------------------------------------------------------- forma
 
     /**

@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -175,6 +176,59 @@ class MyListingsController extends Controller
         }
 
         return ApiResponse::json($request, ListingFormatter::detail($listing->fresh(), $request->user()), ApiResponse::CACHE_PRIVATE);
+    }
+
+    /** POST /me/listings/{id}/sold: an active listing is marked as sold and leaves the site (status "sold"). */
+    public function sold(Request $request, Listing $listing): Response
+    {
+        $this->authorize('update', $listing);
+        if (! $this->posting->markSold($listing)) {
+            throw new ApiError('not_active', 'Samo aktivan oglas može da se označi kao prodat.', 409);
+        }
+
+        return ApiResponse::json($request, ListingFormatter::detail($listing->fresh(), $request->user()), ApiResponse::CACHE_PRIVATE);
+    }
+
+    /** POST /me/listings/{id}/deactivate: an active listing leaves the site (status "expired") and can be renewed for free. */
+    public function deactivate(Request $request, Listing $listing): Response
+    {
+        $this->authorize('update', $listing);
+        if (! $this->posting->deactivate($listing)) {
+            throw new ApiError('not_active', 'Samo aktivan oglas može da se skine sa sajta.', 409);
+        }
+
+        return ApiResponse::json($request, ListingFormatter::detail($listing->fresh(), $request->user()), ApiResponse::CACHE_PRIVATE);
+    }
+
+    /** GET /me/listings/{id}/stats: totals and the last 30 days, newest day first (days without activity are left out). */
+    public function stats(Request $request, Listing $listing): Response
+    {
+        $this->authorize('manage', $listing);
+
+        $days = DB::table('listing_daily_stats')
+            ->where('listing_id', $listing->id)
+            ->where('date', '>=', now()->subDays(29)->toDateString())
+            ->orderByDesc('date')
+            ->get(['date', 'views', 'phone_reveals', 'messages', 'favorites']);
+
+        return ApiResponse::json($request, [
+            'listing_id' => $listing->id,
+            'views' => (int) $listing->views,
+            'phone_reveals' => (int) $listing->phone_reveals,
+            'last_30_days' => [
+                'views' => (int) $days->sum('views'),
+                'phone_reveals' => (int) $days->sum('phone_reveals'),
+                'messages' => (int) $days->sum('messages'),
+                'favorites' => (int) $days->sum('favorites'),
+            ],
+            'days' => $days->map(fn ($d) => [
+                'date' => (string) $d->date,
+                'views' => (int) $d->views,
+                'phone_reveals' => (int) $d->phone_reveals,
+                'messages' => (int) $d->messages,
+                'favorites' => (int) $d->favorites,
+            ])->values()->all(),
+        ], ApiResponse::CACHE_PRIVATE);
     }
 
     // ---------------------------------------------------------------- helpers

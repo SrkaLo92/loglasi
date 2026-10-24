@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\ListingFields;
 use App\Services\ListingImages;
 use App\Support\Settings;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 
 class MyListingsApiTest extends PostingTestCase
@@ -226,5 +227,41 @@ class MyListingsApiTest extends PostingTestCase
         $this->deleteJson('/api/v1/me/listings/'.$listing->id)->assertNoContent();
         $this->assertSoftDeleted($listing);
         $this->getJson('/api/v1/me/listings/'.$listing->id)->assertNotFound();
+    }
+
+    public function test_sold_deactivate_and_stats(): void
+    {
+        $user = $this->as();
+        $sold = $this->published($user, ['title' => 'Prodat bicikl']);
+        $off = $this->published($user, ['title' => 'Skinut bicikl']);
+
+        $this->postJson('/api/v1/me/listings/'.$sold->id.'/sold')->assertOk()->assertJsonPath('status', 'sold');
+        $this->postJson('/api/v1/me/listings/'.$sold->id.'/sold')->assertStatus(409)->assertJsonPath('code', 'not_active');
+        $this->postJson('/api/v1/me/listings/'.$off->id.'/deactivate')->assertOk()->assertJsonPath('status', 'expired');
+        $this->postJson('/api/v1/me/listings/'.$off->id.'/renew')->assertOk()->assertJsonPath('status', 'active');
+
+        DB::table('listing_daily_stats')->insert([
+            ['listing_id' => $off->id, 'date' => now()->toDateString(), 'views' => 5, 'phone_reveals' => 2, 'messages' => 1, 'favorites' => 0],
+            ['listing_id' => $off->id, 'date' => now()->subDays(40)->toDateString(), 'views' => 9, 'phone_reveals' => 0, 'messages' => 0, 'favorites' => 0],
+        ]);
+        $this->getJson('/api/v1/me/listings/'.$off->id.'/stats')->assertOk()
+            ->assertJsonPath('last_30_days.views', 5)
+            ->assertJsonPath('last_30_days.phone_reveals', 2)
+            ->assertJsonCount(1, 'days')
+            ->assertJsonPath('days.0.messages', 1);
+
+        $this->as($this->user());
+        $this->getJson('/api/v1/me/listings/'.$off->id.'/stats')->assertForbidden();
+        $this->postJson('/api/v1/me/listings/'.$off->id.'/sold')->assertForbidden();
+    }
+
+    public function test_listings_api_answers_with_only_the_count_when_asked(): void
+    {
+        $this->published($this->user(), ['title' => 'Jedan oglas']);
+
+        $this->getJson('/api/v1/listings', ['X-Lg-Count' => '1'])->assertOk()
+            ->assertExactJson(['count' => 1])
+            ->assertHeader('Cache-Control', 'no-store, private');
+        $this->getJson('/api/v1/listings')->assertOk()->assertJsonPath('total', 1)->assertHeader('Vary', 'X-Lg-Count');
     }
 }

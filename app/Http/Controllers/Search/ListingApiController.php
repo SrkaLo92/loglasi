@@ -17,6 +17,12 @@ class ListingApiController extends Controller
         $page = $search->paginate($params);
 
         $total = $page->total();
+
+        // The app's "Prikaži N oglasa" button asks only for the number, like the site's filter panel.
+        if ($request->headers->get('X-Lg-Count') === '1') {
+            return response()->json(['count' => $total])->header('Cache-Control', 'no-store, private')->header('Vary', 'X-Lg-Count');
+        }
+
         $pages = (int) ceil($total / $params['per_page']);
 
         return ApiResponse::json($request, [
@@ -26,6 +32,7 @@ class ListingApiController extends Controller
         ], ApiResponse::CACHE_DEFAULT, 200, [
             'X-WP-Total' => (string) $total,
             'X-WP-TotalPages' => (string) $pages,
+            'Vary' => 'X-Lg-Count',
         ]);
     }
 }
