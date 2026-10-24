@@ -84,15 +84,6 @@ class LegacyUrls
             return $this->hit(config('seo.targets.woo_account'), 301, 'woo-nalog');
         }
 
-        // Feedovi koji više ne postoje: komentari i feed jednog oglasa ili kategorije.
-        if (preg_match('#^/comments/feed/?$#', $path)) {
-            return $this->hit('/feed/', 301, 'feed');
-        }
-
-        if (preg_match('#^/(oglas|oglasi)/([^/]+)/feed/?$#', $path, $m)) {
-            return $this->hit('/'.$m[1].'/'.$m[2].'/', 301, 'feed');
-        }
-
         if (rtrim($path, '/') === '/oglasi') {
             return $this->archiveQuery($clean);
         }

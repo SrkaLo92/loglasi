@@ -83,7 +83,7 @@ class ProveraCommandTest extends SeoTestCase
             $b.'/korisnik/pera/' => Http::response($this->html('noindex, follow', null)),
             $b.'/sitemap_index.xml' => Http::response('', 301, ['Location' => $b.'/sitemap.xml']),
             $b.'/sitemap.xml' => Http::response('<sitemapindex/>'),
-            $b.'/feed/' => Http::response('<rss/>', 200, ['X-Robots-Tag' => 'noindex']),
+            $b.'/feed/' => Http::response('', 410),
             $b.'/oglasi/page/2/' => Http::response($this->html('index, follow', 'https://loglasi.rs/oglasi/page/2/')),
             $b.'/o-nama/' => Http::response($this->html('index, follow', 'https://loglasi.rs/o-nama/')),
             $b.'/login-registracija/' => Http::response($this->html('noindex, follow', null)),

@@ -112,6 +112,4 @@ return [
         'wp_login' => '/prijava/',
     ],
 
-    // Feed: broj oglasa u /feed/.
-    'feed_items' => 30,
 ];

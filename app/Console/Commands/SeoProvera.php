@@ -190,16 +190,8 @@ class SeoProvera extends Command
             return ['pattern' => '/stranica-404/', 'status' => 404];
         }
 
-        if ($norm === '/feed/') {
-            return ['pattern' => 'feed', 'status' => 200, 'xrobots' => true];
-        }
-
-        if ($norm === '/comments/feed/') {
-            return ['pattern' => 'feed', 'status' => 301, 'target' => '/feed/'];
-        }
-
-        if (preg_match('#^/(oglas|oglasi)/([^/]+)/feed/$#', $norm, $m)) {
-            return ['pattern' => 'feed', 'status' => 301, 'target' => '/'.$m[1].'/'.$m[2].'/'];
+        if (preg_match('#(^|/)feed/$#', $norm)) {
+            return ['pattern' => 'feed', 'status' => 410];
         }
 
         if ($norm === '/oglasi/' && $clean !== []) {
