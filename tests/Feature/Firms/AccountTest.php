@@ -18,7 +18,7 @@ class AccountTest extends TestCase
     private function firmUser(array $firm = []): User
     {
         $user = User::factory()->create(['account_type' => AccountType::Firm]);
-        Firm::factory()->for($user)->create($firm);
+        Firm::factory()->package('pro')->for($user)->create($firm);
 
         return $user->load('firm');
     }
@@ -50,16 +50,16 @@ class AccountTest extends TestCase
         $this->actingAs($private)->get('/moj-nalog/firma/statistika/')->assertForbidden();
     }
 
-    public function test_edit_page_shows_form_and_biznis_box(): void
+    public function test_edit_page_shows_form_and_package_box(): void
     {
-        $user = $this->firmUser(['name' => 'Pekara Žito', 'biznis_until' => now()->addMonths(6)]);
+        $user = $this->firmUser(['name' => 'Pekara Žito', 'package_ends_at' => now()->addMonths(6)]);
 
         $html = $this->actingAs($user)->get('/moj-nalog/firma/')->assertOk()
             ->assertSee('Profil firme')
             ->assertSee('value="Pekara Žito"', false)
-            ->assertSee('Biznis paket')
+            ->assertSee('Business Pro')->assertSee('Mesečna pretplata')->assertSee('podizanja 10 od 10, isticanja 2 od 2')
             ->assertSee('Aktivan')
-            ->assertSee('Važi do')
+            ->assertSee('važi do')
             ->assertSee('<meta name="robots" content="noindex, follow">', false)
             ->getContent();
         $this->assertSame(1, substr_count($html, '<h1'));
@@ -128,17 +128,21 @@ class AccountTest extends TestCase
     public function test_admin_only_fields_cannot_be_set(): void
     {
         $until = now()->addMonth()->startOfSecond();
-        $user = $this->firmUser(['biznis_until' => $until]);
+        $user = $this->firmUser(['package_ends_at' => $until]);
 
         $this->actingAs($user)->put('/moj-nalog/firma/', $this->valid([
-            'biznis_until' => now()->addYears(10)->toDateTimeString(),
+            'package_ends_at' => now()->addYears(10)->toDateTimeString(),
+            'package' => 'max',
+            'free_program' => '1',
             'founding_free' => '1',
             'verified_at' => now()->toDateTimeString(),
             'user_id' => 999,
         ]))->assertRedirect();
 
         $firm = $user->firm->fresh();
-        $this->assertTrue($firm->biznis_until->equalTo($until));
+        $this->assertTrue($firm->package_ends_at->equalTo($until));
+        $this->assertSame('pro', $firm->package);
+        $this->assertFalse($firm->free_program);
         $this->assertFalse($firm->founding_free);
         $this->assertNull($firm->verified_at);
         $this->assertSame($user->id, $firm->user_id);
@@ -196,16 +200,18 @@ class AccountTest extends TestCase
         ]))->assertSessionHasErrors(['logo', 'cover']);
     }
 
-    public function test_expired_biznis_keeps_data_and_shows_renewal(): void
+    public function test_expired_package_keeps_data_and_shows_packages(): void
     {
-        $user = $this->firmUser(['name' => 'Istekla firma', 'biznis_until' => now()->subDays(3), 'website' => 'https://firma.rs']);
-        Product::factory()->create(['code' => Product::BIZNIS_12M, 'price_rsd' => 6000]);
+        $user = $this->firmUser(['name' => 'Istekla firma', 'package_ends_at' => now()->subDays(3), 'website' => 'https://firma.rs']);
 
         $this->actingAs($user)->get('/moj-nalog/firma/')->assertOk()
             ->assertSee('Istekao')
             ->assertSee('Podaci firme su sačuvani', false)
-            ->assertSee('Produžite Biznis paket')
-            ->assertSee('6.000 din')
+            ->assertSee('Produžite paket')
+            ->assertSee('Business Start')
+            ->assertSee('1.490 din mesečno ili 14.900 din godišnje')
+            ->assertSee('4.990 din mesečno')
+            ->assertDontSee('Founder')
             ->assertSee(url_slash('cenovnik'), false)
             ->assertSee('value="https://firma.rs"', false);
 
@@ -214,17 +220,20 @@ class AccountTest extends TestCase
         $this->assertSame('Ime posle isteka', $user->firm->fresh()->name);
     }
 
-    public function test_expiring_soon_founding_and_pending_order(): void
+    public function test_free_year_expiring_soon_and_pending_order(): void
     {
-        $user = $this->firmUser(['biznis_until' => now()->addDays(5)]);
-        $user->firm->forceFill(['founding_free' => true])->save();
-        $product = Product::factory()->create(['code' => Product::BIZNIS_12M]);
+        $user = User::factory()->create(['account_type' => AccountType::Firm]);
+        Firm::factory()->freeYear()->for($user)->create(['package_ends_at' => now()->addDays(5)->addHour()]);
+        $product = Product::byCode('business_start_yearly');
         Order::create(['user_id' => $user->id, 'product_id' => $product->id, 'amount_rsd' => 6000, 'reference' => 'LG-123', 'status' => OrderStatus::Pending]);
 
         $this->actingAs($user)->get('/moj-nalog/firma/')->assertOk()
             ->assertSee('Ističe uskoro')
-            ->assertSee('Osnivačka firma')
+            ->assertSee('Besplatna prva godina za prvih 30 firmi')
+            ->assertSee('nema automatske naplate')
+            ->assertSee('podizanja 5 od 5, isticanja 1 od 1')
             ->assertSee('još 5 dana')
+            ->assertDontSee('Founder')
             ->assertSee('Narudžbina LG-123 čeka uplatu.');
     }
 

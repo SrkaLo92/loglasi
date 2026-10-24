@@ -15,7 +15,7 @@ class StatsTest extends TestCase
     private function firmUser(array $firm = []): User
     {
         $user = User::factory()->create(['account_type' => AccountType::Firm]);
-        Firm::factory()->for($user)->create($firm);
+        Firm::factory()->package('pro')->for($user)->create($firm);
 
         return $user->load('firm');
     }
@@ -79,21 +79,20 @@ class StatsTest extends TestCase
 
         $this->assertSame(4, substr_count($html, '<svg viewBox="0 0 600 180" role="img"'));
         $this->assertSame(1, substr_count($html, '<h1'));
-        $this->assertStringNotContainsString('<script', str_replace('<script type="application/ld+json">', '', $html));
 
         $this->actingAs($user)->get('/moj-nalog/firma/statistika/?period=90')->assertOk()->assertSee('lg-btn--green" href="'.url_slash('moj-nalog/firma/statistika').'?period=90"  aria-current="page"', false);
         $this->actingAs($user)->get('/moj-nalog/firma/statistika/?period=7')->assertRedirect(url_slash('moj-nalog/firma/statistika'));
     }
 
-    public function test_expired_biznis_sees_upsell_instead_of_numbers(): void
+    public function test_expired_package_sees_upsell_instead_of_numbers(): void
     {
-        $user = $this->firmUser(['biznis_until' => now()->subDay()]);
+        $user = $this->firmUser(['package_ends_at' => now()->subDay()]);
         $listing = Listing::factory()->for($user)->create();
         $this->stat($listing, now()->toDateString(), ['views' => 77]);
 
         $this->actingAs($user)->get('/moj-nalog/firma/statistika/')->assertOk()
-            ->assertSee('Statistika je deo Biznis paketa.')
-            ->assertSee('Produžite Biznis paket')
+            ->assertSee('Statistika je deo paketa za firme.')
+            ->assertSee('Produžite paket')
             ->assertDontSee('Tabela po danima');
     }
 

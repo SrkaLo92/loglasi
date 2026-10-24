@@ -17,7 +17,7 @@ class MyFirmApiTest extends TestCase
     private function firmUser(array $firm = [], array $user = []): User
     {
         $account = User::factory()->create(['account_type' => AccountType::Firm] + $user);
-        Firm::factory()->for($account)->create($firm);
+        Firm::factory()->package('pro')->for($account)->create($firm);
 
         return $account->load('firm');
     }
@@ -49,7 +49,7 @@ class MyFirmApiTest extends TestCase
             'address' => 'Kneza Miloša 12',
             'website' => 'https://drina.rs',
             'working_hours' => ['1' => '08–16', '6' => 'Zatvoreno'],
-            'biznis_until' => '2027-10-01 10:00:00',
+            'package_ends_at' => '2027-10-01 10:00:00',
         ], ['phone_verified_at' => now(), 'created_at' => '2025-05-01 08:00:00']);
         Listing::factory()->count(2)->for($user)->create();
         Listing::factory()->expired()->for($user)->create();
@@ -63,9 +63,9 @@ class MyFirmApiTest extends TestCase
                 'logo' => null,
                 'address' => 'Kneza Miloša 12',
                 'website' => 'https://drina.rs',
-                'working_hours' => "Ponedeljak: 08–16\nSubota: Zatvoreno",
+                'working_hours' => "Ponedeljak: 08–16\nUtorak: zatvoreno\nSreda: zatvoreno\nČetvrtak: zatvoreno\nPetak: zatvoreno\nSubota: Zatvoreno\nNedelja: zatvoreno",
                 'phone_verified' => true,
-                'package' => 'Biznis',
+                'package' => 'Business Pro',
                 'package_expires_at' => '2027-10-01T08:00:00Z',
                 'active_listings' => 2,
                 'member_since' => '2025-05-01T06:00:00Z',
@@ -78,7 +78,7 @@ class MyFirmApiTest extends TestCase
 
         $this->as($user)->getJson('/api/v1/me/firm')->assertOk()
             ->assertJsonPath('name', 'Nova firma')
-            ->assertJsonPath('package', null)
+            ->assertJsonPath('package', 'Bez paketa')
             ->assertJsonPath('package_expires_at', null);
         $this->assertNotNull($user->fresh()->firm);
     }
@@ -163,10 +163,10 @@ class MyFirmApiTest extends TestCase
         $this->as($user)->getJson('/api/v1/me/firm/stats?period=1y')->assertStatus(400)->assertJsonPath('code', 'invalid_param');
     }
 
-    public function test_stats_need_active_biznis(): void
+    public function test_stats_need_an_active_package(): void
     {
-        $user = $this->firmUser(['biznis_until' => now()->subDay()]);
+        $user = $this->firmUser(['package_ends_at' => now()->subDay()]);
 
-        $this->as($user)->getJson('/api/v1/me/firm/stats')->assertForbidden()->assertJsonPath('code', 'biznis_required');
+        $this->as($user)->getJson('/api/v1/me/firm/stats')->assertForbidden()->assertJsonPath('code', 'package_required');
     }
 }

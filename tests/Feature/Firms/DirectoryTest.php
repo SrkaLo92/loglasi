@@ -16,7 +16,7 @@ class DirectoryTest extends TestCase
     private function firm(array $firm = [], array $user = []): User
     {
         $account = User::factory()->create(['account_type' => AccountType::Firm] + $user);
-        Firm::factory()->for($account)->create($firm);
+        Firm::factory()->package('pro')->for($account)->create($firm);
 
         return $account->load('firm');
     }
@@ -29,13 +29,13 @@ class DirectoryTest extends TestCase
     public function test_lists_only_firms_with_active_biznis_and_active_account(): void
     {
         $listed = $this->firm(['name' => 'Auto servis Drina']);
-        $expired = $this->firm(['name' => 'Istekla firma', 'biznis_until' => now()->subDay()]);
-        $none = $this->firm(['name' => 'Bez paketa', 'biznis_until' => null]);
+        $expired = $this->firm(['name' => 'Istekla firma', 'package_ends_at' => now()->subDay()]);
+        $none = $this->firm(['name' => 'Bez paketa', 'package_ends_at' => null]);
         $blocked = $this->firm(['name' => 'Blokirana firma'], ['status' => UserStatus::Blocked]);
         $deleted = $this->firm(['name' => 'Obrisana firma']);
         $deleted->delete();
         $private = User::factory()->create();
-        Firm::factory()->for($private)->create(['name' => 'Privatni sa redom']);
+        Firm::factory()->package('pro')->for($private)->create(['name' => 'Privatni sa redom']);
 
         $this->get('/firme/')
             ->assertOk()
@@ -48,21 +48,22 @@ class DirectoryTest extends TestCase
             ->assertDontSee('Privatni sa redom');
     }
 
-    public function test_founding_firms_first_then_by_active_listings(): void
+    public function test_first_30_firms_first_then_by_active_listings(): void
     {
         $few = $this->firm(['name' => 'Firma Dva']);
         $many = $this->firm(['name' => 'Firma Pet']);
-        $founding = $this->firm(['name' => 'Firma Osnivac']);
-        $founding->firm->forceFill(['founding_free' => true])->save();
+        $free = User::factory()->create(['account_type' => AccountType::Firm]);
+        Firm::factory()->freeYear()->for($free)->create(['name' => 'Firma Prva']);
         $this->listings($few, 2);
         $this->listings($many, 5);
         Listing::factory()->expired()->count(4)->for($few)->create(); // not active, not counted
 
         $names = array_column(FirmDirectory::all(), 'name');
-        $this->assertSame(['Firma Osnivac', 'Firma Pet', 'Firma Dva'], $names);
+        $this->assertSame(['Firma Prva', 'Firma Pet', 'Firma Dva'], $names);
 
         $this->get('/firme/')->assertOk()
-            ->assertSeeInOrder(['Firma Osnivac', 'Osnivačka firma', 'Firma Pet', '5 aktivnih oglasa', 'Firma Dva', '2 aktivna oglasa']);
+            ->assertSeeInOrder(['Firma Prva', 'Firma Pet', '5 aktivnih oglasa', 'Firma Dva', '2 aktivna oglasa'])
+            ->assertDontSee('Founder')->assertDontSee('Osnivačka');
     }
 
     public function test_filter_by_place_and_text_ignores_case_and_diacritics(): void
@@ -81,7 +82,7 @@ class DirectoryTest extends TestCase
         $this->get('/firme/?keyword=ceda')->assertOk()->assertSee('Vulkanizer Čeda')->assertDontSee('Pekara Žito');
         $this->get('/firme/?keyword=ZITO')->assertOk()->assertSee('Pekara Žito')->assertDontSee('Vulkanizer Čeda');
         $this->get('/firme/?keyword=pekara&mesto=banja-koviljaca')->assertOk()->assertSee('Nema firmi za ovu pretragu.');
-        $this->get('/firme/?mesto=<script>')->assertOk()->assertDontSee('<script>', false);
+        $this->get('/firme/?keyword=<script>alert(1)</script>')->assertOk()->assertDontSee('<script>alert(1)', false);
     }
 
     public function test_seo_title_h1_canonical_and_item_list(): void
@@ -89,7 +90,7 @@ class DirectoryTest extends TestCase
         $user = $this->firm(['name' => 'Auto servis Drina', 'activity' => 'Auto servis']);
 
         $html = $this->get('/firme/')->assertOk()
-            ->assertSee('<title>Firme Loznica – imenik lokalnih firmi | loglasi.rs</title>', false)
+            ->assertSee('<title>Firme iz Loznice – lokalne firme i usluge | loglasi.rs</title>', false)
             ->assertSee('<link rel="canonical" href="https://loglasi.rs/firme/">', false)
             ->assertSee('index, follow', false)
             ->getContent();
@@ -139,5 +140,15 @@ class DirectoryTest extends TestCase
     public function test_without_trailing_slash_redirects(): void
     {
         $this->get('/firme')->assertMovedPermanently();
+    }
+
+    public function test_home_links_to_the_directory_with_its_count(): void
+    {
+        $this->firm(['name' => 'Firma sa paketom']);
+        $this->firm(['name' => 'Firma bez paketa', 'package' => null, 'package_ends_at' => null]);
+
+        $this->get('/')->assertOk()
+            ->assertSee(url_slash('firme'), false)
+            ->assertSee('Sve firme (1)');
     }
 }

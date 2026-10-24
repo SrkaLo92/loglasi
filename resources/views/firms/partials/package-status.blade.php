@@ -34,9 +34,16 @@
 				<p class="lgf-help">Pretplata se ne obnavlja sama. Produžavate je uplatom pre isteka.</p>
 			@endif
 			@if ($status['credits'] !== null && array_sum($status['credits_granted']) > 0)
-				<p>Uključeno ovog meseca:
-					podizanja {{ $status['credits']['bumps'] }} od {{ $status['credits_granted']['bumps'] }}@if ($status['credits_granted']['highlights']), isticanja {{ $status['credits']['highlights'] }} od {{ $status['credits_granted']['highlights'] }}@endif @if ($status['credits_granted']['premium_xl']), Premium XL {{ $status['credits']['premium_xl'] }} od {{ $status['credits_granted']['premium_xl'] }}@endif.
-				</p>
+				@php
+					$included = ['bumps' => 'podizanja', 'highlights' => 'isticanja', 'premium_xl' => 'Premium XL'];
+					$parts = [];
+					foreach ($included as $key => $name) {
+						if ($status['credits_granted'][$key] > 0) {
+							$parts[] = $name.' '.$status['credits'][$key].' od '.$status['credits_granted'][$key];
+						}
+					}
+				@endphp
+				<p>Uključeno ovog meseca: {{ implode(', ', $parts) }}.</p>
 			@endif
 		@elseif ($status['state'] === 'expired')
 			<p>{{ $status['label'] ?: 'Paket' }} je istekao {{ $until }}. Podaci firme su sačuvani, ali profil se sada prikazuje kao profil privatnog lica, firma nije u imeniku i važi limit oglasa privatnog lica.</p>
@@ -56,8 +63,7 @@
 			<ul>
 				@foreach ($status['packages'] as $package)
 					@if ($package['monthly'] || $package['yearly'])
-						<li><strong>{{ $package['label'] }}</strong>:
-							@if ($package['monthly']){{ $num($package['monthly']) }} din mesečno@endif{{ $package['monthly'] && $package['yearly'] ? ' ili ' : '' }}@if ($package['yearly']){{ $num($package['yearly']) }} din godišnje@endif
+						<li><strong>{{ $package['label'] }}</strong>: {{ implode(' ili ', array_filter([$package['monthly'] ? $num($package['monthly']).' din mesečno' : null, $package['yearly'] ? $num($package['yearly']).' din godišnje' : null])) }}
 						</li>
 					@endif
 				@endforeach
