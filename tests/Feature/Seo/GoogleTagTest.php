@@ -17,7 +17,10 @@ class GoogleTagTest extends TestCase
             ->assertSee('https://www.googletagmanager.com/gtag/js?id=GT-MKTJD4NV', false)
             ->assertSee("gtag('consent', 'default', {analytics_storage: 'denied'", false)
             ->assertSee('id="lg-kolacici"', false)
-            ->assertSee('Prihvatam');
+            ->assertSee('<button type="button" class="lg-kolacici__ok" data-kolacici="da">U redu</button>', false)
+            ->assertSee('href="'.url_slash('politika-privatnosti').'"', false)
+            ->assertSee("gtag('consent', 'update', {analytics_storage: 'granted'})", false)
+            ->assertDontSee('Odbijam');
     }
 
     public function test_tag_id_comes_from_settings_and_must_be_valid(): void
