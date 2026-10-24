@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Listing extends Model
@@ -90,5 +91,40 @@ class Listing extends Model
     public function url(): string
     {
         return url('/oglas/'.$this->slug.'/');
+    }
+
+    // Listing page module: cover image, stats, visibility
+
+    /** First image by sort order (cards and API without loading the whole gallery). */
+    public function coverImage(): HasOne
+    {
+        return $this->hasOne(ListingImage::class)->ofMany(['sort' => 'min', 'id' => 'min']);
+    }
+
+    public function dailyStats(): HasMany
+    {
+        return $this->hasMany(ListingDailyStat::class);
+    }
+
+    /** Published and not past its expiry date. */
+    public function isActive(): bool
+    {
+        return $this->status === ListingStatus::Published
+            && ! $this->trashed()
+            && ($this->expires_at === null || $this->expires_at->isFuture());
+    }
+
+    /** Expired by status or by date (shown with a notice and noindex). */
+    public function isExpired(): bool
+    {
+        return $this->status === ListingStatus::Expired
+            || ($this->status === ListingStatus::Published && $this->expires_at !== null && ! $this->expires_at->isFuture());
+    }
+
+    /** Active listings: published and not expired. */
+    public function scopeActive(Builder $query): void
+    {
+        $query->where('listings.status', ListingStatus::Published)
+            ->where(fn (Builder $q) => $q->whereNull('listings.expires_at')->orWhere('listings.expires_at', '>', now()));
     }
 }

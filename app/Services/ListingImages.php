@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Http\Api\ListingFormatter;
 use App\Jobs\GenerateImageVariants;
 use App\Models\Listing;
 use App\Models\ListingImage;
 use App\Models\User;
+use App\Support\Home\HomeSections;
 use App\Support\Settings;
 use GdImage;
 use Illuminate\Contracts\Filesystem\Filesystem;
@@ -259,7 +261,10 @@ class ListingImages
                 ListingImage::query()->whereKey($id)->where('listing_id', $listing->id)->update(['sort' => $position]);
             }
         });
+        // query updates fire no model events; the cover may have changed
+        HomeSections::flush();
         $listing->unsetRelation('images');
+        $listing->unsetRelation('coverImage');
     }
 
     public function setCover(Listing $listing, ListingImage $image): void
@@ -394,14 +399,7 @@ class ListingImages
     /** Image from the API contract: {id, thumb, medium, large, width, height}. */
     public function toApi(ListingImage $image): array
     {
-        return [
-            'id' => $image->id,
-            'thumb' => $this->url($image, 'sm'),
-            'medium' => $this->url($image, 'md'),
-            'large' => $this->url($image, 'lg'),
-            'width' => $image->width,
-            'height' => $image->height,
-        ];
+        return ListingFormatter::image($image) ?? [];
     }
 
     // ---------------------------------------------------------------- helpers

@@ -7,6 +7,7 @@ use App\Mail\ListingExpiringSoon;
 use App\Models\Listing;
 use App\Services\Catalog;
 use App\Services\Posting;
+use App\Services\SearchIndex;
 use App\Support\Seo\Sitemap;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
@@ -22,7 +23,7 @@ class ExpireListings extends Command
 
     public const BATCH = 1000;
 
-    public function handle(Posting $posting, Catalog $catalog, Sitemap $sitemap): int
+    public function handle(Posting $posting, Catalog $catalog, Sitemap $sitemap, SearchIndex $search): int
     {
         // in batches on the (status, expires_at) index, so one run never locks a large range
         $expired = 0;
@@ -37,6 +38,8 @@ class ExpireListings extends Command
             if ($ids->isNotEmpty()) {
                 $expired += Listing::query()->whereIn('id', $ids)->where('status', ListingStatus::Published)
                     ->update(['status' => ListingStatus::Expired->value, 'updated_at' => $now]);
+                // mass update skips model events: keep the search table in step
+                $search->syncIds($ids->all());
             }
         } while ($ids->count() === self::BATCH);
 

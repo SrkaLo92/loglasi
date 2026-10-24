@@ -263,15 +263,18 @@ class SeoHeadTest extends SeoTestCase
 
     public function test_site_search_is_noindex(): void
     {
+        Listing::factory()->create(['title' => 'Golf 4']);
         $response = $this->get('/?s=golf');
 
+        // The old WordPress search shows the listing list, so it points to it.
         $this->assertSame('noindex, follow', $this->robots($response));
-        $this->assertSame('https://loglasi.rs/', $this->canonical($response));
+        $this->assertSame('https://loglasi.rs/oglasi/', $this->canonical($response));
     }
 
     public function test_pagination_is_noindex_with_self_canonical(): void
     {
-        Listing::factory()->create();
+        // Three pages of 24 listings (a page past the last one is 404).
+        Listing::factory()->count(49)->for(User::factory())->for(Category::factory())->for(Location::factory())->create();
 
         $response = $this->get('/oglasi/?page=2');
         $this->assertSame('noindex, follow', $this->robots($response));

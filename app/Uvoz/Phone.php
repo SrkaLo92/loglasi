@@ -18,7 +18,8 @@ class Phone
             return '';
         }
 
-        $country = (string) preg_replace('/\D+/', '', $country);
+        // Listivo čuva zastavu kao HTML entitet ispred koda ("&#x1F1F7&#x1F1F8 +381"): uzima se samo +NNN.
+        $country = preg_match('/\+\s*(\d{1,4})/', $country, $m) ? $m[1] : (string) preg_replace('/\D+/', '', $country);
         if ($country !== ''
             && ! str_starts_with($raw, '+')
             && ! str_starts_with($raw, '00')
