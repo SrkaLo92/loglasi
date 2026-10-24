@@ -15,6 +15,7 @@ use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
@@ -25,6 +26,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\ValidationException;
 use UnitEnum;
 
 /** Extra listing fields (brand, mileage, area...). */
@@ -71,7 +73,15 @@ class FieldResource extends Resource
                         ->options(Options::enum(FieldFilter::class))
                         ->default(FieldFilter::None->value)
                         ->required(),
-                    TextInput::make('unit')->label('Jedinica')->helperText('Na primer km, m², cm³.')->maxLength(16),
+                    TextInput::make('unit')->label('Jedinica')->helperText('Na primer km, m², cm³, kW (uz kW se prikazuju i KS).')->maxLength(16),
+                    Select::make('depends_on')
+                        ->label('Zavisi od polja')
+                        ->helperText('Na primer Model zavisi od Marke: nude se samo modeli izabrane marke. Svaka opcija tada ima roditelja.')
+                        ->options(fn (?Field $record) => Field::query()->where('type', FieldType::Select->value)
+                            ->when($record, fn ($q) => $q->whereKeyNot($record->id))
+                            ->orderBy('label')->pluck('label', 'key')->all())
+                        ->visible($hasOptions)
+                        ->live(),
                     TextInput::make('sort')->label('Redosled')->integer()->minValue(0)->default(0),
                 ]),
             Section::make('Opcije')
@@ -79,16 +89,78 @@ class FieldResource extends Resource
                 ->schema([
                     Repeater::make('options')
                         ->label('Opcije izbora')
+                        ->visible(fn (Get $get) => $get('options_text') === null)
                         ->schema([
                             TextInput::make('value')->label('Vrednost')->required()->maxLength(64)->rule('regex:/^[a-z0-9_-]+$/')->helperText('Mala slova, bez razmaka.'),
                             TextInput::make('label')->label('Naziv')->required()->maxLength(255),
+                            Select::make('parent')
+                                ->label('Roditelj')
+                                ->visible(fn (Get $get) => filled($get('../../depends_on')))
+                                ->options(fn (Get $get) => self::parentOptions($get('../../depends_on')))
+                                ->searchable()
+                                ->required(fn (Get $get) => filled($get('../../depends_on'))),
                         ])
-                        ->columns(2)
+                        ->columns(3)
                         ->reorderable()
                         ->addActionLabel('Dodaj opciju')
                         ->defaultItems(0),
+                    // Long lists (car models) are edited as text, one option per line: the repeater would be too slow.
+                    Textarea::make('options_text')
+                        ->label('Opcije izbora (jedna po redu)')
+                        ->helperText('Oblik: vrednost | Naziv | roditelj (roditelj samo kad polje zavisi od drugog). Primer: audi-a4 | A4 | audi')
+                        ->visible(fn (Get $get) => $get('options_text') !== null)
+                        ->rows(25),
                 ]),
         ]);
+    }
+
+    /** Large option lists are shown as text (Filament repeater gets slow above this). */
+    public const TEXT_OPTIONS_FROM = 150;
+
+    /** @return array<string, string> */
+    public static function parentOptions(?string $key): array
+    {
+        if (! $key) {
+            return [];
+        }
+
+        return collect((array) Field::query()->where('key', $key)->value('options'))
+            ->filter(fn ($o) => is_array($o) && isset($o['value']))
+            ->mapWithKeys(fn ($o) => [(string) $o['value'] => (string) ($o['label'] ?? $o['value'])])->all();
+    }
+
+    /** @param  list<array<string, string>>  $options */
+    public static function optionsToText(array $options): string
+    {
+        return collect($options)->map(fn ($o) => implode(' | ', array_filter([
+            (string) ($o['value'] ?? ''), (string) ($o['label'] ?? ''), (string) ($o['parent'] ?? ''),
+        ], 'strlen')))->implode("\n");
+    }
+
+    /**
+     * @return list<array{value: string, label: string, parent?: string}>
+     *
+     * @throws ValidationException
+     */
+    public static function textToOptions(string $text, bool $withParent): array
+    {
+        $out = [];
+        $seen = [];
+        foreach (preg_split('/\R/u', $text) as $i => $line) {
+            if (trim($line) === '') {
+                continue;
+            }
+            $parts = array_map('trim', explode('|', $line));
+            $value = $parts[0] ?? '';
+            $label = $parts[1] ?? '';
+            if (! preg_match('/^[a-z0-9_-]+$/', $value) || $label === '' || isset($seen[$value]) || ($withParent && ($parts[2] ?? '') === '')) {
+                throw ValidationException::withMessages(['data.options_text' => 'Red '.($i + 1).' nije ispravan: „'.mb_substr($line, 0, 80).'”.']);
+            }
+            $seen[$value] = true;
+            $out[] = ['value' => $value, 'label' => $label] + ($withParent ? ['parent' => $parts[2]] : []);
+        }
+
+        return $out;
     }
 
     public static function table(Table $table): Table

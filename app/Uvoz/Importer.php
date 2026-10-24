@@ -2,6 +2,7 @@
 
 namespace App\Uvoz;
 
+use App\Support\Catalog\CatalogDefinition;
 use App\Uvoz\Steps\CategoryImport;
 use App\Uvoz\Steps\FavoriteImport;
 use App\Uvoz\Steps\FieldImport;
@@ -73,6 +74,14 @@ class Importer
             foreach ($steps as $name => $class) {
                 $this->say('Uvoz: '.$name);
                 (new $class($this))->run();
+            }
+
+            // WordPress fields come in as Listivo had them; the catalog definition makes them KP-like again.
+            if (config('uvoz.catalog_definition') && array_intersect(array_keys($steps), ['categories', 'fields', 'listings']) !== []) {
+                $this->say('Uvoz: katalog:uredi');
+                foreach ((new CatalogDefinition)->apply()['counts'] as $what => $n) {
+                    $this->report->note('fields', "katalog:uredi: {$what} {$n}");
+                }
             }
         } finally {
             if ($this->dryRun) {

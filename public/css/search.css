@@ -247,6 +247,24 @@ select.sr-input {
 	gap: 6px;
 }
 
+.sr-more {
+	margin-top: 6px;
+}
+
+.sr-more > summary {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	color: var(--lg-green);
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.sr-more[open] > summary {
+	margin-bottom: 6px;
+}
+
 .sr-pill {
 	position: relative;
 	cursor: pointer;

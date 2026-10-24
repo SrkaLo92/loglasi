@@ -10,6 +10,7 @@ use App\Models\AuditLog;
 use App\Models\Field;
 use App\Models\Listing;
 use App\Services\Catalog;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
 use Tests\Feature\Admin\Concerns\ActsAsStaff;
@@ -151,7 +152,7 @@ class ListingAdminTest extends TestCase
         $this->signIn($this->admin());
 
         Livewire::test(EditListing::class, ['record' => $listing->getRouteKey()])
-            ->fillForm(['title' => 'Golf 4 1.9 TDI', 'price' => 2500, 'currency' => 'EUR', 'contact_phone' => '065 123 4567', 'fields' => ['kilometraza' => '']])
+            ->fillForm(['title' => 'Golf 4 1.9 TDI', 'price' => 2500, 'currency' => 'EUR', 'contact_phone' => '065 123 4567', 'fields' => ['kilometraza' => 'mnogo']])
             ->call('save')
             ->assertHasFormErrors(['fields.kilometraza']);
 
@@ -167,6 +168,13 @@ class ListingAdminTest extends TestCase
         $log = AuditLog::where('action', 'listing.update')->first();
         $this->assertSame('Golf 4 1.9 TDI', $log->changes['title'][1]);
         $this->assertSame(['kilometraza' => '180000'], $log->changes['fields'][1]);
+
+        // Staff may save an old listing without a field the category now requires.
+        Livewire::test(EditListing::class, ['record' => $listing->getRouteKey()])
+            ->fillForm(['title' => 'Golf 4', 'price' => 2500, 'currency' => 'EUR', 'contact_phone' => '065 123 4567', 'fields' => ['kilometraza' => '']])
+            ->call('save')
+            ->assertHasNoFormErrors();
+        $this->assertFalse(DB::table('listing_field_values')->where('listing_id', $listing->id)->exists());
     }
 
     public function test_filters_tabs_and_public_link(): void

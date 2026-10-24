@@ -70,7 +70,8 @@ class EditListing extends EditRecord
         $categoryId = (int) ($data['category_id'] ?? $record->category_id);
 
         try {
-            $values = app(ListingFields::class)->validate($categoryId, $fieldsInput);
+            // Staff may save an old listing that lacks a field the category now asks for.
+            $values = app(ListingFields::class)->validate($categoryId, $fieldsInput, requireAll: false);
         } catch (ValidationException $e) {
             throw ValidationException::withMessages(collect($e->errors())->mapWithKeys(fn ($m, $k) => ['data.'.$k => $m])->all());
         }

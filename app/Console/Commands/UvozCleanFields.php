@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Repairs field data of an import made before empty numbers were skipped: WordPress kept every
  * empty number field as 0, so listings showed "Sobe 0" and categories got fields of other categories.
+ * Run katalog:uredi afterwards: it sets the fields of every category again.
  */
 class UvozCleanFields extends Command
 {

@@ -6,6 +6,7 @@
 @endpush
 @push('scripts')
 <script src="{{ asset_v('js/posting.js') }}" defer></script>
+<script src="{{ asset_v('js/fields.js') }}" defer></script>
 @endpush
 
 @section('content')

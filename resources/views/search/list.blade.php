@@ -11,6 +11,7 @@
 @endpush
 @push('scripts')
 	<script src="{{ asset_v('js/search.js') }}" defer></script>
+	<script src="{{ asset_v('js/fields.js') }}" defer></script>
 @endpush
 
 @php
@@ -109,7 +110,7 @@
 					@endif
 
 					@foreach ($fieldFilters as $field)
-						@include('search.partials.field', ['field' => $field])
+						@include('search.partials.field', ['field' => $field, 'allFields' => $fieldFilters])
 					@endforeach
 
 					<fieldset class="sr-group">

@@ -181,10 +181,20 @@ class ListingResource extends Resource
             $name = 'fields.'.$field->key;
             $label = $field->label.($field->unit ? ' ('.$field->unit.')' : '');
             $options = collect((array) $field->options)->mapWithKeys(fn ($o) => [(string) ($o['value'] ?? '') => (string) ($o['label'] ?? $o['value'] ?? '')])->all();
-            $required = (bool) ($field->required ?? false);
+            $required = false; // staff may leave fields empty (old imported listings), see EditListing
+
+            if ($field->type === FieldType::Select && $field->depends_on) {
+                // Model depends on make: only the chosen make's models.
+                $byParent = collect((array) $field->options)->groupBy(fn ($o) => (string) ($o['parent'] ?? ''))
+                    ->map(fn ($group) => $group->mapWithKeys(fn ($o) => [(string) $o['value'] => (string) $o['label']])->all())->all();
+
+                return Select::make($name)->label($label)->searchable()->required($required)
+                    ->options(fn (Get $get) => $byParent[(string) $get('fields.'.$field->depends_on)] ?? [])
+                    ->disabled(fn (Get $get) => blank($get('fields.'.$field->depends_on)));
+            }
 
             return match ($field->type) {
-                FieldType::Select => Select::make($name)->label($label)->options($options)->required($required),
+                FieldType::Select => Select::make($name)->label($label)->options($options)->searchable(count($options) > 15)->required($required)->live(),
                 FieldType::Multiselect => CheckboxList::make($name)->label($label)->options($options)->columns(2)->required($required),
                 FieldType::Checkbox => Checkbox::make($name)->label($label),
                 FieldType::Number => TextInput::make($name)->label($label)->numeric()->minValue(0)->required($required),

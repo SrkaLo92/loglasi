@@ -103,6 +103,9 @@ return [
         'loglasi_preuzimanje' => ['key' => 'preuzimanje', 'label' => 'Preuzimanje', 'type' => 'multiselect', 'filter' => 'multi', 'options' => ['Lično preuzimanje', 'Dostava']],
     ],
 
+    // After the import, make fields and category fields KP-like (katalog:uredi, database/seeders/data/catalog).
+    'catalog_definition' => (bool) env('UVOZ_CATALOG_DEFINITION', true),
+
     // Paths from the live sitemap that no longer exist (deleted while cleaning the copy): 410 after import.
     'gone_file' => env('UVOZ_GONE_FILE', database_path('seeders/data/gone-urls.txt')),
 

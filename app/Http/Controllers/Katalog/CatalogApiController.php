@@ -33,7 +33,7 @@ class CatalogApiController extends Controller
         return ApiResponse::json($request, $locations, ApiResponse::CACHE_CATALOG);
     }
 
-    /** Polja i filteri za kategoriju: ?category=ID ili /categories/{id}/fields. */
+    /** Polja i filteri za kategoriju: ?category=ID ili /categories/{id}/fields (roditelj: polja potkategorija za filtere). */
     public function fields(Request $request, ListingFields $fields, ?string $id = null): Response|JsonResponse
     {
         $param = $id === null ? 'category' : 'id';
@@ -51,7 +51,8 @@ class CatalogApiController extends Controller
             throw ApiError::notFound('Kategorija ne postoji.');
         }
 
-        $out = $this->catalog->fieldsFor($category)->map(fn ($field) => $fields->toApi($field))->values();
+        // A last-level category gives its form fields; a parent gives what its list can be filtered by.
+        $out = $this->catalog->filterFieldsFor($category)->map(fn ($field) => $fields->toApi($field))->values();
 
         return ApiResponse::json($request, $out, ApiResponse::CACHE_CATALOG);
     }

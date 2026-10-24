@@ -43,13 +43,13 @@ class ListingFields
      *
      * @return array<string, list<mixed>>
      */
-    public function rules(Category|int $category, string $prefix = 'fields'): array
+    public function rules(Category|int $category, string $prefix = 'fields', bool $requireAll = true): array
     {
         $rules = [$prefix => ['nullable', 'array']];
 
         foreach ($this->catalog->fieldsFor($category) as $field) {
             $name = $prefix.'.'.$field->key;
-            $presence = $field->required ? 'required' : 'nullable';
+            $presence = $field->required && $requireAll ? 'required' : 'nullable';
             $values = $this->optionValues($field);
 
             $rules[$name] = match ($field->type) {
@@ -57,7 +57,7 @@ class ListingFields
                 FieldType::Number => [$presence, 'numeric', 'min:0', 'max:'.self::NUMBER_MAX],
                 FieldType::Year => [$presence, 'integer', 'min:'.self::YEAR_MIN, 'max:'.((int) date('Y') + 1)],
                 FieldType::Select => [$presence, 'string', Rule::in($values)],
-                FieldType::Multiselect => [$presence, 'array', ...($field->required ? ['min:1'] : []), 'max:'.max(1, count($values))],
+                FieldType::Multiselect => [$presence, 'array', ...($field->required && $requireAll ? ['min:1'] : []), 'max:'.max(1, count($values))],
                 FieldType::Checkbox => [$presence, 'boolean'],
             };
 
@@ -114,21 +114,110 @@ class ListingFields
     /**
      * Proverava ulaz (samo deo sa poljima, npr. $request->input('fields', [])) i vraća
      * očišćene vrednosti [ključ => vrednost] spremne za save(). Nepoznati ključevi se odbacuju.
+     * $requireAll = false (admin): obavezna polja mogu ostati prazna, npr. kod starog oglasa iz uvoza.
      *
      * @param  array<string, mixed>  $input
      * @return array<string, string|list<string>|bool>
      *
      * @throws ValidationException greške su pod ključem "{$prefix}.{ključ}"
      */
-    public function validate(Category|int $category, array $input, string $prefix = 'fields'): array
+    public function validate(Category|int $category, array $input, string $prefix = 'fields', bool $requireAll = true): array
     {
-        $validated = Validator::make(
+        $input = $this->prepareNumbers($category, $input);
+
+        $validator = Validator::make(
             [$prefix => $input],
-            $this->rules($category, $prefix),
+            $this->rules($category, $prefix, $requireAll),
             $this->messages($category, $prefix),
-        )->validate();
+        );
+        // Make and model errors come together, with the other field errors.
+        $validator->after(function ($validator) use ($category, $prefix) {
+            $values = $this->normalize($category, (array) ($validator->getData()[$prefix] ?? []));
+            foreach ($this->dependencyErrors($category, $values, $prefix) as $key => $message) {
+                if (! $validator->errors()->has($key)) {
+                    $validator->errors()->add($key, $message);
+                }
+            }
+        });
+        $validated = $validator->validate();
 
         return $this->normalize($category, (array) ($validated[$prefix] ?? []));
+    }
+
+    /**
+     * Brojevi kako ih ljudi kucaju: "180.000", "180 000 km", "1,6" postaju 180000 i 1.6.
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    private function prepareNumbers(Category|int $category, array $input): array
+    {
+        foreach ($this->catalog->fieldsFor($category) as $field) {
+            if (! in_array($field->type, [FieldType::Number, FieldType::Year], true) || ! is_string($input[$field->key] ?? null)) {
+                continue;
+            }
+            $input[$field->key] = self::typedNumber($input[$field->key], $field->unit, $field->type === FieldType::Year);
+        }
+
+        return $input;
+    }
+
+    /** "180.000", "180 000 km", "1,6", "2014." => "180000", "180000", "1.6", "2014"; anything else unchanged. */
+    public static function typedNumber(string $raw, ?string $unit = null, bool $year = false): string
+    {
+        $value = preg_replace('/[\s\x{00A0}]+/u', '', $raw);
+        if ($unit) {
+            $value = preg_replace('/'.preg_quote(preg_replace('/\s+/u', '', $unit), '/').'$/iu', '', $value);
+        }
+        if ($year) {
+            $value = rtrim($value, '.');
+        }
+
+        return match (true) {
+            (bool) preg_match('/^\d{1,3}(\.\d{3})+$/', $value) => str_replace('.', '', $value),
+            (bool) preg_match('/^\d{1,3}(\.\d{3})*,\d+$/', $value) => str_replace(['.', ','], ['', '.'], $value),
+            (bool) preg_match('/^\d+,\d+$/', $value) => str_replace(',', '.', $value),
+            default => $value,
+        };
+    }
+
+    /**
+     * A dependent field (model) needs its parent (make) and must be one of the parent's options.
+     *
+     * @param  array<string, string|list<string>|bool>  $values
+     * @return array<string, string> error per input key
+     */
+    public function dependencyErrors(Category|int $category, array $values, string $prefix = 'fields'): array
+    {
+        $fields = $this->catalog->fieldsFor($category)->keyBy('key');
+        $errors = [];
+
+        foreach ($fields as $field) {
+            if ($field->depends_on === null || $field->depends_on === '' || ! isset($values[$field->key])) {
+                continue;
+            }
+            $parent = $fields->get($field->depends_on);
+            if ($parent === null) {
+                continue;
+            }
+
+            $parentValues = (array) ($values[$parent->key] ?? []);
+            if ($parentValues === []) {
+                $errors[$prefix.'.'.$field->key] = 'Prvo izaberite polje „'.$parent->label.'”.';
+
+                continue;
+            }
+
+            $allowed = $this->optionValues($field, $parentValues);
+            foreach ((array) $values[$field->key] as $value) {
+                if (! in_array((string) $value, $allowed, true)) {
+                    $errors[$prefix.'.'.$field->key] = 'Izabrana vrednost za „'.$field->label.'” ne pripada izabranoj vrednosti polja „'.$parent->label.'”.';
+                    break;
+                }
+            }
+        }
+
+        return $errors;
     }
 
     /**
@@ -244,7 +333,16 @@ class ListingFields
             FieldType::Text => implode(', ', $raw),
         };
 
-        return $field->unit ? $text.' '.$field->unit : $text;
+        if (! $field->unit) {
+            return $text;
+        }
+
+        // Snaga: "85 kW (116 KS)", kao na polovniautomobili.
+        if ($field->type === FieldType::Number && $field->unit === 'kW' && count($raw) === 1 && is_numeric($raw[0])) {
+            return $text.' kW ('.number_format((float) $raw[0] * 1.35962, 0, ',', '.').' KS)';
+        }
+
+        return $text.' '.$field->unit;
     }
 
     /** Vrednost jednog polja na oglasu (prva), npr. value('stanje', $oglas) === 'novo'. */
@@ -277,13 +375,15 @@ class ListingFields
      * Polja koja se koriste u pretrazi (filter različit od none), sa imenima parametara.
      * `filter` je u obliku iz ugovora: exact | multi | range.
      *
-     * @return list<array{key: string, label: string, type: string, filter: string, unit: ?string, options: list<array{value: string, label: string}>, params: list<string>}>
+     * Polja potkategorija su uključena (Catalog::filterFieldsFor), pa i „Automobili” filtrira po marki.
+     *
+     * @return list<array{key: string, label: string, type: string, filter: string, unit: ?string, depends_on: ?string, options: list<array{value: string, label: string, parent?: string}>, params: list<string>}>
      */
     public function filters(Category|int $category): array
     {
         $out = [];
 
-        foreach ($this->catalog->fieldsFor($category) as $field) {
+        foreach ($this->catalog->filterFieldsFor($category) as $field) {
             if ($field->filter === FieldFilter::None) {
                 continue;
             }
@@ -294,6 +394,7 @@ class ListingFields
                 'type' => $field->type->value,
                 'filter' => self::apiFilter($field->filter),
                 'unit' => $field->unit,
+                'depends_on' => $this->dependsOn($field),
                 'options' => $this->options($field),
                 'params' => $field->filter === FieldFilter::Range
                     ? [$field->key.'_od', $field->key.'_do']
@@ -322,7 +423,7 @@ class ListingFields
             $fail('Filteri polja se šalju kao f[ključ]=vrednost.');
         }
 
-        $fields = $category === null ? collect() : $this->catalog->fieldsFor($category)->keyBy('key');
+        $fields = $category === null ? collect() : $this->catalog->filterFieldsFor($category)->keyBy('key');
         $out = [];
 
         foreach ($input as $param => $raw) {
@@ -346,6 +447,7 @@ class ListingFields
             $out[$key] ??= ['values' => [], 'min' => null, 'max' => null];
 
             if ($field->filter === FieldFilter::Range) {
+                $raw = self::typedNumber($raw, $field->unit, $field->type === FieldType::Year);
                 if ($bound === null || ! is_numeric($raw)) {
                     $fail('Za „'.$field->label.'” se šalju brojevi kao _od i _do.');
                 }
@@ -423,7 +525,8 @@ class ListingFields
     // ---------------------------------------------------------------- API oblik
 
     /**
-     * Field iz ugovora: key, label, type, required, unit, options, filter.
+     * Field iz ugovora: key, label, type, required, unit, depends_on, options, filter.
+     * Zavisno polje (model) ima depends_on = ključ roditelja (marka), a svaka opcija `parent`.
      *
      * @return array<string, mixed>
      */
@@ -435,9 +538,15 @@ class ListingFields
             'type' => $field->type->value,
             'required' => (bool) $field->required,
             'unit' => $field->unit !== null && $field->unit !== '' ? $field->unit : null,
+            'depends_on' => $this->dependsOn($field),
             'options' => $this->options($field),
             'filter' => self::apiFilter($field->filter),
         ];
+    }
+
+    public function dependsOn(Field $field): ?string
+    {
+        return $field->depends_on !== null && $field->depends_on !== '' ? (string) $field->depends_on : null;
     }
 
     /** U ugovoru se jedan izbor zove "exact". */
@@ -448,23 +557,43 @@ class ListingFields
 
     // ---------------------------------------------------------------- pomoćno
 
-    /** @return list<array{value: string, label: string}> */
-    private function options(Field $field): array
+    /**
+     * Opcije izbora; kod zavisnog polja svaka ima i `parent` (vrednost opcije roditelja).
+     *
+     * @return list<array{value: string, label: string, parent?: string}>
+     */
+    public function options(Field $field): array
     {
+        $dependent = $this->dependsOn($field) !== null;
         $out = [];
         foreach ((array) $field->options as $option) {
             if (is_array($option) && isset($option['value'], $option['label'])) {
-                $out[] = ['value' => (string) $option['value'], 'label' => (string) $option['label']];
+                $item = ['value' => (string) $option['value'], 'label' => (string) $option['label']];
+                if ($dependent) {
+                    $item['parent'] = (string) ($option['parent'] ?? '');
+                }
+                $out[] = $item;
             }
         }
 
         return $out;
     }
 
-    /** @return list<string> */
-    private function optionValues(Field $field): array
+    /**
+     * Vrednosti opcija; sa $parents samo opcije tih roditelja.
+     *
+     * @param  list<string>|null  $parents
+     * @return list<string>
+     */
+    private function optionValues(Field $field, ?array $parents = null): array
     {
-        return array_column($this->options($field), 'value');
+        $options = $this->options($field);
+        if ($parents !== null) {
+            $parents = array_map('strval', $parents);
+            $options = array_filter($options, fn ($o) => in_array($o['parent'] ?? '', $parents, true));
+        }
+
+        return array_values(array_column($options, 'value'));
     }
 
     /** @return array<string, string> */

@@ -46,7 +46,7 @@ class FieldsApiTest extends TestCase
 
         $this->assertSame(['stanje', 'moguca_zamena', 'marka', 'kilometraza', 'godiste'], array_column($response->json(), 'key'));
         $response->assertJsonPath('0', [
-            'key' => 'stanje', 'label' => 'Stanje', 'type' => 'select', 'required' => false, 'unit' => null,
+            'key' => 'stanje', 'label' => 'Stanje', 'type' => 'select', 'required' => false, 'unit' => null, 'depends_on' => null,
             'options' => [['value' => 'novo', 'label' => 'Novo'], ['value' => 'polovno', 'label' => 'Polovno']],
             'filter' => 'multi',
         ]);
@@ -60,12 +60,13 @@ class FieldsApiTest extends TestCase
         $this->assertStringContainsString('max-age=300', $response->headers->get('Cache-Control'));
     }
 
-    public function test_parent_gets_only_its_own_fields(): void
+    public function test_parent_gets_its_fields_then_the_subcategory_fields_for_filters(): void
     {
-        $this->getJson('/api/v1/fields?category='.$this->vozila->id)
-            ->assertOk()
-            ->assertJsonCount(2)
-            ->assertJsonPath('1.required', false);
+        $response = $this->getJson('/api/v1/fields?category='.$this->vozila->id)->assertOk();
+
+        // Own fields first, then what the subcategories add, all optional (a parent is only filtered, never posted to).
+        $this->assertSame(['stanje', 'moguca_zamena', 'marka', 'kilometraza', 'godiste'], array_column($response->json(), 'key'));
+        $this->assertSame([false, false, false, false, false], array_column($response->json(), 'required'));
     }
 
     public function test_rest_style_route_returns_same_body(): void

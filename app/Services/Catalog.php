@@ -61,6 +61,9 @@ class Catalog
     /** @var array<int, Collection<int, Field>> */
     private array $fieldsFor = [];
 
+    /** @var array<int, Collection<int, Field>> */
+    private array $filterFieldsFor = [];
+
     // ---------------------------------------------------------------- kategorije
 
     /**
@@ -317,6 +320,51 @@ class Catalog
         return $this->fieldsFor[$id] = collect(array_column($list, 4))->values();
     }
 
+    /**
+     * Fields a list of this category can be filtered by: its own (and inherited) fields, then the
+     * fields of its subcategories, the ones most subcategories share first. On "Automobili" that is
+     * make, model, year... of the body types, although "Automobili" itself has no fields.
+     * Every field is optional here (`required` false).
+     *
+     * @return Collection<int, Field>
+     */
+    public function filterFieldsFor(Category|int $category): Collection
+    {
+        $id = $category instanceof Category ? $category->id : $category;
+        if (isset($this->filterFieldsFor[$id])) {
+            return $this->filterFieldsFor[$id];
+        }
+
+        $own = $this->fieldsFor($id);
+        $picked = $own->keyBy('id')->all();
+        $map = $this->childrenMap();
+
+        $shared = [];
+        foreach ($this->descendantIds($id, false) as $descendantId) {
+            if (isset($map[$descendantId]) || ! $this->category($descendantId)?->is_active) {
+                continue; // only active last-level categories hold listings
+            }
+            foreach ($this->fieldsFor($descendantId) as $field) {
+                if (! isset($picked[$field->id])) {
+                    $shared[$field->id] ??= [0, $field];
+                    $shared[$field->id][0]++;
+                }
+            }
+        }
+
+        $extra = array_values($shared);
+        usort($extra, fn ($a, $b) => [$b[0], (int) $a[1]->position, (int) $a[1]->sort, $a[1]->id] <=> [$a[0], (int) $b[1]->position, (int) $b[1]->sort, $b[1]->id]);
+
+        $list = $own->all();
+        foreach ($extra as [, $field]) {
+            $copy = clone $field;
+            $copy->setAttribute('required', false);
+            $list[] = $copy;
+        }
+
+        return $this->filterFieldsFor[$id] = collect($list)->values();
+    }
+
     public function field(string $key): ?Field
     {
         $this->loadStructure();
@@ -372,7 +420,7 @@ class Catalog
         Cache::forget(self::KEY_STRUCTURE);
         $this->categories = $this->fields = null;
         $this->pivot = $this->byParent = $this->bySlug = $this->childIds = null;
-        $this->fieldsFor = [];
+        $this->fieldsFor = $this->filterFieldsFor = [];
         $this->flushCounts();
     }
 

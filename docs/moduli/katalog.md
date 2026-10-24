@@ -24,7 +24,7 @@ Izmene u zajedničkim fajlovima: `bootstrap/app.php` (jedan red, `ApiResponse::r
 | --- | --- | --- |
 | `GET /categories` | stablo `Category[]`: `id, name, slug, icon, count, children`; samo aktivne kategorije (neaktivna sakriva i svoje potkategorije) | `public, max-age=300` + ETag |
 | `GET /locations` | `Location[]`: `id, name, slug`, po `sort` pa po nazivu | isto |
-| `GET /fields?category=ID` | `Field[]`: `key, label, type, required, unit, options, filter` | isto |
+| `GET /fields?category=ID` | `Field[]`: `key, label, type, required, unit, depends_on, options, filter`. Za kategoriju poslednjeg nivoa to su polja forme; za roditelja (npr. „Automobili”) polja potkategorija za filtere, sva neobavezna | isto |
 | `GET /categories/{id}/fields` | isto kao gore (REST oblik adrese) | isto |
 | `GET /prices` | `Price[]`: `product, label, amount` (RSD), samo aktivni proizvodi | isto |
 
@@ -180,6 +180,26 @@ $fields->apply($upit, $uslovi);  // jedan WHERE EXISTS po polju, koristi indekse
 ### API oblik polja
 
 `$fields->toApi($field)` vraća `Field` iz ugovora; `ListingFields::apiFilter(FieldFilter::Select)` vraća `exact`.
+
+### Zavisna polja (model zavisi od marke)
+
+- `depends_on` je ključ roditeljskog polja (`model_automobila` → `marka_automobila`), inače `null`.
+- Svaka opcija zavisnog polja ima `parent` = vrednost opcije roditelja: `{"value": "audi-a4", "label": "A4", "parent": "audi"}`. Opcije nezavisnih polja nemaju `parent`.
+- Forma: nuditi samo opcije čiji je `parent` izabrana vrednost roditelja; dok roditelj nije izabran, polje je zaključano („Prvo izaberite: marka”).
+- Upis: model bez marke daje „Prvo izaberite polje „Marka”.”, model druge marke „Izabrana vrednost za „Model” ne pripada izabranoj vrednosti polja „Marka”.” (API 422, ključ `fields.model_automobila`).
+- Pretraga: `f[model_automobila]` radi i bez marke; sajt bez izabrane marke prikazuje modele grupisane po marki.
+- Brojevi se primaju kako ih ljudi kucaju: „180.000”, „180 000 km”, „1,6”, „2014.” (i u filterima `_od`/`_do`). Snaga u kW se prikazuje i u KS: „103 kW (140 KS)”.
+
+## Definicija kataloga (`php artisan katalog:uredi`)
+
+`database/seeders/data/catalog/`: `fields.php` (polja, tipovi, opcije, preimenovanje starih vrednosti), `links.php` (koja polja traži koja kategorija, po slugu, i koja su obavezna), `cars.php` (82 marke i 1864 modela po uzoru na polovniautomobili; WordPress marke i modeli i njihovi stari slugovi). Komanda:
+
+- usklađuje polja (naziv, tip, filter, jedinica, `depends_on`, opcije, redosled) i veze kategorija–polje za sve kategorije (kategorija koju nijedno pravilo ne pominje nema polja);
+- prenosi sačuvane vrednosti na nove opcije (WordPress `a4` → `audi-a4`, Moguća zamena Da/Ne → checkbox), dopunjuje marku iz modela, briše vrednosti kojih nema u opcijama, brojeve „214.000” svodi na 214000, briše godine koje nisu godine;
+- skida naziv roditelja sa potkategorija („Automobili | Džip/SUV” → „Džip/SUV”);
+- prenosi i sačuvane pretrage (`f[model_automobila]`).
+
+`--dry-run` broji izmene bez upisa. Pokreće se sama na kraju `uvoz:wordpress` (isključuje se sa `UVOZ_CATALOG_DEFINITION=false`). Izmene ovih polja u adminu briše sledeće pokretanje; trajne izmene idu u fajlove. Admin za polje sa mnogo opcija (modeli) prikazuje tekst „vrednost | Naziv | roditelj”, red po opciji.
 
 ## Podaci za lokalni razvoj
 

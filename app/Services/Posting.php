@@ -299,8 +299,10 @@ class Posting
         }
         $field = $this->catalog->fieldsFor($listing->category_id)->first(fn ($f) => $f->key === 'stanje');
         $options = collect((array) $field?->options)->map(fn ($o) => is_array($o) ? (string) ($o['value'] ?? '') : (string) $o)->all();
-        if ($field !== null && in_array($condition, $options, true)) {
-            $fields['stanje'] = $condition;
+        // The field says "Korišćeno" where the app says "polovno".
+        $value = $condition === 'polovno' && ! in_array('polovno', $options, true) ? 'korisceno' : $condition;
+        if ($field !== null && in_array($value, $options, true)) {
+            $fields['stanje'] = $value;
         }
 
         return $fields;
