@@ -158,7 +158,7 @@ Pravila po tipu: tekst do 255 znakova; broj ≥ 0; godina ceo broj od 1900 do sl
 ```php
 $oglasi->load('fieldValues');                 // za listu, bez N+1
 $fields->values($oglas);  // [['key' => 'kilometraza', 'label' => 'Kilometraža', 'value' => '180000', 'display' => '180.000 km', 'type' => 'number', 'items' => []], ...]
-                          // 'items' ima nazive za više izbora (oprema: ['ABS', 'Klima']), da se prikažu kao oznake
+                          // 'items' ima nazive za više izbora (oprema: ['ABS', 'Klima']), da se prikažu kao oznake; API `GET /listings/{id}` vraća u `fields[]` i `type` i `items`
 $fields->value('stanje', $oglas);            // 'polovno'
 $fields->condition($oglas);                   // 'novo' | 'polovno' | null (polje `condition` iz ugovora)
 ```

@@ -69,6 +69,8 @@ class ListingFormatter
                 'label' => $f['label'],
                 'value' => (string) $f['value'],
                 'display' => (string) $f['display'],
+                'type' => (string) $f['type'],
+                'items' => array_values($f['items']),
             ], $fields->values($listing)),
             'condition' => $fields->condition($listing),
             'seller' => $listing->user ? static::seller($listing->user) : null,

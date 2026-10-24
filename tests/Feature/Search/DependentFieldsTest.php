@@ -150,6 +150,11 @@ class DependentFieldsTest extends SearchTestCase
         $this->followingRedirects()->get($listing->fresh()->url())->assertOk()
             ->assertSee('<h3 class="lgo-fields__sub">Oprema</h3>', false)
             ->assertSee('<li>Klima</li>', false);
+
+        // The app gets the same split.
+        $api = collect($this->getJson('/api/v1/listings/'.$listing->id)->assertOk()->json('fields'))->keyBy('key');
+        $this->assertSame(['type' => 'multiselect', 'items' => ['ABS', 'Klima']], ['type' => $api['oprema_test']['type'], 'items' => $api['oprema_test']['items']]);
+        $this->assertSame(['type' => 'year', 'items' => []], ['type' => $api['godina']['type'], 'items' => $api['godina']['items']]);
     }
 
     public function test_posting_form_offers_the_models_of_the_make(): void
