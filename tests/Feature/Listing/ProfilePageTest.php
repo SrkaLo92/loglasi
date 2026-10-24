@@ -42,9 +42,10 @@ class ProfilePageTest extends TestCase
             ->assertDontSee('noindex');
     }
 
-    public function test_firm_without_biznis_is_noindex(): void
+    public function test_empty_firm_profile_is_noindex(): void
     {
-        $user = $this->firm(['biznis_until' => null]);
+        // Indexed only with an active listing or a filled profile (SEO plan, section 5).
+        $user = $this->firm(['biznis_until' => null, 'description' => null, 'logo_path' => null]);
 
         $this->get('/korisnik/'.$user->slug.'/')->assertOk()->assertSee('noindex', false);
     }
