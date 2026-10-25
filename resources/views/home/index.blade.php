@@ -249,7 +249,7 @@
 			</div>
 			<div class="hm-faq__lista">
 				@foreach ($hmFaq as $item)
-					<details class="hm-faq__stavka">
+					<details class="hm-faq__stavka" name="hm-faq">
 						<summary class="hm-faq__pitanje"><span>{{ PageText::replace((string) $item['pitanje']) }}</span>{{ CategoryIcons::svg('chevron', 20, '2.5') }}</summary>
 						<p class="hm-faq__odgovor">{{ PageText::inline((string) $item['odgovor']) }}</p>
 					</details>

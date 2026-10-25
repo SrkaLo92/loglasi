@@ -1117,3 +1117,40 @@ a.sr-pages__step:hover {
 	color: var(--lg-muted);
 	font-size: 13px;
 }
+
+/* Category questions: the same look as the other questions (chevron, open one stands out). */
+.sr-faq__item summary {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	list-style: none;
+}
+
+.sr-faq__item summary::-webkit-details-marker {
+	display: none;
+}
+
+.sr-faq__item summary::after {
+	content: "";
+	flex: 0 0 10px;
+	width: 10px;
+	height: 10px;
+	margin-right: 4px;
+	border-right: 2.5px solid var(--lg-green);
+	border-bottom: 2.5px solid var(--lg-green);
+	transform: translateY(-3px) rotate(45deg);
+	transition: transform .2s ease;
+}
+
+.sr-faq__item[open] {
+	border-color: var(--lg-green);
+}
+
+.sr-faq__item[open] summary {
+	color: var(--lg-green);
+}
+
+.sr-faq__item[open] summary::after {
+	transform: translateY(2px) rotate(-135deg);
+}

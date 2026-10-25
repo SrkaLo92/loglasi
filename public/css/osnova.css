@@ -675,3 +675,19 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .lg-recent__row:hover, .lg-recent__row:focus-visible { background: var(--lg-bg); outline: none; }
 .lg-recent__x { flex: none; width: 44px; height: 44px; border: 0; background: none; color: var(--lg-muted); font-size: 22px; cursor: pointer; }
 .lg-recent__x:hover { color: var(--lg-text); }
+
+/* Questions (<details name>): one answer open at a time, the answer slides open where the browser can animate it. */
+details[name] {
+	interpolate-size: allow-keywords;
+}
+details[name]::details-content {
+	block-size: 0;
+	overflow: hidden;
+	transition: block-size .25s ease, content-visibility .25s allow-discrete;
+}
+details[name][open]::details-content {
+	block-size: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+	details[name]::details-content { transition: none; }
+}

@@ -228,7 +228,7 @@
 				<section class="sr-faq" aria-labelledby="sr-faq-title">
 					<h2 class="sr-faq__title" id="sr-faq-title">{{ Seo::text('category.faq_title', ['{kategorija}' => Seo::categoryName($category)]) }}</h2>
 					@foreach ($srFaq as $item)
-						<details class="sr-faq__item">
+						<details class="sr-faq__item" name="sr-faq">
 							<summary>{{ $item['q'] }}</summary>
 							<p>{{ $item['a'] }}</p>
 						</details>

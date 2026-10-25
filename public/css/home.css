@@ -895,3 +895,25 @@
 }
 
 
+
+/* The open question stands out; the whole row is the button. */
+.hm-faq__stavka {
+	transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.hm-faq__stavka:hover {
+	border-color: #c9d6cf;
+}
+
+.hm-faq__stavka[open] {
+	border-color: var(--lg-green);
+	box-shadow: 0 4px 16px rgba(16, 24, 20, .06);
+}
+
+.hm-faq__pitanje {
+	cursor: pointer;
+}
+
+.hm-faq__stavka[open] .hm-faq__pitanje {
+	color: var(--lg-green);
+}

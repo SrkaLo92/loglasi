@@ -1591,3 +1591,17 @@ main:focus { outline: none; }
 	.lgx-polje.lgx-obrazac__polje input[type="text"] { min-height: 0; padding: 4px 0 2px; border: 0; border-bottom: 1px solid #000; border-radius: 0; }
 	.lgx-obrazac__primalac dt, .lgx-obrazac__potpis p, .lgx-obrazac__uvod { color: #000; }
 }
+
+/* The open question stands out. */
+.lgx-faq__stavka {
+	transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.lgx-faq__stavka[open] {
+	border-color: var(--lgx-green);
+	box-shadow: 0 4px 16px rgba(16, 24, 20, .06);
+}
+
+.lgx-faq__stavka[open] .lgx-faq__pitanje {
+	color: var(--lgx-green);
+}
