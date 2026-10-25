@@ -4,6 +4,7 @@ use App\Exceptions\ApiExceptionRenderer;
 use App\Http\Api\ApiResponse;
 use App\Http\Middleware\Gone;
 use App\Http\Middleware\Redirects;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\TrailingSlash;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // SEO: pre rutiranja, da važi i za adrese koje više ne postoje.
         // Redosled: preusmerenja (jedan skok), pa 410, pa kosa crta na kraju.
         $middleware->append([
+            SecurityHeaders::class,
             Redirects::class,
             Gone::class,
             TrailingSlash::class,

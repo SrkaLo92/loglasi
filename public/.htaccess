@@ -21,6 +21,10 @@
     RewriteCond %{HTTP:X-Forwarded-Proto} !=https
     RewriteRule ^ https://loglasi.rs%{REQUEST_URI} [R=301,L,NE]
 
+    # Skriveni fajlovi (.env, .git) se nikad ne služe, osim .well-known; PHP u otpremljenim fajlovima se ne izvršava.
+    RewriteRule (^|/)\.(?!well-known/) - [F,L]
+    RewriteRule ^storage/.*\.(php[0-9]?|phtml|phar|pht)$ - [F,L,NC]
+
     # Kanonski URL-ovi sajta se završavaju kosom crtom (kao na WordPress-u);
     # preusmerenje radi App\Http\Middleware\TrailingSlash, ne .htaccess.
 
@@ -32,6 +36,10 @@
 
 # Static files: CSS/JS carry ?v=<mtime> (asset_v), listing images get a new name when replaced.
 <IfModule mod_headers.c>
+    # Statički fajlovi ne prolaze kroz Laravel, pa im zaglavlja dajemo ovde.
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header unset X-Powered-By
     <FilesMatch "\.(css|js|webp|jpe?g|png|gif|svg|ico|woff2?)$">
         Header set Cache-Control "public, max-age=2592000"
     </FilesMatch>

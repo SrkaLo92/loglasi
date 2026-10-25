@@ -50,14 +50,14 @@ class CenovnikTest extends TestCase
     {
         $this->get('/cenovnik/')->assertOk()
             ->assertSee('Za sada plaćaju firme i preduzetnici')
-            ->assertSee('Uskoro')
+            ->assertSee('Kupovina uskoro')
             ->assertDontSee('usluga=top_7', false)
             ->assertDontSee('usluga=plus_seller_30', false)
             ->assertSee('usluga=business_start_monthly', false); // firm packages are sold now
 
         Settings::set(PaymentMode::PRIVATE_PAYMENTS, true);
         $this->get('/cenovnik/')->assertSee('usluga=top_7', false)->assertSee('usluga=plus_seller_30', false)
-            ->assertDontSee('Za sada plaćaju firme i preduzetnici')
+            ->assertDontSee('Za sada plaćaju firme i preduzetnici')->assertDontSee('Kupovina uskoro')
             ->assertDontSee('usluga=bump&', false); // under the smallest order: only from packs and credits
     }
 
@@ -134,7 +134,7 @@ class CenovnikTest extends TestCase
 
         $this->get('/cenovnik/')
             ->assertSee('Prvih 30 firmi besplatno')
-            ->assertSee('Još 28 besplatnih mesta od 30')
+            ->assertSee('Slobodno još 28 od 30 besplatnih mesta')
             ->assertSee('Zauzeto je 2 od 30.')
             ->assertSee('aria-valuenow="7"', false);
     }

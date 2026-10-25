@@ -29,7 +29,7 @@ class ZaFirmeTest extends TestCase
 
         $this->get('/za-firme/')
             ->assertOk()
-            ->assertSee('Još 23 besplatna mesta od 30')
+            ->assertSee('Slobodno još 23 od 30 besplatnih mesta')
             ->assertSee('Zauzeto je 7 od 30.')
             ->assertSee("Prvih 30 firmi: 12 meseci besplatno. Posle toga paketi počinju od 490\u{00A0}RSD mesečno, bez automatske naplate.", false)
             ->assertSee('Za firme')
@@ -41,7 +41,7 @@ class ZaFirmeTest extends TestCase
     {
         $this->foundingFirms(29);
 
-        $this->get('/za-firme/')->assertSee('Još 1 besplatno mesto od 30');
+        $this->get('/za-firme/')->assertSee('Slobodno još 1 od 30 besplatnih mesta');
     }
 
     public function test_total_comes_from_settings(): void
@@ -49,7 +49,7 @@ class ZaFirmeTest extends TestCase
         Settings::set('founding_firms_total', 50);
         $this->foundingFirms(5);
 
-        $this->get('/za-firme/')->assertSee('Još 45 besplatnih mesta od 50');
+        $this->get('/za-firme/')->assertSee('Slobodno još 45 od 50 besplatnih mesta');
     }
 
     public function test_all_spots_taken_shows_only_price(): void

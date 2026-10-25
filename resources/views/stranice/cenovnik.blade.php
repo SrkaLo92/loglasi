@@ -49,13 +49,12 @@
 	$sellable = fn ($p) => $p && $p->is_active && ! $p->display_only && \App\Services\Payments\ProductCatalog::isSellable($p) && $p->price_rsd >= $minOrder;
 	$isPackage = fn ($p) => \App\Services\Payments\ProductCatalog::type($p) === \App\Services\Payments\ProductCatalog::FIRM_PACKAGE;
 	$orderUrl = fn ($p) => $sellable($p) && ($canOrder || $isPackage($p)) ? url_slash('moj-nalog/narudzbine/nova').'?usluga='.$p->code : null;
-	$soon = fn ($p) => $sellable($p) && ! $canOrder && ! $isPackage($p);
-	$orderCell = function ($p) use ($orderUrl, $soon, $minOrder) {
+	// One „Kupovina uskoro” per block instead of a pill on every row.
+	$soon = fn ($products) => collect($products)->contains(fn ($p) => $sellable($p) && ! $canOrder && ! $isPackage($p));
+	$soonNote = '<p class="lgc-uskoro-napomena">'.Ikonice::svg('clock', 16).' Kupovina uskoro</p>';
+	$orderCell = function ($p) use ($orderUrl, $minOrder) {
 		if ($url = $orderUrl($p)) {
 			return '<a class="lgc-naruci" href="'.e($url).'">Naruči<span class="lg-visually-hidden"> '.e($p->name).'</span></a>';
-		}
-		if ($soon($p)) {
-			return '<span class="lgc-uskoro">Uskoro</span>';
 		}
 		if ($p && $p->is_active && $p->price_rsd < $minOrder) {
 			return '<span class="lgc-uskoro lgc-uskoro--uz">uz paket</span>';
@@ -102,6 +101,7 @@
 			<div class="lgc-sub">
 				<h3 class="lgc-sub__naslov">{{ PageText::get('cenovnik.mesta.naslov') }}</h3>
 				<p class="lgc-sub__uvod">{{ PageText::get('cenovnik.mesta.uvod') }}</p>
+				@if ($soon($slots)) {!! $soonNote !!} @endif
 			</div>
 			<ul class="lgc-slots">
 				@foreach ($slots as $product)
@@ -130,16 +130,22 @@
 							@endforeach
 						</ul>
 					@endif
+					@if (($plusNote = PageText::get('cenovnik.plus.napomena')) !== '')
+						<p class="lgc-plus__napomena">{{ Ikonice::svg('info', 16) }} {{ $plusNote }}</p>
+					@endif
 				</div>
-				<ul class="lgc-plus__cene">
-					@foreach ($plus as $product)
-						<li class="lgc-plus__cena">
-							<span class="lgc-plus__period">{{ match (true) { $product->duration_days >= 365 => 'Godinu dana', default => $product->duration_days.' dana' } }}</span>
-							<span class="lgc-plus__iznos">{{ Cenovnik::price($product->price_rsd) }}</span>
-							{!! $orderCell($product) !!}
-						</li>
-					@endforeach
-				</ul>
+				<div class="lgc-plus__desno">
+					<ul class="lgc-plus__cene">
+						@foreach ($plus as $product)
+							<li class="lgc-plus__cena">
+								<span class="lgc-plus__period">{{ match (true) { $product->duration_days >= 365 => 'Godinu dana', default => $product->duration_days.' dana' } }}</span>
+								<span class="lgc-plus__iznos">{{ Cenovnik::price($product->price_rsd) }}</span>
+								{!! $orderCell($product) !!}
+							</li>
+						@endforeach
+					</ul>
+					@if ($soon($plus)) {!! $soonNote !!} @endif
+				</div>
 			</div>
 		@endif
 	</section>
@@ -151,6 +157,7 @@
 				<span class="lgc-sec__broj">{{ sprintf('%02d', ++$section) }}</span>
 				<h2 class="lgc-sec__naslov" id="lgc-promocije">{{ PageText::get('cenovnik.promocije.naslov') }}</h2>
 				<span class="lgc-sec__uvod">{{ PageText::get('cenovnik.promocije.uvod') }}</span>
+				@if ($soon($promotions)) {!! $soonNote !!} @endif
 			</div>
 			<div class="lgc-table">
 				<table>

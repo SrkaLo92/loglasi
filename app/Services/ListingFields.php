@@ -44,8 +44,8 @@ class ListingFields
      * and AutoScout24: the first four of these that the listing has, in this order.
      */
     public const HIGHLIGHTS = [
-        'godina', 'kilometraza', 'gorivo', 'snaga', 'menjac',
-        'velicina_nekretnine', 'sobe', 'sprat', 'godina_izgradnje', 'povrsina_placa',
+        'godina', 'godiste', 'kilometraza', 'gorivo', 'snaga', 'menjac',
+        'kvadratura', 'velicina_nekretnine', 'sobe', 'sprat', 'godina_izgradnje', 'povrsina_placa',
         'memorija', 'ram', 'nosivost', 'radni_sati', 'stanje',
     ];
 

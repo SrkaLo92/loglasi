@@ -55,15 +55,18 @@ class CategoryIcons
         'search' => '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',
         'shield' => '<path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z"/><path d="m9 12 2 2 4-4"/>',
         'support' => '<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="13" width="4" height="6" rx="1.5"/><rect x="17" y="13" width="4" height="6" rx="1.5"/><path d="M19 19c0 1.5-2 2.5-5 2.5"/>',
+        'flame' => '<path d="M12 3c.5 3 4.5 5 4.5 10a4.5 4.5 0 0 1-9 0c0-2.4 1.3-3.9 2.3-4.8.2 1.5.9 2.6 2 3.1-.3-3.3-.1-5.8.2-8.3z"/>',
+        'brick' => '<path d="M3 6h18v12H3zM3 10h18M3 14h18M9 6v4M15 6v4M6 10v4M12 10v4M18 10v4M9 14v4M15 14v4"/>',
+        'gear' => '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
         'click' => '<path d="M9 3v3M4.5 5l2 2M3 10h3"/><path d="m10 10 10 4-4 1.5L14.5 20z"/>',
     ];
 
-    /** Part of the slug => icon, first match wins. */
+    /** Part of the slug => icon, first match wins. Keys of up to 3 letters only match where a slug word starts ("tv" is not in "stvari"). */
     private const RULES = [
         'plovn' => 'boat', 'camac' => 'boat', 'ribolov' => 'fish', 'rasvet' => 'lamp', 'konzol' => 'gamepad', 'igric' => 'gamepad',
         'foto-aparat' => 'camera', 'kamere' => 'camera', 'nega-i-licna' => 'care', 'higijen' => 'care', 'elektro-i' => 'lamp',
         'kuca-i-basta' => 'garden', 'aparat' => 'washer', 'bela-tehn' => 'washer', 'ljubim' => 'paw', 'zivotinj' => 'paw', 'bicikl' => 'bike', 'motor' => 'moto', 'moto' => 'moto', 'skuter' => 'moto',
-        'kamion' => 'truck', 'kombi' => 'truck', 'teretn' => 'truck', 'auto' => 'car', 'vozil' => 'car',
+        'kamion' => 'truck', 'kombi' => 'truck', 'teretn' => 'truck', 'auto-delov' => 'gear', 'rezervni-delov' => 'gear', 'auto' => 'car', 'vozil' => 'car',
         'hecbek' => 'car', 'karavan' => 'car', 'limuzin' => 'car', 'dzip' => 'car',
         'stan' => 'building', 'plac' => 'land', 'zemlj' => 'land', 'parcel' => 'land', 'kuc' => 'house',
         'nekretn' => 'house', 'vikend' => 'house', 'lokal' => 'building', 'poslovni-prostor' => 'building',
@@ -72,10 +75,10 @@ class CategoryIcons
         'elektron' => 'tv', 'audio' => 'tv', 'tv' => 'tv', 'konzol' => 'tv', 'foto' => 'tv', 'namest' => 'sofa',
         'odec' => 'shirt', 'obuc' => 'shirt', 'moda' => 'shirt', 'garderob' => 'shirt', 'sat' => 'shirt',
         'poljopriv' => 'sprout', 'stoc' => 'sprout', 'stoka' => 'sprout', 'mehaniz' => 'sprout', 'voce' => 'sprout',
-        'ogrev' => 'sprout', 'posao' => 'job', 'poslov' => 'job', 'uslug' => 'wrench', 'majstor' => 'wrench',
+        'ogrev' => 'flame', 'drva' => 'flame', 'pelet' => 'flame', 'posao' => 'job', 'poslov' => 'job', 'uslug' => 'wrench', 'majstor' => 'wrench',
         'servis' => 'wrench', 'muzi' => 'music', 'instrument' => 'music',
         'dec' => 'kids', 'beb' => 'kids', 'igrack' => 'kids', 'sport' => 'sport', 'fitnes' => 'sport',
-        'knjig' => 'book', 'gradj' => 'build', 'alat' => 'build', 'materijal' => 'build', 'besplatn' => 'gift',
+        'knjig' => 'book', 'gradj' => 'brick', 'alat' => 'build', 'materijal' => 'build', 'besplatn' => 'gift',
     ];
 
     public static function nameFor(?Category $category): string
@@ -90,7 +93,7 @@ class CategoryIcons
         while ($category !== null && $guard++ < 10) {
             $slug = (string) $category->slug;
             foreach (self::RULES as $needle => $icon) {
-                if (str_contains($slug, $needle)) {
+                if (self::matches($slug, $needle)) {
                     return $icon;
                 }
             }
@@ -98,6 +101,15 @@ class CategoryIcons
         }
 
         return 'tag';
+    }
+
+    private static function matches(string $slug, string $needle): bool
+    {
+        if (strlen($needle) > 3) {
+            return str_contains($slug, $needle);
+        }
+
+        return str_starts_with($slug, $needle) || str_contains($slug, '-'.$needle);
     }
 
     /** Inline SVG, decorative (aria-hidden). Paths are constants, never user input. */

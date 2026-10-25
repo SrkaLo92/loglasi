@@ -305,9 +305,11 @@ class Cenovnik
         $taken = $total - $left;
 
         return [
-            'text' => $left === 0
-                ? 'Sva besplatna mesta su popunjena'
-                : sprintf('Još %d %s od %d', $left, self::plural($left, 'besplatno mesto', 'besplatna mesta', 'besplatnih mesta'), $total),
+            'text' => match (true) {
+                $left === 0 => 'Sva besplatna mesta su popunjena',
+                $left === $total => sprintf('Slobodno je svih %d besplatnih mesta', $total),
+                default => sprintf('Slobodno još %d od %d besplatnih mesta', $left, $total),
+            },
             'note' => sprintf('Zauzeto je %d od %d.', $taken, $total),
             'percent' => max(3, min(100, (int) round(100 * $taken / $total))),
         ];

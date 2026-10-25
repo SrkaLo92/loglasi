@@ -262,6 +262,7 @@ class MyListingsApiTest extends PostingTestCase
         $this->getJson('/api/v1/listings', ['X-Lg-Count' => '1'])->assertOk()
             ->assertExactJson(['count' => 1])
             ->assertHeader('Cache-Control', 'no-store, private');
-        $this->getJson('/api/v1/listings')->assertOk()->assertJsonPath('total', 1)->assertHeader('Vary', 'X-Lg-Count');
+        $vary = $this->getJson('/api/v1/listings')->assertOk()->assertJsonPath('total', 1)->headers->get('Vary');
+        $this->assertContains('X-Lg-Count', array_map('trim', explode(',', (string) $vary)));
     }
 }
