@@ -65,6 +65,7 @@ class OrderAdminTest extends PaymentsTestCase
 
     public function test_receipt_number_can_be_entered_later(): void
     {
+        config(['fiscal.invoice_auto_number' => false]);
         $order = $this->featuredOrder();
         app(OrderFulfillment::class)->markPaid($order, $this->admin());
         $this->assertNull($order->refresh()->receipt_number);

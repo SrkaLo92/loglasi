@@ -26,6 +26,7 @@ class OrdersApiTest extends PaymentsTestCase
             'listing_id' => $listing->id, 'user' => ['id' => $user->id, 'name' => $user->name],
             'payment_reference' => $pending->reference,
             'created_at' => $pending->created_at->utc()->format('Y-m-d\TH:i:s\Z'), 'paid_at' => null,
+            'receipt' => null,
         ], $byId[$pending->id]);
         $this->assertSame('paid', $byId[$paid->id]['status']);
         $this->assertSame('listing_slots_3', $byId[$paid->id]['product']);
@@ -57,7 +58,7 @@ class OrdersApiTest extends PaymentsTestCase
         // Contract keys (plus product_label) and types, newest first.
         $this->assertSame([$cancelled->id, $refunded->id, $xl->id, $bump->id], $items->keys()->all());
         foreach ($items as $item) {
-            $this->assertSame(['id', 'product', 'product_label', 'amount', 'status', 'listing_id', 'user', 'payment_reference', 'created_at', 'paid_at'], array_keys($item));
+            $this->assertSame(['id', 'product', 'product_label', 'amount', 'status', 'listing_id', 'user', 'payment_reference', 'created_at', 'paid_at', 'receipt'], array_keys($item));
             $this->assertIsString($item['product']);
             $this->assertIsInt($item['amount']);
             $this->assertContains($item['status'], ['awaiting_payment', 'paid', 'refunded', 'cancelled']);

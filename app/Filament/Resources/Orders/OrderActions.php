@@ -7,6 +7,7 @@ use App\Enums\OrderStatus;
 use App\Filament\Support\Notify;
 use App\Models\Order;
 use App\Services\Admin\OrderAdministration;
+use App\Services\Payments\FiscalDriver;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Textarea;
@@ -39,7 +40,11 @@ class OrderActions
                 DatePicker::make('paid_at')->label('Datum uplate')->required()->maxDate(now()),
                 TextInput::make('receipt_number')
                     ->label(fn (Order $record) => $record->buyer_type === BuyerType::Firm ? 'Broj fakture' : 'Broj fiskalnog računa')
-                    ->helperText('Može i kasnije, akcijom „Upiši broj računa”.')
+                    ->helperText(fn (Order $record) => match (true) {
+                        $record->buyer_type === BuyerType::Firm => 'Prazno = sledeći broj fakture (npr. 12/2026).',
+                        FiscalDriver::automatic() => 'Prazno = fiskalni račun se izdaje automatski preko V-PFR-a.',
+                        default => 'Može i kasnije, akcijom „Upiši broj računa”.',
+                    })
                     ->maxLength(64),
                 TextInput::make('advance_receipt_number')
                     ->label('Broj avansnog računa')
@@ -123,7 +128,9 @@ class OrderActions
                     ->minValue(0)
                     ->maxValue(fn (Order $record) => (int) $record->amount_rsd)
                     ->required(),
-                TextInput::make('refund_receipt_number')->label('Broj storno računa / knjižnog odobrenja')->maxLength(64),
+                TextInput::make('refund_receipt_number')->label('Broj storno računa / knjižnog odobrenja')
+                    ->helperText(fn (Order $record) => $record->buyer_type === BuyerType::Firm || FiscalDriver::automatic() ? 'Prazno = izdaje se automatski.' : null)
+                    ->maxLength(64),
                 Textarea::make('reason')->label('Razlog povraćaja')->required()->rows(2)->maxLength(1000),
             ])
             ->modalDescription(fn (Order $record) => 'Usluga se isključuje. Novac se vraća uplatom sa računa firme; ovde se samo evidentira. '

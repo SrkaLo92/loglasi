@@ -173,6 +173,7 @@ class FulfillmentTest extends PaymentsTestCase
     public function test_manual_receipts_outside_test_mode(): void
     {
         Settings::set('payments.test_mode', false);
+        config(['fiscal.invoice_auto_number' => false]);
         $user = $this->firmUser();
         $order = $this->order($user, 'business_start_monthly', null, $this->firmBuyer());
 
@@ -187,6 +188,24 @@ class FulfillmentTest extends PaymentsTestCase
         $this->assertNull($other->fresh()->receipt_number);
         $this->assertTrue($this->fulfillment()->recordReceipt($other, new PaymentConfirmation(receiptNumber: 'R-2026-16')));
         $this->assertSame('R-2026-16', $other->fresh()->receipt_number);
+    }
+
+    public function test_firm_invoices_are_numbered_per_year_outside_test_mode(): void
+    {
+        Settings::set('payments.test_mode', false);
+        $first = $this->order($this->firmUser(), 'business_start_monthly', null, $this->firmBuyer());
+        $second = $this->order($this->firmUser(), 'business_start_monthly', null, $this->firmBuyer());
+
+        $this->fulfillment()->markPaid($first);
+        $this->fulfillment()->markPaid($second);
+
+        $year = now()->format('Y');
+        $this->assertSame('1/'.$year, $first->fresh()->receipt_number);
+        $this->assertSame('2/'.$year, $second->fresh()->receipt_number);
+        $this->assertSame(ReceiptType::Invoice, $second->fresh()->receipt_type);
+
+        $this->fulfillment()->refund($first->fresh(), null, 'Test');
+        $this->assertSame('KO-1/'.$year, $first->fresh()->refund_receipt_number);
     }
 
     public function test_pro_rata_refund_of_a_promotion(): void

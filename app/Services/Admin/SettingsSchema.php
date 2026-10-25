@@ -5,6 +5,7 @@ namespace App\Services\Admin;
 use App\Models\AuditLog;
 use App\Models\Setting;
 use App\Services\ListingImages;
+use App\Services\Payments\FiscalDriver;
 use App\Services\Payments\PlusSeller;
 use App\Support\Home\HomeSettings;
 use App\Support\Payments\PaymentDetails;
@@ -108,6 +109,17 @@ class SettingsSchema
         ];
     }
 
+    /** Fiscal register: who issues receipts and the V-PFR address (keys and certificates stay in .env). */
+    public static function fiscal(): array
+    {
+        return [
+            'fiscal.driver' => ['label' => 'Izdavanje fiskalnih računa', 'type' => 'select', 'options' => FiscalDriver::OPTIONS, 'help' => 'Automatski tek kad su FISCAL_VPFR_* podaci upisani na serveru i `php artisan fiskal:provera` prođe.', 'default' => (string) config('fiscal.driver', FiscalDriver::MANUAL)],
+            'fiscal.vpfr_url' => ['label' => 'Adresa V-PFR-a', 'type' => 'text', 'help' => 'Bez /api/v3 na kraju. Prazno = FISCAL_VPFR_URL iz .env.', 'default' => ''],
+            'fiscal.tax_label' => ['label' => 'Poreska oznaka na računu', 'type' => 'text', 'help' => 'Oznaka za obveznika van sistema PDV-a; proveriti sa knjigovođom (podrazumevano „А”, ćirilica).', 'default' => (string) config('fiscal.vpfr.tax_label', 'А')],
+            'fiscal.cashier' => ['label' => 'Kasir na računu', 'type' => 'text', 'default' => (string) config('fiscal.vpfr.cashier', 'loglasi.rs')],
+        ];
+    }
+
     /** Bank transfer data (price list, order page, IPS QR code) and the legal pages linked from the order step. */
     public static function payment(): array
     {
@@ -190,7 +202,7 @@ class SettingsSchema
     /** @return array<string, array{label: string, type: string, default: mixed}> every field on the page */
     public static function all(): array
     {
-        $all = self::general() + self::contact() + self::google() + self::home() + self::payments() + self::payment();
+        $all = self::general() + self::contact() + self::google() + self::home() + self::payments() + self::fiscal() + self::payment();
         foreach (self::pageTexts() as $fields) {
             $all += $fields;
         }

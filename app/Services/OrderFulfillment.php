@@ -225,6 +225,7 @@ class OrderFulfillment
             if ($previous === OrderStatus::Activated) {
                 Effects::revert($locked, Product::query()->findOrFail($locked->product_id));
             }
+            $locked->refund_amount_rsd = $amount; // the refund receipt is for this amount
             $document = $this->receipts->issueRefund($locked, $refundReceiptNumber);
             $note = trim((string) $note);
 
@@ -235,6 +236,7 @@ class OrderFulfillment
                 'refunded_by' => $admin?->getKey(),
                 'refund_of_receipt' => $locked->receipt_number ?? $locked->advance_receipt_number,
                 'refund_receipt_number' => $document?->number,
+                'refund_receipt_url' => $document?->verificationUrl,
                 'note' => $note !== '' ? trim(($locked->note ? $locked->note."\n" : '').$note) : $locked->note,
             ])->save();
 
@@ -319,6 +321,7 @@ class OrderFulfillment
             'receipt_type' => $receipt->type,
             'receipt_number' => $receipt->number ?? $order->receipt_number,
             'receipt_issued_at' => $receipt->number !== null ? $receipt->issuedAt : $order->receipt_issued_at,
+            'receipt_url' => $receipt->number !== null ? $receipt->verificationUrl : $order->receipt_url,
             'advance_receipt_number' => $receipt->advanceNumber ?? $order->advance_receipt_number,
             'advance_receipt_issued_at' => $receipt->advanceIssuedAt ?? $order->advance_receipt_issued_at,
         ]);

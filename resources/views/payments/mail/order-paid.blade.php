@@ -18,6 +18,11 @@ Usluga traje do {!! $order->service_ends_at->format('j. n. Y. \u H:i') !!}.
 @if ($order->receipt_number)
 Broj računa: {!! $order->receipt_number !!}
 @endif
+@if ($order->buyer_type === \App\Enums\BuyerType::Firm && $order->receipt_type === \App\Enums\ReceiptType::Invoice && $order->receipt_number)
+Račun za preuzimanje: {!! url_slash('moj-nalog/narudzbine/'.$order->id.'/racun') !!}
+@elseif ($order->receipt_url)
+Provera fiskalnog računa: {!! $order->receipt_url !!}
+@endif
 
 Vaše porudžbine: {!! url_slash('moj-nalog/narudzbine') !!}
 

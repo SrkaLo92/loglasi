@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\Payments\FakeReceiptIssuer;
+use App\Services\Payments\FiscalDriver;
 use App\Services\Payments\FiscalReceiptIssuer;
 use App\Services\Payments\ManualReceiptIssuer;
 use App\Support\Payments\PaymentMode;
@@ -18,10 +19,10 @@ class PaymentsServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // Test mode always fakes receipts; otherwise the configured issuer (manual until Šljaker's API).
+        // Test mode always fakes receipts; otherwise the fiscal driver (config/fiscal.php, admin setting fiscal.driver).
         $this->app->bind(FiscalReceiptIssuer::class, fn ($app) => $app->make(PaymentMode::testMode()
             ? FakeReceiptIssuer::class
-            : config('payments.receipt_issuer', ManualReceiptIssuer::class)));
+            : (config('fiscal.drivers.'.FiscalDriver::current()) ?? ManualReceiptIssuer::class)));
     }
 
     public function boot(): void
@@ -33,6 +34,8 @@ class PaymentsServiceProvider extends ServiceProvider
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             InProcess::command($schedule, 'orders:cancel-stale')->dailyAt('03:15')->withoutOverlapping()->onOneServer();
+            // Receipts the V-PFR could not issue at payment time (does nothing with the manual driver).
+            InProcess::command($schedule, 'fiskal:izdaj')->everyFifteenMinutes()->withoutOverlapping()->onOneServer();
         });
     }
 }

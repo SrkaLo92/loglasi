@@ -50,7 +50,14 @@ Audit actions: `order.paid`, `order.activated`, `order.activation_failed`, `orde
 
 ## Receipts and refunds
 
-`FiscalReceiptIssuer` is bound in `PaymentsServiceProvider`: `FakeReceiptIssuer` in test mode (numbers `TEST-0001`, `TEST-A-…`, `TEST-R-…`), otherwise `config('payments.receipt_issuer')` (`ManualReceiptIssuer`: admin types the V-PFR number). A V-PFR integration is a new implementation of the same interface.
+`FiscalReceiptIssuer` is bound in `PaymentsServiceProvider`: `FakeReceiptIssuer` in test mode (numbers `TEST-0001`, `TEST-A-…`, `TEST-R-…`), otherwise the driver from `FiscalDriver::current()` (admin setting `fiscal.driver`, else `FISCAL_DRIVER`, default `manual`; map in `config/fiscal.php`).
+
+### Fiscal register (ready to connect)
+
+- `manual` (`ManualReceiptIssuer`): the admin issues the receipt in the fiscal app (Šljaker) and types the number in.
+- `vpfr` (`Vpfr\VpfrReceiptIssuer` + `Vpfr\VpfrClient`): private buyers get a fiscal receipt automatically through the V-PFR API (ESIR to PFR, `POST /api/v3/invoices`, `GET /api/v3/status`): `Normal` + `Sale`, payment `WireTransfer`, one item with the tax label (`fiscal.tax_label`, default Cyrillic `А`, to confirm with the accountant), header `RequestId` = `loglasi-{order}-sale|refund` so a retry never makes a second receipt. A refund is `Normal` + `Refund` with `referentDocumentNumber`/`referentDocumentDT` of the sale and the refunded amount. The response's `invoiceNumber`, `sdcDateTime` and `verificationUrl` are stored (`receipt_url`, `refund_receipt_url`). A number typed in by the admin wins (receipt issued by hand). When the V-PFR fails, the error is logged, the order stays paid without a receipt and `fiskal:izdaj` (every 15 min) retries.
+- Connecting: put `FISCAL_VPFR_URL`, `FISCAL_VPFR_PAC` and either `FISCAL_VPFR_CERT`/`FISCAL_VPFR_CERT_PASSWORD` or `FISCAL_VPFR_TOKEN` (fiscal services that put the V-PFR behind an API key) in `.env`, run `php artisan fiskal:provera`, then switch "Izdavanje fiskalnih računa" in admin settings to automatic. Secrets never go into admin settings. Open with the fiscal service: whether a refund needs the buyer id (`buyerId`), and the exact tax label.
+- Firms (any driver, `FirmInvoices`): invoice numbered `{n}/{year}` and credit note `KO-{n}/{year}` (`DocumentNumbers`, table `document_counters`, row locked) unless the admin types a number (`fiscal.invoice_auto_number`). Printable pages `/moj-nalog/narudzbine/{id}/racun/` and `/odobrenje/` (owner or staff; note "Obveznik nije u sistemu PDV-a" or the `payment_vat_note` setting). The order page and the "paid" mail link to the invoice or to the fiscal receipt check (suf.purs.gov.rs). API `/me/orders`: `receipt` = `{number, kind: fiscal_receipt|invoice, check_url, invoice_url}` or null.
 
 `refund()` takes back the unused part: whole unused days / days of the period (the current day counts as used); a bump pack refunds unused bumps; a single bump refunds nothing by default. The amount can be overridden by admin. It stores `refund_amount_rsd`, `refund_of_receipt` and the refund receipt.
 

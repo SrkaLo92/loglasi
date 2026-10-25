@@ -17,6 +17,9 @@ Route::middleware('auth')->controller(OrderController::class)->group(function ()
     });
 
     Route::get('/moj-nalog/narudzbine/{order}', 'show')->whereNumber('order')->name('payments.orders.show');
+    // Firm invoice and credit note, printable (save as PDF from the browser).
+    Route::get('/moj-nalog/narudzbine/{order}/racun', 'invoice')->whereNumber('order')->name('payments.orders.invoice');
+    Route::get('/moj-nalog/narudzbine/{order}/odobrenje', 'creditNote')->whereNumber('order')->name('payments.orders.credit');
     Route::post('/moj-nalog/narudzbine/{order}/otkazi', 'cancel')->whereNumber('order')
         ->middleware('throttle:payments-orders')->name('payments.orders.cancel');
 });

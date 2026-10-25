@@ -7,21 +7,25 @@ use App\Enums\ReceiptType;
 use App\Models\Order;
 use Illuminate\Support\Carbon;
 
-/** The admin issues receipts in the fiscal app and types the numbers in; this only records them. */
+/**
+ * The admin issues fiscal receipts in the fiscal app and types the numbers in; this only records them.
+ * Firm invoices are numbered automatically when no number is typed in (FirmInvoices).
+ */
 class ManualReceiptIssuer implements FiscalReceiptIssuer
 {
     public function issueSale(Order $order, PaymentConfirmation $confirmation): ?IssuedReceipt
     {
-        $number = self::clean($confirmation->receiptNumber);
-        $advance = self::clean($confirmation->advanceReceiptNumber);
+        if ($order->buyer_type === BuyerType::Firm) {
+            return FirmInvoices::sale($confirmation->receiptNumber);
+        }
+
+        $number = FirmInvoices::clean($confirmation->receiptNumber);
+        $advance = FirmInvoices::clean($confirmation->advanceReceiptNumber);
         if ($number === null && $advance === null) {
             return null;
         }
 
         $now = Carbon::now();
-        if ($order->buyer_type === BuyerType::Firm) {
-            return new IssuedReceipt(ReceiptType::Invoice, $number, $now);
-        }
 
         $paidAt = $confirmation->paidAt ?? $now;
 
@@ -36,22 +40,12 @@ class ManualReceiptIssuer implements FiscalReceiptIssuer
 
     public function issueRefund(Order $order, ?string $refundNumber): ?IssuedReceipt
     {
-        $number = self::clean($refundNumber);
-        if ($number === null) {
-            return null;
+        if ($order->buyer_type === BuyerType::Firm) {
+            return FirmInvoices::creditNote($refundNumber);
         }
 
-        return new IssuedReceipt(
-            $order->buyer_type === BuyerType::Firm ? ReceiptType::InvoiceCredit : ReceiptType::FiscalRefund,
-            $number,
-            Carbon::now(),
-        );
-    }
+        $number = FirmInvoices::clean($refundNumber);
 
-    private static function clean(?string $value): ?string
-    {
-        $value = trim((string) $value);
-
-        return $value === '' ? null : mb_substr($value, 0, 64);
+        return $number === null ? null : new IssuedReceipt(ReceiptType::FiscalRefund, $number, Carbon::now());
     }
 }

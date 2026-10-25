@@ -70,3 +70,6 @@
 	.lgpay-card { padding: 16px; }
 	.lgpay-summary > div, .lgpay-pay > div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
 }
+
+/* Order documents (invoice, fiscal receipt check) */
+.lgpay-docs { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; }

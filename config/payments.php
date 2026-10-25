@@ -1,7 +1,5 @@
 <?php
 
-use App\Services\Payments\ManualReceiptIssuer;
-
 // Paid features of the price list of 24 Oct 2026, paid by bank transfer (IPS QR). See docs/modules/payments.md.
 // Prices live in `products` (admin). Payee data and switches are admin settings (payment_*, payments.*), never code.
 
@@ -33,11 +31,6 @@ return [
     // NBS IPS QR: payment code (SF). 221 = trade in goods and services, final consumption.
     // Admin setting payment_code overrides it.
     'ips_payment_code' => '221',
-
-    // Who records receipts and invoices outside test mode (App\Services\Payments\FiscalReceiptIssuer).
-    // Manual: the admin issues them in the fiscal app (Šljaker, V-PFR) and types the number in.
-    // Test mode always uses FakeReceiptIssuer.
-    'receipt_issuer' => ManualReceiptIssuer::class,
 
     // Premium XL: at most one bigger card per this many listings in a list (price list: 1 per 8–12).
     'premium_xl_every' => 10,

@@ -91,6 +91,7 @@
 					<div><dt>Vraćen iznos</dt><dd>{{ number_format($order->refund_amount_rsd, 0, ',', '.') }}&nbsp;RSD</dd></div>
 				@endif
 			</dl>
+			@include('payments.partials.documents', ['order' => $order])
 			@if ($order->status === OrderStatus::Paid)
 				<p class="lgpay-help">Uplata je primljena, usluga se uključuje uskoro.</p>
 			@endif

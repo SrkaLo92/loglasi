@@ -74,6 +74,10 @@ class SiteSettings extends Page
                             ->schema([
                                 Section::make('Kontakt')->columns(2)->schema($this->fields(SettingsSchema::contact())),
                                 Section::make('Plaćanja')->columns(2)->schema($this->fields(SettingsSchema::payments())),
+                                Section::make('Fiskalna kasa')
+                                    ->description('PAC, sertifikat i ključ se upisuju samo u .env na serveru, nikad ovde.')
+                                    ->columns(2)
+                                    ->schema($this->fields(SettingsSchema::fiscal())),
                                 Section::make('Podaci za uplatu')
                                     ->description('Prikazuju se na Cenovniku. Ništa se ne izmišlja: prazno polje se ne prikazuje.')
                                     ->columns(2)

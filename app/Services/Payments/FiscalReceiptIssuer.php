@@ -11,9 +11,8 @@ use App\Models\Order;
  * "Obveznik nije u sistemu PDV-a" (no SEF). A refund document references the original receipt.
  *
  * Implementations: FakeReceiptIssuer (test mode, "TEST-0001"), ManualReceiptIssuer (the admin
- * issues the receipt in Šljaker and types the number in). A future SljakerReceiptIssuer would call
- * Šljaker's API (V-PFR; only in their "Agencija" plan) and return the numbers. Outside test mode
- * the implementation is config('payments.receipt_issuer').
+ * issues the receipt in Šljaker and types the number in) and Vpfr\VpfrReceiptIssuer (automatic,
+ * through the V-PFR API). Outside test mode the driver is FiscalDriver::current() (config/fiscal.php).
  */
 interface FiscalReceiptIssuer
 {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Payments\Api;
 
 use App\Enums\OrderStatus;
+use App\Enums\ReceiptType;
 use App\Http\Api\CatalogFormatter;
 use App\Models\Order;
 use DateTimeInterface;
@@ -55,6 +56,28 @@ class OrderPresenter
             'payment_reference' => (string) $order->reference,
             'created_at' => self::date($order->created_at),
             'paid_at' => self::date($order->paid_at),
+            'receipt' => self::receipt($order),
+        ];
+    }
+
+    /**
+     * The order's document, null until one is issued: number, kind (fiscal_receipt or invoice),
+     * check_url (Tax Administration page of a fiscal receipt) and invoice_url (printable firm invoice).
+     *
+     * @return array{number: string, kind: string, check_url: ?string, invoice_url: ?string}|null
+     */
+    private static function receipt(Order $order): ?array
+    {
+        if ($order->receipt_number === null || $order->receipt_type === null) {
+            return null;
+        }
+        $invoice = $order->receipt_type === ReceiptType::Invoice;
+
+        return [
+            'number' => (string) $order->receipt_number,
+            'kind' => $invoice ? 'invoice' : 'fiscal_receipt',
+            'check_url' => $invoice ? null : $order->receipt_url,
+            'invoice_url' => $invoice ? url_slash('moj-nalog/narudzbine/'.$order->id.'/racun') : null,
         ];
     }
 

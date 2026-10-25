@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Payments;
 
 use App\Enums\BuyerType;
 use App\Enums\OrderStatus;
+use App\Enums\ReceiptType;
 use App\Exceptions\OrderException;
 use App\Http\Controllers\Controller;
 use App\Models\Listing;
@@ -15,6 +16,7 @@ use App\Support\Payments\IpsQr;
 use App\Support\Payments\PaymentDetails;
 use App\Support\Payments\PaymentMode;
 use App\Support\Payments\TaxId;
+use App\Support\Stranice\Prodavac;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -169,6 +171,37 @@ class OrderController extends Controller
             'details' => $details,
             'qrSvg' => $payload !== null ? IpsQr::svg($payload) : null,
             'expiresAt' => OrderService::expiresAt($order),
+        ]);
+    }
+
+    /** Invoice for a firm buyer (no SEF; the seller is outside the VAT system). */
+    public function invoice(Order $order): View
+    {
+        return $this->document($order, false);
+    }
+
+    /** Credit note for a refunded firm order, referencing the invoice. */
+    public function creditNote(Order $order): View
+    {
+        return $this->document($order, true);
+    }
+
+    private function document(Order $order, bool $credit): View
+    {
+        Gate::authorize('view', $order);
+        $type = $credit ? ReceiptType::InvoiceCredit : ReceiptType::Invoice;
+        $number = $credit ? $order->refund_receipt_number : $order->receipt_number;
+        abort_unless($order->buyer_type === BuyerType::Firm && $number !== null
+            && ($credit ? $order->status === OrderStatus::Refunded : $order->receipt_type === ReceiptType::Invoice), 404);
+        $order->load(['product:id,code,name', 'listing:id,title,deleted_at']);
+
+        return view('payments.invoice', [
+            'order' => $order,
+            'type' => $type,
+            'number' => $number,
+            'amount' => $credit ? (int) $order->refund_amount_rsd : (int) $order->amount_rsd,
+            'issuedAt' => $credit ? ($order->refunded_at ?? now()) : ($order->receipt_issued_at ?? $order->paid_at ?? now()),
+            'seller' => Prodavac::rows(),
         ]);
     }
 
