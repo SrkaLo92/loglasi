@@ -45,6 +45,7 @@
 <script src="{{ asset_v('js/accordion.js') }}" defer></script>
 <script src="{{ asset_v('js/recent.js') }}" defer></script>
 <script src="{{ asset_v('js/fav.js') }}" defer></script>
+<script src="{{ asset_v('js/lozinka.js') }}" defer></script>
 @stack('scripts')
 </body>
 </html>

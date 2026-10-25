@@ -801,3 +801,26 @@ details[name][open]::details-content {
 @media (prefers-reduced-motion: reduce) {
 	details[name]::details-content { transition: none; }
 }
+
+/* Password field with a show/hide button (js/lozinka.js) */
+.lg-lozinka { position: relative; display: block; width: 100%; }
+.lg-lozinka > input { width: 100%; padding-right: 52px !important; }
+.lg-lozinka__oko {
+	position: absolute;
+	top: 50%;
+	right: 4px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border: 0;
+	border-radius: 8px;
+	background: transparent;
+	color: var(--lg-muted);
+	cursor: pointer;
+	transform: translateY(-50%);
+}
+.lg-lozinka__oko:hover { color: var(--lg-text); }
+.lg-lozinka__oko:focus-visible { outline: 2px solid var(--lg-green); outline-offset: -2px; }

@@ -137,7 +137,6 @@
 						<input id="nalog-nova2" type="password" name="password_confirmation" autocomplete="new-password" required>
 					</div>
 				</div>
-				<label class="lga-check"><input type="checkbox" data-show-passwords> Prikaži lozinke</label>
 				<div class="lga-form__end">
 					<button class="lga-btn" type="submit">Promeni lozinku</button>
 				</div>

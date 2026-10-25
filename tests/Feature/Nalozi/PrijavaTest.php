@@ -191,4 +191,10 @@ class PrijavaTest extends TestCase
 
         $this->assertGuest();
     }
+
+    public function test_password_fields_get_a_show_button(): void
+    {
+        $this->get('/login-registracija/')->assertOk()->assertSee('js/lozinka.js', false);
+        $this->assertStringContainsString('Prikaži lozinku', file_get_contents(public_path('js/lozinka.js')));
+    }
 }
