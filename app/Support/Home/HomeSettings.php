@@ -14,14 +14,10 @@ class HomeSettings
         // 1. Intro
         'home.h1' => 'Oglasi za Loznicu i okolinu',
         'home.intro_text' => 'Besplatno postavljanje oglasa. Kupujte i prodajte direktno, od ljudi iz svog kraja.',
-        'home.intro_label' => 'Često se traži:',
-        'home.intro_terms' => '',            // "bicikl, stan Loznica, Golf"; empty = the biggest categories
-        'home.intro_terms_count' => 5,
         // 2. Main categories (big tiles, the sixth is "Sve kategorije"), then the popular ones
         'home.main_categories' => 'automobili,nekretnine,besplatne-stvari,poslovi,usluge',
         'home.popular_categories' => 'mobilni-telefoni,stanovi-prodaja,stanovi-iznajmljivanje,namestaj,bela-tehnika-i-kucni-aparati,kompjuteri-laptop-i-tablet,tv-i-video,moda',
         'home.categories_title' => 'Popularno',
-        'home.categories_count' => 11,
         // 2b. Premium XL + početna (hidden when empty)
         'home.premium_title' => 'Premium oglasi',
         'home.premium_count' => 4,

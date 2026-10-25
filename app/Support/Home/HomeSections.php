@@ -4,7 +4,6 @@ namespace App\Support\Home;
 
 use App\Enums\AccountType;
 use App\Enums\UserStatus;
-use App\Models\Category;
 use App\Models\Firm;
 use App\Services\Catalog;
 use App\Services\ListingSearch;
@@ -66,8 +65,6 @@ class HomeSections
 
         return [
             'total' => $this->search->count([]),
-            'chips' => $this->chips($counts),
-            'categories' => $this->categories($counts),
             'categories_total' => count(array_filter($counts)),
             'premium' => $premium,
             'featured' => array_slice($featured, 0, $featuredCount),
@@ -88,8 +85,6 @@ class HomeSections
         $listings = $this->search->listings(array_values(array_unique($ids)))->keyBy('id');
         $pick = fn (array $ids) => (new Collection(array_map(fn (int $id) => $listings->get($id), $ids)))->filter()->values();
 
-        $data['categories'] = array_values(array_filter(array_map(fn (array $c) => ($category = $this->catalog->category($c['id']))
-            ? ['category' => $category, 'count' => $c['count']] : null, $data['categories'])));
         // Premium XL + početna ended within the cache minute: left out.
         $data['premium'] = $pick($data['premium'])->filter(fn ($l) => $l->isPremiumHome())->values();
         $data['featured'] = $pick($data['featured']);
@@ -102,61 +97,6 @@ class HomeSections
         }, $data['tabs'])));
 
         return $data;
-    }
-
-    /**
-     * „Često se traži”: terms from the settings (a term that is a category name or slug
-     * links to the category, others to the search), or the biggest categories without children.
-     *
-     * @return list<array{label: string, url: string}>
-     */
-    private function chips(array $counts): array
-    {
-        $terms = HomeSettings::list('home.intro_terms');
-
-        if ($terms !== []) {
-            $chips = [];
-            foreach (array_slice($terms, 0, 12) as $term) {
-                $slug = str($term)->slug()->value();
-                $category = $this->catalog->categories()->first(fn (Category $c) => $c->slug === $slug
-                    || mb_strtolower($c->name) === mb_strtolower($term));
-                $chips[] = [
-                    'label' => $term,
-                    'url' => $category && $this->catalog->isVisible($category)
-                        ? $category->url()
-                        : url_slash('/oglasi').'?'.http_build_query(['keyword' => $term]),
-                ];
-            }
-
-            return $chips;
-        }
-
-        $parents = $this->catalog->categories()->pluck('parent_id')->filter()->flip();
-
-        return $this->catalog->categories()
-            ->filter(fn (Category $c) => ($counts[$c->id] ?? 0) > 0 && $this->catalog->isVisible($c))
-            ->sortBy([
-                fn (Category $a, Category $b) => isset($parents[$a->id]) <=> isset($parents[$b->id]),
-                fn (Category $a, Category $b) => ($counts[$b->id] ?? 0) <=> ($counts[$a->id] ?? 0),
-                fn (Category $a, Category $b) => strcmp($a->name, $b->name),
-            ])
-            ->take(HomeSettings::int('home.intro_terms_count', 0, 12))
-            ->map(fn (Category $c) => ['label' => $c->name, 'url' => $c->url()])
-            ->values()->all();
-    }
-
-    /** @return list<array{id: int, count: int}> top categories with the most listings */
-    private function categories(array $counts): array
-    {
-        return $this->catalog->children(null)
-            ->filter(fn (Category $c) => ($counts[$c->id] ?? 0) > 0)
-            ->sortBy([
-                fn (Category $a, Category $b) => $counts[$b->id] <=> $counts[$a->id],
-                fn (Category $a, Category $b) => strcmp($a->name, $b->name),
-            ])
-            ->take(HomeSettings::int('home.categories_count', 1, 47))
-            ->map(fn (Category $c) => ['id' => $c->id, 'count' => $counts[$c->id]])
-            ->values()->all();
     }
 
     /**

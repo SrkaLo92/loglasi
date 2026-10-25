@@ -69,11 +69,10 @@ class SettingsSchema
     public static function home(): array
     {
         $labels = [
-            'home.h1' => 'Naslov (H1)', 'home.intro_text' => 'Uvodni tekst', 'home.intro_label' => 'Oznaka ispred čestih pretraga',
-            'home.intro_terms' => 'Česte pretrage (zarezom odvojene)', 'home.intro_terms_count' => 'Broj čestih pretraga',
+            'home.h1' => 'Naslov (H1)', 'home.intro_text' => 'Uvodni tekst',
             'home.main_categories' => 'Glavne kategorije (do 5 slugova, zarezom)',
             'home.popular_categories' => 'Popularno (slugovi kategorija ili grupa, zarezom, do 12)',
-            'home.categories_title' => 'Popularno: naslov', 'home.categories_count' => 'Kategorije: broj',
+            'home.categories_title' => 'Popularno: naslov',
             'home.featured_title' => 'Istaknuti: naslov', 'home.featured_count' => 'Istaknuti: broj',
             'home.featured_link_text' => 'Istaknuti: tekst linka', 'home.featured_link_url' => 'Istaknuti: adresa linka',
             'home.premium_title' => 'Premium: naslov', 'home.premium_count' => 'Premium: broj',
