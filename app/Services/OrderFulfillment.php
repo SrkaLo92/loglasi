@@ -207,11 +207,11 @@ class OrderFulfillment
      *
      * @throws OrderException when the order was never paid
      */
-    public function refund(Order $order, ?string $refundReceiptNumber = null, ?string $note = null, ?User $admin = null, ?int $amountRsd = null): bool
+    public function refund(Order $order, ?string $refundReceiptNumber = null, ?string $note = null, ?User $admin = null, ?int $amountRsd = null, ?string $buyerId = null): bool
     {
         $admin ??= self::currentAdmin();
 
-        $refunded = DB::transaction(function () use ($order, $refundReceiptNumber, $note, $admin, $amountRsd) {
+        $refunded = DB::transaction(function () use ($order, $refundReceiptNumber, $note, $admin, $amountRsd, $buyerId) {
             $locked = $this->lockOrder($order);
             if ($locked->status === OrderStatus::Refunded) {
                 return false;
@@ -226,7 +226,7 @@ class OrderFulfillment
                 Effects::revert($locked, Product::query()->findOrFail($locked->product_id));
             }
             $locked->refund_amount_rsd = $amount; // the refund receipt is for this amount
-            $document = $this->receipts->issueRefund($locked, $refundReceiptNumber);
+            $document = $this->receipts->issueRefund($locked, $refundReceiptNumber, $buyerId);
             $note = trim((string) $note);
 
             $locked->forceFill([

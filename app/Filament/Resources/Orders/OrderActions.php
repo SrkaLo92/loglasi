@@ -131,6 +131,12 @@ class OrderActions
                 TextInput::make('refund_receipt_number')->label('Broj storno računa / knjižnog odobrenja')
                     ->helperText(fn (Order $record) => $record->buyer_type === BuyerType::Firm || FiscalDriver::automatic() ? 'Prazno = izdaje se automatski.' : null)
                     ->maxLength(64),
+                TextInput::make('buyer_id')->label('ID kupca za fiskalni račun refundacije')
+                    ->helperText('Obavezno za refundaciju fiskalnog računa: 20:broj lične karte, 23:broj pasoša; za sopstvenu grešku bez vraćanja novca 10:PIB prodavca. Ne čuva se.')
+                    ->placeholder('20:123456789')
+                    ->regex('/^\d{2}:[0-9A-Za-z]{1,20}$/')
+                    ->visible(fn (Order $record) => $record->buyer_type !== BuyerType::Firm && FiscalDriver::automatic())
+                    ->maxLength(23),
                 Textarea::make('reason')->label('Razlog povraćaja')->required()->rows(2)->maxLength(1000),
             ])
             ->modalDescription(fn (Order $record) => 'Usluga se isključuje. Novac se vraća uplatom sa računa firme; ovde se samo evidentira. '
@@ -139,7 +145,7 @@ class OrderActions
                     : 'Nema saglasnosti potrošača za početak usluge (firma ili stara narudžbina).'))
             ->modalSubmitActionLabel('Evidentiraj povraćaj')
             ->action(fn (Order $record, array $data) => Notify::run(
-                fn () => self::service()->refund($record, auth()->user(), (string) $data['reason'], $data['refund_receipt_number'] ?? null, (int) $data['amount_rsd']),
+                fn () => self::service()->refund($record, auth()->user(), (string) $data['reason'], $data['refund_receipt_number'] ?? null, (int) $data['amount_rsd'], $data['buyer_id'] ?? null),
                 'Povraćaj je evidentiran.',
             ));
     }

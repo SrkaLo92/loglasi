@@ -19,6 +19,10 @@ interface FiscalReceiptIssuer
     /** Sale document for a payment that was just confirmed; null when nothing could be recorded yet. */
     public function issueSale(Order $order, PaymentConfirmation $confirmation): ?IssuedReceipt;
 
-    /** Refund document referencing $order->receipt_number; null when nothing could be recorded yet. */
-    public function issueRefund(Order $order, ?string $refundNumber): ?IssuedReceipt;
+    /**
+     * Refund document referencing $order->receipt_number; null when nothing could be recorded yet.
+     * $buyerId ("20:123456789" = ID card, "23:" passport, "10:" PIB) is required on a fiscal refund
+     * receipt; it is passed through and never stored.
+     */
+    public function issueRefund(Order $order, ?string $refundNumber, ?string $buyerId = null): ?IssuedReceipt;
 }

@@ -31,7 +31,7 @@ class FakeReceiptIssuer implements FiscalReceiptIssuer
         );
     }
 
-    public function issueRefund(Order $order, ?string $refundNumber): ?IssuedReceipt
+    public function issueRefund(Order $order, ?string $refundNumber, ?string $buyerId = null): ?IssuedReceipt
     {
         return new IssuedReceipt(
             $order->buyer_type === BuyerType::Firm ? ReceiptType::InvoiceCredit : ReceiptType::FiscalRefund,

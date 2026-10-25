@@ -49,6 +49,13 @@ class FiskalProvera extends Command
                 $this->line("{$label}: {$status[$key]}");
             }
         }
+        foreach ((array) ($status['currentTaxRates']['taxCategories'] ?? []) as $category) {
+            foreach ((array) ($category['taxRates'] ?? []) as $rate) {
+                if (isset($rate['label'])) {
+                    $this->line('Poreska oznaka '.$rate['label'].': '.($category['name'] ?? '').' '.($rate['rate'] ?? '').'%');
+                }
+            }
+        }
         if (isset($status['gsc']) && is_array($status['gsc']) && $status['gsc'] !== []) {
             $this->warn('Upozorenja: '.implode(', ', array_map('strval', $status['gsc'])));
         }

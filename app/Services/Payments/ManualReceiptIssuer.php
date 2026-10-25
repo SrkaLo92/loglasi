@@ -38,7 +38,7 @@ class ManualReceiptIssuer implements FiscalReceiptIssuer
         );
     }
 
-    public function issueRefund(Order $order, ?string $refundNumber): ?IssuedReceipt
+    public function issueRefund(Order $order, ?string $refundNumber, ?string $buyerId = null): ?IssuedReceipt
     {
         if ($order->buyer_type === BuyerType::Firm) {
             return FirmInvoices::creditNote($refundNumber);

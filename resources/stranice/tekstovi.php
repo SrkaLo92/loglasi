@@ -482,7 +482,7 @@ Sve cene su u dinarima (RSD). Iznos na predračunu je iznos koji plaćate; mi ne
 
 - Kao potrošač imate pravo da odustanete od ugovora u roku od 14 dana, uz izuzetak za uslugu koja je izvršena. Sve o tome, i obrazac, je na strani [Odustanak od ugovora](/odustanak-od-ugovora/).
 - Ako usluga nije pružena kako je opisano, podnesite reklamaciju. Kako i u kom roku odgovaramo piše na strani [Reklamacije i povraćaj novca](/reklamacije/).
-- Novac vraćamo uplatom na Vaš tekući račun, najkasnije u roku od 14 dana. Za povraćaj nam je potreban broj računa na koji vraćamo novac.
+- Novac vraćamo uplatom na Vaš tekući račun, najkasnije u roku od 14 dana. Za povraćaj nam je potreban broj računa na koji vraćamo novac, a fizičkom licu i broj lične karte ili pasoša, jer po propisima o fiskalizaciji mora da stoji na računu refundacije.
 
 ## 9. Kontakt
 
@@ -545,6 +545,7 @@ MD,
         'Adresa potrošača',
         'E-pošta ili telefon',
         'Broj tekućeg računa za povraćaj novca',
+        'Broj lične karte ili pasoša (obavezan na fiskalnom računu refundacije)',
     ],
     'odustanak.obrazac.potpis' => 'Potpis potrošača (samo ako se obrazac šalje na papiru)',
     'odustanak.obrazac.datum' => 'Datum',

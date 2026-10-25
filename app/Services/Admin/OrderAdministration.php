@@ -72,7 +72,7 @@ class OrderAdministration
     }
 
     /** Pro-rata by default; $amountRsd overrides it (capped at the paid amount by the payments module). */
-    public function refund(Order $order, User $by, string $reason, ?string $refundReceiptNumber = null, ?int $amountRsd = null): Order
+    public function refund(Order $order, User $by, string $reason, ?string $refundReceiptNumber = null, ?int $amountRsd = null, ?string $buyerId = null): Order
     {
         $reason = trim($reason);
         if ($reason === '') {
@@ -81,7 +81,7 @@ class OrderAdministration
         if ($amountRsd !== null && ($amountRsd < 0 || $amountRsd > (int) $order->amount_rsd)) {
             throw new DomainException('Iznos povraćaja mora biti između 0 i plaćenog iznosa.');
         }
-        if (! $this->fulfillment->refund($order, self::clean($refundReceiptNumber), 'Povraćaj: '.$reason, $by, $amountRsd)) {
+        if (! $this->fulfillment->refund($order, self::clean($refundReceiptNumber), 'Povraćaj: '.$reason, $by, $amountRsd, self::clean($buyerId))) {
             throw new DomainException('Narudžbina je već refundirana.');
         }
 

@@ -17,7 +17,8 @@ use Throwable;
 /**
  * Fiscal receipts issued automatically through the V-PFR. Private buyer: "Promet prodaja" with the
  * payment "prenos na račun" (WireTransfer) on the day the payment is confirmed; a refund is
- * "Promet refundacija" referencing the original receipt. Firm buyer: our own invoice (FirmInvoices),
+ * "Promet refundacija" referencing the original receipt and carrying the buyer id the admin enters
+ * (required by the Tax Administration; not stored). Firm buyer: our own invoice (FirmInvoices),
  * not a fiscal receipt.
  *
  * A number typed in by the admin is recorded as is (receipt issued by hand while the V-PFR was down).
@@ -40,7 +41,7 @@ class VpfrReceiptIssuer implements FiscalReceiptIssuer
         return $this->fiscalise($order, ReceiptType::FiscalSale, (int) $order->amount_rsd);
     }
 
-    public function issueRefund(Order $order, ?string $refundNumber): ?IssuedReceipt
+    public function issueRefund(Order $order, ?string $refundNumber, ?string $buyerId = null): ?IssuedReceipt
     {
         if ($order->buyer_type === BuyerType::Firm) {
             return FirmInvoices::creditNote($refundNumber);
@@ -51,12 +52,17 @@ class VpfrReceiptIssuer implements FiscalReceiptIssuer
         if ($order->receipt_number === null || $order->receipt_type !== ReceiptType::FiscalSale) {
             return null; // nothing to reference: the sale was never fiscalised
         }
+        if (! self::validBuyerId($buyerId)) {
+            Log::warning('Refundacija nije fiskalizovana: nedostaje ID kupca', ['order' => $order->getKey()]);
 
-        return $this->fiscalise($order, ReceiptType::FiscalRefund, (int) ($order->refund_amount_rsd ?? $order->amount_rsd));
+            return null; // the admin issues it by hand and types the number in
+        }
+
+        return $this->fiscalise($order, ReceiptType::FiscalRefund, (int) ($order->refund_amount_rsd ?? $order->amount_rsd), $buyerId);
     }
 
     /** The request body for one receipt (ESIR to PFR protocol, POST /api/v3/invoices). */
-    public static function payload(Order $order, ReceiptType $type, int $amount): array
+    public static function payload(Order $order, ReceiptType $type, int $amount, ?string $buyerId = null): array
     {
         $refund = $type === ReceiptType::FiscalRefund;
         $item = [
@@ -73,6 +79,7 @@ class VpfrReceiptIssuer implements FiscalReceiptIssuer
             'cashier' => (string) (Settings::get('fiscal.cashier') ?: config('fiscal.vpfr.cashier', 'loglasi.rs')),
             'payment' => [['amount' => $amount, 'paymentType' => 'WireTransfer']],
             'items' => [$item],
+            'buyerId' => $refund ? $buyerId : null,
             'referentDocumentNumber' => $refund ? $order->receipt_number : null,
             'referentDocumentDT' => $refund ? $order->receipt_issued_at?->toIso8601String() : null,
         ], fn ($value) => $value !== null);
@@ -89,10 +96,16 @@ class VpfrReceiptIssuer implements FiscalReceiptIssuer
         return (string) (Settings::get('fiscal.tax_label') ?: config('fiscal.vpfr.tax_label', 'А'));
     }
 
-    private function fiscalise(Order $order, ReceiptType $type, int $amount): ?IssuedReceipt
+    /** Buyer id on a fiscal receipt: two-digit type, colon, number (20:123456789, 23:..., 10:PIB). */
+    public static function validBuyerId(?string $buyerId): bool
+    {
+        return $buyerId !== null && preg_match('/^\d{2}:[0-9A-Za-z]{1,20}$/', $buyerId) === 1;
+    }
+
+    private function fiscalise(Order $order, ReceiptType $type, int $amount, ?string $buyerId = null): ?IssuedReceipt
     {
         try {
-            $response = $this->client->invoice(self::payload($order, $type, $amount), self::requestId($order, $type));
+            $response = $this->client->invoice(self::payload($order, $type, $amount, $buyerId), self::requestId($order, $type));
         } catch (Throwable $e) {
             Log::warning('Fiskalni račun nije izdat', ['order' => $order->getKey(), 'type' => $type->value, 'error' => $e->getMessage()]);
 

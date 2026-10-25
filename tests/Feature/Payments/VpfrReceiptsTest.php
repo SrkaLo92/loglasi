@@ -41,7 +41,8 @@ class VpfrReceiptsTest extends PaymentsTestCase
                 'verificationUrl' => 'https://suf.purs.gov.rs/v/?vl=test'.$request['transactionType'],
                 'totalAmount' => $request['payment'][0]['amount'],
             ]),
-            self::URL.'/api/v3/status' => Http::response(['sdcDateTime' => '2026-10-25T10:00:00', 'uid' => 'ABCD1234', 'gsc' => []]),
+            self::URL.'/api/v3/status' => Http::response(['sdcDateTime' => '2026-10-25T10:00:00', 'uid' => 'ABCD1234', 'gsc' => [],
+                'currentTaxRates' => ['taxCategories' => [['name' => 'Bez PDV', 'taxRates' => [['label' => 'А', 'rate' => 0]]]]]]),
         ]);
     }
 
@@ -74,15 +75,28 @@ class VpfrReceiptsTest extends PaymentsTestCase
         $this->fulfillment()->markPaid($order);
         $sale = $order->fresh()->receipt_number;
 
-        $this->fulfillment()->refund($order->fresh(), null, 'Greška', null, 50);
+        $this->fulfillment()->refund($order->fresh(), null, 'Greška', null, 50, '20:123456789');
         $order->refresh();
 
         $this->assertSame('REF-loglasi-'.$order->id.'-refund', $order->refund_receipt_number);
         $this->assertSame('https://suf.purs.gov.rs/v/?vl=testRefund', $order->refund_receipt_url);
         Http::assertSent(fn (Request $r) => $r['transactionType'] === 'Refund'
+            && $r['buyerId'] === '20:123456789'
             && $r['referentDocumentNumber'] === $sale
             && is_string($r['referentDocumentDT'])
             && $r['payment'][0]['amount'] === 50);
+    }
+
+    public function test_refund_without_buyer_id_is_not_fiscalised(): void
+    {
+        $this->fakeProcessor();
+        $order = $this->order($this->seller(), 'listing_slots_3');
+        $this->fulfillment()->markPaid($order);
+
+        $this->fulfillment()->refund($order->fresh(), null, 'Greška');
+
+        $this->assertNull($order->fresh()->refund_receipt_number);
+        Http::assertSentCount(1); // only the sale
     }
 
     public function test_processor_down_leaves_the_order_paid_and_the_command_issues_it_later(): void
@@ -129,7 +143,7 @@ class VpfrReceiptsTest extends PaymentsTestCase
     {
         $this->fakeProcessor();
 
-        $this->artisan('fiskal:provera')->expectsOutput('V-PFR odgovara.')->expectsOutput('UID: ABCD1234')->assertSuccessful();
+        $this->artisan('fiskal:provera')->expectsOutput('V-PFR odgovara.')->expectsOutput('UID: ABCD1234')->expectsOutput('Poreska oznaka А: Bez PDV 0%')->assertSuccessful();
     }
 
     public function test_firm_invoice_page_is_printable_and_only_for_the_owner(): void
