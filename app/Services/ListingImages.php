@@ -19,8 +19,9 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * Listing images: upload (JPEG, PNG, WebP), content check, EXIF removal with the
- * orientation applied, storage on the "public" disk under oglasi/{listing id|tmp}/,
- * variants (sm 400, md 800, lg 1600 px wide; WebP + JPEG), order, cover, delete.
+ * orientation applied, stored as WebP at high quality on the "public" disk under oglasi/{listing id|tmp}/,
+ * variants (sm 400, md 800, lg 1600 px wide; WebP + JPEG, lightly sharpened; md and lg carry the logo
+ * watermark), order, cover, delete.
  *
  * Variants are made by the queued GenerateImageVariants job; `php artisan images:variants`
  * fills in the ones that are missing (imported WordPress images).
@@ -44,9 +45,17 @@ class ListingImages
 
     public const MIN_EDGE = 100;
 
-    private const QUALITY_JPEG = 85;
+    private const QUALITY_JPEG = 86;
 
-    private const QUALITY_WEBP = 80;
+    private const QUALITY_WEBP = 84;
+
+    /** The stored original: WebP at a quality that looks the same as the upload. */
+    private const QUALITY_ORIGINAL = 92;
+
+    /** Sizes that get the logo watermark (thumbnails stay clean). */
+    private const WATERMARKED = ['md', 'lg'];
+
+    public function __construct(private readonly Watermark $watermark) {}
 
     public function maxImages(): int
     {
@@ -169,12 +178,13 @@ class ListingImages
         }
         $image = $this->fit($image, self::MAX_EDGE);
 
-        $extension = match ($type) {
-            IMAGETYPE_PNG => 'png',
-            IMAGETYPE_WEBP => 'webp',
-            default => 'jpg',
-        };
-        $data = $this->encode($image, $extension);
+        // Every upload is kept as WebP (smaller than JPEG/PNG at the same look); transparency stays.
+        if (! imageistruecolor($image)) {
+            imagepalettetotruecolor($image);
+        }
+        imagesavealpha($image, true);
+        $extension = 'webp';
+        $data = $this->encode($image, 'original');
         $phash = $this->differenceHash($image);
         $width = imagesx($image);
         $height = imagesy($image);
@@ -350,6 +360,15 @@ class ListingImages
         $variants = [];
         foreach (self::SIZES as $name => $width) {
             $resized = $this->resizeToWidth($source, $width);
+            if ($resized === $source) {
+                // never draw the logo on the source the next sizes are made from
+                $resized = $this->resample($source, imagesx($source), imagesy($source));
+            } else {
+                $this->sharpen($resized);
+            }
+            if (in_array($name, self::WATERMARKED, true)) {
+                $this->watermark->apply($resized);
+            }
             // shape shared with the listing page: {"webp": path, "jpg": path, "width": px}
             $variant = [];
             foreach (['webp', 'jpg'] as $format) {
@@ -358,9 +377,7 @@ class ListingImages
                 $variant[$format] = $file;
             }
             $variant['width'] = imagesx($resized);
-            if ($resized !== $source) {
-                imagedestroy($resized);
-            }
+            imagedestroy($resized);
             $variants[$name] = $variant;
         }
 
@@ -523,10 +540,17 @@ class ListingImages
         match ($format) {
             'png' => imagepng($image, null, 6),
             'webp' => imagewebp($image, null, self::QUALITY_WEBP),
+            'original' => imagewebp($image, null, self::QUALITY_ORIGINAL),
             default => imagejpeg($this->flatten($image), null, self::QUALITY_JPEG),
         };
 
         return (string) ob_get_clean();
+    }
+
+    /** Downscaling softens a photo a little; a light sharpen brings the detail back. */
+    private function sharpen(GdImage $image): void
+    {
+        imageconvolution($image, [[0, -1, 0], [-1, 24, -1], [0, -1, 0]], 20, 0);
     }
 
     /** JPEG has no transparency: put the image on a white background. */

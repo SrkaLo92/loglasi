@@ -4,6 +4,7 @@ namespace Tests\Feature\Posting;
 
 use App\Models\ListingImage;
 use App\Services\ListingImages;
+use App\Services\Watermark;
 use App\Support\Settings;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -70,6 +71,44 @@ class ListingImagesTest extends PostingTestCase
         $this->assertStringEndsWith('-lg.webp', $api['large']);
     }
 
+    public function test_every_upload_is_stored_as_webp(): void
+    {
+        $image = $this->service()->upload($this->image('large.jpg'), $this->user())->refresh();
+
+        $this->assertStringEndsWith('.webp', $image->path);
+        $this->assertSame(IMAGETYPE_WEBP, getimagesizefromstring(Storage::disk('public')->get($image->path))[2]);
+    }
+
+    public function test_logo_watermark_is_on_medium_and_large_photos_not_on_thumbnails(): void
+    {
+        $with = $this->service()->upload($this->image('large.jpg'), $this->user())->refresh();
+
+        $this->app->instance(Watermark::class, new class extends Watermark
+        {
+            public function apply(\GdImage $photo): void {}
+        });
+        $this->app->forgetInstance(ListingImages::class);
+        $without = app(ListingImages::class)->upload($this->image('large.jpg'), $this->user())->refresh();
+
+        $corner = function (ListingImage $image, string $size): string {
+            $gd = imagecreatefromstring(Storage::disk('public')->get($image->variants[$size]['jpg']));
+            $w = imagesx($gd);
+            $h = imagesy($gd);
+            $pixels = '';
+            for ($y = (int) ($h * 0.8); $y < $h - 4; $y += 3) {
+                for ($x = (int) ($w * 0.7); $x < $w - 4; $x += 3) {
+                    $pixels .= imagecolorat($gd, $x, $y).',';
+                }
+            }
+
+            return md5($pixels);
+        };
+
+        $this->assertNotSame($corner($with, 'lg'), $corner($without, 'lg'));
+        $this->assertNotSame($corner($with, 'md'), $corner($without, 'md'));
+        $this->assertSame($corner($with, 'sm'), $corner($without, 'sm'));
+    }
+
     public function test_small_image_is_not_enlarged(): void
     {
         $image = $this->service()->upload($this->image('photo.webp'), $this->user())->refresh();
@@ -83,7 +122,7 @@ class ListingImagesTest extends PostingTestCase
     {
         $image = $this->service()->upload($this->image('alpha.png'), $this->user())->refresh();
 
-        $this->assertStringEndsWith('.png', $image->path);
+        $this->assertStringEndsWith('.webp', $image->path); // every upload is kept as WebP
         $jpg = imagecreatefromstring(Storage::disk('public')->get($image->variants['sm']['jpg']));
         $corner = imagecolorat($jpg, 1, 1);
         $this->assertSame([255, 255, 255], [($corner >> 16) & 0xFF, ($corner >> 8) & 0xFF, $corner & 0xFF]);

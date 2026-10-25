@@ -13,7 +13,7 @@ class ImageVariants extends Command
     protected $signature = 'images:variants
         {--batch=200 : Images per run}
         {--queue : Dispatch jobs instead of working here}
-        {--all : Make variants again for all images}';
+        {--all : Make variants again for all images (e.g. to add the watermark), in batches until done}';
 
     protected $description = 'Generate missing listing image variants (sm, md, lg in WebP and JPEG)';
 
@@ -27,7 +27,8 @@ class ImageVariants extends Command
 
         $done = 0;
         $failed = 0;
-        foreach ($query->limit($batch)->get() as $image) {
+        $todo = $this->option('all') ? $query->lazyById($batch) : $query->limit($batch)->get();
+        foreach ($todo as $image) {
             if ($this->option('queue')) {
                 GenerateImageVariants::dispatch($image->id);
                 $done++;
