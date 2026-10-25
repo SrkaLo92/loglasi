@@ -5,6 +5,7 @@ namespace App\Services\Admin;
 use App\Models\AuditLog;
 use App\Models\Setting;
 use App\Services\ListingImages;
+use App\Services\Payments\PlusSeller;
 use App\Support\Home\HomeSettings;
 use App\Support\Payments\PaymentDetails;
 use App\Support\Payments\PaymentMode;
@@ -29,7 +30,8 @@ class SettingsSchema
     public static function general(): array
     {
         return [
-            'private_active_limit' => ['label' => 'Besplatnih aktivnih oglasa (privatna lica)', 'type' => 'integer', 'help' => 'Koliko aktivnih oglasa privatno lice može da ima bez plaćanja.', 'default' => Settings::DEFAULTS['private_active_limit']],
+            'private_active_limit' => ['label' => 'Besplatnih aktivnih oglasa (privatna lica)', 'type' => 'integer', 'help' => 'Koliko aktivnih oglasa privatno lice može da ima bez plaćanja. Cenovnik: 10, a kad sajt ima oko 2.500 aktivnih oglasa može da se spusti na 5.', 'default' => Settings::DEFAULTS['private_active_limit']],
+            PlusSeller::EXCLUDED_SETTING => ['label' => 'Plus prodavac ne važi u kategorijama', 'type' => 'text', 'help' => 'Slugovi kategorija, odvojeni zarezom (sa svim podkategorijama). Tamo važi samo besplatan limit.', 'default' => implode(', ', PlusSeller::EXCLUDED_DEFAULT)],
             'listing_duration_days' => ['label' => 'Trajanje oglasa (dana)', 'type' => 'integer', 'default' => Settings::DEFAULTS['listing_duration_days']],
             'listing_max_images' => ['label' => 'Najviše slika po oglasu', 'type' => 'integer', 'default' => ListingImages::DEFAULT_MAX_IMAGES],
             'image_max_mb' => ['label' => 'Najveća slika (MB)', 'type' => 'decimal', 'default' => ListingImages::DEFAULT_MAX_MB],
@@ -101,7 +103,8 @@ class SettingsSchema
     {
         return [
             PaymentMode::TEST_MODE => ['label' => 'Test režim plaćanja', 'type' => 'boolean', 'help' => 'Dok je uključen, narudžbine nisu prave uplate: računi su probni, a na strani Narudžbine piše „TEST REŽIM”.', 'default' => (bool) config('payments.test_mode', true)],
-            PaymentMode::PRIVATE_PAYMENTS => ['label' => 'Plaćanje za privatna lica', 'type' => 'boolean', 'help' => 'Uključiti tek kad fiskalna kasa radi. Do tada prave uplate mogu samo firme.', 'default' => (bool) config('payments.private_payments_enabled', false)],
+            PaymentMode::PRIVATE_PAYMENTS => ['label' => 'Plaćanje za privatna lica', 'type' => 'boolean', 'help' => 'Uključiti tek kad fiskalna kasa radi. Do tada plaćaju samo firme i preduzetnici, a privatna lica vide cene sa oznakom „Uskoro”.', 'default' => (bool) config('payments.private_payments_enabled', false)],
+            PaymentMode::MIN_ORDER => ['label' => 'Najmanja porudžbina (RSD)', 'type' => 'integer', 'help' => 'Jeftinije usluge (npr. jedno podizanje) ne mogu da se naruče same, već kao paket ili iz uključenih podizanja.', 'default' => (int) config('payments.min_order_rsd', 149)],
         ];
     }
 

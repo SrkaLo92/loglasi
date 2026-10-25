@@ -44,7 +44,6 @@ class LocationsAndPricesApiTest extends TestCase
         $response->assertExactJson([
             ['product' => 'bump', 'label' => 'Podizanje oglasa', 'amount' => 49],
             ['product' => 'featured_7d', 'label' => 'Istaknut oglas 7 dana', 'amount' => 199],
-            ['product' => 'featured_30d', 'label' => 'Istaknut oglas 30 dana', 'amount' => 800],
         ]);
         $this->assertStringContainsString('max-age=300', $response->headers->get('Cache-Control'));
         $this->get('/api/v1/prices', ['If-None-Match' => $response->headers->get('ETag')])->assertStatus(304);
@@ -53,13 +52,13 @@ class LocationsAndPricesApiTest extends TestCase
     public function test_price_change_and_deactivation_invalidate_cache(): void
     {
         $this->seed(ProductSeeder::class);
-        $this->getJson('/api/v1/prices')->assertJsonCount(3); // the retired 12-month package is not sold
+        $this->getJson('/api/v1/prices')->assertJsonCount(2); // retired: the 12-month package and Istaknut 30 dana
 
         Product::byCode(Product::BUMP)->update(['price_rsd' => 70]);
-        Product::byCode(Product::FEATURED_30)->update(['is_active' => false]);
+        Product::byCode(Product::FEATURED_7)->update(['is_active' => false]);
 
-        $response = $this->getJson('/api/v1/prices')->assertJsonCount(2);
+        $response = $this->getJson('/api/v1/prices')->assertJsonCount(1);
         $response->assertJsonPath('0.amount', 70);
-        $this->assertNotContains('featured_30d', array_column($response->json(), 'product'));
+        $this->assertNotContains('featured_7d', array_column($response->json(), 'product'));
     }
 }

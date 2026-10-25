@@ -222,7 +222,7 @@ class FulfillmentTest extends PaymentsTestCase
         $this->fulfillment()->refund($pack);
         $this->assertSame(0, BumpCredits::remaining($user));
 
-        $slots = $this->pay($this->order($user, 'listing_slots_30'));
+        $slots = $this->pay($this->order($user, 'listing_slots_10'));
         $this->fulfillment()->refund($slots);
         $this->assertSame((int) Settings::get('private_active_limit'), ListingLimits::monthlyLimit($user));
 

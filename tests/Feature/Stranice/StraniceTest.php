@@ -30,7 +30,7 @@ class StraniceTest extends TestCase
             'cenovnik' => ['/cenovnik/', 'Cenovnik', 'Za privatne korisnike'],
             'za firme' => ['/za-firme/', 'Predstavite svoju firmu kupcima iz Loznice', 'Šta dobija firma uz profil firme'],
             'kontakt' => ['/kontakt/', 'Kontakt', 'Pišite nam'],
-            'o nama' => ['/o-nama/', 'O nama', 'Zašto lokalni oglasi'],
+            'o nama' => ['/o-nama/', 'Oglasi iz Loznice, za ljude iz Loznice', 'Zašto lokalni oglasi'],
             'česta pitanja' => ['/faq/', 'Česta pitanja', 'Kako da postavim oglas?'],
             'uslovi' => ['/uslovi-koriscenja/', 'Uslovi korišćenja', 'Zabranjen sadržaj'],
             'privatnost' => ['/politika-privatnosti/', 'Politika privatnosti', 'Vaša prava'],
@@ -75,22 +75,35 @@ class StraniceTest extends TestCase
 
     public function test_text_page_uses_admin_text_and_escapes_html(): void
     {
-        Settings::set(PageText::PREFIX.'o_nama.tekst', "## Naš tim\n\nTekst iz admina <script>alert(1)</script> za {besplatni_oglasi}.");
+        Settings::set(PageText::PREFIX.'uslovi.tekst', "## Naš tim\n\nTekst iz admina <script>alert(1)</script> za {besplatni_oglasi}.");
 
-        $this->get('/o-nama/')
+        $this->get('/uslovi-koriscenja/')
             ->assertOk()
             ->assertSee('<h2>Naš tim</h2>', false)
             ->assertSee('Tekst iz admina')
             ->assertDontSee('<script>alert(1)</script>', false)
-            ->assertSee('do 5 aktivnih oglasa')
-            ->assertDontSee('Zašto lokalni oglasi');
+            ->assertSee('do 10 aktivnih oglasa');
+    }
+
+    public function test_about_page_has_sections_from_admin_texts_and_live_numbers(): void
+    {
+        Settings::set(PageText::PREFIX.'o_nama.hero', 'Naslov iz admina <b>x</b>');
+
+        $this->get('/o-nama/')
+            ->assertOk()
+            ->assertSee('Naslov iz admina &lt;b&gt;x&lt;/b&gt;', false)
+            ->assertSee('Zašto lokalni oglasi')
+            ->assertSee('Kako funkcioniše')
+            ->assertSee('Kako zarađujemo')
+            ->assertSee('besplatnih oglasa za privatna lica')
+            ->assertDontSee('Imate nešto za prodaju?');
     }
 
     public function test_faq_answers_use_prices_from_database(): void
     {
-        Product::where('code', 'bump')->update(['price_rsd' => 70]);
+        Product::where('code', 'featured_7')->update(['price_rsd' => 270]);
 
-        $this->get('/faq/')->assertOk()->assertSee("70\u{00A0}RSD", false);
+        $this->get('/faq/')->assertOk()->assertSee("270\u{00A0}RSD", false);
     }
 
     public function test_footer_marks_current_page(): void

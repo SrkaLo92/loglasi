@@ -31,9 +31,9 @@ class HomePageTest extends SearchTestCase
             ->assertSee('Zašto izabrati nas')
             ->assertSee('Sigurnost i poverenje')
             ->assertSee('Podrška korisnicima')
-            ->assertSee('Privatna lica imaju do 5 aktivnih oglasa besplatno')
+            ->assertSee('Privatna lica imaju do 10 aktivnih oglasa besplatno')
             ->assertSee('Najčešća pitanja')
-            ->assertSee('<details class="hm-faq__stavka">', false)
+            ->assertSee('<details class="hm-faq__stavka" name="hm-faq">', false)
             ->assertSee('href="'.url_slash('faq').'"', false)
             ->assertSee('O sajtu loglasi.rs');
 

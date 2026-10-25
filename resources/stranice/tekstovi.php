@@ -6,7 +6,7 @@
  *
  * Zamene u vitičastim zagradama popunjavaju se iz baze (cene iz tabele products,
  * limiti iz podešavanja), da se cena nikad ne piše ručno u tekstu:
- *   {cena_podizanje} {cena_istaknuto_7} {cena_istaknuto_30} {cena_paket_podizanja} {cena_prioritet} {cena_top}
+ *   {cena_podizanje} {cena_istaknuto_7} {cena_brza_prodaja} {cena_plus_prodavac} {cena_vizitka} {cena_paket_podizanja} {cena_prioritet} {cena_top}
  *   {cena_premium_xl} {cena_start} {cena_pro} {cena_max}
  *   {besplatni_oglasi} {besplatne_firme} {trajanje_oglasa} {email}
  *
@@ -64,7 +64,8 @@ return [
     ],
     'cenovnik.opis.bump' => 'Oglas se vraća na vrh liste kao da je upravo postavljen. Korisno kad oglas potone ispod novijih.',
     'cenovnik.opis.featured_7' => 'Oglas je izdvojen na početnoj strani i u rezultatima pretrage, sa oznakom „Istaknuto”.',
-    'cenovnik.opis.featured_30' => 'Isto kao 7 dana, ali ceo mesec. Najisplativije za vozila, nekretnine i skuplje stvari.',
+    'cenovnik.plus.naslov' => 'Plus prodavac',
+    'cenovnik.plus.uvod' => 'Za one koji prodaju više polovnih i svojih stvari. Ne važi za usluge, poslove i nekretnine od agencije: za to su paketi za firme.',
     'cenovnik.opis.biznis_12m' => 'Profil firme sa logoom i naslovnom slikom, oznaka „Proverena firma”, radno vreme, mapa i statistika.',
     'cenovnik.uplata.naslov' => 'Kako da platim',
     'cenovnik.uplata.uvod' => 'Za sada se plaća samo uplatom na račun.',
@@ -159,39 +160,39 @@ return [
     /* O nama -------------------------------------------------------------- */
 
     'o_nama.naslov' => 'O nama',
-    'o_nama.tekst' => <<<'MD'
-loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu. Napravljen je da ljudi iz našeg kraja lako prodaju, kupe ili ponude uslugu nekome ko je blizu, bez posrednika i bez provizije.
-
-## Zašto lokalni oglasi
-
-Na velikim sajtovima oglas iz Loznice se izgubi među hiljadama oglasa iz cele Srbije. Ovde su prodavci i kupci iz Loznice, Banje Koviljače, Lešnice, Tršića i okolnih sela, pa stvar možete da pogledate uživo pre nego što je kupite, a dogovor je brz.
-
-## Šta možete da radite na sajtu
-
-- Besplatno imate {besplatni_oglasi}. Oglas traje {trajanje_oglasa}, a obnova je besplatna.
-- Javite se prodavcu pozivom, porukom preko sajta, WhatsApp-om ili Viber-om.
-- Sačuvajte pretragu i vratite se oglasima koji vas zanimaju.
-- Ako imate firmu, otvorite profil firme sa logoom, radnim vremenom i svim oglasima na jednom mestu. Više o tome na strani [Za firme](/za-firme/).
-
-## Kako zarađujemo
-
-Postavljanje oglasa je besplatno. Plaćaju se samo dodaci koje sami izaberete: podizanje oglasa, isticanje oglasa i paketi za firme. Sve cene su na strani [Cenovnik](/cenovnik/).
-
-## Kontakt
-
-Pitanja, predlozi i prijave problema su dobrodošli. Pišite nam preko [kontakt forme](/kontakt/) ili na {email}.
-MD,
+    'o_nama.oznaka' => 'O nama',
+    'o_nama.hero' => 'Oglasi iz Loznice, za ljude iz Loznice',
+    'o_nama.uvod' => 'loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu. Prodajte, kupite ili ponudite uslugu nekome ko je blizu, bez posrednika i bez provizije.',
+    'o_nama.prednosti.naslov' => 'Zašto lokalni oglasi',
+    'o_nama.prednosti' => [
+        ['ikonica' => 'pin', 'naslov' => 'Kupci i prodavci su blizu', 'tekst' => 'Loznica, Banja Koviljača, Lešnica, Tršić i okolna sela. Stvar pogledate uživo pre nego što je kupite.'],
+        ['ikonica' => 'gift', 'naslov' => 'Besplatno i bez provizije', 'tekst' => 'Privatna lica imaju {besplatni_oglasi} besplatno. Od prodaje ne uzimamo ništa.'],
+        ['ikonica' => 'phone', 'naslov' => 'Dogovor jednim dodirom', 'tekst' => 'Poziv, poruka preko sajta, WhatsApp ili Viber, kako vama odgovara.'],
+        ['ikonica' => 'badge', 'naslov' => 'Pregledani oglasi', 'tekst' => 'Svaki oglas pregledamo pre objave, a prijavljene i sumnjive oglase uklanjamo.'],
+    ],
+    'o_nama.koraci.naslov' => 'Kako funkcioniše',
+    'o_nama.koraci' => [
+        ['naslov' => 'Napravite nalog', 'tekst' => 'Dovoljni su ime i e-pošta ili broj telefona. [Registracija](/login-registracija/) traje minut.'],
+        ['naslov' => 'Postavite oglas', 'tekst' => 'Izaberite kategoriju, dodajte slike, naslov i cenu. Oglas traje {trajanje_oglasa}, a obnova je besplatna.'],
+        ['naslov' => 'Dogovorite se uživo', 'tekst' => 'Kupci vas zovu ili vam pišu, a posao završite licem u lice, bez posrednika.'],
+    ],
+    'o_nama.zaradjujemo.naslov' => 'Kako zarađujemo',
+    'o_nama.zaradjujemo.tekst' => 'Postavljanje oglasa je besplatno. Plaćaju se samo dodaci koje sami izaberete, kao što je isticanje oglasa, i paketi za firme.',
+    'o_nama.firme.naslov' => 'Imate firmu ili radnju?',
+    'o_nama.firme.tekst' => 'Profil firme sa logoom, radnim vremenom, mapom i svim oglasima na jednom mestu.',
+    'o_nama.cta.naslov' => 'Pitanje, predlog ili problem?',
+    'o_nama.cta.tekst' => 'Pišite nam, odgovaramo obično istog ili sledećeg radnog dana.',
 
     /* Česta pitanja ------------------------------------------------------- */
 
     'faq.naslov' => 'Česta pitanja',
     'faq.uvod' => 'Odgovori na pitanja koja nam najčešće postavljate. Ako ne nađete odgovor, [pišite nam](/kontakt/).',
     'faq.pitanja' => [
-        ['pitanje' => 'Da li je postavljanje oglasa besplatno?', 'odgovor' => 'Da. Privatni korisnici besplatno imaju {besplatni_oglasi}. Plaćaju se samo dodatna mesta za oglase i promocije koje sami izaberete, kao što su podizanje i isticanje.'],
+        ['pitanje' => 'Da li je postavljanje oglasa besplatno?', 'odgovor' => 'Da. Privatni korisnici besplatno imaju {besplatni_oglasi}. Plaćaju se samo promocije koje sami izaberete, kao što je isticanje oglasa.'],
         ['pitanje' => 'Kako da postavim oglas?', 'odgovor' => 'Prijavite se ili napravite nalog, pa kliknite na „Postavite oglas”. Izaberite kategoriju, upišite naslov, opis i cenu, dodajte fotografije i objavite oglas.'],
         ['pitanje' => 'Koliko dugo traje oglas?', 'odgovor' => 'Oglas traje {trajanje_oglasa}. Kad istekne, možete besplatno da ga obnovite iz svog naloga.'],
         ['pitanje' => 'Kako da kontaktiram prodavca?', 'odgovor' => 'Na strani oglasa su dugmad za poziv i poruku preko sajta, a ako je prodavac ostavio broj, i za WhatsApp i Viber.'],
-        ['pitanje' => 'Kako da istaknem ili podignem oglas?', 'odgovor' => 'Podizanje oglasa košta {cena_podizanje}, a isticanje {cena_istaknuto_7} za 7 dana ili {cena_istaknuto_30} za 30 dana. Plaća se uplatom na račun, a postupak je opisan na strani [Cenovnik](/cenovnik/).'],
+        ['pitanje' => 'Kako da istaknem ili podignem oglas?', 'odgovor' => 'Isticanje na 7 dana košta {cena_istaknuto_7}, a „Brza prodaja” ({cena_brza_prodaja}) je isticanje na 7 dana i 3 podizanja. Plaća se uplatom na račun, a sve cene su na strani [Cenovnik](/cenovnik/).'],
         ['pitanje' => 'Šta dobija firma uz profil firme?', 'odgovor' => 'Profil firme sa logoom, radnim vremenom, mapom i oznakom „Firma” na svakom oglasu. {ponuda_firme} Više na strani [Za firme](/za-firme/).'],
         ['pitanje' => 'Kako da prijavim sumnjiv oglas?', 'odgovor' => 'Na strani oglasa kliknite na „Prijavi oglas” i ukratko napišite šta nije u redu. Svaku prijavu pregledamo.'],
         ['pitanje' => 'Kako da kupujem bezbedno?', 'odgovor' => 'Robu pogledajte uživo pre plaćanja, ne plaćajte unapred nepoznatim osobama i nikome ne šaljite kodove koje dobijete SMS porukom.'],

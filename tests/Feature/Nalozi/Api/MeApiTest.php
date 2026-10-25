@@ -208,9 +208,9 @@ class MeApiTest extends TestCase
         $this->withToken($this->tokenFor($user))->getJson('/api/v1/me/limits')
             ->assertOk()
             ->assertJson([
-                'monthly_limit' => 5,
+                'monthly_limit' => 10,
                 'used_this_month' => 3,
-                'remaining' => 2,
+                'remaining' => 7,
                 'resets_at' => '2026-10-31T23:00:00Z',
                 'unlimited' => false,
             ]);
@@ -247,7 +247,7 @@ class MeApiTest extends TestCase
         Firm::where('user_id', $firm->id)->update(['package_ends_at' => now()->subDay()]);
 
         $this->withToken($this->tokenFor($firm))->getJson('/api/v1/me/limits')
-            ->assertJson(['monthly_limit' => 5, 'unlimited' => false]);
+            ->assertJson(['monthly_limit' => 10, 'unlimited' => false]);
     }
 
     public function test_patch_is_rate_limited(): void

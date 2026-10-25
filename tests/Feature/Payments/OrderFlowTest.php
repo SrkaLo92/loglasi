@@ -163,9 +163,9 @@ class OrderFlowTest extends PaymentsTestCase
         $this->assertNotNull($order->terms_accepted_at);
     }
 
-    public function test_private_payments_need_the_switch_outside_test_mode(): void
+    public function test_private_payments_need_the_switch_even_in_test_mode(): void
     {
-        Settings::set('payments.test_mode', false);
+        Settings::set('payments.private_payments_enabled', false);
         $user = $this->seller();
 
         $this->actingAs($user)->post('/moj-nalog/narudzbine/', $this->confirm(['usluga' => 'listing_slots_3']))
@@ -174,7 +174,7 @@ class OrderFlowTest extends PaymentsTestCase
 
         Settings::set('payments.private_payments_enabled', true);
         $this->actingAs($user)->post('/moj-nalog/narudzbine/', $this->confirm(['usluga' => 'listing_slots_3']))->assertRedirect();
-        $this->assertFalse(Order::sole()->is_test);
+        $this->assertTrue(Order::sole()->is_test); // test mode stays on the test site
     }
 
     public function test_only_own_active_listings(): void

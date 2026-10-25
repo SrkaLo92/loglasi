@@ -17,6 +17,8 @@ final class ProductCatalog
 
     public const FIRM_PACKAGE = 'firm_package';
 
+    public const PLUS_SELLER = 'plus_seller';
+
     /** @return array<string, mixed>|null */
     public static function definition(Product|string $product): ?array
     {

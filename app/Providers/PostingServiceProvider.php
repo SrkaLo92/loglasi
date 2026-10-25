@@ -49,6 +49,7 @@ class PostingServiceProvider extends ServiceProvider
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             InProcess::command($schedule, 'listings:expire')->hourly()->withoutOverlapping();
+            InProcess::command($schedule, 'listings:plus-renew')->dailyAt('06:30')->withoutOverlapping()->onOneServer();
             InProcess::command($schedule, 'images:prune')->dailyAt('04:10')->withoutOverlapping();
             InProcess::command($schedule, 'images:variants')->everyTenMinutes()->withoutOverlapping();
         });

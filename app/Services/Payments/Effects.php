@@ -30,10 +30,11 @@ final class Effects
     {
         return match (ProductCatalog::type($product)) {
             ProductCatalog::BUMP => self::bump(self::lockListing($listingId)),
-            ProductCatalog::PROMOTION => self::promote($product, self::lockListing($listingId)),
+            ProductCatalog::PROMOTION => self::promote($product, self::lockListing($listingId), $user, $orderId),
             ProductCatalog::BUMP_PACK => self::bumpPack($product, $user, $orderId),
             ProductCatalog::SLOTS => self::slots($product, $user, $orderId),
             ProductCatalog::FIRM_PACKAGE => self::firmPackage($product, $user),
+            ProductCatalog::PLUS_SELLER => self::plusSeller($product, $user, $orderId),
             default => throw new OrderException('Za ovu uslugu ne postoji automatska aktivacija.', 'unknown_product'),
         };
     }
@@ -60,6 +61,10 @@ final class Effects
         if ($share <= 0) {
             return 0.0;
         }
+        // Bumps that came with the product (Brza prodaja, Plus prodavac) and were not used go back too.
+        if (! empty(ProductCatalog::definition($product)['bumps']) || $type === ProductCatalog::PLUS_SELLER) {
+            BumpCredits::revoke((int) $order->getKey());
+        }
         $remaining = (int) max(0, $order->service_ends_at->getTimestamp() - max(now()->getTimestamp(), $order->service_starts_at->getTimestamp()));
 
         if ($type === ProductCatalog::PROMOTION && $order->listing_id !== null) {
@@ -74,6 +79,8 @@ final class Effects
             }
         } elseif ($type === ProductCatalog::SLOTS) {
             ListingSlots::endForOrder((int) $order->getKey());
+        } elseif ($type === ProductCatalog::PLUS_SELLER) {
+            PlusSeller::endForOrder((int) $order->getKey(), self::shorten($order->service_ends_at, $remaining));
         } elseif ($type === ProductCatalog::FIRM_PACKAGE) {
             $firm = Firm::query()->where('user_id', $order->user_id)->lockForUpdate()->first();
             if ($firm?->package_ends_at !== null) {
@@ -113,7 +120,7 @@ final class Effects
         ];
     }
 
-    private static function promote(Product $product, Listing $listing): array
+    private static function promote(Product $product, Listing $listing, ?User $user = null, ?int $orderId = null): array
     {
         $days = max(1, ProductCatalog::days($product));
         $columns = (array) (ProductCatalog::definition($product)['columns'] ?? []);
@@ -131,6 +138,29 @@ final class Effects
             }
         }
         $listing->save();
+
+        // Brza prodaja: the highlight plus bumps to use later.
+        $bumps = (int) (ProductCatalog::definition($product)['bumps'] ?? 0);
+        if ($bumps > 0 && $user !== null) {
+            $effect['bump_credits_id'] = BumpCredits::grant($user, $bumps, $orderId);
+            $effect['bumps'] = $bumps;
+        }
+
+        return ['effect' => $effect, 'starts' => $starts, 'ends' => $ends];
+    }
+
+    /** Plus prodavac: a term after the running one, and bumps for each started 30 days. */
+    private static function plusSeller(Product $product, User $user, ?int $orderId): array
+    {
+        $days = max(1, ProductCatalog::days($product));
+        [$starts, $ends] = PlusSeller::grant($user, $days, $orderId);
+        $effect = ['plus_seller' => [$starts->toIso8601String(), $ends->toIso8601String()]];
+
+        $bumps = (int) (ProductCatalog::definition($product)['bumps_per_month'] ?? 0) * (int) ceil($days / 30);
+        if ($bumps > 0) {
+            $effect['bump_credits_id'] = BumpCredits::grant($user, $bumps, $orderId);
+            $effect['bumps'] = $bumps;
+        }
 
         return ['effect' => $effect, 'starts' => $starts, 'ends' => $ends];
     }

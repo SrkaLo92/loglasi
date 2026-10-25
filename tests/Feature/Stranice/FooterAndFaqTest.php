@@ -85,7 +85,7 @@ class FooterAndFaqTest extends TestCase
         $response = $this->get('/faq/')->assertOk()
             ->assertSee('Niste pronašli odgovor?')
             ->assertSee('href="'.url_slash('kontakt').'#forma"', false)
-            ->assertSee('<details class="lgx-faq__stavka"  open >', false);
+            ->assertSee('<details class="lgx-faq__stavka" name="faq"  open >', false);
 
         preg_match_all('#<script type="application/ld\+json">(.*?)</script>#s', $response->getContent(), $m);
         $faq = collect($m[1])->map(fn ($json) => json_decode($json, true))

@@ -76,8 +76,8 @@ class BenefitsTest extends TestCase
             return $user->load('firm');
         };
 
-        $this->assertSame(20, $this->benefits()->listingLimit($make('start')));
-        $this->assertSame(100, $this->benefits()->listingLimit($make('pro')));
+        $this->assertSame(50, $this->benefits()->listingLimit($make('start')));
+        $this->assertNull($this->benefits()->listingLimit($make('pro')));
         $this->assertNull($this->benefits()->listingLimit($make('max')));
         $this->assertSame(5, $this->benefits()->listingLimit($make('max', ['package_ends_at' => now()->subDay()])));
         $this->assertSame(5, $this->benefits()->listingLimit(User::factory()->create()));
@@ -85,7 +85,7 @@ class BenefitsTest extends TestCase
         // The product row (admin) wins over the config default.
         Product::byCode('business_start_monthly')->update(['listing_limit' => 25]);
         $this->assertSame(25, $this->benefits()->listingLimit($make('start')));
-        $this->assertSame(20, $this->benefits()->listingLimit($make('start', ['package_period' => 'yearly', 'package_ends_at' => now()->addYear()])));
+        $this->assertSame(50, $this->benefits()->listingLimit($make('start', ['package_period' => 'yearly', 'package_ends_at' => now()->addYear()])));
     }
 
     public function test_advanced_stats_and_monthly_credits_by_package(): void
@@ -96,7 +96,7 @@ class BenefitsTest extends TestCase
 
         $this->assertFalse($this->benefits()->canShowAdvancedStats($start));
         $this->assertTrue($this->benefits()->canShowAdvancedStats($pro));
-        $this->assertSame(['bumps' => 0, 'highlights' => 0, 'premium_xl' => 0], $this->benefits()->monthlyCredits($start));
+        $this->assertSame(['bumps' => 3, 'highlights' => 0, 'premium_xl' => 0], $this->benefits()->monthlyCredits($start));
         $this->assertSame(['bumps' => 10, 'highlights' => 2, 'premium_xl' => 0], $this->benefits()->monthlyCredits($pro));
         $this->assertSame(['bumps' => 20, 'highlights' => 5, 'premium_xl' => 1], $this->benefits()->monthlyCredits($max));
     }

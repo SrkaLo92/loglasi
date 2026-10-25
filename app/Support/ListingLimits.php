@@ -3,18 +3,21 @@
 namespace App\Support;
 
 use App\Enums\ListingStatus;
+use App\Models\Category;
 use App\Models\Listing;
 use App\Models\User;
 use App\Services\Payments\ListingSlots;
+use App\Services\Payments\PlusSeller;
 use App\Support\Firms\FirmPackage;
 use Carbon\CarbonImmutable;
 
 /**
  * How many ACTIVE listings a user may have (pending or published and not expired).
- * Private users: setting private_active_limit (5). Firms with an active package: the package limit
- * (Start 20, Pro 100, Max and the free first year unlimited; FirmPackage::listingLimit).
+ * Private users: setting private_active_limit (10). Firms with an active package: the package limit
+ * (Vizitka 5, Start 50, Pro, Max and the free first year unlimited; FirmPackage::listingLimit).
  * A firm without an active package has the private limit. Extra listings bought for 30 days
- * (ListingSlots, payments module) are added to the private limit.
+ * (ListingSlots, payments module) are added to the private limit. Plus prodavac (PlusSeller) raises it
+ * to 100, except for listings in services and jobs (pass the category).
  * A slot frees when a listing expires, is sold, rejected or deleted.
  * The API keeps the contract names (monthly_limit, used_this_month, resets_at).
  */
@@ -41,15 +44,15 @@ class ListingLimits
     }
 
     /** Da li korisnik može da postavi još jedan oglas (za modul oglasa). */
-    public static function canCreate(User $user): bool
+    public static function canCreate(User $user, ?Category $category = null): bool
     {
-        $limit = static::monthlyLimit($user);
+        $limit = static::monthlyLimit($user, $category);
 
         return $limit === null || static::activeCount($user) < $limit;
     }
 
     /** null = bez ograničenja. */
-    public static function monthlyLimit(User $user): ?int
+    public static function monthlyLimit(User $user, ?Category $category = null): ?int
     {
         if ($user->isFirm()) {
             $firm = $user->firm;
@@ -58,8 +61,13 @@ class ListingLimits
             }
         }
 
-        // Extra listings bought for 30 days (payments: +3 / +10 / +30) raise the private limit.
-        return (int) Settings::get('private_active_limit') + ListingSlots::extra($user);
+        // Extra listings bought for 30 days (payments: +3 / +10) raise the private limit.
+        $limit = (int) Settings::get('private_active_limit') + ListingSlots::extra($user);
+        if (PlusSeller::isActive($user) && ($category === null || PlusSeller::appliesTo($category))) {
+            $limit = max($limit, PlusSeller::listingLimit());
+        }
+
+        return $limit;
     }
 
     /** Listings that use a slot: waiting for review or published and not expired (drafts do not). */

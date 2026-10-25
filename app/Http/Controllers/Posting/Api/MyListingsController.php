@@ -83,7 +83,7 @@ class MyListingsController extends Controller
         $price = $this->price($data);
 
         try {
-            $this->posting->ensureCanCreate($user);
+            $this->posting->ensureCanCreate($user, $category);
         } catch (PostingRefused $e) {
             throw new ApiError('limit_reached', $e->getMessage(), 403);
         }

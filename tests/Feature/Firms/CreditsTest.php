@@ -32,10 +32,10 @@ class CreditsTest extends TestCase
         $this->assertSame(['bumps' => 20, 'highlights' => 5, 'premium_xl' => 1], FirmCredits::remaining($firm));
     }
 
-    public function test_no_credits_without_package_or_on_start(): void
+    public function test_no_credits_without_package_or_on_vizitka(): void
     {
-        $start = $this->firm('start');
-        $this->assertFalse(FirmCredits::consume($start, 'bumps'));
+        $vizitka = $this->firm('vizitka');
+        $this->assertFalse(FirmCredits::consume($vizitka, 'bumps'));
 
         $expired = $this->firm('pro');
         $expired->forceFill(['package_ends_at' => now()->subDay()])->save();
@@ -43,7 +43,7 @@ class CreditsTest extends TestCase
         $this->assertSame(['bumps' => 0, 'highlights' => 0, 'premium_xl' => 0], FirmCredits::remaining($expired));
 
         $this->expectException(\InvalidArgumentException::class);
-        FirmCredits::consume($start, 'banner');
+        FirmCredits::consume($vizitka, 'banner');
     }
 
     public function test_upgrade_during_the_month_raises_the_allowance(): void

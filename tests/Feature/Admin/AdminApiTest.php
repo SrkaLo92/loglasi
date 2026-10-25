@@ -11,11 +11,14 @@ use App\Services\Payments\BuyerDetails;
 use Database\Seeders\ProductSeeder;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\Sanctum;
+use Tests\Concerns\OpensPrivatePayments;
 use Tests\TestCase;
 
 /** /api/v1/admin/* for the admin tab of the mobile app. */
 class AdminApiTest extends TestCase
 {
+    use OpensPrivatePayments;
+
     protected function setUp(): void
     {
         parent::setUp();

@@ -98,9 +98,9 @@ class Posting
     }
 
     /** @throws PostingRefused */
-    public function ensureCanCreate(User $user): void
+    public function ensureCanCreate(User $user, ?Category $category = null): void
     {
-        if (! ListingLimits::canCreate($user)) {
+        if (! ListingLimits::canCreate($user, $category)) {
             $limits = ListingLimits::for($user);
 
             throw new PostingRefused('limit_reached', $user->isFirm()
@@ -117,7 +117,7 @@ class Posting
         if (! $this->isPostableCategory($category)) {
             throw new PostingRefused('invalid_category', 'Izaberite kategoriju sa spiska (poslednji nivo).', field: 'category_id');
         }
-        $this->ensureCanCreate($user);
+        $this->ensureCanCreate($user, $category);
 
         $drafts = Listing::query()->where('user_id', $user->id)->where('status', ListingStatus::Draft)->count();
         if ($limitDrafts && $drafts >= self::MAX_DRAFTS) {
@@ -377,7 +377,7 @@ class Posting
         $owner = $listing->user ?? User::query()->findOrFail($listing->user_id);
         $isDraft = $listing->status === ListingStatus::Draft;
         if ($isDraft) {
-            $this->ensureCanCreate($owner);
+            $this->ensureCanCreate($owner, $listing->category);
         }
         $this->ensureNotDuplicate($listing);
 

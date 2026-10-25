@@ -35,7 +35,7 @@ class NalogTest extends TestCase
             ->assertSee('Petar Petrović')
             ->assertSee('Privatno lice')
             ->assertSee('065 541 5128')
-            ->assertSee('3 od 5', false)
+            ->assertSee('3 od 10', false)
             ->assertSee('PP');
     }
 

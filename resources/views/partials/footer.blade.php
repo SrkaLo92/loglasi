@@ -21,7 +21,7 @@
 	];
 	$lgCurrent = url_slash(request()->path());
 	// No "post a listing" band while posting or inside the account: the user is already doing it.
-	$lgFooterCta = ! request()->is('postavi-oglas*', 'moj-nalog*');
+	$lgFooterCta = ! request()->is('postavi-oglas*', 'moj-nalog*', 'o-nama*');
 	$lgFooter = FooterSections::get();
 	$lgPhone = (string) Settings::get('contact_phone');
 	$lgEmail = (string) Settings::get('contact_email');

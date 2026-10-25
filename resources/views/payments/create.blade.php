@@ -83,6 +83,9 @@
 							<label class="lgpay-radio"><input type="radio" name="kupac" value="private" @checked($buyer === 'private')> fizičko lice</label>
 						@endif
 						<label class="lgpay-radio"><input type="radio" name="kupac" value="firm" @checked($buyer === 'firm' || ! $privateEnabled)> firma ili preduzetnik</label>
+						@unless ($privateEnabled)
+							<p class="lgpay-help">Za sada plaćaju firme i preduzetnici, uz račun. Plaćanje za fizička lica uključujemo uskoro.</p>
+						@endunless
 					</fieldset>
 					<fieldset class="lgpay-firm">
 						<legend class="lgpay-help">Samo za firmu ili preduzetnika: podaci za račun</legend>

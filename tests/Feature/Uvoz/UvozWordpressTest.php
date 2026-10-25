@@ -341,10 +341,10 @@ class UvozWordpressTest extends UvozTestCase
 
         Settings::flush();
         $this->assertSame(117.5, (float) Settings::get('eur_rate'));
-        $this->assertSame(5, (int) Settings::get('private_active_limit')); // the old monthly limit is not imported
+        $this->assertSame(10, (int) Settings::get('private_active_limit')); // the old monthly limit is not imported
         $this->assertSame(60, Product::where('code', Product::BUMP)->value('price_rsd'));
         $this->assertFalse((bool) Product::where('code', Product::FEATURED_30)->value('is_active'));
-        $this->assertSame(18, Product::where('display_only', false)->count()); // 4 old products + 14 sold by payments
+        $this->assertSame(24, Product::where('display_only', false)->count()); // 4 old products + 14 (24 Oct) + 6 (25 Oct) sold by payments
     }
 
     public function test_running_twice_gives_the_same_result(): void

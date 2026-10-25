@@ -28,6 +28,9 @@ class Cenovnik
         'cena_start' => 'business_start_monthly',
         'cena_pro' => 'business_pro_monthly',
         'cena_max' => 'business_max_monthly',
+        'cena_brza_prodaja' => 'quick_sale_7',
+        'cena_plus_prodavac' => 'plus_seller_30',
+        'cena_vizitka' => 'business_vizitka_monthly',
     ];
 
     /** Podešavanja za uplatu i kontakt (prazno dok ih admin ne unese; račun se nigde ne izmišlja). */
@@ -52,11 +55,13 @@ class Cenovnik
     }
 
     /** Codes of the /cenovnik/ sections, in order (shown when the product exists). */
-    public const SLOTS = ['listing_slots_3', 'listing_slots_10', 'listing_slots_30'];
+    public const SLOTS = ['listing_slots_3', 'listing_slots_10'];
 
-    public const PROMOTIONS = ['bump', 'bump_10', 'featured_7', 'priority_3', 'top_7', 'premium_xl_7', 'premium_xl_home_7'];
+    public const PLUS_SELLER = ['plus_seller_30', 'plus_seller_90', 'plus_seller_365'];
 
-    public const PACKAGES = ['business_start', 'business_pro', 'business_max'];
+    public const PROMOTIONS = ['bump', 'bump_10', 'featured_7', 'quick_sale_7', 'priority_3', 'top_7', 'premium_xl_7', 'premium_xl_home_7'];
+
+    public const PACKAGES = ['business_vizitka', 'business_start', 'business_pro', 'business_max'];
 
     /**
      * Products for the price list: active ones and display-only ones (listed, not sold yet), by code.

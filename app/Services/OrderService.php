@@ -106,6 +106,10 @@ class OrderService
         if (! ProductCatalog::isSellable($product) || ! $product->is_active || $product->display_only || $product->price_rsd <= 0) {
             return 'Ova usluga trenutno nije dostupna.';
         }
+        $min = PaymentMode::minOrder();
+        if ($product->price_rsd < $min) {
+            return 'Najmanja porudžbina je '.number_format($min, 0, ',', '.').' RSD. Podizanja možete da kupite kao paket ili uz „Brzu prodaju”.';
+        }
 
         return $this->eligibilityReason($user, $product, $listing);
     }
@@ -129,6 +133,11 @@ class OrderService
         }
         if ($type === ProductCatalog::BUMP_PACK) {
             return null;
+        }
+        if ($type === ProductCatalog::PLUS_SELLER) {
+            return $user->isFirm()
+                ? 'Plus prodavac je za privatna lica. Za firme su paketi na strani Cenovnik.'
+                : null;
         }
 
         if ($listing === null) {

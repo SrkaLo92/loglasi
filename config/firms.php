@@ -14,22 +14,29 @@ return [
     'renew_url' => '/cenovnik/#lgc-firme',
 
     /*
-     * Firm packages (price list of 24 Oct 2026). The active listing limit is read from the product
+     * Firm packages (price list of 25 Oct 2026). The active listing limit is read from the product
      * (products.listing_limit, editable in the admin) and falls back to 'listing_limit' here;
      * null = unlimited. Included promotions are granted per calendar month.
      */
     'packages' => [
+        'vizitka' => [
+            'label' => 'Vizitka',
+            'products' => ['monthly' => 'business_vizitka_monthly', 'yearly' => 'business_vizitka_yearly'],
+            'listing_limit' => 5,
+            'credits' => ['bumps' => 0, 'highlights' => 0, 'premium_xl' => 0],
+            'advanced_stats' => false,
+        ],
         'start' => [
             'label' => 'Business Start',
             'products' => ['monthly' => 'business_start_monthly', 'yearly' => 'business_start_yearly'],
-            'listing_limit' => 20,
-            'credits' => ['bumps' => 0, 'highlights' => 0, 'premium_xl' => 0],
+            'listing_limit' => 50,
+            'credits' => ['bumps' => 3, 'highlights' => 0, 'premium_xl' => 0],
             'advanced_stats' => false,
         ],
         'pro' => [
             'label' => 'Business Pro',
             'products' => ['monthly' => 'business_pro_monthly', 'yearly' => 'business_pro_yearly'],
-            'listing_limit' => 100,
+            'listing_limit' => null,
             'credits' => ['bumps' => 10, 'highlights' => 2, 'premium_xl' => 0],
             'advanced_stats' => true,
         ],

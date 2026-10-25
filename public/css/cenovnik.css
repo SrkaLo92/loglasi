@@ -145,7 +145,7 @@
 
 .lgc-slots {
 	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 	gap: 16px;
 	margin: 0;
 	padding: 0;
@@ -388,7 +388,7 @@
 
 .lgc-paketi {
 	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 	gap: 20px;
 	margin: 0;
 	padding: 0;
@@ -696,3 +696,152 @@
 /* Payments: order links on sellable products. */
 .lgc-naruci { display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; font-weight: 700; color: var(--lg-green); }
 .lgc-paket__naruci { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+
+/* Not on sale for this viewer yet (private payments off) or only together with a pack */
+.lgc-uskoro {
+	display: inline-flex;
+	align-items: center;
+	min-height: 28px;
+	padding: 0 10px;
+	border-radius: 999px;
+	background: #f1f4f2;
+	color: var(--lg-muted);
+	font-size: 13px;
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+.lgc-head__napomena {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin: 16px 0 0;
+	padding: 14px 16px;
+	border: 1px solid #cfe3da;
+	border-radius: 12px;
+	background: #f2f9f6;
+	color: var(--lg-text);
+	font-size: 15px;
+	line-height: 1.55;
+}
+
+.lgc-head__napomena .lg-icon {
+	flex: none;
+	margin-top: 2px;
+	color: var(--lg-green);
+}
+
+/* Plus prodavac */
+.lgc-plus {
+	display: grid;
+	grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+	gap: 24px 32px;
+	align-items: center;
+	padding: 32px;
+	border: 1px solid #cfe3da;
+	border-radius: 16px;
+	background: linear-gradient(135deg, #fff 0%, #fff 50%, #eef7f3 100%);
+}
+
+.lgc-plus__tekst {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 10px;
+}
+
+.lgc-plus__oznaka {
+	padding: 4px 10px;
+	border-radius: 999px;
+	background: var(--lg-orange);
+	color: #fff;
+	font-size: 12px;
+	font-weight: 800;
+	letter-spacing: .04em;
+	text-transform: uppercase;
+}
+
+.lgc-plus__naziv {
+	margin: 0;
+	font-size: 26px;
+	font-weight: 800;
+}
+
+.lgc-plus__uvod {
+	margin: 0;
+	color: var(--lg-muted);
+	font-size: 15px;
+	line-height: 1.55;
+}
+
+.lgc-plus__stavke {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px 20px;
+	margin: 6px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.lgc-plus__stavke li {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+}
+
+.lgc-plus__stavke .lg-icon {
+	flex: none;
+	margin-top: 2px;
+	color: var(--lg-green);
+}
+
+.lgc-plus__cene {
+	display: grid;
+	gap: 10px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.lgc-plus__cena {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto auto;
+	align-items: center;
+	gap: 12px;
+	padding: 14px 18px;
+	border: 1px solid var(--lg-border);
+	border-radius: 12px;
+	background: #fff;
+}
+
+.lgc-plus__period {
+	font-weight: 700;
+}
+
+.lgc-plus__iznos {
+	color: var(--lg-green-dark);
+	font-size: 20px;
+	font-weight: 800;
+	white-space: nowrap;
+}
+
+@media (max-width: 767.98px) {
+	.lgc-plus {
+		grid-template-columns: 1fr;
+		padding: 22px 18px;
+	}
+
+	.lgc-plus__stavke {
+		grid-template-columns: 1fr;
+	}
+
+	.lgc-plus__cena {
+		grid-template-columns: minmax(0, 1fr) auto;
+	}
+
+	.lgc-plus__cena .lgc-naruci,
+	.lgc-plus__cena .lgc-uskoro {
+		grid-column: 1 / -1;
+		justify-self: start;
+	}
+}

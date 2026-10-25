@@ -95,8 +95,8 @@ class OrderAdminTest extends PaymentsTestCase
 
     public function test_refund_defaults_to_the_pro_rata_amount(): void
     {
-        $order = $this->pay($this->featuredOrder('featured_30'));
-        $this->travel(10)->days();
+        $order = $this->pay($this->featuredOrder('top_7'));
+        $this->travel(2)->days();
         $expected = app(OrderFulfillment::class)->refundableAmount($order->fresh());
         $this->assertGreaterThan(0, $expected);
         $this->assertLessThan($order->amount_rsd, $expected);

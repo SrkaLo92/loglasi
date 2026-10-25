@@ -13,11 +13,14 @@ use App\Services\Payments\BuyerDetails;
 use App\Support\Settings;
 use Database\Seeders\ProductSeeder;
 use Illuminate\Support\Facades\Mail;
+use Tests\Concerns\OpensPrivatePayments;
 use Tests\TestCase;
 
 /** Shared setup: the price list, payee settings (synthetic account), helpers to order and pay. */
 abstract class PaymentsTestCase extends TestCase
 {
+    use OpensPrivatePayments;
+
     public const ACCOUNT = '160-0000000123456-54';
 
     protected function setUp(): void

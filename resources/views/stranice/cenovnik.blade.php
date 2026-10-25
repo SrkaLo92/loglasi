@@ -27,18 +27,42 @@
 	$free = Cenovnik::freeListings();
 	$maxImages = app(ListingImages::class)->maxImages();
 	$check = fn () => Ikonice::svg('check', 18, '2.5');
+	$plus = Cenovnik::listedOf(Cenovnik::PLUS_SELLER);
+	$plusMain = $plus[0] ?? null;
+	$plusFeatures = $plusMain ? array_values(array_filter(array_map('trim', preg_split('/\R/', (string) $plusMain->description) ?: []), 'strlen')) : [];
 	$promoIcons = [
 		'bump' => 'M12 19V5M5 12l7-7 7 7',
 		'bump_10' => 'M12 19V5M5 12l7-7 7 7M5 21h14',
 		'featured_7' => 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',
+		'quick_sale_7' => 'M13 2L4 14h7l-1 8 9-12h-7z',
 		'priority_3' => 'M13 2L3 14h9l-1 8 10-12h-9z',
 		'top_7' => 'M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0z',
 		'premium_xl_7' => 'M3 3h18v14H3zM3 21h8',
 		'premium_xl_home_7' => 'M3 11l9-8 9 8M5 10v10h14V10',
 	];
 	$section = 0;
-	// Payments: order page for products that are on sale (display-only rows have no link).
-	$orderUrl = fn ($p) => $p && $p->is_active && ! $p->display_only && \App\Services\Payments\ProductCatalog::isSellable($p) ? url_slash('moj-nalog/narudzbine/nova').'?usluga='.$p->code : null;
+	// Payments: order page for products that are on sale (display-only rows have no link). Products under the
+	// smallest order come from packs and credits. Until private payments are on, only firm packages and firm
+	// accounts can order; private users see „Uskoro”.
+	$canOrder = \App\Support\Payments\PaymentMode::canOrder(auth()->user());
+	$minOrder = \App\Support\Payments\PaymentMode::minOrder();
+	$sellable = fn ($p) => $p && $p->is_active && ! $p->display_only && \App\Services\Payments\ProductCatalog::isSellable($p) && $p->price_rsd >= $minOrder;
+	$isPackage = fn ($p) => \App\Services\Payments\ProductCatalog::type($p) === \App\Services\Payments\ProductCatalog::FIRM_PACKAGE;
+	$orderUrl = fn ($p) => $sellable($p) && ($canOrder || $isPackage($p)) ? url_slash('moj-nalog/narudzbine/nova').'?usluga='.$p->code : null;
+	$soon = fn ($p) => $sellable($p) && ! $canOrder && ! $isPackage($p);
+	$orderCell = function ($p) use ($orderUrl, $soon, $minOrder) {
+		if ($url = $orderUrl($p)) {
+			return '<a class="lgc-naruci" href="'.e($url).'">Naruči<span class="lg-visually-hidden"> '.e($p->name).'</span></a>';
+		}
+		if ($soon($p)) {
+			return '<span class="lgc-uskoro">Uskoro</span>';
+		}
+		if ($p && $p->is_active && $p->price_rsd < $minOrder) {
+			return '<span class="lgc-uskoro lgc-uskoro--uz">uz paket</span>';
+		}
+
+		return '';
+	};
 @endphp
 
 @section('content')
@@ -46,6 +70,9 @@
 	<header class="lgc-head">
 		<h1 class="lg-strana__naslov">{{ PageText::get('cenovnik.naslov') }}</h1>
 		<p class="lgc-head__uvod">{{ PageText::get('cenovnik.uvod') }}</p>
+		@unless ($canOrder)
+			<p class="lgc-head__napomena">{{ Ikonice::svg('info', 18) }} Za sada plaćaju firme i preduzetnici. Za privatna lica plaćanje uključujemo uskoro, a do tada imate {{ Cenovnik::freeListingsText() }} besplatno.</p>
+		@endunless
 	</header>
 
 	{{-- 1. Private users --}}
@@ -84,10 +111,36 @@
 							<span class="lgc-slot__opis">{{ Cenovnik::description($product) }}</span>
 						</span>
 						<span class="lgc-slot__cena">{{ Cenovnik::price($product->price_rsd) }}</span>
-						@if ($url = $orderUrl($product))<a class="lgc-naruci" href="{{ $url }}">Naruči<span class="lg-visually-hidden"> {{ $product->name }}</span></a>@endif
+						{!! $orderCell($product) !!}
 					</li>
 				@endforeach
 			</ul>
+		@endif
+
+		@if ($plusMain)
+			<div class="lgc-plus" data-proizvod="{{ $plusMain->code }}">
+				<div class="lgc-plus__tekst">
+					<span class="lgc-plus__oznaka">Novo</span>
+					<h3 class="lgc-plus__naziv">{{ PageText::get('cenovnik.plus.naslov') }}</h3>
+					<p class="lgc-plus__uvod">{{ PageText::get('cenovnik.plus.uvod') }}</p>
+					@if ($plusFeatures)
+						<ul class="lgc-plus__stavke">
+							@foreach ($plusFeatures as $feature)
+								<li>{{ $check() }}{{ $feature }}</li>
+							@endforeach
+						</ul>
+					@endif
+				</div>
+				<ul class="lgc-plus__cene">
+					@foreach ($plus as $product)
+						<li class="lgc-plus__cena">
+							<span class="lgc-plus__period">{{ match (true) { $product->duration_days >= 365 => 'Godinu dana', default => $product->duration_days.' dana' } }}</span>
+							<span class="lgc-plus__iznos">{{ Cenovnik::price($product->price_rsd) }}</span>
+							{!! $orderCell($product) !!}
+						</li>
+					@endforeach
+				</ul>
+			</div>
 		@endif
 	</section>
 
@@ -114,7 +167,7 @@
 								</th>
 								<td class="lgc-promo__opis">{{ Cenovnik::description($product) }}</td>
 								<td class="lgc-promo__trajanje">{{ Cenovnik::promotionDuration($product) }}</td>
-								<td class="lgc-promo__cena">{{ Cenovnik::price($product->price_rsd) }}@if ($url = $orderUrl($product)) <a class="lgc-naruci" href="{{ $url }}">Naruči<span class="lg-visually-hidden"> {{ $product->name }}</span></a>@endif</td>
+								<td class="lgc-promo__cena">{{ Cenovnik::price($product->price_rsd) }} {!! $orderCell($product) !!}</td>
 							</tr>
 						@endforeach
 					</tbody>

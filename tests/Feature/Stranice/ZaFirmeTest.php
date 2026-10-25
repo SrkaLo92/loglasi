@@ -31,7 +31,7 @@ class ZaFirmeTest extends TestCase
             ->assertOk()
             ->assertSee('Još 23 besplatna mesta od 30')
             ->assertSee('Zauzeto je 7 od 30.')
-            ->assertSee("Prvih 30 firmi: 12 meseci besplatno. Posle toga paketi počinju od 1.490\u{00A0}RSD mesečno, bez automatske naplate.", false)
+            ->assertSee("Prvih 30 firmi: 12 meseci besplatno. Posle toga paketi počinju od 490\u{00A0}RSD mesečno, bez automatske naplate.", false)
             ->assertSee('Za firme')
             ->assertDontSee('Founder')
             ->assertSee('Prijavite firmu dok ima besplatnih mesta');
@@ -58,18 +58,18 @@ class ZaFirmeTest extends TestCase
 
         $this->get('/za-firme/')
             ->assertSee('Sva besplatna mesta su popunjena')
-            ->assertSee("Paketi za firme počinju od 1.490\u{00A0}RSD mesečno.", false)
+            ->assertSee("Paketi za firme počinju od 490\u{00A0}RSD mesečno.", false)
             ->assertDontSee('firmi: 12 meseci besplatno')
             ->assertSee('Prijavite svoju firmu');
     }
 
     public function test_package_prices_from_products(): void
     {
-        Product::where('code', 'business_start_monthly')->update(['price_rsd' => 1990]);
+        Product::where('code', 'business_vizitka_monthly')->update(['price_rsd' => 590]);
 
         $this->get('/za-firme/')
-            ->assertSee("paketi počinju od 1.990\u{00A0}RSD mesečno", false)
-            ->assertSeeInOrder(['Business Start', "1.990\u{00A0}RSD", 'Business Pro', 'Business Max'], false)
+            ->assertSee("paketi počinju od 590\u{00A0}RSD mesečno", false)
+            ->assertSeeInOrder(['Vizitka', "590\u{00A0}RSD", 'Business Start', "1.490\u{00A0}RSD", 'Business Pro', 'Business Max'], false)
             ->assertSee('<th scope="col" class="lgx-tabela__biznis">Profil firme</th>', false)
             ->assertDontSee('Biznis paket');
     }

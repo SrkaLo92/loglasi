@@ -7,14 +7,14 @@ use App\Models\Product;
 use Carbon\CarbonInterface;
 
 /**
- * The plan a firm is on right now: a Business package (start, pro, max; monthly or yearly) or the free
+ * The plan a firm is on right now: a package (vizitka, start, pro, max; monthly or yearly) or the free
  * first year of the first 30 firms. A term is active while package_ends_at is in the future.
  * Definitions are in config('firms.packages') and config('firms.free_program'); the listing limit of a
  * package comes from its product row (admin-editable) when that row exists.
  */
 class FirmPackage
 {
-    public const PACKAGES = ['start', 'pro', 'max'];
+    public const PACKAGES = ['vizitka', 'start', 'pro', 'max'];
 
     public const PERIODS = ['monthly', 'yearly'];
 
@@ -28,7 +28,7 @@ class FirmPackage
             && ($firm->onFreeYear() || in_array($firm->package, self::PACKAGES, true));
     }
 
-    /** 'start' | 'pro' | 'max' | 'free', or null without an active term. */
+    /** 'vizitka' | 'start' | 'pro' | 'max' | 'free', or null without an active term. */
     public static function code(?Firm $firm): ?string
     {
         if (! static::isActive($firm)) {

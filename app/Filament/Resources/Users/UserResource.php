@@ -15,6 +15,7 @@ use App\Filament\Support\Options;
 use App\Models\User;
 use App\Rules\PhoneNumber;
 use App\Support\Firms\FirmPackage;
+use App\Support\LikelyFirm;
 use App\Support\Phone;
 use BackedEnum;
 use Filament\Actions\ActionGroup;
@@ -30,6 +31,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -206,7 +208,9 @@ class UserResource extends Resource
                     ->label('Vrsta')
                     ->badge()
                     ->formatStateUsing(fn (AccountType $state) => $state->label())
-                    ->color(fn (AccountType $state) => $state === AccountType::Firm ? 'warning' : 'gray'),
+                    ->color(fn (AccountType $state) => $state === AccountType::Firm ? 'warning' : 'gray')
+                    // Price list of 25 Oct 2026: a private account that looks like a firm gets a warning.
+                    ->description(fn (User $record) => ($why = LikelyFirm::reasons($record)) ? 'Verovatno firma: '.implode(', ', $why) : null),
                 TextColumn::make('role')
                     ->label('Uloga')
                     ->formatStateUsing(fn (Role $state) => $state->label())
@@ -221,6 +225,9 @@ class UserResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('account_type')->label('Vrsta naloga')->options(Options::enum(AccountType::class)),
+                Filter::make('likely_firm')
+                    ->label('Verovatno firma (više od 50 oglasa, isti artikli, usluge)')
+                    ->query(fn (Builder $query) => LikelyFirm::scope($query)),
                 SelectFilter::make('role')->label('Uloga')->options(Options::enum(Role::class)),
                 SelectFilter::make('status')->label('Status')->options(Options::enum(UserStatus::class)),
                 TernaryFilter::make('phone_verified')

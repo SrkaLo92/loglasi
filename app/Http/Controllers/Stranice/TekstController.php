@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers\Stranice;
 
+use App\Enums\ListingStatus;
 use App\Http\Controllers\Controller;
+use App\Models\Listing;
 use App\Support\Seo;
+use App\Support\Stranice\Cenovnik;
+use App\Support\Stranice\Navigacija;
 use App\Support\Stranice\PageText;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 /** O nama, Uslovi korišćenja, Politika privatnosti, pravni tekstovi za plaćanje i Česta pitanja: tekst iz podešavanja. */
@@ -27,6 +32,15 @@ class TekstController extends Controller
         abort_unless(isset(self::PAGES[$page]), 404);
 
         $heading = PageText::get($page.'.naslov');
+        $meta = [
+            'title' => PageText::get('seo.'.$page.'.title') ?: $heading.' | loglasi.rs',
+            'description' => PageText::get('seo.'.$page.'.description') ?: self::PAGES[$page]['opis'],
+            'canonical' => '/'.trim(self::PAGES[$page]['putanja'], '/').'/',
+        ];
+
+        if ($page === 'o_nama') {
+            return view('stranice.o-nama', $meta + ['stats' => self::stats()]);
+        }
 
         return view('stranice.tekst', [
             'page' => $page,
@@ -36,6 +50,28 @@ class TekstController extends Controller
             'description' => PageText::get('seo.'.$page.'.description') ?: self::PAGES[$page]['opis'],
             'canonical' => '/'.trim(self::PAGES[$page]['putanja'], '/').'/',
         ]);
+    }
+
+    /**
+     * Numbers for the About page (cached 10 minutes): active listings, categories, free listings.
+     *
+     * @return list<array{value: string, label: string}>
+     */
+    private static function stats(): array
+    {
+        $counts = Cache::remember('stranice.o_nama.stats', 600, fn () => [
+            'listings' => Listing::query()->where('status', ListingStatus::Published)
+                ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))->count(),
+            'categories' => count(Navigacija::kategorije()),
+        ]);
+        $number = fn (int $n) => number_format($n, 0, ',', '.');
+        $free = Cenovnik::freeListings();
+
+        return array_values(array_filter([
+            $counts['listings'] > 0 ? ['value' => $number($counts['listings']), 'label' => Cenovnik::plural($counts['listings'], 'aktivan oglas', 'aktivna oglasa', 'aktivnih oglasa')] : null,
+            $counts['categories'] > 0 ? ['value' => $number($counts['categories']), 'label' => 'kategorija za sve što prodajete'] : null,
+            $free > 0 ? ['value' => (string) $free, 'label' => Cenovnik::plural($free, 'besplatan oglas', 'besplatna oglasa', 'besplatnih oglasa').' za privatna lica'] : null,
+        ]));
     }
 
     public function faq(): View
