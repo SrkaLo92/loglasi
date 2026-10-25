@@ -1006,6 +1006,13 @@
 	transition: border-color .15s, background .15s;
 }
 .hm-pop__item:hover .hm-pop__icon { border-color: var(--lg-green); background: var(--lg-mint); }
+/* Each popular category in its own soft colour (same tones as the main tiles), repeating every five */
+.hm-pop__list > li:nth-child(5n+1) .hm-pop__icon { border-color: #c9dcf3; background: #e8f0fb; color: #2563a8; }
+.hm-pop__list > li:nth-child(5n+2) .hm-pop__icon { border-color: #f6d6bf; background: #fdf0e6; color: #b8501a; }
+.hm-pop__list > li:nth-child(5n+3) .hm-pop__icon { border-color: #ddd3f4; background: #f1edfb; color: #6b4fbb; }
+.hm-pop__list > li:nth-child(5n+4) .hm-pop__icon { border-color: #c4e6e0; background: #e6f5f3; color: #1f7a6d; }
+.hm-pop__list > li:nth-child(5n+5) .hm-pop__icon { border-color: #cfe3da; background: var(--lg-mint); color: var(--lg-green); }
+.hm-pop__item:hover .hm-pop__icon { filter: saturate(1.25) brightness(.97); }
 .hm-pop__name { font-size: 14px; line-height: 1.3; }
 
 @media (max-width: 767.98px) {

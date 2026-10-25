@@ -414,7 +414,7 @@ class ListingImages
     {
         $file = $image->variants[$size][$format] ?? $image->path;
 
-        return $this->disk()->url($file);
+        return ListingImage::urlFor($file) ?? ''; // imported images can be full URLs
     }
 
     /** Image from the API contract: {id, thumb, medium, large, width, height}. */
