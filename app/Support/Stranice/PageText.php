@@ -2,6 +2,7 @@
 
 namespace App\Support\Stranice;
 
+use App\Services\Ratings\SellerRatings;
 use App\Support\Payments\PaymentDetails;
 use App\Support\Phone;
 use App\Support\Settings;
@@ -101,6 +102,7 @@ class PageText
             '{email}' => $emailMd,
             '{telefon}' => self::phone(),
             '{rok_uplate}' => self::pendingDays(),
+            '{dani_izmene_ocene}' => (string) SellerRatings::EDIT_DAYS,
             '{pdv_napomena}' => Prodavac::escape(PaymentDetails::vatNote()),
             '{prodavac}' => Prodavac::markdown(),
             '{prodavac_kratko}' => Prodavac::short(),

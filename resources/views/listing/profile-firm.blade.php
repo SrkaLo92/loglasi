@@ -7,6 +7,7 @@
 
 @push('head')
 <link rel="stylesheet" href="{{ asset_v('css/listing-profile.css') }}">
+<link rel="stylesheet" href="{{ asset_v('css/ocene.css') }}">
 @endpush
 
 @push('scripts')
@@ -93,6 +94,7 @@
 	<div class="lgp-firma__cols">
 		<div class="lgp-firma__main">
 			@include('listing.profile.listings', ['title' => 'Oglasi firme'])
+			@include('ratings.partials.brief', ['summary' => $ratingSummary, 'latest' => $ratingLatest])
 		</div>
 		<aside class="lgp-firma__side" aria-label="Podaci o firmi">
 			<details class="lgp-firma__more" open data-lgp-collapse>

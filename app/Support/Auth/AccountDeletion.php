@@ -5,6 +5,7 @@ namespace App\Support\Auth;
 use App\Enums\UserStatus;
 use App\Models\Conversation;
 use App\Models\User;
+use App\Services\Ratings\SellerRatings;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -12,7 +13,7 @@ use Illuminate\Support\Str;
  * Brisanje naloga na zahtev korisnika (sajt i aplikacija).
  *
  * Brišu se oglasi (meko, da stari URL-ovi vrate 410), razgovori i poruke, omiljeni, sačuvane
- * pretrage, uređaji, tokeni, profil firme i slika. Red korisnika ostaje bez ličnih podataka
+ * pretrage, ocene (date i dobijene), uređaji, tokeni, profil firme i slika. Red korisnika ostaje bez ličnih podataka
  * (ime, email, telefon, lozinka), da bi narudžbine i knjigovodstvo ostali tačni.
  * Isti email posle može ponovo da se registruje.
  */
@@ -30,6 +31,11 @@ class AccountDeletion
                 ->where('buyer_id', $user->id)
                 ->orWhere('seller_id', $user->id)
                 ->delete();
+
+            // Ratings the user gave and got; the averages of the rated sellers are recomputed after commit.
+            $rated = DB::table('seller_ratings')->where('rater_id', $user->id)->pluck('seller_id')->all();
+            DB::table('seller_ratings')->where('rater_id', $user->id)->orWhere('seller_id', $user->id)->delete();
+            DB::afterCommit(fn () => array_map(fn ($id) => app(SellerRatings::class)->refresh((int) $id), $rated));
 
             $user->listings()->delete();
             $user->firm()->delete();

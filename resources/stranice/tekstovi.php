@@ -259,6 +259,13 @@ Plaćena usluga za oglas uklonjen zbog kršenja pravila se ne vraća.
 
 Ako vidite oglas koji krši pravila ili deluje kao prevara, kliknite na „Prijavi oglas” na strani oglasa. Prijave pregledamo i javljamo rezultat ako ostavite kontakt.
 
+## Ocene prodavaca
+
+- Prodavca ocenjuje kupac, od 1 do 5 zvezdica, iz razgovora o oglasu, i to tek kad mu prodavac odgovori. Jedan kupac daje jednu ocenu istom prodavcu i može da je promeni {dani_izmene_ocene} dana.
+- Ocenjujte kako je tekao dogovor: da li se prodavac javio, da li je stvar bila kao u opisu, da li je ispoštovao dogovor. Cena nije razlog za lošu ocenu.
+- U komentaru nisu dozvoljeni uvrede, pretnje, lični podaci (telefon, adresa, JMBG), linkovi ni reklame. Ne ocenjujte sebe preko drugog naloga i ne tražite ili nudite ocenu za uslugu.
+- Prodavac može javno da odgovori na ocenu ili da je prijavi. Ocenu koja krši pravila sakrivamo i ona se više ne računa u prosek.
+
 ## Saveti za bezbednu kupovinu
 
 - Robu pogledajte i platite uživo, na javnom mestu.
@@ -314,15 +321,19 @@ Oglase pregledamo i možemo da uklonimo oglas koji krši ove uslove, bez prethod
 - Plus prodavac važi za oglase privatnih korisnika; ne važi za usluge i poslove. Oglasi se tokom paketa obnavljaju sami.
 - Sve o naručivanju, plaćanju, računima, odustanku i reklamacijama piše na stranama [Uslovi kupovine i plaćanja](/uslovi-placanja/), [Odustanak od ugovora](/odustanak-od-ugovora/) i [Reklamacije i povraćaj novca](/reklamacije/).
 
-## 7. Odgovornost
+## 7. Ocene prodavaca
+
+Kupac koji se dopisivao sa prodavcem o oglasu može da ga oceni od 1 do 5 i da napiše komentar. Ocena, komentar, ime i početno slovo prezimena kupca i naslov oglasa su javni na profilu prodavca. Za ocenu odgovara onaj ko ju je dao. Ocene koje krše [Pravila oglašavanja](/pravila-oglasavanja/) sakrivamo; ocene ne menjamo i ne brišemo na zahtev prodavca samo zato što su loše.
+
+## 8. Odgovornost
 
 Za sadržaj oglasa odgovara onaj ko ga je postavio. loglasi.rs ne odgovara za tačnost oglasa, kvalitet robe ni za dogovor između kupca i prodavca. Preporučujemo da robu pogledate uživo i da ne plaćate unapred nepoznatim osobama.
 
-## 8. Izmene uslova
+## 9. Izmene uslova
 
 Uslove možemo da izmenimo. Nova verzija važi od objave na ovoj strani.
 
-## 9. Kontakt
+## 10. Kontakt
 
 Pitanja o ovim uslovima pošaljite preko [kontakt forme](/kontakt/) ili na {email}.
 MD,
@@ -381,6 +392,8 @@ Podatke ne prodajemo i ne ustupamo drugima radi reklamiranja.
 ## Šta drugi korisnici vide
 
 Na oglasu se prikazuju ime ili naziv firme, mesto i broj telefona ako ste ga uneli u oglas. Adresa e-pošte se ne prikazuje.
+
+Kad ocenite prodavca, na njegovom profilu se prikazuju vaša ocena, komentar, vaše ime sa početnim slovom prezimena (npr. „Marko P.”) i naslov oglasa. Ocene koje ste dali i dobili brišu se zajedno sa nalogom.
 
 ## Koliko dugo čuvamo podatke
 

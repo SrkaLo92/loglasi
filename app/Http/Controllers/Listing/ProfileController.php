@@ -9,6 +9,7 @@ use App\Models\Listing;
 use App\Models\User;
 use App\Services\Catalog;
 use App\Services\FirmBenefits;
+use App\Services\Ratings\SellerRatings;
 use App\Support\Listing\Seller;
 use App\Support\Listing\SimilarListings;
 use App\Support\Listing\Stats;
@@ -27,7 +28,7 @@ class ProfileController extends Controller
 
     public const MAX_PAGES = 50;
 
-    public function show(Request $request, string $slug, Catalog $catalog): View
+    public function show(Request $request, string $slug, Catalog $catalog, SellerRatings $ratings): View
     {
         $user = User::query()->where('slug', $slug)->with('firm.location')->first();
         $viewer = $request->user();
@@ -82,6 +83,8 @@ class ProfileController extends Controller
             'isOwner' => $viewer !== null && $viewer->id === $user->id,
             'editUrl' => url_slash($isFirm ? 'moj-nalog/firma' : (string) config('listing.profile_edit_path', 'moj-nalog')),
             'messageUrl' => url_slash('moj-nalog/poruke/novo').'?korisnik='.$user->id,
+            'ratingSummary' => $ratings->summary($user->id),
+            'ratingLatest' => $user->rating_count > 0 ? $ratings->latest($user->id) : collect(),
         ];
 
         if (! $isFirm) {

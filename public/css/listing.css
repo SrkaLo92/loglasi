@@ -1820,3 +1820,6 @@ button.lgo-bar__btn--tel {
 .lgo-fav__btn:hover { border-color: var(--lg-green); color: var(--lg-green-dark); }
 .lgo-fav__btn[aria-pressed="true"] { border-color: #f3c3bd; background: #fdf0ee; color: #c0392b; }
 .lgo-fav__btn[aria-pressed="true"] svg path { fill: currentColor; }
+
+/* Seller rating on the seller card */
+.lgo-seller__star { display: inline-grid; place-items: center; width: 20px; color: #d08a00; font-size: 18px; line-height: 1; }

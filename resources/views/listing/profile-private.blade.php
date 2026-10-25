@@ -4,6 +4,7 @@
 
 @push('head')
 <link rel="stylesheet" href="{{ asset_v('css/listing-profile.css') }}">
+<link rel="stylesheet" href="{{ asset_v('css/ocene.css') }}">
 @endpush
 
 @section('content')
@@ -12,6 +13,7 @@
 		Text::memberSince($user->created_at),
 		Text::number($total).' '.Text::plural($total, 'oglas', 'oglasa', 'oglasa'),
 		$phone !== '' && $user->isPhoneVerified() ? 'Telefon proveren' : null,
+		$user->rating_count > 0 ? '★ '.\App\Support\Ratings\RatingPresenter::average((float) $user->rating_avg).' ('.\App\Support\Ratings\RatingPresenter::count((int) $user->rating_count).')' : null,
 	]);
 @endphp
 <section class="lgp lgp-privatni" aria-labelledby="lgp-ime-{{ $user->id }}" data-lgp-user="{{ $user->id }}">
@@ -28,4 +30,5 @@
 	@include('listing.profile.actions', ['isFirm' => false, 'firm' => null])
 </section>
 @include('listing.profile.listings', ['title' => 'Oglasi korisnika'])
+<div class="lg-wrap">@include('ratings.partials.brief', ['summary' => $ratingSummary, 'latest' => $ratingLatest])</div>
 @endsection

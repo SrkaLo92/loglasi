@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Services\Messages\MessageBody;
 use App\Services\Messages\MessageRejected;
 use App\Services\Messages\Messenger;
+use App\Services\Ratings\SellerRatings;
 use App\Support\Listing\ReportReasons;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -98,6 +99,7 @@ class ConversationController extends Controller
             'messages' => $page['items'],
             'hasOlder' => $page['has_older'],
             'otherReadAt' => $conversation->otherReadAt($user),
+            'rating' => app(SellerRatings::class)->card($user, $conversation),
         ]);
     }
 

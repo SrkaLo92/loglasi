@@ -59,6 +59,10 @@
 		<p class="lgm-alert lgm-alert--warn">Ovaj korisnik više ne prima poruke.</p>
 	@endif
 
+	@if ($rating)
+		@include('ratings.partials.conversation', ['rating' => $rating])
+	@endif
+
 	@if ($other)
 		<div class="lgm-actions">
 			<form method="post" action="{{ url_slash('moj-nalog/poruke/'.$conversation->id.'/blokiraj') }}">

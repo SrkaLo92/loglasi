@@ -23,6 +23,9 @@
 			<li>{{ Icons::listing('calendar') }}<span>{{ $since }}</span></li>
 		@endif
 		<li>{{ Icons::listing('list') }}<a href="{{ $seller->profileUrl }}">{{ Text::activeListings($seller->activeCount) }}</a></li>
+		@if ($seller->user->rating_count > 0)
+			<li class="lgo-seller__rating"><span class="lgo-seller__star" aria-hidden="true">★</span><a href="{{ url_slash('korisnik/'.$seller->user->slug.'/ocene') }}"><strong>{{ \App\Support\Ratings\RatingPresenter::average((float) $seller->user->rating_avg) }}</strong> ({{ \App\Support\Ratings\RatingPresenter::count((int) $seller->user->rating_count) }})</a></li>
+		@endif
 		@if ($seller->user->isPhoneVerified())
 			<li>{{ Icons::listing('shield') }}<span>Telefon proveren</span></li>
 		@endif

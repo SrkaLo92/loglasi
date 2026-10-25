@@ -12,6 +12,7 @@ use App\Services\ListingFields;
 use App\Support\Firms\FirmPackage;
 use App\Support\Listing\Seller;
 use App\Support\Listing\WorkingHours;
+use App\Support\Ratings\RatingPresenter;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use Illuminate\Support\Facades\DB;
@@ -128,6 +129,7 @@ class ListingFormatter
             'phone_verified' => $user->isPhoneVerified(),
             'member_since' => static::date($user->created_at),
             'active_listings' => $activeListings ?? Seller::activeCount($user->id),
+            'rating' => RatingPresenter::brief($user),
         ];
     }
 
