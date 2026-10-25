@@ -7,6 +7,12 @@
 @use('App\Support\Seo')
 
 @push('head')
+	@php
+		$srRecent = trim(implode(' | ', array_filter([$filters->query['keyword'] ?? null, $category?->name, $location?->name])));
+	@endphp
+	@if ($srRecent !== '')
+		<meta name="lg-recent" content="{{ $srRecent }}">
+	@endif
 	<link rel="stylesheet" href="{{ asset_v('css/search.css') }}">
 	<link rel="stylesheet" href="{{ asset_v('css/pick.css') }}">
 @endpush
@@ -96,6 +102,24 @@
 						<label class="sr-group__title" for="sr-keyword">Ključna reč</label>
 						<input class="sr-input" id="sr-keyword" type="search" name="keyword" value="{{ $filters->query['keyword'] ?? '' }}" maxlength="100" placeholder="npr. Golf, stan, bicikl" enterkeyhint="search">
 					</div>
+
+					{{-- Phone: "Kategorija" opens all categories, "Grupa" lists the groups of the top category (kupujemprodajem). --}}
+					<a class="sr-row sr-mcat" href="{{ url_slash('/oglasi') }}" data-lg-cats>
+						<span class="sr-row__title">Kategorija</span>
+						<span class="sr-row__value{{ $groupNav['root'] ? ' has-value' : '' }}">{{ $groupNav['root']['name'] ?? 'Sve kategorije' }}</span>
+						{{ CategoryIcons::svg('chevron', 20, '2') }}
+					</a>
+					@if ($groupNav['groups'])
+						<fieldset class="sr-group sr-mgroup" data-sr-key="grupa" data-sr-links>
+							<legend class="sr-group__title">Grupa</legend>
+							<ul class="sr-links">
+								<li><a href="{{ $groupNav['root']['url'] }}" @if ($groupNav['current'] === null) aria-current="page" @endif data-all>Sve u kategoriji {{ $groupNav['root']['name'] }} <span class="sr-links__n">{{ number_format($groupNav['root']['count'], 0, ',', '.') }}</span></a></li>
+								@foreach ($groupNav['groups'] as $group)
+									<li><a href="{{ $group['url'] }}" @if ($groupNav['current'] === $group['id']) aria-current="page" @endif>{{ $group['name'] }} <span class="sr-links__n">{{ number_format($group['count'], 0, ',', '.') }}</span></a></li>
+								@endforeach
+							</ul>
+						</fieldset>
+					@endif
 
 					<fieldset class="sr-group" data-sr-key="cena">
 						<legend class="sr-group__title">Cena</legend>
@@ -223,4 +247,5 @@
 		</div>
 	</div>
 </div>
+@include('partials.category-sheet')
 @endsection

@@ -92,9 +92,12 @@
 		</div>
 	</a>
 	@if ($lcFav !== null)
-		<form class="lc__fav" method="post" action="{{ Favorites::url((int) $listing->id) }}">
+		<form class="lc__fav" method="post" action="{{ Favorites::url((int) $listing->id) }}" data-lg-fav>
 			@csrf
 			<button class="lc__fav-btn" type="submit" aria-pressed="{{ $lcFav ? 'true' : 'false' }}" aria-label="{{ $lcFav ? 'Ukloni iz omiljenih' : 'Sačuvaj u omiljene' }}: {{ $listing->title }}">{{ CategoryIcons::svg('heart', 20, '2') }}</button>
 		</form>
+	@else
+		{{-- A guest sees the heart too (as on kupujemprodajem); it leads to login. --}}
+		<div class="lc__fav"><a class="lc__fav-btn" href="{{ \App\Support\Auth\LoginPage::url() }}" rel="nofollow" aria-label="Prijavite se da biste sačuvali oglas: {{ $listing->title }}">{{ CategoryIcons::svg('heart', 20, '2') }}</a></div>
 	@endif
 </article>

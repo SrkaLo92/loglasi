@@ -8,6 +8,7 @@ use App\Http\Api\CatalogFormatter;
 use App\Http\Controllers\Controller;
 use App\Services\Catalog;
 use App\Services\ListingFields;
+use App\Support\Search\CategorySheet;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -23,6 +24,26 @@ class CatalogApiController extends Controller
         $tree = array_map([CatalogFormatter::class, 'categoryNode'], $this->catalog->tree());
 
         return ApiResponse::json($request, $tree, ApiResponse::CACHE_CATALOG);
+    }
+
+    /** "Sve kategorije" for the app: most wanted, then themes of tiles (the same as the site's sheet). */
+    public function browse(Request $request): Response|JsonResponse
+    {
+        $item = fn (array $c) => [
+            'id' => $c['id'],
+            'slug' => $c['slug'],
+            'name' => $c['name'],
+            'parent_name' => $c['path'],
+            'icon' => $c['icon'],
+            'image' => $c['image'],
+            'count' => $c['count'],
+        ];
+        $sheet = CategorySheet::get();
+
+        return ApiResponse::json($request, [
+            'popular' => array_map($item, $sheet['popular']),
+            'themes' => array_map(fn ($t) => ['name' => $t['name'], 'items' => array_map($item, $t['items'])], $sheet['themes']),
+        ], ApiResponse::CACHE_CATALOG);
     }
 
     /** Mesta. */

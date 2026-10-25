@@ -5,7 +5,22 @@
 	$published = $listing->published_at ?? $listing->created_at;
 @endphp
 <section class="lgo lgo-card lgo-contact lgo-o3" aria-label="Cena i kontakt">
-	<h1 class="lgo-contact__title">{{ Seo::get()->getH1() ?? $listing->title }}</h1>
+	<div class="lgo-contact__top">
+		<h1 class="lgo-contact__title">{{ Seo::get()->getH1() ?? $listing->title }}</h1>
+		@if (! ($isOwner ?? false))
+			@auth
+				@php
+					$lgoFav = app(\App\Support\Search\Favorites::class)->has((int) $listing->id);
+				@endphp
+				<form class="lgo-fav" method="post" action="{{ \App\Support\Search\Favorites::url((int) $listing->id) }}" data-lg-fav>
+					@csrf
+					<button class="lgo-fav__btn" type="submit" aria-pressed="{{ $lgoFav ? 'true' : 'false' }}" aria-label="{{ $lgoFav ? 'Ukloni iz omiljenih' : 'Sačuvaj u omiljene' }}">{{ Icons::listing('heart', 20) }}<span data-fav-text>{{ $lgoFav ? 'Sačuvano' : 'Sačuvaj' }}</span></button>
+				</form>
+			@else
+				<a class="lgo-fav__btn" href="{{ \App\Support\Auth\LoginPage::url() }}" rel="nofollow" aria-label="Prijavite se da biste sačuvali oglas">{{ Icons::listing('heart', 20) }}<span>Sačuvaj</span></a>
+			@endauth
+		@endif
+	</div>
 	<div class="lgo-contact__pricerow">
 		<p class="lgo-contact__price">{{ $listing->price === null ? 'Cena po dogovoru' : $listing->priceLabel() }}</p>
 		@if ($swap)

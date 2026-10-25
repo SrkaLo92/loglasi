@@ -61,8 +61,8 @@
 		<section class="hm-sec" aria-labelledby="hm-cats-title">
 			<div class="hm-sec__head">
 				<h2 class="hm-sec__title" id="hm-cats-title">{{ HomeSettings::get('home.categories_title') }}</h2>
-				<a class="hm-sec__link hm-hide-m" href="{{ $hmAll }}">Sve kategorije ({{ $hmCatTotal }})</a>
-				<a class="hm-sec__link hm-show-m" href="{{ $hmAll }}">Sve ({{ $hmCatTotal }})</a>
+				<a class="hm-sec__link hm-hide-m" href="{{ $hmAll }}" data-lg-cats>Sve kategorije ({{ $hmCatTotal }})</a>
+				<a class="hm-sec__link hm-show-m" href="{{ $hmAll }}" data-lg-cats>Sve ({{ $hmCatTotal }})</a>
 			</div>
 			<ul class="hm-cats">
 				@foreach ($sections['categories'] as $item)
@@ -77,7 +77,7 @@
 					</li>
 				@endforeach
 				<li>
-					<a class="hm-cat hm-cat--all" href="{{ $hmAll }}">
+					<a class="hm-cat hm-cat--all" href="{{ $hmAll }}" data-lg-cats>
 						<span class="hm-cat__icon">{{ CategoryIcons::svg('grid', 20) }}</span>
 						<span class="hm-cat__text">
 							<span class="hm-cat__name">Sve kategorije</span>
@@ -264,4 +264,5 @@
 		<div class="hm-about__text">{{ PageText::markdown($hmAbout !== '' ? $hmAbout : HomeSettings::ABOUT_DEFAULT) }}</div>
 	</details>
 </div>
+@include('partials.category-sheet')
 @endsection

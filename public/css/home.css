@@ -734,23 +734,50 @@
 		display: inline;
 	}
 
+	/* Phone: icon tiles, four in a row (kupujemprodajem, OLX), like "Sve kategorije". */
 	.hm-cats {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 10px;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 14px 6px;
 	}
 
-	.hm-cat {
-		gap: 10px;
-		padding: 10px 12px;
+	.hm-cat,
+	.hm-cat:visited {
+		flex-direction: column;
+		gap: 6px;
+		padding: 0;
+		border: 0;
+		background: none;
+		box-shadow: none;
+		text-align: center;
 	}
 
 	.hm-cat__icon {
-		width: 36px;
-		height: 36px;
+		width: 100%;
+		max-width: 76px;
+		height: auto;
+		aspect-ratio: 1;
+		border: 1px solid var(--lg-border);
+		border-radius: 16px;
+		background: var(--lg-mint);
+	}
+
+	.hm-cat__icon svg {
+		width: 28px;
+		height: 28px;
+	}
+
+	.hm-cat__text {
+		align-items: center;
 	}
 
 	.hm-cat__name {
-		font-size: 14px;
+		font-size: 13px;
+		line-height: 1.25;
+		overflow-wrap: anywhere;
+	}
+
+	.hm-cat__count {
+		display: none;
 	}
 
 	.hm-grid {
@@ -867,18 +894,4 @@
 	}
 }
 
-/* Narrow phones: icon above the name, so long category names keep the whole tile width. */
-@media (max-width: 479.98px) {
-	.hm-cat,
-	.hm-cat:visited {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 8px;
-	}
-
-	.hm-cat__icon {
-		width: 32px;
-		height: 32px;
-	}
-}
 

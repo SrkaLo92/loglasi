@@ -1,0 +1,76 @@
+/* "Sve kategorije" sheet (partials/category-sheet.blade.php, js/cats.js). Full screen on a phone, a dialog on a computer. */
+.lgc-lock, .lgc-lock body { overflow: hidden; }
+.lgc {
+	position: fixed; inset: 0; z-index: 10000;
+	display: flex; align-items: center; justify-content: center;
+	background: rgba(17, 30, 25, .45);
+}
+.lgc[hidden] { display: none; }
+.lgc__panel {
+	display: flex; flex-direction: column;
+	width: min(880px, calc(100vw - 48px)); max-height: min(86vh, 900px);
+	background: var(--lg-bg, #f5f6f4); border-radius: 18px; overflow: hidden;
+	box-shadow: 0 24px 60px rgba(0, 0, 0, .25);
+}
+.lgc__head { display: flex; align-items: center; justify-content: center; position: relative; min-height: 60px; padding: 0 56px; background: #fff; }
+.lgc__title { margin: 0; font-size: 18px; font-weight: 800; }
+.lgc__close {
+	position: absolute; right: 8px; top: 8px; display: flex; align-items: center; justify-content: center;
+	width: 44px; height: 44px; border: 0; border-radius: 50%; background: none; color: var(--lg-text); cursor: pointer;
+}
+.lgc__close:hover { background: var(--lg-bg); }
+.lgc__find {
+	display: flex; align-items: center; gap: 10px; margin: 0; padding: 0 16px 14px; background: #fff; color: var(--lg-muted);
+	border-bottom: 1px solid var(--lg-border);
+}
+.lgc__input {
+	flex: 1; min-width: 0; height: 48px; padding: 0 14px; border: 1px solid var(--lg-input); border-radius: 12px;
+	font: inherit; font-size: 16px; color: var(--lg-text); background: #fff;
+}
+.lgc__find { position: relative; }
+.lgc__find > svg { position: absolute; left: 30px; top: 14px; pointer-events: none; }
+.lgc__find .lgc__input { padding-left: 44px; }
+.lgc__input:focus { outline: none; border-color: var(--lg-green); box-shadow: 0 0 0 3px var(--lg-mint); }
+.lgc__body { overflow-y: auto; overscroll-behavior: contain; padding: 12px 16px 24px; }
+
+.lgc-sec { margin: 0 0 12px; padding: 16px; background: #fff; border-radius: 14px; }
+.lgc-sec__title { margin: 0 0 12px; font-size: 17px; font-weight: 800; }
+.lgc-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px 10px; }
+.lgc-tile, .lgc-tile:visited {
+	display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0;
+	color: var(--lg-text); text-align: center; text-decoration: none;
+}
+.lgc-tile__media {
+	display: flex; align-items: center; justify-content: center; width: 64px; height: 64px;
+	border: 1px solid var(--lg-border); border-radius: 16px; background: var(--lg-mint); color: var(--lg-green);
+	transition: border-color .15s, transform .15s;
+}
+.lgc-tile__media img { width: 48px; height: 48px; object-fit: contain; }
+.lgc-tile:hover .lgc-tile__media { border-color: var(--lg-green); transform: translateY(-1px); }
+.lgc-tile__name { font-size: 13px; font-weight: 600; line-height: 1.25; overflow-wrap: anywhere; }
+.lgc-tile__n { margin-top: -4px; font-size: 12px; color: var(--lg-muted); }
+.lgc-all, .lgc-all:visited { display: block; padding: 14px; text-align: center; font-weight: 700; color: var(--lg-green); }
+
+.lgc-results { margin: 0; padding: 0; list-style: none; background: #fff; border-radius: 14px; overflow: hidden; }
+.lgc-results li + li { border-top: 1px solid var(--lg-border); }
+.lgc-results a, .lgc-results a:visited {
+	display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; align-items: center;
+	min-height: 56px; padding: 8px 16px; color: var(--lg-text); text-decoration: none;
+}
+.lgc-results a:hover, .lgc-results a:focus-visible { background: var(--lg-bg); }
+.lgc-results__name { font-weight: 600; }
+.lgc-results__path { grid-row: 2; font-size: 13px; color: var(--lg-muted); }
+.lgc-results__n { grid-row: 1 / span 2; grid-column: 2; font-size: 13px; color: var(--lg-muted); }
+.lgc-none { padding: 24px 8px; text-align: center; color: var(--lg-text-2); }
+
+@media (max-width: 767.98px) {
+	.lgc { align-items: stretch; }
+	.lgc__panel { width: 100%; max-height: none; height: 100%; border-radius: 0; }
+	.lgc-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 6px; }
+	.lgc-tile__media { width: 100%; max-width: 76px; height: auto; aspect-ratio: 1; }
+	.lgc-sec { padding: 14px 12px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+	.lgc.is-open .lgc__panel { animation: lgc-in .2s ease-out; }
+	@keyframes lgc-in { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+}

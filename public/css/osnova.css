@@ -640,3 +640,38 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	.lg-header__nav, .lg-search, .lg-mnav, .lg-footer__nav { display: none !important; }
 	body { background: #fff; padding-bottom: 0 !important; }
 }
+
+/* Ranije pretrage (js/recent.js) */
+.lg-recent {
+	position: absolute;
+	z-index: 9000;
+	overflow: hidden;
+	background: #fff;
+	border: 1px solid var(--lg-border);
+	border-radius: 14px;
+	box-shadow: 0 16px 40px rgba(20, 40, 30, .16);
+}
+.lg-recent[hidden] { display: none; }
+.lg-recent__head { display: flex; align-items: center; justify-content: space-between; padding: 8px 8px 4px 16px; }
+.lg-recent__title { font-size: 13px; font-weight: 700; color: var(--lg-muted); }
+.lg-recent__clear { min-height: 40px; padding: 0 10px; border: 0; background: none; color: var(--lg-green); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.lg-recent__list { margin: 0; padding: 0 0 6px; list-style: none; }
+.lg-recent__list li { display: flex; align-items: center; }
+.lg-recent__list li + li { border-top: 1px solid var(--lg-border); }
+.lg-recent__row,
+.lg-recent__row:visited {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	min-height: 48px;
+	padding: 0 16px;
+	overflow: hidden;
+	color: var(--lg-text);
+	text-decoration: none;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+.lg-recent__row:hover, .lg-recent__row:focus-visible { background: var(--lg-bg); outline: none; }
+.lg-recent__x { flex: none; width: 44px; height: 44px; border: 0; background: none; color: var(--lg-muted); font-size: 22px; cursor: pointer; }
+.lg-recent__x:hover { color: var(--lg-text); }

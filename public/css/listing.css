@@ -1800,3 +1800,17 @@ button.lgo-bar__btn--tel {
 }
 .lgo-facts dt { font-size: 12px; color: var(--lg-muted); }
 .lgo-facts dd { margin: 2px 0 0; font-size: 15px; font-weight: 700; color: var(--lg-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Title row with "Sačuvaj" (kupujemprodajem "Pratim") */
+.lgo-contact__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.lgo-contact__top .lgo-contact__title { min-width: 0; }
+.lgo-fav { margin: 0; flex: none; }
+.lgo-fav__btn,
+.lgo-fav__btn:visited {
+	display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px;
+	border: 1px solid var(--lg-border); border-radius: 999px; background: #fff; color: var(--lg-text-2);
+	font: inherit; font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer; flex: none;
+}
+.lgo-fav__btn:hover { border-color: var(--lg-green); color: var(--lg-green-dark); }
+.lgo-fav__btn[aria-pressed="true"] { border-color: #f3c3bd; background: #fdf0ee; color: #c0392b; }
+.lgo-fav__btn[aria-pressed="true"] svg path { fill: currentColor; }

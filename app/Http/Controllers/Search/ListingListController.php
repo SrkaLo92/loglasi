@@ -103,6 +103,7 @@ class ListingListController extends Controller
             'location' => $filters->location,
             'crumbs' => $filters->category ? $this->catalog->breadcrumbs($filters->category) : collect(),
             'categoryLinks' => $this->categoryLinks($filters),
+            'groupNav' => $this->groupNav($filters),
             'fieldFilters' => $filters->category ? $this->fields->filters($filters->category) : [],
             'locations' => $this->catalog->locations()->values(),
         ]);
@@ -160,6 +161,33 @@ class ListingListController extends Controller
      *
      * @return array{up: ?array, current: ?array, items: list<array>}
      */
+    /**
+     * "Kategorija" and "Grupa" rows of the phone filter panel (kupujemprodajem): the top category and its groups.
+     *
+     * @return array{root: ?array{name: string, url: string}, current: ?int, groups: list<array{id: int, name: string, count: int, url: string}>}
+     */
+    private function groupNav(WebFilters $filters): array
+    {
+        $current = $filters->category;
+        if ($current === null) {
+            return ['root' => null, 'current' => null, 'groups' => []];
+        }
+
+        $root = $this->catalog->breadcrumbs($current)->first() ?? $current;
+        $counts = $this->catalog->counts();
+        $groups = $this->catalog->children($root)
+            ->map(fn (Category $c) => ['id' => $c->id, 'name' => $c->name, 'count' => $counts[$c->id] ?? 0, 'url' => $filters->urlFor($c, $filters->location)])
+            ->filter(fn ($g) => $g['count'] > 0 || $g['id'] === $current->id)
+            ->values()
+            ->all();
+
+        return [
+            'root' => ['name' => $root->name, 'url' => $filters->urlFor($root, $filters->location), 'count' => $counts[$root->id] ?? 0],
+            'current' => $current->id === $root->id ? null : $current->id,
+            'groups' => $groups,
+        ];
+    }
+
     private function categoryLinks(WebFilters $filters): array
     {
         $counts = $this->catalog->counts();

@@ -35,6 +35,12 @@ class CategoryIcons
         'book' => '<path d="M4 19V5a2 2 0 0 1 2-2h14v14H6a2 2 0 0 0-2 2zm0 0a2 2 0 0 0 2 2h14"/>',
         'build' => '<path d="M3 18h18M5 18v-3a7 7 0 0 1 14 0v3M10 9V5h4v4"/>',
         'tag' => '<path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+        'boat' => '<path d="M3 16l2 4h14l2-4z"/><path d="M12 3v13M12 4l6 9h-6"/>',
+        'fish' => '<path d="M3 12c3-4 8-6 12-4 2 1 4 3 5 4-1 1-3 3-5 4-4 2-9 0-12-4z"/><path d="M3 12l-1-3v6zM15 11h.01"/>',
+        'lamp' => '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.4 1 2.5h6c0-1.1.4-1.9 1-2.5A6 6 0 0 0 12 3z"/>',
+        'gamepad' => '<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3M15.5 12h.01M18 14h.01"/>',
+        'camera' => '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+        'care' => '<path d="M9 3h6v4H9zM8 7h8v14H8z"/><path d="M8 12h8"/>',
         'grid' => '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
         'pin' => '<path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',
         'image' => '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
@@ -54,6 +60,8 @@ class CategoryIcons
 
     /** Part of the slug => icon, first match wins. */
     private const RULES = [
+        'plovn' => 'boat', 'camac' => 'boat', 'ribolov' => 'fish', 'rasvet' => 'lamp', 'konzol' => 'gamepad', 'igric' => 'gamepad',
+        'foto-aparat' => 'camera', 'kamere' => 'camera', 'nega-i-licna' => 'care', 'higijen' => 'care', 'elektro-i' => 'lamp',
         'kuca-i-basta' => 'garden', 'aparat' => 'washer', 'bela-tehn' => 'washer', 'ljubim' => 'paw', 'zivotinj' => 'paw', 'bicikl' => 'bike', 'motor' => 'moto', 'moto' => 'moto', 'skuter' => 'moto',
         'kamion' => 'truck', 'kombi' => 'truck', 'teretn' => 'truck', 'auto' => 'car', 'vozil' => 'car',
         'hecbek' => 'car', 'karavan' => 'car', 'limuzin' => 'car', 'dzip' => 'car',

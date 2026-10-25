@@ -31,6 +31,8 @@
 @include('partials.bottom-nav')
 @endif
 @include('partials.cookie-bar')
+<script src="{{ asset_v('js/recent.js') }}" defer></script>
+<script src="{{ asset_v('js/fav.js') }}" defer></script>
 @stack('scripts')
 </body>
 </html>
