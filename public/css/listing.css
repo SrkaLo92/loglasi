@@ -1620,7 +1620,7 @@ button.lgo-bar__btn--tel {
 	justify-content: space-between;
 	padding: max(8px, env(safe-area-inset-top)) 8px 8px 16px;
 	background: linear-gradient(rgba(0, 0, 0, .55), rgba(0, 0, 0, 0));
-	pointer-events: none;
+	cursor: zoom-out; /* a click on the bar closes the gallery (lightbox.js) */
 }
 
 .lgb__count {
@@ -1655,6 +1655,12 @@ button.lgo-bar__btn--tel {
 .lgb__btn:disabled {
 	opacity: .3;
 	cursor: default;
+}
+
+/* No previous / next photo: the arrow fades out and a click there closes like the dark area around it. */
+.lgb__nav:disabled {
+	opacity: 0;
+	pointer-events: none;
 }
 
 .lgb__track {

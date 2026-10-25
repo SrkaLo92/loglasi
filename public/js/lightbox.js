@@ -1,6 +1,7 @@
 /* loglasi.rs listing photos in a full screen gallery: swipe or arrows between photos, pinch or double tap
-   to zoom on a phone, wheel or click to zoom on a computer, Esc to close. Without JavaScript the photo
-   link opens the large photo. No libraries. */
+   to zoom on a phone, wheel or click to zoom on a computer. It closes with the X, Esc, the phone's back
+   button, a tap or click anywhere outside the photo, or by dragging the photo up or down. Without
+   JavaScript the photo link opens the large photo. No libraries. */
 (function () {
 	'use strict';
 
@@ -196,16 +197,26 @@
 		var pan = null;
 		var lastTap = 0;
 		var moved = false;
+		var drag = null; // dragging the photo up or down to close (not zoomed, one finger)
+		var CLOSE_AT = 110;
+
+		function dragTo(dy) {
+			track.style.transform = dy ? 'translateY(' + dy + 'px)' : '';
+			box.style.backgroundColor = dy ? 'rgba(13, 18, 16, ' + Math.max(0.35, 1 - Math.abs(dy) / 400) + ')' : '';
+		}
 
 		track.addEventListener('pointerdown', function (ev) {
 			if (!ev.target.classList.contains('lgb__img')) { return; }
 			points[ev.pointerId] = { x: ev.clientX, y: ev.clientY };
 			moved = false;
 			var ids = Object.keys(points);
+			drag = ids.length === 1 && zoom.scale === 1 ? { x: ev.clientX, y: ev.clientY, axis: null, dy: 0 } : null;
 			if (ids.length === 2) {
 				var a = points[ids[0]], b = points[ids[1]];
 				pinch = { dist: Math.hypot(a.x - b.x, a.y - b.y), scale: zoom.scale };
 				pan = null;
+				drag = null;
+				dragTo(0);
 			} else if (zoom.scale > 1) {
 				pan = { x: ev.clientX - zoom.x, y: ev.clientY - zoom.y };
 				track.setPointerCapture(ev.pointerId);
@@ -215,6 +226,15 @@
 			if (!points[ev.pointerId]) { return; }
 			if (Math.abs(ev.clientX - points[ev.pointerId].x) + Math.abs(ev.clientY - points[ev.pointerId].y) > 6) { moved = true; }
 			points[ev.pointerId] = { x: ev.clientX, y: ev.clientY };
+			if (drag) {
+				var dx = ev.clientX - drag.x;
+				drag.dy = ev.clientY - drag.y;
+				if (!drag.axis && Math.abs(dx) + Math.abs(drag.dy) > 10) {
+					drag.axis = Math.abs(drag.dy) > Math.abs(dx) ? 'y' : 'x';
+					if (drag.axis === 'y') { track.setPointerCapture(ev.pointerId); }
+				}
+				if (drag.axis === 'y') { dragTo(drag.dy); return; }
+			}
 			var ids = Object.keys(points);
 			if (pinch && ids.length === 2) {
 				var a = points[ids[0]], b = points[ids[1]];
@@ -228,6 +248,15 @@
 		});
 		var end = function (ev) {
 			var wasTap = points[ev.pointerId] && !moved && !pinch;
+			if (drag && drag.axis === 'y') {
+				var far = Math.abs(drag.dy) > CLOSE_AT && ev.type !== 'pointercancel';
+				drag = null;
+				delete points[ev.pointerId];
+				dragTo(0);
+				if (far) { close(); }
+				return;
+			}
+			drag = null;
 			delete points[ev.pointerId];
 			if (Object.keys(points).length < 2) { pinch = null; }
 			if (!Object.keys(points).length) { pan = null; }
@@ -248,9 +277,13 @@
 			ev.preventDefault();
 			zoomAt(zoom.scale * (ev.deltaY < 0 ? 1.2 : 1 / 1.2), ev.clientX, ev.clientY);
 		}, { passive: false });
-		// Clicking the dark area around the photo closes the gallery, as on most sites.
+		// Clicking the dark area around the photo (also the empty parts of the top bar and the thumbnail
+		// strip) closes the gallery, as on most sites.
 		track.addEventListener('click', function (ev) {
 			if (ev.target.classList.contains('lgb__slide') && zoom.scale === 1) { close(); }
+		});
+		box.addEventListener('click', function (ev) {
+			if (ev.target === box || ev.target.classList.contains('lgb__bar') || ev.target.classList.contains('lgb__thumbs') || ev.target.classList.contains('lgb__count')) { close(); }
 		});
 	}
 
