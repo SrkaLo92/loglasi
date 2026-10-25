@@ -15,7 +15,7 @@ class CategoryIconsTest extends TestCase
 
     public function test_short_keys_only_match_the_start_of_a_slug_word(): void
     {
-        $this->assertSame('gift', $this->icon('besplatne-stvari'));
+        $this->assertSame('gift_heart', $this->icon('besplatne-stvari'));
         $this->assertSame('tv', $this->icon('tv-i-video'));
         $this->assertSame('tv', $this->icon('audio-tv'));
     }

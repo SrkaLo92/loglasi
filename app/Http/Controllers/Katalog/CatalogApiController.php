@@ -41,6 +41,7 @@ class CatalogApiController extends Controller
         $sheet = CategorySheet::get();
 
         return ApiResponse::json($request, [
+            'main' => array_map(fn (array $c) => $item($c) + ['accent' => $c['accent']], $sheet['main']),
             'popular' => array_map($item, $sheet['popular']),
             'themes' => array_map(fn ($t) => ['name' => $t['name'], 'items' => array_map($item, $t['items'])], $sheet['themes']),
         ], ApiResponse::CACHE_CATALOG);

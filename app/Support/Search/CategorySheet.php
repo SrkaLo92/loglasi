@@ -4,6 +4,7 @@ namespace App\Support\Search;
 
 use App\Models\Category;
 use App\Services\Catalog;
+use App\Support\Home\HomeSettings;
 
 /**
  * "Sve kategorije" (as on kupujemprodajem, Leboncoin and Willhaben): a search over every category, the most
@@ -25,8 +26,14 @@ class CategorySheet
 
     public const POPULAR = 8;
 
+    /** Big tiles at the top of the home page (site and apps); a sixth tile opens all categories. */
+    public const MAIN = 5;
+
+    /** Tiles with a warm accent: giving things away is part of what the site stands for. */
+    public const WARM = ['besplatne-stvari'];
+
     /**
-     * @return array{popular: list<array>, themes: list<array{name: string, items: list<array>}>, all: list<array>}
+     * @return array{main: list<array>, popular: list<array>, themes: list<array{name: string, items: list<array>}>, all: list<array>}
      */
     public static function get(): array
     {
@@ -95,6 +102,14 @@ class CategorySheet
             ->values()
             ->all();
 
-        return ['popular' => $popular, 'themes' => $themes, 'all' => $all];
+        $main = [];
+        foreach (HomeSettings::list('home.main_categories') as $slug) {
+            $category = $catalog->categoryBySlug($slug);
+            if ($category !== null && $catalog->isVisible($category) && count($main) < self::MAIN) {
+                $main[] = $tile($category) + ['accent' => in_array($category->slug, self::WARM, true) ? 'warm' : null];
+            }
+        }
+
+        return ['main' => $main, 'popular' => $popular, 'themes' => $themes, 'all' => $all];
     }
 }

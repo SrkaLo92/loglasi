@@ -18,8 +18,9 @@ class HomePageTest extends SearchTestCase
         $response = $this->get('/')->assertOk();
 
         $response->assertSee('Oglasi za Loznicu i okolinu')
-            ->assertSee('Često se traži:')
-            ->assertSee('Kategorije')
+            ->assertDontSee('Često se traži:')
+            ->assertSee('aria-label="Glavne kategorije"', false)
+            ->assertSee('Popularno')
             ->assertSee('Sve kategorije')
             ->assertSee('Istaknuti oglasi')
             ->assertSee('Istaknuti stan')
@@ -96,13 +97,12 @@ class HomePageTest extends SearchTestCase
     public function test_settings_change_texts(): void
     {
         $this->listing(['title' => 'Golf']);
-        Settings::set('home.intro_terms', 'bicikl, Automobili');
+        Settings::set('home.main_categories', 'automobili');
         Settings::set('home.latest_title', 'Sveže iz Loznice');
         Settings::set('home.about', 'Naš **tekst** o sajtu.');
 
         $this->get('/')->assertOk()
-            ->assertSee('href="'.url_slash('/oglasi').'?keyword=bicikl"', false)
-            ->assertSee('href="'.url_slash('/oglasi/automobili').'"', false)
+            ->assertSee('class="hm-main__tile" href="'.url_slash('/oglasi/automobili').'"', false)
             ->assertSee('Sveže iz Loznice')
             ->assertSee('<strong>tekst</strong>', false);
     }

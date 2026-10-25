@@ -1,8 +1,9 @@
-{{-- Home page: eight sections (and Premium XL + početna) ported from loglasi-core inc/home. Data: HomeSections (cached 60 s). --}}
+{{-- Home page: main category tiles, popular categories, then the listing sections. Data: HomeSections (cached 60 s) and CategorySheet. --}}
 @extends('layouts.app')
 @use('App\Support\Home\HomeSettings')
 @use('App\Support\Phone')
 @use('App\Support\Search\CategoryIcons')
+@use('App\Support\Search\CategorySheet')
 @use('App\Support\Search\TimeAgo')
 @use('App\Support\Seo')
 @use('App\Support\Stranice\Cenovnik')
@@ -18,6 +19,9 @@
 
 @php
 	$hmTotal = $sections['total'];
+	$hmSheet = CategorySheet::get();
+	$hmMain = $hmSheet['main'];
+	$hmPopular = $hmSheet['popular'];
 	$hmWhy = PageText::list('pocetna.zasto');
 	$hmFaq = array_slice(array_values(array_filter(PageText::list('faq.pitanja'), fn ($q) => is_array($q) && ! empty($q['pitanje']) && ! empty($q['odgovor']))), 0, 5);
 	$hmEmail = (string) Settings::get('contact_email');
@@ -37,54 +41,54 @@
 @endphp
 
 @section('content')
-{{-- 1. Intro --}}
+{{-- 1. Intro: H1 and one line; the six tiles below are the way in (as on the apps) --}}
 <section class="hm-intro">
 	<div class="lg-wrap">
 		<h1 class="hm-intro__title">{{ Seo::get()->getH1() }}</h1>
 		<p class="hm-intro__text">{{ HomeSettings::get('home.intro_text') }}</p>
-		@if ($sections['chips'])
-			<div class="hm-chips">
-				<span class="hm-chips__label" id="hm-chips-label">{{ HomeSettings::get('home.intro_label') }}</span>
-				<ul class="hm-chips__list" aria-labelledby="hm-chips-label">
-					@foreach ($sections['chips'] as $chip)
-						<li><a class="hm-chip" href="{{ $chip['url'] }}">{{ $chip['label'] }}</a></li>
-					@endforeach
-				</ul>
-			</div>
-		@endif
 	</div>
 </section>
 
 <div class="lg-wrap hm">
-	{{-- 2. Categories --}}
-	@if ($sections['categories'])
-		<section class="hm-sec" aria-labelledby="hm-cats-title">
-			<div class="hm-sec__head">
-				<h2 class="hm-sec__title" id="hm-cats-title">{{ HomeSettings::get('home.categories_title') }}</h2>
-				<a class="hm-sec__link hm-hide-m" href="{{ $hmAll }}" data-lg-cats>Sve kategorije ({{ $hmCatTotal }})</a>
-				<a class="hm-sec__link hm-show-m" href="{{ $hmAll }}" data-lg-cats>Sve ({{ $hmCatTotal }})</a>
-			</div>
-			<ul class="hm-cats">
-				@foreach ($sections['categories'] as $item)
-					<li class="{{ $loop->index >= 7 ? 'hm-hide-m' : '' }}">
-						<a class="hm-cat" href="{{ $item['category']->url() }}">
-							<span class="hm-cat__icon">{{ CategoryIcons::forCategory($item['category'], 20) }}</span>
-							<span class="hm-cat__text">
-								<span class="hm-cat__name">{{ $item['category']->name }}</span>
-								<span class="hm-cat__count">{{ TimeAgo::listings($item['count']) }}</span>
-							</span>
+	{{-- 2. Main categories: five big tiles and "Sve kategorije" (3 x 2 on phones, one row on a computer) --}}
+	@if ($hmMain)
+		<nav class="hm-main" aria-label="Glavne kategorije">
+			<ul class="hm-main__list">
+				@foreach ($hmMain as $tile)
+					<li>
+						<a @class(['hm-main__tile', 'hm-main__tile--warm' => $tile['accent'] === 'warm']) href="{{ $tile['url'] }}">
+							<span class="hm-main__icon">{{ CategoryIcons::svg($tile['icon'], 34) }}</span>
+							<span class="hm-main__name">{{ $tile['name'] }}</span>
+							<span class="hm-main__count">{{ TimeAgo::listings($tile['count']) }}</span>
 						</a>
 					</li>
 				@endforeach
 				<li>
-					<a class="hm-cat hm-cat--all" href="{{ $hmAll }}" data-lg-cats>
-						<span class="hm-cat__icon">{{ CategoryIcons::svg('grid', 20) }}</span>
-						<span class="hm-cat__text">
-							<span class="hm-cat__name">Sve kategorije</span>
-							<span class="hm-cat__count">{{ $hmCatTotal }} {{ Cenovnik::plural($hmCatTotal, 'kategorija', 'kategorije', 'kategorija') }}</span>
-						</span>
+					<a class="hm-main__tile hm-main__tile--all" href="{{ $hmAll }}" data-lg-cats>
+						<span class="hm-main__icon">{{ CategoryIcons::svg('grid', 34) }}</span>
+						<span class="hm-main__name">Sve kategorije</span>
+						<span class="hm-main__count">{{ $hmCatTotal }} {{ Cenovnik::plural($hmCatTotal, 'kategorija', 'kategorije', 'kategorija') }}</span>
 					</a>
 				</li>
+			</ul>
+		</nav>
+	@endif
+
+	{{-- 2a. Popular: the groups with the most listings, round icons (same list as the apps) --}}
+	@if ($hmPopular)
+		<section class="hm-sec hm-pop" aria-labelledby="hm-pop-title">
+			<div class="hm-sec__head">
+				<h2 class="hm-sec__title" id="hm-pop-title">{{ HomeSettings::get('home.categories_title') }}</h2>
+			</div>
+			<ul class="hm-pop__list">
+				@foreach ($hmPopular as $tile)
+					<li>
+						<a class="hm-pop__item" href="{{ $tile['url'] }}">
+							<span @class(['hm-pop__icon', 'hm-pop__icon--warm' => in_array($tile['icon'], ['gift_heart'], true)])>{{ CategoryIcons::svg($tile['icon'], 26) }}</span>
+							<span class="hm-pop__name">{{ $tile['name'] }}</span>
+						</a>
+					</li>
+				@endforeach
 			</ul>
 		</section>
 	@endif

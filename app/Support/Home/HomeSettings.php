@@ -17,8 +17,9 @@ class HomeSettings
         'home.intro_label' => 'Često se traži:',
         'home.intro_terms' => '',            // "bicikl, stan Loznica, Golf"; empty = the biggest categories
         'home.intro_terms_count' => 5,
-        // 2. Categories
-        'home.categories_title' => 'Kategorije',
+        // 2. Main categories (big tiles, the sixth is "Sve kategorije"), then the popular ones
+        'home.main_categories' => 'automobili,nekretnine,besplatne-stvari,poslovi,usluge',
+        'home.categories_title' => 'Popularno',
         'home.categories_count' => 11,
         // 2b. Premium XL + početna (hidden when empty)
         'home.premium_title' => 'Premium oglasi',

@@ -4,6 +4,7 @@ namespace Tests\Feature\Search;
 
 use App\Models\Category;
 use App\Services\Catalog;
+use App\Support\Settings;
 
 class CategoryBrowseTest extends SearchTestCase
 {
@@ -25,6 +26,21 @@ class CategoryBrowseTest extends SearchTestCase
             ->assertJsonPath('popular.0.parent_name', 'Vozila')
             ->assertJsonPath('popular.0.count', 2)
             ->assertJsonStructure(['themes' => [['name', 'items' => [['id', 'slug', 'name', 'icon', 'count']]]]]);
+    }
+
+    public function test_main_categories_for_the_home_tiles_follow_the_admin_setting(): void
+    {
+        $free = Category::create(['name' => 'Besplatne stvari', 'slug' => 'besplatne-stvari']);
+        app(Catalog::class)->flush();
+        Settings::set('home.main_categories', 'besplatne-stvari, nema-ove, automobili');
+
+        $this->getJson('/api/v1/categories/browse')->assertOk()
+            ->assertJsonCount(2, 'main')
+            ->assertJsonPath('main.0.id', $free->id)
+            ->assertJsonPath('main.0.icon', 'gift_heart')
+            ->assertJsonPath('main.0.accent', 'warm')
+            ->assertJsonPath('main.1.slug', 'automobili')
+            ->assertJsonPath('main.1.accent', null);
     }
 
     public function test_phone_filter_rows_show_the_category_and_its_groups(): void

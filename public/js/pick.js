@@ -103,11 +103,15 @@
 		sheet.input.setAttribute('aria-label', 'Pretraga: ' + control.title);
 		control.refreshSub();
 		render();
+		window.clearTimeout(sheet.hideTimer);
+		sheet.root.classList.remove('is-closing', 'is-open', 'is-pop');
+		sheet.panel.removeAttribute('style');
 		sheet.root.hidden = false;
 		// A short list on a phone: the sheet is only as tall as its options.
 		sheet.root.classList.toggle('is-short', control.count() <= 8);
 		if (window.matchMedia('(min-width: 720px)').matches && control.trigger) { place(control.trigger); }
 		else { document.documentElement.classList.add('lp-lock'); }
+		void sheet.panel.offsetHeight; // start the opening transition from the closed state
 		window.requestAnimationFrame(function () {
 			sheet.root.classList.add('is-open');
 			// The keyboard on a phone would cover half the list, so focus the search there only for long lists.
@@ -144,10 +148,18 @@
 		if (!sheet || !sheet.current) { return; }
 		var control = sheet.current;
 		sheet.current = null;
-		sheet.root.classList.remove('is-open', 'is-pop');
-		sheet.panel.removeAttribute('style');
-		sheet.root.hidden = true;
+		var root = sheet.root;
+		var panel = sheet.panel;
+		root.classList.add('is-closing');
+		root.classList.remove('is-open');
 		document.documentElement.classList.remove('lp-lock');
+		// Hidden once the closing transition has run (shorter with reduced motion).
+		var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		sheet.hideTimer = window.setTimeout(function () {
+			root.classList.remove('is-closing', 'is-pop');
+			panel.removeAttribute('style');
+			root.hidden = true;
+		}, reduce ? 0 : 230);
 		if (control.trigger) { control.trigger.focus(); }
 	};
 

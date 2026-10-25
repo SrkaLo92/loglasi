@@ -917,3 +917,108 @@
 .hm-faq__stavka[open] .hm-faq__pitanje {
 	color: var(--lg-green);
 }
+
+/* Main categories: 6 tiles in one row, 3 x 2 on phones (same as the apps) */
+.hm-main { margin: 20px 0 8px; }
+.hm-main__list {
+	display: grid;
+	grid-template-columns: repeat(6, minmax(0, 1fr));
+	gap: 12px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.hm-main__tile,
+.hm-main__tile:visited {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	height: 100%;
+	min-height: 132px;
+	padding: 16px 8px;
+	border: 1px solid var(--lg-border);
+	border-radius: 16px;
+	background: #fff;
+	color: var(--lg-text);
+	text-align: center;
+	text-decoration: none;
+	transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+.hm-main__tile:hover { border-color: var(--lg-green); box-shadow: 0 6px 18px rgba(23, 60, 49, .08); transform: translateY(-1px); }
+.hm-main__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 60px;
+	height: 60px;
+	border-radius: 18px;
+	background: var(--lg-mint);
+	color: var(--lg-green);
+}
+.hm-main__name { font-size: 16px; font-weight: 800; line-height: 1.25; }
+.hm-main__count { color: var(--lg-muted); font-size: 13px; }
+
+/* Besplatne stvari: warm accent, part of what loglasi stands for */
+.hm-main__tile--warm,
+.hm-main__tile--warm:visited { border-color: #f3c9a8; background: linear-gradient(180deg, #fff7f0 0%, #fff 100%); }
+.hm-main__tile--warm .hm-main__icon,
+.hm-pop__icon--warm { background: #fde8d7; color: var(--lg-orange); }
+.hm-main__tile--warm:hover { border-color: var(--lg-orange); }
+.hm-main__tile--all .hm-main__icon { background: #f1f4f2; color: var(--lg-text-2); }
+
+/* Popularno: round icons, one scrolling row on phones */
+.hm-pop__list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px 20px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.hm-pop__item,
+.hm-pop__item:visited {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	width: 96px;
+	color: var(--lg-text);
+	text-align: center;
+	text-decoration: none;
+}
+.hm-pop__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 64px;
+	height: 64px;
+	border: 1.5px solid #cfe3da;
+	border-radius: 50%;
+	background: #fff;
+	color: var(--lg-green);
+	transition: border-color .15s, background .15s;
+}
+.hm-pop__item:hover .hm-pop__icon { border-color: var(--lg-green); background: var(--lg-mint); }
+.hm-pop__name { font-size: 14px; line-height: 1.3; }
+
+@media (max-width: 767.98px) {
+	.hm-main { margin-top: 14px; }
+	.hm-main__list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+	.hm-main__tile { min-height: 112px; padding: 12px 4px; border-radius: 14px; }
+	.hm-main__icon { width: 48px; height: 48px; border-radius: 14px; }
+	.hm-main__icon svg { width: 28px; height: 28px; }
+	.hm-main__name { font-size: 14px; }
+	.hm-main__count { font-size: 12px; }
+	.hm-pop__list { flex-wrap: nowrap; overflow-x: auto; margin: 0 -16px; padding: 0 16px 6px; scroll-snap-type: x proximity; scrollbar-width: none; }
+	.hm-pop__list::-webkit-scrollbar { display: none; }
+	.hm-pop__list > li { flex: none; scroll-snap-align: start; }
+	.hm-pop__item { width: 80px; }
+	.hm-pop__icon { width: 56px; height: 56px; }
+}
+@media (max-width: 767.98px) {
+	.hm-intro { padding: 18px 0 14px; }
+	.hm-intro__title { font-size: 22px; }
+	.hm-intro__text { margin-bottom: 0; font-size: 15px; }
+}

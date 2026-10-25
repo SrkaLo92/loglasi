@@ -112,7 +112,7 @@
 	inset: 0;
 	background: rgba(16, 24, 20, .45);
 	opacity: 0;
-	transition: opacity .18s ease-out;
+	transition: opacity .24s ease;
 }
 
 .lp-panel {
@@ -127,9 +127,14 @@
 	border-radius: 20px 20px 0 0;
 	background: #fff;
 	box-shadow: 0 -8px 30px rgba(0, 0, 0, .18);
-	transform: translateY(24px);
-	opacity: 0;
-	transition: transform .22s cubic-bezier(.2, .8, .2, 1), opacity .18s ease-out;
+	/* Phone: slides up from the bottom edge, like a native sheet; closing runs the same way back. */
+	transform: translateY(100%);
+	transition: transform .32s cubic-bezier(.32, .72, 0, 1);
+}
+
+.lp-sheet.is-closing .lp-panel {
+	transition-duration: .22s;
+	transition-timing-function: cubic-bezier(.4, 0, 1, 1);
 }
 
 .lp-sheet.is-short .lp-panel {
@@ -402,10 +407,13 @@
 		height: min(640px, calc(100vh - 80px));
 		border-radius: 18px;
 		box-shadow: 0 24px 60px rgba(0, 0, 0, .25);
-		transform: translate(-50%, -48%);
+		opacity: 0;
+		transform: translate(-50%, -48%) scale(.98);
+		transition: transform .2s cubic-bezier(.2, .8, .2, 1), opacity .16s ease;
 	}
 
 	.lp-sheet.is-open .lp-panel {
+		opacity: 1;
 		transform: translate(-50%, -50%);
 	}
 
@@ -618,11 +626,20 @@
 		overflow: hidden;
 	}
 
+	/* A computer: the dropdown fades in and settles from just above its field. */
 	.lp-sheet.is-pop .lp-panel {
-		transform: translateY(-4px);
+		opacity: 0;
+		transform: translateY(-6px) scale(.985);
+		transform-origin: top center;
+		transition: transform .18s cubic-bezier(.2, .8, .2, 1), opacity .14s ease;
+	}
+
+	.lp-sheet.is-pop.is-closing .lp-panel {
+		transition-duration: .12s;
 	}
 
 	.lp-sheet.is-pop.is-open .lp-panel {
+		opacity: 1;
 		transform: none;
 	}
 
