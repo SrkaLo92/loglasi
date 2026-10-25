@@ -5,6 +5,7 @@ namespace Tests\Feature\Seo;
 use App\Enums\Currency;
 use App\Models\Category;
 use App\Models\Listing;
+use App\Models\ListingImage;
 use App\Models\Location;
 use App\Models\User;
 use App\Support\Seo;
@@ -145,6 +146,20 @@ class SeoHeadTest extends SeoTestCase
         foreach ($this->graph($response) as $node) {
             $this->assertStringNotContainsString('loglasirs.local', json_encode($node));
         }
+    }
+
+    public function test_share_preview_uses_the_listing_cover_as_jpeg(): void
+    {
+        $listing = Listing::factory()->create(['slug' => 'passat-b6']);
+        ListingImage::query()->create([
+            'listing_id' => $listing->id, 'user_id' => $listing->user_id, 'path' => 'oglasi/1/a.webp', 'sort' => 0,
+            'variants' => ['md' => ['webp' => 'oglasi/1/a-md.webp', 'jpg' => 'oglasi/1/a-md.jpg', 'width' => 800]],
+        ]);
+
+        $html = $this->get('http://evil.example/oglas/passat-b6/')->assertOk()->getContent();
+
+        $this->assertStringContainsString('<meta property="og:image" content="https://loglasi.rs/storage/oglasi/1/a-md.jpg">', $html);
+        $this->assertStringNotContainsString('content="http://evil.example', $html);
     }
 
     public function test_active_listing_is_indexable_with_product_schema(): void

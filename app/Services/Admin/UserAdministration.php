@@ -7,8 +7,12 @@ use App\Enums\Role;
 use App\Enums\UserStatus;
 use App\Models\AuditLog;
 use App\Models\Firm;
+use App\Models\Product;
 use App\Models\User;
+use App\Services\Payments\Effects;
+use App\Services\Payments\ProductCatalog;
 use DomainException;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /** Account actions for the admin panel and the admin API. Permissions are checked by the caller (UserPolicy). */
@@ -99,5 +103,61 @@ class UserAdministration
         AuditLog::record('user.change_role', $user, ['role' => [$before?->value, $role->value]]);
 
         return $user;
+    }
+
+    /** Products an admin can give a private account for free: extra listings and Plus prodavac, as on the price list. */
+    public const GIFT_TYPES = [ProductCatalog::SLOTS, ProductCatalog::PLUS_SELLER];
+
+    /** @return array<string, string> code => name, active products in price list order */
+    public static function giftOptions(): array
+    {
+        return Product::query()->where('is_active', true)->orderBy('sort')->get()
+            ->filter(fn (Product $p) => in_array(ProductCatalog::type($p), self::GIFT_TYPES, true))
+            ->mapWithKeys(fn (Product $p) => [$p->code => $p->name])
+            ->all();
+    }
+
+    /**
+     * Gives a package for free, with the same effect as a paid order (no order, no invoice, no receipt).
+     * Firm packages are given on the firm page.
+     */
+    public function giftPackage(User $user, string $code): array
+    {
+        if ($user->isFirm()) {
+            throw new DomainException('Firmi se paket dodeljuje na strani firme („Dodeli paket”).');
+        }
+        $product = Product::query()->where('code', $code)->where('is_active', true)->first();
+        if ($product === null || ! in_array(ProductCatalog::type($product), self::GIFT_TYPES, true)) {
+            throw new DomainException('Ovaj paket ne može da se dodeli.');
+        }
+
+        $applied = DB::transaction(fn () => Effects::apply($product, $user, null));
+        AuditLog::record('user.gift_package', $user, ['product' => $code, 'effect' => $applied['effect']]);
+
+        return $applied;
+    }
+
+    /** Running packages given by an admin (Plus prodavac terms and extra listings without an order). */
+    public static function runningGifts(User $user): array
+    {
+        $now = now();
+
+        return [
+            'plus_until' => ($ends = DB::table('plus_seller_terms')->where('user_id', $user->getKey())->whereNull('order_id')->where('ends_at', '>', $now)->max('ends_at')) ? Carbon::parse($ends) : null,
+            'slots' => (int) DB::table('listing_slot_grants')->where('user_id', $user->getKey())->whereNull('order_id')->where('starts_at', '<=', $now)->where('ends_at', '>', $now)->sum('slots'),
+        ];
+    }
+
+    /** Ends the packages an admin gave (paid ones stay). */
+    public function endGifts(User $user): void
+    {
+        $now = now();
+        DB::transaction(function () use ($user, $now) {
+            DB::table('plus_seller_terms')->where('user_id', $user->getKey())->whereNull('order_id')->where('ends_at', '>', $now)
+                ->update(['ends_at' => DB::raw('GREATEST(starts_at, '.DB::getPdo()->quote($now->toDateTimeString()).')'), 'updated_at' => $now]);
+            DB::table('listing_slot_grants')->where('user_id', $user->getKey())->whereNull('order_id')->where('ends_at', '>', $now)
+                ->update(['ends_at' => DB::raw('GREATEST(starts_at, '.DB::getPdo()->quote($now->toDateTimeString()).')'), 'updated_at' => $now]);
+        });
+        AuditLog::record('user.end_gifts', $user);
     }
 }

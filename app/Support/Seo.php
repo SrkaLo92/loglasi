@@ -295,7 +295,8 @@ class Seo
             $this->meta('article:modified_time', $listing->updated_at->toAtomString());
         }
 
-        $images = $listing->images->take(6)->map(fn ($image) => static::imageUrl($image->path))->filter()->values()->all();
+        // JPEG 800 px first: share previews (WhatsApp, Viber) skip large WebP originals.
+        $images = $listing->images->take(6)->map(fn ($image) => static::imageUrl($image->variants['md']['jpg'] ?? $image->variants['lg']['jpg'] ?? $image->path))->filter()->values()->all();
         $this->image($images);
 
         $active = static::isActive($listing);

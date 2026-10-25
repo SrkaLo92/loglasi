@@ -23,7 +23,7 @@ class CategoryIconsTest extends TestCase
     public function test_specific_icons(): void
     {
         $this->assertSame('flame', $this->icon('ogrev'));
-        $this->assertSame('brick', $this->icon('gradjevinarstvo'));
+        $this->assertSame('build', $this->icon('gradjevinarstvo'));
         $this->assertSame('gear', $this->icon('auto-delovi-i-oprema'));
         $this->assertSame('car', $this->icon('automobili'));
         $this->assertSame('bike', $this->icon('bicikli-delovi-i-oprema'));

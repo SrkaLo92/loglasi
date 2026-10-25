@@ -135,6 +135,50 @@ class UserActions
             ->action(fn (User $record, array $data) => Notify::run(fn () => self::service()->changeRole($record, Role::from($data['role'])), 'Uloga je promenjena.'));
     }
 
+    /** Plus prodavac or extra listings for free (private accounts). Firms get packages on the firm page. */
+    public static function giftPackage(): Action
+    {
+        return Action::make('giftPackage')
+            ->label('Dodeli paket besplatno')
+            ->icon(Heroicon::OutlinedGift)
+            ->color('success')
+            ->visible(fn (User $record) => ! $record->isFirm() && self::isAdmin())
+            ->schema([
+                Select::make('product')->label('Paket')->options(fn () => UserAdministration::giftOptions())->required()->native(false),
+            ])
+            ->modalHeading('Dodeliti paket besplatno')
+            ->modalDescription(fn (User $record) => self::giftsText($record).'Paket radi isto kao kupljen: Plus prodavac se nadovezuje na onaj koji traje, a dodatni oglasi važe 30 dana od danas. Ne pravi se narudžbina ni račun.')
+            ->modalSubmitActionLabel('Dodeli')
+            ->action(fn (User $record, array $data) => Notify::run(fn () => self::service()->giftPackage($record, $data['product']), 'Paket je dodeljen.'));
+    }
+
+    public static function endGifts(): Action
+    {
+        return Action::make('endGifts')
+            ->label('Prekini dodeljene pakete')
+            ->icon(Heroicon::OutlinedXCircle)
+            ->color('gray')
+            ->visible(function (User $record) {
+                $gifts = UserAdministration::runningGifts($record);
+
+                return self::isAdmin() && ($gifts['plus_until'] !== null || $gifts['slots'] > 0);
+            })
+            ->requiresConfirmation()
+            ->modalDescription(fn (User $record) => self::giftsText($record).'Prekidaju se samo besplatno dodeljeni paketi. Kupljeni ostaju.')
+            ->action(fn (User $record) => Notify::run(fn () => self::service()->endGifts($record), 'Dodeljeni paketi su prekinuti.'));
+    }
+
+    private static function giftsText(User $record): string
+    {
+        $gifts = UserAdministration::runningGifts($record);
+        $parts = array_filter([
+            $gifts['plus_until'] ? 'Plus prodavac do '.$gifts['plus_until']->format('d.m.Y.') : null,
+            $gifts['slots'] > 0 ? '+'.$gifts['slots'].' oglasa' : null,
+        ]);
+
+        return $parts ? 'Sada dodeljeno: '.implode(', ', $parts).'. ' : '';
+    }
+
     /** @return list<Action> */
     public static function all(): array
     {
@@ -144,6 +188,8 @@ class UserActions
             self::makeFirm(),
             self::makePrivate(),
             self::firmPackage(),
+            self::giftPackage(),
+            self::endGifts(),
             self::changeRole(),
             self::block(),
             self::unblock(),
