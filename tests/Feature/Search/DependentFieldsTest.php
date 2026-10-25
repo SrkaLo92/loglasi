@@ -115,9 +115,15 @@ class DependentFieldsTest extends SearchTestCase
 
         $page = $this->get('/oglasi/automobili/?f[marka_automobila]=audi')->assertOk();
         $page->assertSee('Audi A4 2009')->assertSee('Audi A6 Avant')->assertDontSee('Golf 4');
-        // Only Audi's models are offered once Audi is chosen; without a make they come grouped by make.
+        // Only Audi's models are in the page once Audi is chosen; without a make none are (they load for the chosen make).
         $page->assertSee('data-depends-on="marka_automobila"', false)->assertSee('>A4<', false)->assertDontSee('>Golf 4<', false);
-        $this->get('/oglasi/automobili/')->assertOk()->assertSee('<optgroup label="Volkswagen">', false)->assertSee('Gorivo');
+        $this->get('/oglasi/automobili/')->assertOk()->assertDontSee('<optgroup label="Volkswagen">', false)
+            ->assertSee('data-options-url="'.url('api/v1/fields/model_automobila/options').'"', false)->assertSee('Gorivo');
+        $this->getJson('/api/v1/fields/model_automobila/options?parent=audi')->assertOk()
+            ->assertJsonFragment(['value' => 'audi-a4', 'label' => 'A4', 'parent' => 'audi'])
+            ->assertJsonMissing(['parent' => 'volkswagen']);
+        $this->getJson('/api/v1/fields/model_automobila/options')->assertStatus(400);
+        $this->getJson('/api/v1/fields/gorivo/options?parent=audi')->assertNotFound();
     }
 
     public function test_filter_panel_sections_quick_filters_and_live_count(): void
@@ -171,7 +177,7 @@ class DependentFieldsTest extends SearchTestCase
         $listing = $this->listing(['category_id' => $this->limuzina->id, 'status' => ListingStatus::Draft, 'published_at' => null]);
 
         $page = $this->actingAs($user)->get('/postavi-oglas/'.$listing->id.'/detalji/')->assertOk();
-        $page->assertSee('data-needs-parent', false)->assertSee('<optgroup label="Audi">', false)->assertSee('Kilometraža');
+        $page->assertSee('data-needs-parent', false)->assertSee('data-options-url=', false)->assertDontSee('<optgroup label="Audi">', false)->assertSee('Kilometraža');
         // Long lists open in the searchable picker, short ones are pills, yes/no are switches.
         $this->assertMatchesRegularExpression('/name="fields\[marka_automobila\]" data-pick\s+data-pick-popular="volkswagen/', $page->getContent());
         $page->assertSee('data-pick="year"', false)

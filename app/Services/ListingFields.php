@@ -43,6 +43,9 @@ class ListingFields
      * Key facts shown right under the price on the listing page, like the spec strip on polovniautomobili
      * and AutoScout24: the first four of these that the listing has, in this order.
      */
+    /** A dependent list longer than this (car models) is not put in the page but loaded for the chosen parent. */
+    public const LAZY_OPTIONS = 150;
+
     public const HIGHLIGHTS = [
         'godina', 'godiste', 'kilometraza', 'gorivo', 'snaga', 'menjac',
         'kvadratura', 'velicina_nekretnine', 'sobe', 'sprat', 'godina_izgradnje', 'povrsina_placa',

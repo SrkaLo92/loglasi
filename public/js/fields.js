@@ -1,5 +1,6 @@
 /* loglasi.rs dependent fields (model depends on make), for the posting form and the search filters.
-   The page works without this file: the child select then lists every option, grouped by parent. */
+   Short lists are all in the page (without this file the child lists every option, grouped by parent);
+   long ones (data-options-url, car models) are loaded for the chosen parents and kept for the visit. */
 (function () {
 	'use strict';
 
@@ -24,6 +25,26 @@
 			return { value: option.value, label: option.textContent, parent: option.getAttribute('data-parent'), group: group };
 		});
 
+		var url = child.getAttribute('data-options-url');
+		var loaded = {};
+		options.forEach(function (o) { loaded[o.parent] = true; });
+		var load = function (parents) {
+			var missing = parents.filter(function (p) { return !loaded[p]; });
+			if (!url || !missing.length) { return false; }
+			missing.forEach(function (p) { loaded[p] = true; });
+			child.setAttribute('aria-busy', 'true');
+			fetch(url + '?parent=' + encodeURIComponent(missing.join(',')), { headers: { Accept: 'application/json' } })
+				.then(function (r) { return r.ok ? r.json() : []; })
+				.then(function (list) {
+					(Array.isArray(list) ? list : []).forEach(function (o) {
+						options.push({ value: o.value, label: o.label, parent: o.parent, group: '' });
+					});
+				})
+				.catch(function () { missing.forEach(function (p) { delete loaded[p]; }); })
+				.then(function () { child.removeAttribute('aria-busy'); sync(); });
+			return true;
+		};
+
 		var add = function (target, value, label) {
 			var option = document.createElement('option');
 			option.value = value;
@@ -34,6 +55,7 @@
 
 		var sync = function () {
 			var parents = parentValues(form, key);
+			if (load(parents)) { return; }
 			var current = child.value;
 			var list = parents.length ? options.filter(function (o) { return parents.indexOf(o.parent) >= 0; }) : (needsParent ? [] : options);
 

@@ -13,7 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-/** GET /categories, /locations, /fields?category=ID, /categories/{id}/fields, /prices. */
+/** GET /categories, /locations, /fields?category=ID, /categories/{id}/fields, /fields/{key}/options, /prices. */
 class CatalogApiController extends Controller
 {
     public function __construct(private readonly Catalog $catalog) {}
@@ -41,7 +41,7 @@ class CatalogApiController extends Controller
         $sheet = CategorySheet::get();
 
         return ApiResponse::json($request, [
-            'main' => array_map(fn (array $c) => $item($c) + ['accent' => $c['accent']], $sheet['main']),
+            'main' => array_map(fn (array $c) => $item($c) + ['color' => $c['color'], 'accent' => $c['accent'], 'tagline' => $c['tagline']], $sheet['main']),
             'popular' => array_map($item, $sheet['popular']),
             'themes' => array_map(fn ($t) => ['name' => $t['name'], 'items' => array_map($item, $t['items'])], $sheet['themes']),
         ], ApiResponse::CACHE_CATALOG);
@@ -75,6 +75,29 @@ class CatalogApiController extends Controller
 
         // A last-level category gives its form fields; a parent gives what its list can be filtered by.
         $out = $this->catalog->filterFieldsFor($category)->map(fn ($field) => $fields->toApi($field))->values();
+
+        return ApiResponse::json($request, $out, ApiResponse::CACHE_CATALOG);
+    }
+
+    /**
+     * Options of a dependent field for the chosen parents (models of a make): ?parent=audi,bmw.
+     * The site loads them on demand instead of putting ~1,900 models in every page.
+     */
+    public function options(Request $request, string $key): Response|JsonResponse
+    {
+        $field = $this->catalog->field($key);
+        if ($field === null || ! $field->depends_on) {
+            throw ApiError::notFound('Polje ne postoji.');
+        }
+        $parents = array_slice(array_values(array_filter(array_map('trim', explode(',', (string) $request->query('parent', ''))), 'strlen')), 0, 20);
+        if ($parents === []) {
+            throw ApiError::missingParams('parent');
+        }
+
+        $out = collect((array) $field->options)
+            ->filter(fn ($o) => is_array($o) && in_array((string) ($o['parent'] ?? ''), $parents, true))
+            ->map(fn (array $o) => ['value' => (string) $o['value'], 'label' => (string) $o['label'], 'parent' => (string) $o['parent']])
+            ->values();
 
         return ApiResponse::json($request, $out, ApiResponse::CACHE_CATALOG);
     }

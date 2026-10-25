@@ -960,13 +960,18 @@
 .hm-main__name { font-size: 16px; font-weight: 800; line-height: 1.25; }
 .hm-main__count { color: var(--lg-muted); font-size: 13px; }
 
-/* Besplatne stvari: warm accent, part of what loglasi stands for */
-.hm-main__tile--warm,
-.hm-main__tile--warm:visited { border-color: #f3c9a8; background: linear-gradient(180deg, #fff7f0 0%, #fff 100%); }
-.hm-main__tile--warm .hm-main__icon,
-.hm-pop__icon--warm { background: #fde8d7; color: var(--lg-orange); }
-.hm-main__tile--warm:hover { border-color: var(--lg-orange); }
-.hm-main__tile--all .hm-main__icon { background: #f1f4f2; color: var(--lg-text-2); }
+/* Tile colours (same names in the API and the apps). Besplatne stvari is red and stands out on purpose. */
+.hm-main__tile--blue .hm-main__icon { background: #e8f0fb; color: #2563a8; }
+.hm-main__tile--orange .hm-main__icon { background: #fdf0e6; color: #b8501a; }
+.hm-main__tile--violet .hm-main__icon { background: #f1edfb; color: #6b4fbb; }
+.hm-main__tile--teal .hm-main__icon { background: #e6f5f3; color: #1f7a6d; }
+.hm-main__tile--gray .hm-main__icon { background: #f1f4f2; color: #3f4a45; }
+.hm-main__tile--red,
+.hm-main__tile--red:visited { border-color: #f4b4b4; background: #fdecec; }
+.hm-main__tile--red .hm-main__icon { background: #e5383b; color: #fff; box-shadow: 0 6px 14px rgba(229, 56, 59, .28); }
+.hm-main__tile--red .hm-main__name { color: #b4232a; }
+.hm-main__tile--red:hover { border-color: #e5383b; box-shadow: 0 8px 22px rgba(229, 56, 59, .16); }
+.hm-main__tagline { margin-bottom: -4px; color: #b4232a; font-size: 12px; font-weight: 700; letter-spacing: .02em; }
 
 /* Popularno: round icons, one scrolling row on phones */
 .hm-pop__list {
@@ -1021,4 +1026,9 @@
 	.hm-intro { padding: 18px 0 14px; }
 	.hm-intro__title { font-size: 22px; }
 	.hm-intro__text { margin-bottom: 0; font-size: 15px; }
+}
+@media (max-width: 767.98px) {
+	.hm-main__tile { gap: 4px; }
+	.hm-main__name { font-size: 13.5px; }
+	.hm-main__tagline { font-size: 11px; white-space: nowrap; margin-bottom: -2px; }
 }

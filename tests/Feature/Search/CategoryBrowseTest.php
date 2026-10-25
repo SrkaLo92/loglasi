@@ -38,9 +38,22 @@ class CategoryBrowseTest extends SearchTestCase
             ->assertJsonCount(2, 'main')
             ->assertJsonPath('main.0.id', $free->id)
             ->assertJsonPath('main.0.icon', 'gift_heart')
-            ->assertJsonPath('main.0.accent', 'warm')
+            ->assertJsonPath('main.0.accent', 'red')
+            ->assertJsonPath('main.0.color', 'red')
+            ->assertJsonPath('main.0.tagline', 'Poklonite nekome')
             ->assertJsonPath('main.1.slug', 'automobili')
-            ->assertJsonPath('main.1.accent', null);
+            ->assertJsonPath('main.1.accent', null)
+            ->assertJsonPath('main.1.color', 'blue');
+    }
+
+    public function test_popular_is_the_admin_list_not_the_biggest_categories(): void
+    {
+        $this->listing(['category_id' => $this->cars->id]);
+        Settings::set('home.popular_categories', 'nekretnine, nema-ove');
+
+        $this->getJson('/api/v1/categories/browse')->assertOk()
+            ->assertJsonCount(1, 'popular')
+            ->assertJsonPath('popular.0.slug', 'nekretnine');
     }
 
     public function test_phone_filter_rows_show_the_category_and_its_groups(): void

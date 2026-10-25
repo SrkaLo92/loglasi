@@ -19,6 +19,7 @@ class HomeSettings
         'home.intro_terms_count' => 5,
         // 2. Main categories (big tiles, the sixth is "Sve kategorije"), then the popular ones
         'home.main_categories' => 'automobili,nekretnine,besplatne-stvari,poslovi,usluge',
+        'home.popular_categories' => 'auto-delovi,stanovi-iznajmljivanje,mobilni-telefoni,namestaj,traktori,bela-tehnika-i-kucni-aparati,alati-i-orudja,kucni-ljubimci',
         'home.categories_title' => 'Popularno',
         'home.categories_count' => 11,
         // 2b. Premium XL + početna (hidden when empty)

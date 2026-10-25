@@ -29,8 +29,16 @@ class CategorySheet
     /** Big tiles at the top of the home page (site and apps); a sixth tile opens all categories. */
     public const MAIN = 5;
 
-    /** Tiles with a warm accent: giving things away is part of what the site stands for. */
-    public const WARM = ['besplatne-stvari'];
+    /**
+     * Colour of each main tile (site and apps use the same names). Besplatne stvari is red and has a tagline:
+     * giving things away is part of what the site stands for.
+     */
+    public const COLORS = ['automobili' => 'blue', 'nekretnine' => 'orange', 'besplatne-stvari' => 'red', 'poslovi' => 'violet', 'usluge' => 'teal'];
+
+    public const TAGLINES = ['besplatne-stvari' => 'Poklonite nekome'];
+
+    /** Popularno: chosen in the admin, not by count (a few big sellers would decide it otherwise). */
+    public const POPULAR_MAX = 12;
 
     /**
      * @return array{main: list<array>, popular: list<array>, themes: list<array{name: string, items: list<array>}>, all: list<array>}
@@ -94,8 +102,17 @@ class CategorySheet
             }
         }
 
-        // Most wanted: the groups (or top categories without groups) with the most listings.
-        $popular = collect($leaves)
+        // Popularno: the admin list (categories or groups), in its order; by count only when it is empty.
+        $chosen = [];
+        foreach (array_slice(HomeSettings::list('home.popular_categories'), 0, self::POPULAR_MAX) as $slug) {
+            $category = $catalog->categoryBySlug($slug);
+            if ($category !== null && $catalog->isVisible($category)) {
+                $parent = $category->parent_id ? $catalog->category((int) $category->parent_id) : null;
+                $chosen[] = $tile($category, $parent);
+            }
+        }
+
+        $popular = $chosen !== [] ? $chosen : collect($leaves)
             ->filter(fn ($c) => $c['count'] > 0)
             ->sortByDesc('count')
             ->take(self::POPULAR)
@@ -106,7 +123,11 @@ class CategorySheet
         foreach (HomeSettings::list('home.main_categories') as $slug) {
             $category = $catalog->categoryBySlug($slug);
             if ($category !== null && $catalog->isVisible($category) && count($main) < self::MAIN) {
-                $main[] = $tile($category) + ['accent' => in_array($category->slug, self::WARM, true) ? 'warm' : null];
+                $main[] = $tile($category) + [
+                    'color' => self::COLORS[$category->slug] ?? 'green',
+                    'accent' => (self::COLORS[$category->slug] ?? null) === 'red' ? 'red' : null,
+                    'tagline' => self::TAGLINES[$category->slug] ?? null,
+                ];
             }
         }
 

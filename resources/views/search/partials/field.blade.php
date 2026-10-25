@@ -60,12 +60,14 @@
 		$parentField = collect($allFields ?? [])->firstWhere('key', $field['depends_on']);
 		$parentLabels = collect($parentField['options'] ?? [])->pluck('label', 'value')->all();
 		$chosenParents = $parentField ? $filters->fieldValues($parentField['key']) : [];
-		$shown = collect($field['options'])->when($chosenParents !== [], fn ($c) => $c->filter(fn ($o) => in_array($o['parent'] ?? '', $chosenParents, true)));
+		// Long lists (car models) are loaded for the chosen make only (fields.js, /api/v1/fields/{key}/options).
+		$lazy = count($field['options']) > \App\Services\ListingFields::LAZY_OPTIONS;
+		$shown = collect($field['options'])->when($chosenParents !== [] || $lazy, fn ($c) => $c->filter(fn ($o) => in_array($o['parent'] ?? '', $chosenParents, true)));
 		$groups = count($chosenParents) === 1 ? ['' => $shown->all()] : $shown->groupBy(fn ($o) => $parentLabels[$o['parent'] ?? ''] ?? '')->all();
 	@endphp
 	<div class="sr-group" data-sr-key="{{ $field['key'] }}">
 		<label class="sr-group__title" for="{{ $fid }}">{{ $field['label'] }}</label>
-		<select class="sr-input" id="{{ $fid }}" name="f[{{ $field['key'] }}]" data-pick data-field-key="{{ $field['key'] }}" data-depends-on="{{ $field['depends_on'] }}" data-placeholder="Sve">
+		<select class="sr-input" id="{{ $fid }}" name="f[{{ $field['key'] }}]" data-pick data-field-key="{{ $field['key'] }}" data-depends-on="{{ $field['depends_on'] }}" data-placeholder="Sve" @if ($lazy) data-options-url="{{ url('api/v1/fields/'.$field['key'].'/options') }}" data-needs-parent data-waiting="Prvo izaberite: {{ mb_strtolower($parentField['label'] ?? 'marku') }}" @endif>
 			<option value="">Sve</option>
 			@foreach ($groups as $group => $options)
 				@if ($group !== '')<optgroup label="{{ $group }}">@endif

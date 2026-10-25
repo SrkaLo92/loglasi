@@ -102,7 +102,7 @@ class HomePageTest extends SearchTestCase
         Settings::set('home.about', 'Naš **tekst** o sajtu.');
 
         $this->get('/')->assertOk()
-            ->assertSee('class="hm-main__tile" href="'.url_slash('/oglasi/automobili').'"', false)
+            ->assertSee('class="hm-main__tile hm-main__tile--blue" href="'.url_slash('/oglasi/automobili').'"', false)
             ->assertSee('Sveže iz Loznice')
             ->assertSee('<strong>tekst</strong>', false);
     }

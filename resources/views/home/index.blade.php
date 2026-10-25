@@ -56,15 +56,18 @@
 			<ul class="hm-main__list">
 				@foreach ($hmMain as $tile)
 					<li>
-						<a @class(['hm-main__tile', 'hm-main__tile--warm' => $tile['accent'] === 'warm']) href="{{ $tile['url'] }}">
+						<a class="hm-main__tile hm-main__tile--{{ $tile['color'] }}" href="{{ $tile['url'] }}">
 							<span class="hm-main__icon">{{ CategoryIcons::svg($tile['icon'], 34) }}</span>
+							@if ($tile['tagline'])
+								<span class="hm-main__tagline">{{ $tile['tagline'] }}</span>
+							@endif
 							<span class="hm-main__name">{{ $tile['name'] }}</span>
-							<span class="hm-main__count">{{ TimeAgo::listings($tile['count']) }}</span>
+							<span class="hm-main__count">{{ $tile['count'] > 0 ? TimeAgo::listings($tile['count']) : 'Budite prvi' }}</span>
 						</a>
 					</li>
 				@endforeach
 				<li>
-					<a class="hm-main__tile hm-main__tile--all" href="{{ $hmAll }}" data-lg-cats>
+					<a class="hm-main__tile hm-main__tile--gray" href="{{ $hmAll }}" data-lg-cats>
 						<span class="hm-main__icon">{{ CategoryIcons::svg('grid', 34) }}</span>
 						<span class="hm-main__name">Sve kategorije</span>
 						<span class="hm-main__count">{{ $hmCatTotal }} {{ Cenovnik::plural($hmCatTotal, 'kategorija', 'kategorije', 'kategorija') }}</span>
@@ -74,7 +77,7 @@
 		</nav>
 	@endif
 
-	{{-- 2a. Popular: the groups with the most listings, round icons (same list as the apps) --}}
+	{{-- 2a. Popular: categories chosen in the admin (home.popular_categories), round icons (same list as the apps) --}}
 	@if ($hmPopular)
 		<section class="hm-sec hm-pop" aria-labelledby="hm-pop-title">
 			<div class="hm-sec__head">
@@ -84,8 +87,8 @@
 				@foreach ($hmPopular as $tile)
 					<li>
 						<a class="hm-pop__item" href="{{ $tile['url'] }}">
-							<span @class(['hm-pop__icon', 'hm-pop__icon--warm' => in_array($tile['icon'], ['gift_heart'], true)])>{{ CategoryIcons::svg($tile['icon'], 26) }}</span>
-							<span class="hm-pop__name">{{ $tile['name'] }}</span>
+							<span class="hm-pop__icon">{{ CategoryIcons::svg($tile['icon'], 26) }}</span>
+							<span class="hm-pop__name">{{ str_replace(' | ', ' · ', $tile['name']) }}</span>
 						</a>
 					</li>
 				@endforeach

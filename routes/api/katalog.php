@@ -10,5 +10,6 @@ Route::middleware('throttle:katalog')->controller(CatalogApiController::class)->
     Route::get('/categories/{id}/fields', 'fields')->whereNumber('id')->name('api.categories.fields');
     Route::get('/locations', 'locations')->name('api.locations');
     Route::get('/fields', 'fields')->name('api.fields');
+    Route::get('/fields/{key}/options', 'options')->where('key', '[a-z0-9_]{1,64}')->name('api.fields.options');
     Route::get('/prices', 'prices')->name('api.prices');
 });
