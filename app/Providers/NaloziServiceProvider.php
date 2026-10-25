@@ -6,6 +6,7 @@ use App\Http\Middleware\EnsureNotBlocked;
 use App\Http\Middleware\EnsureStaff;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
+use App\Notifications\Listeners\HoldOutgoingMail;
 use App\Support\ApiError;
 use App\Support\Auth\LoginPage;
 use App\Support\Auth\LoglasiHasher;
@@ -122,7 +123,8 @@ class NaloziServiceProvider extends ServiceProvider
             ->line('Kliknite na dugme da potvrdite email adresu svog naloga na loglasi.rs.')
             ->action('Potvrdi email adresu', $url)
             ->line('Ako niste napravili nalog, ništa ne morate da radite.')
-            ->salutation('Pozdrav, loglasi.rs'));
+            ->salutation('Pozdrav, loglasi.rs')
+            ->withSymfonyMessage(HoldOutgoingMail::markRequested(...)));
 
         ResetPassword::createUrlUsing(fn ($user, string $token) => url_slash('nova-lozinka/'.$token).'?email='.urlencode($user->getEmailForPasswordReset()));
 
@@ -133,6 +135,7 @@ class NaloziServiceProvider extends ServiceProvider
             ->action('Postavi novu lozinku', url_slash('nova-lozinka/'.$token).'?email='.urlencode($notifiable->getEmailForPasswordReset()))
             ->line('Link važi '.config('auth.passwords.users.expire').' minuta.')
             ->line('Ako niste tražili novu lozinku, ništa ne morate da radite.')
-            ->salutation('Pozdrav, loglasi.rs'));
+            ->salutation('Pozdrav, loglasi.rs')
+            ->withSymfonyMessage(HoldOutgoingMail::markRequested(...)));
     }
 }

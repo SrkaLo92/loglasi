@@ -7,6 +7,8 @@ return [
     // Before the official launch nothing may reach real users: with hold on, mail goes only to the
     // addresses (or @domains) in "allow" and push is not sent at all.
     'hold' => (bool) env('NOTIFICATIONS_HOLD', false),
+    // Also send, to anyone, the mails a person asks for themselves (password reset, email confirmation).
+    'allow_requested' => (bool) env('NOTIFICATIONS_ALLOW_REQUESTED', false),
     'allow' => array_values(array_filter(array_map('trim', explode(',', (string) env('NOTIFICATIONS_ALLOW', ''))))),
 
     'fcm' => [
