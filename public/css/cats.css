@@ -45,8 +45,9 @@
 	border: 1px solid var(--lg-border); border-radius: 16px; background: var(--lg-mint); color: var(--lg-green);
 	transition: border-color .15s, transform .15s;
 }
+.lgc-tile__media[class*="lg-tone--"] { border-color: var(--tone-line); background: var(--tone-bg); color: var(--tone); }
 .lgc-tile__media img { width: 48px; height: 48px; object-fit: contain; }
-.lgc-tile:hover .lgc-tile__media { border-color: var(--lg-green); transform: translateY(-1px); }
+.lgc-tile:hover .lgc-tile__media { border-color: var(--tone, var(--lg-green)); transform: translateY(-1px); }
 .lgc-tile__name { font-size: 13px; font-weight: 600; line-height: 1.25; overflow-wrap: anywhere; }
 .lgc-tile__n { margin-top: -4px; font-size: 12px; color: var(--lg-muted); }
 .lgc-all, .lgc-all:visited { display: block; padding: 14px; text-align: center; font-weight: 700; color: var(--lg-green); }

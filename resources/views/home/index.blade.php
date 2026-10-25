@@ -87,7 +87,7 @@
 				@foreach ($hmPopular as $tile)
 					<li>
 						<a class="hm-pop__item" href="{{ $tile['url'] }}">
-							<span class="hm-pop__icon">{{ CategoryIcons::svg($tile['icon'], 26) }}</span>
+							<span class="hm-pop__icon lg-tone--{{ $tile['color'] }}">{{ CategoryIcons::svg($tile['icon'], 26) }}</span>
 							<span class="hm-pop__name">{{ str_replace(' | ', ' · ', $tile['name']) }}</span>
 						</a>
 					</li>

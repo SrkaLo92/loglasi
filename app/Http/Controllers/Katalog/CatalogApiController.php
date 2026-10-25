@@ -37,11 +37,12 @@ class CatalogApiController extends Controller
             'icon' => $c['icon'],
             'image' => $c['image'],
             'count' => $c['count'],
+            'color' => $c['color'],
         ];
         $sheet = CategorySheet::get();
 
         return ApiResponse::json($request, [
-            'main' => array_map(fn (array $c) => $item($c) + ['color' => $c['color'], 'accent' => $c['accent'], 'tagline' => $c['tagline']], $sheet['main']),
+            'main' => array_map(fn (array $c) => $item($c) + ['accent' => $c['accent'], 'tagline' => $c['tagline']], $sheet['main']),
             'popular' => array_map($item, $sheet['popular']),
             'themes' => array_map(fn ($t) => ['name' => $t['name'], 'items' => array_map($item, $t['items'])], $sheet['themes']),
         ], ApiResponse::CACHE_CATALOG);

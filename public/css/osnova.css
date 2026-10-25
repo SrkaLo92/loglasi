@@ -824,3 +824,16 @@ details[name][open]::details-content {
 }
 .lg-lozinka__oko:hover { color: var(--lg-text); }
 .lg-lozinka__oko:focus-visible { outline: 2px solid var(--lg-green); outline-offset: -2px; }
+
+/* Category colours (CategorySheet::COLORS / THEME_COLORS): text or icon, soft background, border */
+.lg-tone--blue { --tone: #2563a8; --tone-bg: #e8f0fb; --tone-line: #c9dcf3; }
+.lg-tone--orange { --tone: #b8501a; --tone-bg: #fdf0e6; --tone-line: #f6d6bf; }
+.lg-tone--red { --tone: #c42b2f; --tone-bg: #fdecec; --tone-line: #f4b4b4; }
+.lg-tone--violet { --tone: #6b4fbb; --tone-bg: #f1edfb; --tone-line: #ddd3f4; }
+.lg-tone--teal { --tone: #1f7a6d; --tone-bg: #e6f5f3; --tone-line: #c4e6e0; }
+.lg-tone--indigo { --tone: #4338ca; --tone-bg: #eceefe; --tone-line: #d3d6fb; }
+.lg-tone--green { --tone: #3d7a1f; --tone-bg: #edf6e6; --tone-line: #cfe6c0; }
+.lg-tone--pink { --tone: #b0306f; --tone-bg: #fcebf4; --tone-line: #f3c9de; }
+.lg-tone--sky { --tone: #0369a1; --tone-bg: #e4f4fc; --tone-line: #bfe3f5; }
+.lg-tone--amber { --tone: #9a5b00; --tone-bg: #fdf4e0; --tone-line: #f0d9a8; }
+.lg-tone--gray { --tone: #3f4a45; --tone-bg: #f1f4f2; --tone-line: #dde3df; }

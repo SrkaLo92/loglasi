@@ -13,7 +13,7 @@ $lgcTile = function (array $c) {
 	$media = $c['image']
 		? '<img src="'.e($c['image']).'" alt="" loading="lazy" width="48" height="48">'
 		: CategoryIcons::svg($c['icon'], 28, '1.6');
-	return '<a class="lgc-tile" href="'.e($c['url']).'"><span class="lgc-tile__media">'.$media.'</span><span class="lgc-tile__name">'.e($c['name']).'</span>'
+	return '<a class="lgc-tile" href="'.e($c['url']).'"><span class="lgc-tile__media lg-tone--'.e($c['color']).'">'.$media.'</span><span class="lgc-tile__name">'.e(str_replace(' | ', ' · ', $c['name'])).'</span>'
 		.($c['count'] > 0 ? '<span class="lgc-tile__n">'.number_format($c['count'], 0, ',', '.').'</span>' : '').'</a>';
 };
 @endphp

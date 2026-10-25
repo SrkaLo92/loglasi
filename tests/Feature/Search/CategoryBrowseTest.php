@@ -53,7 +53,24 @@ class CategoryBrowseTest extends SearchTestCase
 
         $this->getJson('/api/v1/categories/browse')->assertOk()
             ->assertJsonCount(1, 'popular')
-            ->assertJsonPath('popular.0.slug', 'nekretnine');
+            ->assertJsonPath('popular.0.slug', 'nekretnine')
+            ->assertJsonPath('popular.0.color', 'orange');
+    }
+
+    public function test_every_category_and_group_carries_the_colour_of_its_group(): void
+    {
+        $parts = Category::create(['name' => 'Delovi', 'slug' => 'delovi-za-automobile', 'parent_id' => $this->cars->id]);
+        $phones = Category::create(['name' => 'Mobilni telefoni', 'slug' => 'mobilni-telefoni']);
+        app(Catalog::class)->flush();
+        Settings::set('home.popular_categories', 'delovi-za-automobile, mobilni-telefoni');
+
+        $this->getJson('/api/v1/categories/browse')->assertOk()
+            ->assertJsonPath('popular.0.id', $parts->id)
+            ->assertJsonPath('popular.0.color', 'blue')
+            ->assertJsonPath('popular.1.id', $phones->id)
+            ->assertJsonPath('popular.1.color', 'indigo');
+
+        $this->get('/')->assertOk()->assertSee('hm-pop__icon lg-tone--indigo', false)->assertSee('lgc-tile__media lg-tone--blue', false);
     }
 
     public function test_phone_filter_rows_show_the_category_and_its_groups(): void

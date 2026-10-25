@@ -35,6 +35,16 @@ class CategorySheet
      */
     public const COLORS = ['automobili' => 'blue', 'nekretnine' => 'orange', 'besplatne-stvari' => 'red', 'poslovi' => 'violet', 'usluge' => 'teal'];
 
+    /**
+     * Colour of each theme: every category and group carries the colour of its top category's theme
+     * (Popularno, "Sve kategorije", the apps), so a group is recognised by colour. COLORS wins for its own slugs.
+     */
+    public const THEME_COLORS = [
+        'Vozila' => 'blue', 'Nekretnine' => 'orange', 'Elektronika' => 'indigo', 'Kuća i bašta' => 'green',
+        'Porodica i moda' => 'pink', 'Sport i hobi' => 'sky', 'Životinje i poljoprivreda' => 'amber',
+        'Poslovi i usluge' => 'violet', 'Ostalo' => 'gray',
+    ];
+
     public const TAGLINES = ['besplatne-stvari' => 'Poklonite nekome'];
 
     /** Popularno: chosen in the admin, not by count (a few big sellers would decide it otherwise). */
@@ -52,8 +62,23 @@ class CategorySheet
     {
         $catalog = app(Catalog::class);
         $counts = $catalog->counts();
+        $colors = self::COLORS;
+        foreach (self::THEMES as $name => $slugs) {
+            $colors += array_fill_keys($slugs, self::THEME_COLORS[$name]);
+        }
+        $colorOf = function (Category $c) use ($catalog, $colors): string {
+            for ($depth = 0; $c->parent_id && $depth < 5 && ($parent = $catalog->category((int) $c->parent_id)); $depth++) {
+                if (isset($colors[$c->slug])) {
+                    break;
+                }
+                $c = $parent;
+            }
+
+            return $colors[$c->slug] ?? self::THEME_COLORS['Ostalo'];
+        };
         $tile = fn (Category $c, ?Category $parent = null) => [
             'id' => $c->id,
+            'color' => $colorOf($c),
             'slug' => $c->slug,
             'name' => $c->name,
             'path' => $parent ? $parent->name : null,
@@ -124,7 +149,6 @@ class CategorySheet
             $category = $catalog->categoryBySlug($slug);
             if ($category !== null && $catalog->isVisible($category) && count($main) < self::MAIN) {
                 $main[] = $tile($category) + [
-                    'color' => self::COLORS[$category->slug] ?? 'green',
                     'accent' => (self::COLORS[$category->slug] ?? null) === 'red' ? 'red' : null,
                     'tagline' => self::TAGLINES[$category->slug] ?? null,
                 ];
