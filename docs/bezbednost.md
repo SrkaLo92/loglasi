@@ -21,7 +21,7 @@
 
 ## Automatske provere
 
-- `php artisan test` (u CI-ju i pre svakog deploy-a). Bezbednost posebno: `tests/Feature/Security/AttackSurfaceTest.php` (zaglavlja, XSS, IDOR, PHP kao slika, pogađanje lozinke, eskalacija prava, admin, curenje podataka, skriveni fajlovi), plus testovi modula (politike, ograničenja, 2FA).
+- `php artisan test` lokalno pre svakog push-a i deploy-a (GitHub služi samo za čuvanje koda, bez Actions). Bezbednost posebno: `tests/Feature/Security/AttackSurfaceTest.php` (zaglavlja, XSS, IDOR, PHP kao slika, pogađanje lozinke, eskalacija prava, admin, curenje podataka, skriveni fajlovi), plus testovi modula (politike, ograničenja, 2FA).
 - `scripts/bezbednost-provera.sh https://adresa-sajta` spolja, samo čitanje: zaglavlja, kolačići, osetljive putanje, listanje direktorijuma, TRACE, http→https, API bez tokena, CORS, admin, stranice grešaka. Pokrenuti posle svakog deploy-a na probni sajt i obavezno na loglasi.rs posle prelaska.
 - `composer audit` (poznate ranjivosti paketa) pre svakog izlaska.
 
