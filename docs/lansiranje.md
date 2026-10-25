@@ -41,6 +41,14 @@ Posle izmene: `php artisan config:cache`.
 - [ ] Cron `schedule:run` svakog minuta (kao na probnom sajtu).
 - [ ] `php artisan migrate --force`, `seo:preusmerenja`, `search:rebuild`, `config:cache`, `route:cache`, `view:cache`, `event:cache`.
 - [ ] `/robots.txt` više nema `Disallow: /`, `/sitemap.xml` vraća adrese sa https://loglasi.rs.
+- [ ] Admin → Podešavanja: isključiti „Test režim plaćanja”; „Plaćanje za privatna lica” ostaje isključeno.
+
+## Plaćanje na produkciji (Srdjan, 25. 10. 2026)
+
+- Firme i preduzetnici plaćaju uplatom na račun i dobijaju fakturu (van sistema PDV-a, bez SEF-a). Brojevi faktura i knjižnih odobrenja idu automatski po godini (`fiscal.invoice_auto_number`), admin može da upiše svoj broj.
+- Privatna lica vide ceo cenovnik sa oznakom „Kupovina uskoro” i ne mogu da naruče dok fiskalna kasa ne proradi; tada se uključuje „Plaćanje za privatna lica” i bira fiskalni drajver.
+- Probni sajt ostaje u test režimu, da probne narudžbine ne troše prave brojeve faktura.
+- Dok je `NOTIFICATIONS_HOLD` uključen, predračun i faktura se ne šalju mejlom; firma ih vidi u „Moje narudžbine” (sa pozivom na broj i QR kodom).
 
 ## 4. Odmah posle prelaska
 
@@ -52,5 +60,5 @@ Posle izmene: `php artisan config:cache`.
 
 ## Otvoreno (odluke)
 
-- Plaćanje: `payments.test_mode` je uključen (predračuni i mejlovi označeni TEST). Bez fiskalne kase plaćanje za firme ostaje u test režimu ili se privremeno sakriva; privatna plaćanja su isključena.
+- Fiskalna kasa za privatna lica: kasnije (vidi „Plaćanje na produkciji”).
 - Push obaveštenja: tek kad stignu Firebase/APNs ključevi i Srdjan odobri.
