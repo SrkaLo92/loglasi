@@ -40,6 +40,7 @@ class MeApiTest extends TestCase
                 'avatar' => null,
                 'firm_id' => null,
                 'member_since' => '2026-10-23T18:30:00Z',
+                'plus_seller_until' => null,
                 'notifications' => ['messages' => true, 'listing_status' => true, 'payments' => true, 'expiring' => true],
             ]);
     }

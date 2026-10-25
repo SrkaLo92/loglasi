@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/potvrda-emaila/ponovo', [PotvrdaEmailaController::class, 'send'])->middleware('throttle:3,10')->name('verification.send');
 
     Route::get('/moj-nalog', [NalogController::class, 'show'])->name('nalog');
+    Route::get('/moj-nalog/podesavanja', [NalogController::class, 'settings'])->name('nalog.podesavanja');
     Route::get('/moj-nalog/brisanje', [NalogController::class, 'confirmDelete'])->name('nalog.brisanje.potvrda');
 
     Route::middleware('throttle:nalozi-account')->group(function () {

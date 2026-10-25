@@ -409,39 +409,127 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	.lg-footer__in { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* Navigacija naloga ---------------------------------------------------- */
+/* Navigacija naloga: meni sa strane na računaru, lista na pregledu naloga na telefonu --------- */
 
-.lg-acct { max-width: 1040px; margin-top: 20px; margin-bottom: -4px; }
-.lg-acct__list {
-	display: flex;
-	gap: 6px;
-	margin: 0;
-	padding: 0 0 2px;
-	list-style: none;
-	overflow-x: auto;
-	scrollbar-width: none;
+.lg-acct {
+	display: grid;
+	grid-template-columns: 264px minmax(0, 1fr);
+	gap: 32px;
+	align-items: start;
+	padding-top: 28px;
+	padding-bottom: 56px;
 }
-.lg-acct__list::-webkit-scrollbar { display: none; }
-.lg-acct__list a,
-.lg-acct__list a:visited {
-	display: inline-flex;
-	align-items: center;
-	min-height: 40px;
-	padding: 0 16px;
+.lg-acct__side { position: sticky; top: 20px; }
+.lg-acct__main { min-width: 0; }
+/* Strane naloga imaju svoj omotač; unutar okvira naloga on ne dodaje širinu ni razmak. */
+.lg-acct__main > .lg-wrap { max-width: none; margin: 0; padding: 0; }
+.lg-acct__back { display: none; }
+
+.lg-acct-nav {
+	padding: 10px;
 	border: 1px solid var(--lg-border);
-	border-radius: 999px;
+	border-radius: 18px;
 	background: #fff;
-	color: var(--lg-text-2);
-	font-size: 15px;
-	font-weight: 600;
-	white-space: nowrap;
+}
+.lg-acct-nav__me,
+.lg-acct-nav__me:visited {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 10px 14px;
+	margin-bottom: 6px;
+	border-bottom: 1px solid var(--lg-border);
+	color: var(--lg-text);
 	text-decoration: none;
 }
-.lg-acct__list a:hover { border-color: var(--lg-green); color: var(--lg-green-dark); }
-.lg-acct__list a[aria-current="page"] { border-color: var(--lg-green); background: var(--lg-green); color: #fff; }
-@media (max-width: 767.98px) {
-	.lg-acct { margin-top: 14px; margin-bottom: -8px; padding-right: 0; }
-	.lg-acct__list { padding-right: var(--lg-gutter); }
+.lg-acct-nav__avatar {
+	display: grid;
+	flex: none;
+	place-items: center;
+	width: 44px;
+	height: 44px;
+	overflow: hidden;
+	border-radius: 50%;
+	background: var(--lg-mint);
+	color: var(--lg-green-dark);
+	font-weight: 800;
+}
+.lg-acct-nav__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.lg-acct-nav__who { display: grid; min-width: 0; line-height: 1.3; }
+.lg-acct-nav__who strong { overflow: hidden; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.lg-acct-nav__who small { color: var(--lg-muted); font-size: 13px; }
+.lg-acct-nav__title {
+	margin: 12px 12px 4px;
+	color: var(--lg-muted);
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: .06em;
+	text-transform: uppercase;
+}
+.lg-acct-nav ul { margin: 0; padding: 0; list-style: none; }
+.lg-acct-nav a,
+.lg-acct-nav a:visited,
+.lg-acct-nav button {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	width: 100%;
+	min-height: 44px;
+	padding: 0 12px;
+	border: 0;
+	border-radius: 12px;
+	background: none;
+	color: var(--lg-text);
+	font: inherit;
+	font-size: 15px;
+	font-weight: 600;
+	text-align: left;
+	text-decoration: none;
+	cursor: pointer;
+}
+.lg-acct-nav .lg-icon { flex: none; color: var(--lg-muted); }
+.lg-acct-nav a:hover,
+.lg-acct-nav button:hover { background: var(--lg-bg); }
+.lg-acct-nav a[aria-current="page"] { background: var(--lg-mint); color: var(--lg-green-dark); }
+.lg-acct-nav a[aria-current="page"] .lg-icon { color: var(--lg-green); }
+.lg-acct-nav__label { flex: 1; min-width: 0; }
+.lg-acct-nav__count {
+	min-width: 24px;
+	padding: 2px 8px;
+	border-radius: 999px;
+	background: var(--lg-bg);
+	color: var(--lg-muted);
+	font-size: 13px;
+	font-weight: 700;
+	text-align: center;
+}
+.lg-acct-nav__count.is-alert { background: var(--lg-orange); color: #fff; }
+.lg-acct-nav__group--end { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--lg-border); }
+.lg-acct-nav__group--end button:hover { color: var(--lg-error); }
+
+/* Lista na pregledu naloga (samo telefon). */
+.lg-acct-nav--list { display: none; }
+
+@media (max-width: 1023.98px) {
+	.lg-acct { display: block; padding-top: 12px; padding-bottom: 32px; }
+	.lg-acct__side { display: none; }
+	.lg-acct__back,
+	.lg-acct__back:visited {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		min-height: 40px;
+		margin: 0 0 4px -6px;
+		padding: 0 8px 0 2px;
+		color: var(--lg-green-dark);
+		font-size: 15px;
+		font-weight: 700;
+		text-decoration: none;
+	}
+	.lg-acct-nav--list { display: block; padding: 6px; }
+	.lg-acct-nav--list a,
+	.lg-acct-nav--list button { min-height: 52px; }
+	.lg-acct-nav--list .lg-icon--chevron-r { color: var(--lg-input); }
 }
 
 /* Donja navigacija (samo telefon) -------------------------------------- */

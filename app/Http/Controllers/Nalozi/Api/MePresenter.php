@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Nalozi\Api;
 
 use App\Models\User;
+use App\Services\Payments\PlusSeller;
 use DateTimeInterface;
 
 /** Šema Me iz ugovora. */
@@ -35,6 +36,8 @@ class MePresenter
             ] : null,
             'firm_id' => $user->isFirm() ? $user->firm?->id : null,
             'member_since' => static::date($user->created_at),
+            // Plus prodavac: up to PlusSeller::listingLimit() active listings until this date (null when not active).
+            'plus_seller_until' => static::date(PlusSeller::activeUntil($user)),
             'notifications' => $user->notificationSettings(),
         ];
     }

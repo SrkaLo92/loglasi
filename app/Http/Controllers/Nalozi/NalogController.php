@@ -9,7 +9,7 @@ use App\Support\Auth\AccountDeletion;
 use App\Support\Auth\Accounts;
 use App\Support\Auth\ApiTokens;
 use App\Support\Auth\Avatar;
-use App\Support\ListingLimits;
+use App\Support\Nalozi\AccountOverview;
 use App\Support\Phone;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,16 +22,27 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use RuntimeException;
 
-/** „Moj nalog”: podaci, slika, lozinka i brisanje naloga. */
+/** „Moj nalog”: overview, settings (data, photo, password) and account deletion. */
 class NalogController extends Controller
 {
     public function show(Request $request): View
     {
         $user = $request->user()->load('location', 'firm');
+        $overview = new AccountOverview($user);
 
         return view('nalozi.moj-nalog', [
             'user' => $user,
-            'limits' => ListingLimits::for($user),
+            'tasks' => $overview->tasks(),
+            'stats' => $overview->stats(),
+            'recent' => $overview->recentListings(),
+        ]);
+    }
+
+    /** /moj-nalog/podesavanja/: personal data, profile photo, password, sign out and account deletion. */
+    public function settings(Request $request): View
+    {
+        return view('nalozi.podesavanja', [
+            'user' => $request->user()->load('location', 'firm'),
             'locations' => Location::query()->orderBy('sort')->orderBy('name')->get(['id', 'name']),
         ]);
     }
@@ -55,7 +66,7 @@ class NalogController extends Controller
         $phoneChanged = $user->isDirty('phone');
         $user->save();
 
-        return redirect()->to(url_slash('moj-nalog'))->with('status', $phoneChanged
+        return redirect()->to(url_slash('moj-nalog/podesavanja'))->with('status', $phoneChanged
             ? 'Podaci su sačuvani. Novi broj telefona administrator treba ponovo da proveri.'
             : 'Podaci su sačuvani.');
     }
@@ -78,7 +89,7 @@ class NalogController extends Controller
         ApiTokens::revokeAll($user);
         DB::table('sessions')->where('user_id', $user->id)->where('id', '!=', $request->session()->getId())->delete();
 
-        return redirect()->to(url_slash('moj-nalog'))->with('status', 'Lozinka je promenjena. Ostali uređaji su odjavljeni.');
+        return redirect()->to(url_slash('moj-nalog/podesavanja'))->with('status', 'Lozinka je promenjena. Ostali uređaji su odjavljeni.');
     }
 
     public function updateAvatar(Request $request): RedirectResponse
@@ -99,7 +110,7 @@ class NalogController extends Controller
             throw ValidationException::withMessages(['avatar' => 'Slika ne može da se obradi. Probajte drugu sliku.'])->errorBag('slika');
         }
 
-        return redirect()->to(url_slash('moj-nalog'))->with('status', 'Slika je sačuvana.');
+        return redirect()->to(url_slash('moj-nalog/podesavanja'))->with('status', 'Slika je sačuvana.');
     }
 
     public function destroyAvatar(Request $request): RedirectResponse
@@ -109,7 +120,7 @@ class NalogController extends Controller
 
         Avatar::delete($user);
 
-        return redirect()->to(url_slash('moj-nalog'))->with('status', 'Slika je uklonjena.');
+        return redirect()->to(url_slash('moj-nalog/podesavanja'))->with('status', 'Slika je uklonjena.');
     }
 
     public function confirmDelete(Request $request): View

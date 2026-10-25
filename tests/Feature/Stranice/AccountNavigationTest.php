@@ -14,11 +14,12 @@ class AccountNavigationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        foreach (['moj-nalog' => 'Pregled', 'moj-nalog/oglasi' => 'Moji oglasi', 'moj-nalog/poruke' => 'Poruke', 'moj-nalog/obavestenja' => 'Obaveštenja', 'moj-nalog/narudzbine' => 'Narudžbine'] as $path => $label) {
-            $this->actingAs($user)->get('/'.$path.'/')->assertOk()
+        foreach (['moj-nalog' => 'Pregled', 'moj-nalog/oglasi' => 'Moji oglasi', 'moj-nalog/poruke' => 'Poruke', 'moj-nalog/obavestenja' => 'Obaveštenja', 'moj-nalog/narudzbine' => 'Narudžbine', 'moj-nalog/podesavanja' => 'Podešavanja naloga'] as $path => $label) {
+            $html = $this->actingAs($user)->get('/'.$path.'/')->assertOk()
                 ->assertSee('class="lg-acct lg-wrap"', false)
-                ->assertSee('aria-current="page">'.$label.'</a>', false)
-                ->assertDontSee('Imate nešto za prodaju?');
+                ->assertDontSee('Imate nešto za prodaju?')
+                ->getContent();
+            $this->assertMatchesRegularExpression('#aria-current="page">\s*<svg[^>]*>.*?</svg>\s*<span class="lg-acct-nav__label">'.preg_quote($label, '#').'</span>#s', $html);
         }
     }
 

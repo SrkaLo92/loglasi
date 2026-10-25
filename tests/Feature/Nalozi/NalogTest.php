@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Nalozi;
 
+use App\Enums\ListingStatus;
 use App\Models\Conversation;
 use App\Models\Listing;
 use App\Models\Location;
@@ -34,22 +35,55 @@ class NalogTest extends TestCase
             ->assertSee('Moj nalog')
             ->assertSee('Petar Petrović')
             ->assertSee('Privatno lice')
-            ->assertSee('065 541 5128')
-            ->assertSee('3 od 10', false)
+            ->assertSee('Zdravo, Petar')
+            ->assertSee('3 <small>od 10</small>', false)
             ->assertSee('PP');
+
+        $this->actingAs($user)->get('/moj-nalog/podesavanja/')
+            ->assertOk()
+            ->assertSee('Podešavanja naloga')
+            ->assertSee('Petar Petrović')
+            ->assertSee('065 541 5128');
+    }
+
+    public function test_overview_lists_what_needs_attention(): void
+    {
+        $user = User::factory()->create();
+        Listing::factory()->for($user)->create(['expires_at' => now()->addDays(2)]);
+        Listing::factory()->for($user)->create(['status' => ListingStatus::Rejected]);
+        Listing::factory()->for($user)->create(['status' => ListingStatus::Draft]);
+
+        $this->actingAs($user)->get('/moj-nalog/')->assertOk()
+            ->assertSee('1 oglas ističe u naredna 3 dana')
+            ->assertSee('1 oglas je odbijen')
+            ->assertSee('Imate 1 nedovršen oglas')
+            ->assertSee('Dodajte svoje mesto');
+    }
+
+    public function test_account_menu_is_on_every_account_page_with_counts(): void
+    {
+        $user = User::factory()->create();
+        Listing::factory()->count(2)->for($user)->create();
+
+        $this->actingAs($user)->get('/moj-nalog/oglasi/')->assertOk()
+            ->assertSee('class="lg-acct-nav"', false)
+            ->assertSee('Sačuvane pretrage')
+            ->assertSee('Podešavanja naloga')
+            ->assertSee('lg-acct-nav__count">2', false)
+            ->assertSee('class="lg-acct__back"', false);
     }
 
     public function test_firm_account_shows_badge(): void
     {
         $user = User::factory()->firm()->create();
 
-        $this->actingAs($user)->get('/moj-nalog/')->assertOk()->assertSee('Firma')->assertSee('nema ograničenje');
+        $this->actingAs($user)->get('/moj-nalog/')->assertOk()->assertSee('Firma')->assertSee('nema ograničenje')->assertSee('Profil firme');
     }
 
     public function test_unverified_email_shows_notice(): void
     {
         $this->actingAs(User::factory()->unverified()->create())->get('/moj-nalog/')
-            ->assertSee('Email adresa još nije potvrđena');
+            ->assertSee('Potvrdite e-poštu');
     }
 
     public function test_profile_update(): void
@@ -61,7 +95,7 @@ class NalogTest extends TestCase
             'name' => 'Novo Ime',
             'phone' => '065 541 5128',
             'location_id' => $location->id,
-        ])->assertRedirect(url_slash('moj-nalog'))->assertSessionHas('status', 'Podaci su sačuvani.');
+        ])->assertRedirect(url_slash('moj-nalog/podesavanja'))->assertSessionHas('status', 'Podaci su sačuvani.');
 
         $user->refresh();
         $this->assertSame('Novo Ime', $user->name);
@@ -114,7 +148,7 @@ class NalogTest extends TestCase
             'current_password' => 'lozinka123',
             'password' => 'novalozinka9',
             'password_confirmation' => 'novalozinka9',
-        ])->assertRedirect(url_slash('moj-nalog'))->assertSessionHas('status');
+        ])->assertRedirect(url_slash('moj-nalog/podesavanja'))->assertSessionHas('status');
 
         $user->refresh();
         $this->assertTrue(Hash::check('novalozinka9', $user->password));
@@ -158,7 +192,7 @@ class NalogTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)->post('/moj-nalog/slika/', ['avatar' => UploadedFile::fake()->image('ja.jpg', 900, 600)])
-            ->assertRedirect(url_slash('moj-nalog'));
+            ->assertRedirect(url_slash('moj-nalog/podesavanja'));
 
         $path = $user->fresh()->avatar_path;
         $this->assertStringStartsWith('avatars/'.$user->id.'/', $path);
@@ -171,9 +205,9 @@ class NalogTest extends TestCase
         Storage::disk('public')->assertMissing($path);
         $second = $user->fresh()->avatar_path;
 
-        $this->actingAs($user)->get('/moj-nalog/')->assertSee($second);
+        $this->actingAs($user)->get('/moj-nalog/podesavanja/')->assertSee($second);
 
-        $this->actingAs($user)->delete('/moj-nalog/slika/')->assertRedirect(url_slash('moj-nalog'));
+        $this->actingAs($user)->delete('/moj-nalog/slika/')->assertRedirect(url_slash('moj-nalog/podesavanja'));
         $this->assertNull($user->fresh()->avatar_path);
         Storage::disk('public')->assertMissing($second);
     }

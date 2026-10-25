@@ -23,9 +23,18 @@
 @include('partials.header')
 <main id="sadrzaj" tabindex="-1">
 @if (auth()->check() && request()->is('moj-nalog', 'moj-nalog/*') && ! request()->is('moj-nalog/obavestenja/odjava/*'))
-	@include('partials.account-tabs')
-@endif
+<div class="lg-acct lg-wrap">
+	<aside class="lg-acct__side">@include('partials.account-tabs')</aside>
+	<div class="lg-acct__main">
+		@unless (request()->is('moj-nalog'))
+			<a class="lg-acct__back" href="{{ url_slash('moj-nalog') }}">{{ \App\Support\Stranice\Ikonice::svg('chevron-l', 18) }} Moj nalog</a>
+		@endunless
+		@yield('content')
+	</div>
+</div>
+@else
 @yield('content')
+@endif
 </main>
 @include('partials.footer')
 @if ($mnav)
