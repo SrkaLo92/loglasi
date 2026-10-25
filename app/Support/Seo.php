@@ -276,11 +276,11 @@ class Seo
 
         $this->h1($listing->title)
             ->title($title)
-            ->canonical('/oglas/'.$listing->slug.'/')
-            ->type('article');
+            ->canonical('/oglas/'.$listing->slug.'/');
 
         // Price is left out for jobs (it is a salary) and when there is none.
         $hasPrice = $listing->price !== null && (float) $listing->price > 0 && $topSlug !== 'poslovi';
+        $this->type($hasPrice ? 'product' : 'article');
         $price = $hasPrice ? 'Cena '.$listing->priceLabel().'. ' : '';
         $text = static::clean((string) $listing->description);
 
@@ -335,6 +335,10 @@ class Seo
 
         if ($listing->category) {
             $product['category'] = $listing->category->name;
+        }
+
+        if ($topSlug === 'automobili') {
+            $product = static::car($product, $listing);
         }
 
         if ($hasPrice) {
@@ -393,7 +397,7 @@ class Seo
             $crumbs[] = [$location->name, $path];
             $indexable = $count >= static::placeMinListings();
         } else {
-            $vars = ['{kategorija}' => static::categoryName($category)];
+            $vars = ['{kategorija}' => static::categoryName($category), '{o_cemu}' => static::about($accusative, $category)];
 
             $this->title($category->seo_title ?: static::withSuffix(static::text('category.title', $vars)))
                 ->h1($category->seo_h1 ?: static::text('category.h1', $vars))
@@ -593,9 +597,11 @@ class Seo
             $title = static::paged($title, $pageNumber);
         }
         $images = $this->images;
+        $usesDefault = false;
 
         if ($images === [] && ($default = static::defaultImage())) {
             $images = [$default];
+            $usesDefault = true;
         }
 
         $og = [
@@ -609,6 +615,11 @@ class Seo
 
         if ($images !== []) {
             $og['og:image'] = $images[0];
+            if ($usesDefault) {
+                $og['og:image:width'] = '1200';
+                $og['og:image:height'] = '630';
+            }
+            $og['og:image:alt'] = $usesDefault ? config('seo.site_name').': '.config('seo.default_image_alt', 'Oglasi za Loznicu i okolinu') : ($this->getH1() ?? $title);
         }
 
         $og += $this->extraMeta;
@@ -942,6 +953,31 @@ class Seo
     private static function assetExists(?string $path): bool
     {
         return $path !== null && $path !== '' && (preg_match('#^https?://#i', $path) || is_file(public_path(ltrim($path, '/'))));
+    }
+
+    /** A car listing is also a schema.org Car: brand, model year, mileage and fuel from the listing fields. */
+    private static function car(array $product, Listing $listing): array
+    {
+        $fields = collect(app(ListingFields::class)->values($listing))->keyBy('key');
+        $product['@type'] = ['Product', 'Car'];
+
+        if ($brand = $fields->get('marka_automobila')['display'] ?? null) {
+            $product['brand'] = ['@type' => 'Brand', 'name' => $brand];
+        }
+        if ($model = $fields->get('model_automobila')['display'] ?? null) {
+            $product['model'] = $model;
+        }
+        if (is_numeric($year = $fields->get('godina')['value'] ?? null)) {
+            $product['vehicleModelDate'] = (string) (int) $year;
+        }
+        if (is_numeric($km = $fields->get('kilometraza')['value'] ?? null)) {
+            $product['mileageFromOdometer'] = ['@type' => 'QuantitativeValue', 'value' => (int) $km, 'unitCode' => 'KMT'];
+        }
+        if ($fuel = $fields->get('gorivo')['display'] ?? null) {
+            $product['fuelType'] = $fuel;
+        }
+
+        return $product;
     }
 
     private static function defaultImage(): ?string

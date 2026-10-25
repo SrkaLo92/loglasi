@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class Listing extends Model
 {
@@ -131,6 +132,19 @@ class Listing extends Model
     {
         return $this->status === ListingStatus::Expired
             || ($this->status === ListingStatus::Published && $this->expires_at !== null && ! $this->expires_at->isFuture());
+    }
+
+    /**
+     * Since when a sold or expired listing is no longer active (null while it is active or not public).
+     * After seo.inactive_gone_days its page answers 410 to visitors; renewing brings it back.
+     */
+    public function inactiveSince(): ?Carbon
+    {
+        return match (true) {
+            $this->status === ListingStatus::Sold => $this->updated_at,
+            $this->isExpired() => $this->expires_at ?? $this->updated_at,
+            default => null,
+        };
     }
 
     /** Active listings: published and not expired. */

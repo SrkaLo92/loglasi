@@ -12,6 +12,9 @@ class RobotsController extends Controller
     /** Paths no crawler needs (seo-sta-mora-da-ostane.md, section 5). */
     public const DISALLOW = ['/admin', '/api/', '/panel/', '/nalog/', '/naplata/'];
 
+    /** Search results by keyword (new `keyword`/`q`, old WordPress `?s=`): endless combinations, no own content. */
+    public const SEARCH_QUERIES = ['/*?*keyword=', '/*?*q=', '/*?s='];
+
     /** Crawlers with their own group: they ignore the `*` group, so the Disallow lines are repeated. */
     public const ALLOWED_BOTS = [
         'Googlebot', 'Bingbot', 'OAI-SearchBot', 'ChatGPT-User', 'GPTBot', 'ClaudeBot', 'Claude-SearchBot',
@@ -24,9 +27,10 @@ class RobotsController extends Controller
             // Probna i lokalna verzija: ništa se ne indeksira.
             $body = "User-agent: *\nDisallow: /\n";
         } else {
-            $disallow = array_map(fn ($path) => 'Disallow: '.$path, self::DISALLOW);
+            // Bots with their own group ignore the `*` group, so both get the same Disallow lines.
+            $disallow = array_map(fn ($path) => 'Disallow: '.$path, array_merge(self::DISALLOW, self::SEARCH_QUERIES));
             $lines = array_merge(
-                ['User-agent: *'], $disallow, ['Disallow: /uporedite-oglase/', 'Disallow: /*?*kljucna-rec=', ''],
+                ['User-agent: *'], $disallow, [''],
                 array_map(fn ($bot) => 'User-agent: '.$bot, self::ALLOWED_BOTS), ['Allow: /'], $disallow, [''],
                 ['Sitemap: '.config('seo.base_url').'/sitemap.xml'],
             );

@@ -20,6 +20,11 @@ return [
 
     // Slika za Open Graph kad strana nema svoju (putanja iz public/ ili apsolutni URL).
     'default_image' => env('SEO_DEFAULT_IMAGE', '/img/loglasi-og.png'),
+    'default_image_alt' => 'Oglasi za Loznicu i okolinu',
+
+    // Sold and expired listings answer 410 after this many days (renewal brings the page back).
+    'inactive_gone_days' => 90,
+
     'logo' => env('SEO_LOGO', '/img/brand/logo.png'),
 
     'organization' => [

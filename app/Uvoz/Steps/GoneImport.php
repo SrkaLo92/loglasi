@@ -11,9 +11,13 @@ use Illuminate\Support\Facades\DB;
  */
 class GoneImport extends Step
 {
+    /** @var array<string, true> paths that get a 301 from the redirect file, never a 410 */
+    private array $redirected = [];
+
     public function run(): void
     {
         $postType = config('uvoz.post_type');
+        $this->importRedirects();
 
         if ($this->ctx->spamUsers) {
             foreach ($this->wp->table('users')->whereIn('ID', $this->ctx->spamUsers)->get(['ID', 'user_nicename']) as $user) {
@@ -54,6 +58,45 @@ class GoneImport extends Step
         UrlTables::flushGone();
     }
 
+    /** 301s from the redirect file (old addresses with clicks in Search Console); they leave the 410 list. */
+    private function importRedirects(): void
+    {
+        foreach (static::listedRedirects((string) config('uvoz.redirect_file')) as $from => $to) {
+            $this->redirected[$from] = true;
+            DB::table('gone_urls')->where('path', $from)->delete();
+            if (! DB::table('redirects')->where('from_path', $from)->update(['to_path' => $to, 'status_code' => 301, 'updated_at' => now()])
+                && ! DB::table('redirects')->where('from_path', $from)->exists()) {
+                DB::table('redirects')->insert(['from_path' => $from, 'to_path' => $to, 'status_code' => 301, 'created_at' => now(), 'updated_at' => now()]);
+            }
+            $this->report->imported('redirect');
+        }
+
+        UrlTables::flushRedirects();
+    }
+
+    /** @return array<string, string> "path target" per line (paths or full URLs), "#" starts a comment */
+    public static function listedRedirects(string $file): array
+    {
+        if ($file === '' || ! is_file($file)) {
+            return [];
+        }
+
+        $path = fn (string $url) => '/'.trim(rawurldecode((string) (parse_url($url, PHP_URL_PATH) ?? '')), '/').'/';
+        $redirects = [];
+        foreach (file($file, FILE_IGNORE_NEW_LINES) ?: [] as $line) {
+            $parts = preg_split('/\s+/', trim((string) preg_replace('/#.*$/', '', $line)));
+            if (count($parts) !== 2) {
+                continue;
+            }
+            [$from, $to] = [$path($parts[0]), $path($parts[1])];
+            if ($from !== '//' && $from !== $to) {
+                $redirects[$from] = $to === '//' ? '/' : $to;
+            }
+        }
+
+        return $redirects;
+    }
+
     /** @return list<string> one path per line ("/oglas/x/" or a full URL), "#" starts a comment */
     public static function listedPaths(string $file): array
     {
@@ -86,6 +129,10 @@ class GoneImport extends Step
     private function gone(string $path, string $note): void
     {
         $this->report->wp('gone');
+
+        if (isset($this->redirected[$path])) {
+            return;
+        }
 
         if (preg_match('~^/(oglas|korisnik|author)/([^/]+)/$~', $path, $m)) {
             $live = match ($m[1]) {

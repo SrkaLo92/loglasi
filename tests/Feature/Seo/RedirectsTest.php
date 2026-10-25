@@ -79,9 +79,17 @@ class RedirectsTest extends SeoTestCase
 
     public function test_marka_automobila_redirects_to_cars(): void
     {
-        $this->get('/oglasi/?marka-automobila=bmw')->assertStatus(301)->assertTarget('/oglasi/automobili/');
+        $this->get('/oglasi/?marka-automobila=bmw')->assertStatus(301)->assertTarget('/oglasi/automobili/?f%5Bmarka_automobila%5D=bmw');
         $this->get('/oglasi/?marka-automobila=bmw&kategorija=automobili&utm_campaign=x')
-            ->assertTarget('/oglasi/automobili/');
+            ->assertTarget('/oglasi/automobili/?f%5Bmarka_automobila%5D=bmw');
+        $this->get('/oglasi/?marka-automobila=nepoznata')->assertTarget('/oglasi/automobili/');
+    }
+
+    public function test_page_parameters_redirect_to_page_paths(): void
+    {
+        $this->get('/oglasi/automobili/?page=3')->assertStatus(301)->assertTarget('/oglasi/automobili/page/3/');
+        $this->get('/oglasi/?paged=2&sort=cena')->assertStatus(301)->assertTarget('/oglasi/page/2/?sort=cena');
+        $this->get('/oglasi/?page=1')->assertStatus(301)->assertTarget('/oglasi/');
     }
 
     /** @return array<string, array{string, string}> */

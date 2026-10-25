@@ -13,6 +13,14 @@
     RewriteCond %{HTTP:x-xsrf-token} .
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
+    # Produkcija: http:// i www. idu na https://loglasi.rs u jednom skoku (probni domeni ostaju netaknuti).
+    RewriteCond %{HTTP_HOST} ^www\.loglasi\.rs$ [NC]
+    RewriteRule ^ https://loglasi.rs%{REQUEST_URI} [R=301,L,NE]
+    RewriteCond %{HTTP_HOST} ^loglasi\.rs$ [NC]
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteRule ^ https://loglasi.rs%{REQUEST_URI} [R=301,L,NE]
+
     # Kanonski URL-ovi sajta se završavaju kosom crtom (kao na WordPress-u);
     # preusmerenje radi App\Http\Middleware\TrailingSlash, ne .htaccess.
 

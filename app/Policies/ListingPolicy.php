@@ -9,7 +9,7 @@ use App\Models\User;
 /** Who may see a listing page and use its contact and report actions, and who may change it (owner and staff). */
 class ListingPolicy
 {
-    /** Published (also expired) for everyone; pending, rejected and drafts only for the owner and staff. */
+    /** Published (also expired and sold) for everyone; pending, rejected and drafts only for the owner and staff. */
     public function view(?User $user, Listing $listing): bool
     {
         if ($listing->trashed()) {
@@ -22,7 +22,7 @@ class ListingPolicy
             return false;
         }
 
-        return in_array($listing->status, [ListingStatus::Published, ListingStatus::Expired], true);
+        return in_array($listing->status, [ListingStatus::Published, ListingStatus::Expired, ListingStatus::Sold], true);
     }
 
     /** The phone is shown only while the listing is active. */

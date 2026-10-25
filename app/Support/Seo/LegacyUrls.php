@@ -63,13 +63,15 @@ class LegacyUrls
             return $this->categoryTarget($m[1], 'kategorija-zarez');
         }
 
-        // Old pagination parameter: ?paginacija=N -> /.../page/N/
-        if (isset($clean['paginacija']) && preg_match('#^/oglasi(/[a-z0-9-]+){0,2}/?$#', $path)) {
-            $page = is_scalar($clean['paginacija']) && ctype_digit((string) $clean['paginacija']) ? (int) $clean['paginacija'] : 1;
-            $rest = array_diff_key($clean, ['paginacija' => true]);
-            $base = rtrim($path, '/').'/';
+        // Page as a parameter (old ?paginacija=N, WordPress ?paged=N and ?page=N) -> /.../page/N/, one address per page.
+        foreach (['paginacija', 'paged', 'page'] as $key) {
+            if (isset($clean[$key]) && preg_match('#^/oglasi(/[a-z0-9-]+){0,2}/?$#', $path)) {
+                $page = is_scalar($clean[$key]) && ctype_digit((string) $clean[$key]) ? (int) $clean[$key] : 1;
+                $rest = array_diff_key($clean, ['paginacija' => true, 'paged' => true, 'page' => true]);
+                $base = rtrim($path, '/').'/';
 
-            return $this->hit($page > 1 ? $base.'page/'.$page.'/' : $base, 301, 'paginacija', $rest);
+                return $this->hit($page > 1 ? $base.'page/'.$page.'/' : $base, 301, 'paginacija', $rest);
+            }
         }
 
         // WooCommerce ostaci.
@@ -106,7 +108,10 @@ class LegacyUrls
         $keys = array_keys($clean);
 
         if (isset($clean['marka-automobila']) && array_diff($keys, ['marka-automobila', 'kategorija']) === []) {
-            return $this->hit(config('seo.targets.marka_automobila'), 301, 'marka-automobila');
+            $make = is_string($clean['marka-automobila']) ? static::make($clean['marka-automobila']) : null;
+
+            // The make stays as a filter (noindex list), so the visitor sees the same cars as before.
+            return $this->hit(config('seo.targets.marka_automobila'), 301, 'marka-automobila', $make ? ['f' => ['marka_automobila' => $make]] : []);
         }
 
         if ($keys === ['kategorija'] && is_string($clean['kategorija'])) {
@@ -157,6 +162,15 @@ class LegacyUrls
         }
 
         return null;
+    }
+
+    /** Our make value for an old WordPress make slug (catalog data, legacy_makes), or null. */
+    private static function make(string $slug): ?string
+    {
+        static $makes = null;
+        $makes ??= (require database_path('seeders/data/catalog/cars.php'))['legacy_makes'] ?? [];
+
+        return $makes[mb_strtolower(trim($slug))] ?? null;
     }
 
     private function hit(string $to, int $code, string $rule, array $query = [], bool $raw = false): array

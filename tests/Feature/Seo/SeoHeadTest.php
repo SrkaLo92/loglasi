@@ -89,7 +89,8 @@ class SeoHeadTest extends SeoTestCase
 
     private function schemaOf(TestResponse $response, string $type): ?array
     {
-        return collect($this->graph($response))->firstWhere('@type', $type);
+        // A node can have several types (a car is ['Product', 'Car']).
+        return collect($this->graph($response))->first(fn ($node) => in_array($type, (array) ($node['@type'] ?? []), true));
     }
 
     public function test_home_has_defaults_and_site_wide_schema(): void
@@ -158,7 +159,7 @@ class SeoHeadTest extends SeoTestCase
         $response = $this->get('/oglas/golf-4/')->assertOk()
             ->assertSee('<title>Golf 4 1.9 TDI, Automobili, Banja Koviljača | loglasi.rs</title>', false)
             ->assertSee('<meta name="description" content="Golf 4 1.9 TDI u mestu Banja Koviljača. Cena 2.500 €. Pogledajte oglas i kontaktirajte prodavca na loglasi.rs.">', false)
-            ->assertSee('<meta property="og:type" content="article">', false)
+            ->assertSee('<meta property="og:type" content="product">', false)
             ->assertSee('<meta property="article:published_time"', false);
 
         $this->assertSame('https://loglasi.rs/oglas/golf-4/', $this->canonical($response));
@@ -246,7 +247,7 @@ class SeoHeadTest extends SeoTestCase
 
         $response = $this->get('/oglasi/automobili/')->assertOk()
             ->assertSee('<title>Automobili, oglasi Loznica | loglasi.rs</title>', false)
-            ->assertSee('content="Pregledajte Automobili oglase u Loznici i okolini na loglasi.rs. Kontaktirajte prodavca direktno ili besplatno postavite svoj oglas."', false);
+            ->assertSee('content="Oglasi za polovne automobile u Loznici i okolini na loglasi.rs. Kontaktirajte prodavca direktno ili besplatno postavite svoj oglas."', false);
 
         $this->assertSame('Automobili u Loznici', (new Seo)->category($category)->getH1());
         $this->assertNotNull($this->schemaOf($response, 'CollectionPage'));
@@ -263,7 +264,7 @@ class SeoHeadTest extends SeoTestCase
 
         $this->get('/oglasi/ogrev/')
             ->assertSee('<title>Ogrev, oglasi Loznica | loglasi.rs</title>', false)
-            ->assertSee('content="Pregledajte Ogrev oglase u Loznici', false);
+            ->assertSee('content="Oglasi u kategoriji Ogrev u Loznici', false);
     }
 
     public function test_subcategory_name_has_no_parent_prefix(): void
@@ -365,13 +366,9 @@ class SeoHeadTest extends SeoTestCase
         // Three pages of 24 listings (a page past the last one is 404).
         Listing::factory()->count(49)->for(User::factory())->for(Category::factory())->for(Location::factory())->create();
 
-        $response = $this->get('/oglasi/?page=2');
-        $this->assertStringStartsWith('index, follow', $this->robots($response));
-        $this->assertSame('https://loglasi.rs/oglasi/?page=2', $this->canonical($response));
-        $response->assertSee('<title>Svi oglasi Loznica, strana 2 | loglasi.rs</title>', false);
-
-        $response = $this->get('/oglasi/?paged=3&utm_source=x');
-        $this->assertSame('https://loglasi.rs/oglasi/?paged=3', $this->canonical($response));
+        // ?page= and ?paged= are the same page at a second address: 301 to /page/N/.
+        $this->get('/oglasi/?page=2')->assertStatus(301)->assertTarget('/oglasi/page/2/');
+        $this->get('/oglasi/?paged=3&utm_source=x')->assertStatus(301)->assertTarget('/oglasi/page/3/');
 
         $response = $this->get('/oglasi/page/2/');
         $this->assertStringStartsWith('index, follow', $this->robots($response));

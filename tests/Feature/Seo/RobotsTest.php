@@ -19,8 +19,9 @@ Disallow: /api/
 Disallow: /panel/
 Disallow: /nalog/
 Disallow: /naplata/
-Disallow: /uporedite-oglase/
-Disallow: /*?*kljucna-rec=
+Disallow: /*?*keyword=
+Disallow: /*?*q=
+Disallow: /*?s=
 
 User-agent: Googlebot
 User-agent: Bingbot
@@ -39,6 +40,9 @@ Disallow: /api/
 Disallow: /panel/
 Disallow: /nalog/
 Disallow: /naplata/
+Disallow: /*?*keyword=
+Disallow: /*?*q=
+Disallow: /*?s=
 
 Sitemap: https://loglasi.rs/sitemap.xml
 

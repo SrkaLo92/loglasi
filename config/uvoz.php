@@ -109,6 +109,9 @@ return [
     // Paths from the live sitemap that no longer exist (deleted while cleaning the copy): 410 after import.
     'gone_file' => env('UVOZ_GONE_FILE', database_path('seeders/data/gone-urls.txt')),
 
+    // Old addresses with Google clicks whose listing is not imported: "path target" per line, 301 instead of 410.
+    'redirect_file' => env('UVOZ_REDIRECT_FILE', database_path('seeders/data/preusmerenja-sa-klikovima.txt')),
+
     // Spam nalozi koji se ne prenose (docs/09-deploy-seo.md, odeljak 2); njihovi URL-ovi idu u gone_urls.
     'spam_users' => [80, 106, 109],
 

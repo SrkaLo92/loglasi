@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Listing;
 
 use App\Enums\ReportStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\Gone;
 use App\Models\Listing;
 use App\Models\Report;
 use App\Services\Catalog;
@@ -20,14 +21,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 /** /oglas/{slug}/: listing page, phone reveal and report form. */
 class ListingController extends Controller
 {
-    public function show(Request $request, string $slug, Catalog $catalog, ListingFields $fields): View
+    public function show(Request $request, string $slug, Catalog $catalog, ListingFields $fields): View|Response
     {
         $listing = $this->find($request, $slug, 'view');
         $viewer = $request->user();
+
+        // Sold or expired for a long time: gone for visitors and search engines; the owner still sees it.
+        $since = $listing->inactiveSince();
+        if ($since !== null && $since->lt(now()->subDays((int) config('seo.inactive_gone_days', 90)))
+            && ! ($viewer && ($viewer->id === $listing->user_id || $viewer->isStaff()))) {
+            return Gone::response();
+        }
 
         Seo::for($listing);
         Stats::viewFromWeb($listing, $request);

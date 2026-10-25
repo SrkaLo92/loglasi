@@ -54,7 +54,7 @@
 							<source type="image/webp" srcset="{{ ImageUrls::url($lcImage, 'thumb') }} 400w, {{ ImageUrls::url($lcImage, 'medium') }} 800w" sizes="(max-width: 767px) 50vw, 300px">
 						@endif
 					@endif
-					<img class="lc__img" src="{{ $lcFallback ?? ImageUrls::url($lcImage, 'medium') }}" alt="" width="400" height="300" loading="{{ $eager ? 'eager' : 'lazy' }}" decoding="async" @if ($eager) fetchpriority="high" @endif>
+					<img class="lc__img" src="{{ $lcFallback ?? ImageUrls::url($lcImage, 'medium') }}" alt="{{ $listing->title }}" width="400" height="300" loading="{{ $eager ? 'eager' : 'lazy' }}" decoding="async" @if ($eager) fetchpriority="high" @endif>
 				</picture>
 			@else
 				<span class="lc__ph" aria-hidden="true">

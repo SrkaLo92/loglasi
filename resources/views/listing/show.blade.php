@@ -31,7 +31,9 @@
 		</ol>
 	</nav>
 
-	@if ($listing->isExpired())
+	@if ($listing->status === ListingStatus::Sold)
+		<p class="lgo lgo-notice lgo-notice--expired" role="status">{{ Icons::listing('info', 20) }}<span><strong>Prodato.</strong> Ovaj predmet je prodat. Pogledajte slične oglase ispod.</span></p>
+	@elseif ($listing->isExpired())
 		<p class="lgo lgo-notice lgo-notice--expired" role="status">{{ Icons::listing('info', 20) }}<span><strong>Oglas je istekao.</strong> Ovaj oglas više nije aktivan. Pogledajte slične oglase ispod.</span></p>
 	@elseif ($listing->status === ListingStatus::Rejected)
 		<p class="lgo lgo-notice lgo-notice--rejected" role="status">{{ Icons::listing('info', 20) }}<span><strong>Oglas je odbijen.</strong> @if ($listing->rejection_reason) Razlog: {{ $listing->rejection_reason }}. @endif Vidite ga samo vi.</span></p>
