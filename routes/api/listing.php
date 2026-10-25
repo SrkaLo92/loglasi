@@ -11,6 +11,7 @@ Route::middleware('throttle:listing-api')->group(function () {
     Route::get('/listings/{id}', [ListingApiController::class, 'show'])->whereNumber('id');
     Route::get('/listings/{id}/similar', [ListingApiController::class, 'similar'])->whereNumber('id');
     Route::get('/firms/{id}', [FirmApiController::class, 'show'])->whereNumber('id');
+    Route::get('/home/firms', [FirmApiController::class, 'home']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {

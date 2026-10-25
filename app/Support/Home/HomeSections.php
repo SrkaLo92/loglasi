@@ -171,6 +171,7 @@ class HomeSections
             ->pluck(DB::raw('COUNT(*)'), 'user_id');
 
         $items = $firms->map(fn (Firm $f) => [
+            'id' => (int) $f->id,
             'name' => $f->name,
             'url' => url_slash('/korisnik/'.$f->user->slug),
             'logo' => self::storageUrl($f->logo_path),

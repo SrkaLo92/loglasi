@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Listing;
 use App\Models\Location;
 use App\Models\User;
+use App\Support\Home\HomeSections;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -126,6 +127,22 @@ class ListingApiTest extends TestCase
             ->assertJsonStructure(['id', 'name', 'about', 'logo', 'address', 'website', 'working_hours', 'phone_verified', 'package', 'package_expires_at', 'active_listings', 'member_since'])
             ->assertJsonPath('active_listings', 2)
             ->assertJsonPath('package', 'Business Max');
+    }
+
+    public function test_home_firm_cards_match_the_home_page(): void
+    {
+        $this->getJson('/api/v1/home/firms')->assertOk()->assertJsonPath('items', []);
+
+        $user = User::factory()->firm()->create();
+        Listing::factory()->for($user)->count(3)->create();
+        HomeSections::flush();
+
+        $this->getJson('/api/v1/home/firms')
+            ->assertOk()
+            ->assertJsonStructure(['title', 'text', 'directory_total', 'directory_url', 'items' => [['id', 'name', 'activity', 'place', 'logo', 'cover', 'initials', 'active_listings', 'url']]])
+            ->assertJsonPath('title', 'Firme iz Loznice')
+            ->assertJsonPath('items.0.id', $user->firm->id)
+            ->assertJsonPath('items.0.active_listings', 3);
     }
 
     public function test_firm_of_blocked_or_unknown_account_is_404(): void
