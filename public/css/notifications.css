@@ -41,3 +41,19 @@
 	.lgt-item__actions { flex-direction: column; align-items: stretch; }
 	.lgt-rename { flex-basis: auto; }
 }
+
+/* Obaveštenja (the bell's list) */
+.lgo-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.lgo-head__set, .lgo-head__set:visited { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--lg-green); text-decoration: none; }
+.lgo-list { margin: 16px 0 0; padding: 0; list-style: none; background: #fff; border: 1px solid var(--lg-border); border-radius: 14px; overflow: hidden; }
+.lgo-list > li + li { border-top: 1px solid var(--lg-border); }
+.lgo-item, .lgo-item:visited { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; color: var(--lg-text); text-decoration: none; transition: background .15s; }
+.lgo-item:hover { background: #f7f9f8; }
+.lgo-item.is-new { background: var(--lg-mint); }
+.lgo-item__icon { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 1px solid var(--tone-line); border-radius: 50%; background: var(--tone-bg); color: var(--tone); }
+.lgo-item__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.lgo-item__title { font-weight: 700; line-height: 1.35; }
+.lgo-item__body { color: var(--lg-text); line-height: 1.4; overflow-wrap: anywhere; }
+.lgo-item__time { font-size: 13px; color: var(--lg-muted); }
+.lgo-item__dot { flex: none; width: 10px; height: 10px; margin-top: 6px; border-radius: 50%; background: var(--lg-orange); }
+.lgo-more { margin-top: 16px; text-align: center; }

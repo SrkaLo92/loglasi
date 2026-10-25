@@ -5,6 +5,9 @@
 	$lgKategorije = Navigacija::kategorije();
 	$lgMesta = Navigacija::mesta();
 	$lgUlogovan = auth()->check();
+	$lgObavestenja = $lgUlogovan ? \App\Services\Notifications\InAppNotifications::badge() : 0;
+	$lgPoruke = max(0, (int) ($unreadMessages ?? 0));
+	$lgBroj = fn (int $n) => $n > 99 ? '99+' : (string) $n;
 @endphp
 <header class="lg-header">
 	<div class="lg-wrap lg-header__in">
@@ -37,8 +40,12 @@
 			<button class="lg-search__dugme" type="submit">Traži</button>
 			<a class="lg-search__filteri" href="{{ Navigacija::link('oglasi') }}" aria-label="Filteri i svi oglasi">{{ Ikonice::svg('filter', 20, '2') }}</a>
 		</form>
+		@if ($lgUlogovan)
+			<a class="lg-header__zvono" href="{{ url_slash('moj-nalog/obavestenja') }}" aria-label="Obaveštenja{{ $lgObavestenja ? ', '.$lgObavestenja.' novih' : '' }}">{{ Ikonice::svg('bell', 22) }}@if ($lgObavestenja)<span class="lg-header__broj" aria-hidden="true">{{ $lgBroj($lgObavestenja) }}</span>@endif</a>
+		@endif
 		<nav class="lg-header__nav" aria-label="Nalog">
 			@if ($lgUlogovan)
+				<a class="lg-header__nalog" href="{{ Navigacija::link('poruke') }}" aria-label="Poruke{{ $lgPoruke ? ', '.$lgPoruke.' nepročitanih' : '' }}"><span class="lg-header__ik">{{ Ikonice::svg('chat', 20) }}@if ($lgPoruke)<span class="lg-header__broj" aria-hidden="true">{{ $lgBroj($lgPoruke) }}</span>@endif</span><span class="lg-header__tekst">Poruke</span></a>
 				<a class="lg-header__nalog" href="{{ Navigacija::link('nalog') }}">{{ Ikonice::svg('user', 20) }}Moj nalog</a>
 			@else
 				<a class="lg-header__nalog" href="{{ Navigacija::link('prijava') }}">{{ Ikonice::svg('user', 20) }}Prijava</a>

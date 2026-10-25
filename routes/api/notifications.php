@@ -1,11 +1,12 @@
 <?php
 
 use App\Http\Controllers\Notifications\Api\DeviceController;
+use App\Http\Controllers\Notifications\Api\InAppNotificationApiController;
 use App\Http\Controllers\Notifications\Api\NotificationSettingsApiController;
 use App\Http\Controllers\Notifications\Api\SavedSearchApiController;
 use Illuminate\Support\Facades\Route;
 
-// Notifications (/api/v1): push tokens, notification switches and saved searches of the mobile app.
+// Notifications (/api/v1): the bell (in-app notifications), push tokens, notification switches and saved searches of the mobile app.
 
 Route::middleware(['auth:sanctum', 'throttle:notifications-devices'])->group(function () {
     Route::post('/devices', [DeviceController::class, 'store']);
@@ -15,6 +16,10 @@ Route::middleware(['auth:sanctum', 'throttle:notifications-devices'])->group(fun
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::get('/me/notification-settings', [NotificationSettingsApiController::class, 'show']);
     Route::patch('/me/notification-settings', [NotificationSettingsApiController::class, 'update']);
+
+    Route::get('/me/notifications', [InAppNotificationApiController::class, 'index']);
+    Route::get('/me/notifications/unread-count', [InAppNotificationApiController::class, 'unreadCount']);
+    Route::post('/me/notifications/read', [InAppNotificationApiController::class, 'read']);
 
     Route::get('/me/saved-searches', [SavedSearchApiController::class, 'index']);
     Route::post('/me/saved-searches', [SavedSearchApiController::class, 'store']);

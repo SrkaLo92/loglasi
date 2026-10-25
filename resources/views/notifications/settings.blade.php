@@ -1,20 +1,20 @@
 @extends('layouts.app')
 @include('notifications.partials.head')
 @php
-	$title = 'Obaveštenja | loglasi.rs';
+	$title = 'Podešavanja obaveštenja | loglasi.rs';
 	$robots = 'noindex, follow';
 @endphp
 
 @section('content')
 <div class="lgn lgt lg-wrap">
-	<h1>Obaveštenja</h1>
+	<h1>Podešavanja obaveštenja</h1>
 	<p class="lgn-lead">Izaberite o čemu želite da vas obaveštavamo mejlom na <strong>{{ $user->email }}</strong> i u aplikaciji.</p>
 
 	@include('nalozi.partials.status')
 
 	<section class="lgn-card" aria-labelledby="lgt-izbor">
 		<h2 id="lgt-izbor">Šta vam šaljemo</h2>
-		<form method="post" action="{{ url_slash('moj-nalog/obavestenja') }}">
+		<form method="post" action="{{ url_slash('moj-nalog/obavestenja/podesavanja') }}">
 			@csrf
 			@method('PUT')
 			<ul class="lgt-toggles">

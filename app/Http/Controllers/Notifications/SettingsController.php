@@ -39,6 +39,6 @@ class SettingsController extends Controller
         }
         NotificationPreferences::set($user, $values);
 
-        return redirect()->to(url_slash('moj-nalog/obavestenja'))->with('status', 'Podešavanja obaveštenja su sačuvana.');
+        return redirect()->to(url_slash('moj-nalog/obavestenja/podesavanja'))->with('status', 'Podešavanja obaveštenja su sačuvana.');
     }
 }

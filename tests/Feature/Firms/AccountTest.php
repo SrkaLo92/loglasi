@@ -222,6 +222,7 @@ class AccountTest extends TestCase
 
     public function test_free_year_expiring_soon_and_pending_order(): void
     {
+        $this->travelTo(now()->setTime(12, 0)); // "još 5 dana" counts calendar days in Belgrade
         $user = User::factory()->create(['account_type' => AccountType::Firm]);
         Firm::factory()->freeYear()->for($user)->create(['package_ends_at' => now()->addDays(5)->addHour()]);
         $product = Product::byCode('business_start_yearly');

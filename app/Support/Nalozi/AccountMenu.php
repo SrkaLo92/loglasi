@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\SavedSearch;
 use App\Models\User;
 use App\Services\Messages\Messenger;
+use App\Services\Notifications\InAppNotifications;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -38,7 +39,7 @@ final class AccountMenu
             ['title' => 'Nalog', 'items' => array_values(array_filter([
                 $user->isFirm() ? $item('moj-nalog/firma', 'Profil firme', 'shop') : null,
                 $item('moj-nalog/narudzbine', 'Narudžbine', 'receipt', $c['orders'] ?: null, $c['orders'] > 0),
-                $item('moj-nalog/obavestenja', 'Obaveštenja', 'bell'),
+                $item('moj-nalog/obavestenja', 'Obaveštenja', 'bell', $c['notifications'] ?: null, $c['notifications'] > 0),
                 $item('moj-nalog/podesavanja', 'Podešavanja naloga', 'settings'),
             ]))],
         ];
@@ -57,7 +58,7 @@ final class AccountMenu
             ->first();
     }
 
-    /** @return array{listings: int, unread: int, favorites: int, searches: int, orders: int} */
+    /** @return array{listings: int, unread: int, favorites: int, searches: int, orders: int, notifications: int} */
     public static function counts(User $user): array
     {
         $key = 'account_counts_'.$user->id;
@@ -74,6 +75,7 @@ final class AccountMenu
             'favorites' => DB::table('favorites')->where('user_id', $user->id)->count(),
             'searches' => SavedSearch::query()->where('user_id', $user->id)->count(),
             'orders' => Order::query()->where('user_id', $user->id)->where('status', OrderStatus::Pending)->count(),
+            'notifications' => app(InAppNotifications::class)->unread($user),
         ];
         request()->attributes->set($key, $counts);
 

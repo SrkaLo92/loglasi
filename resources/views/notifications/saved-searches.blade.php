@@ -17,7 +17,7 @@
 
 	@unless ($alertsOn)
 		<div class="lgn-alert lgn-alert--warn">
-			<p>Obaveštenja za sačuvane pretrage su isključena. <a href="{{ url_slash('moj-nalog/obavestenja') }}">Uključite ih u podešavanjima</a>.</p>
+			<p>Obaveštenja za sačuvane pretrage su isključena. <a href="{{ url_slash('moj-nalog/obavestenja/podesavanja') }}">Uključite ih u podešavanjima</a>.</p>
 		</div>
 	@endunless
 

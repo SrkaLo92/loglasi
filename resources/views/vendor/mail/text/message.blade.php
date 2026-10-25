@@ -16,7 +16,7 @@ loglasi.rs
 <x-slot:footer>
 --
 loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu.
-Podešavanja obaveštenja: {{ url_slash('moj-nalog/obavestenja') }}
+Podešavanja obaveštenja: {{ url_slash('moj-nalog/obavestenja/podesavanja') }}
 @if ($unsubscribe)
 Odjava od ovih poruka: {{ $unsubscribe }}
 @endif

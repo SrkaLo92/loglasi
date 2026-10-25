@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Console\Commands\PruneInAppNotifications;
 use App\Console\Commands\SendSavedSearchAlerts;
 use App\Events\MessageSent;
 use App\Http\Middleware\SavePendingSearch;
@@ -43,6 +44,7 @@ class NotificationsServiceProvider extends ServiceProvider
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             InProcess::command($schedule, SendSavedSearchAlerts::class)->hourly()->withoutOverlapping(30);
+            InProcess::command($schedule, PruneInAppNotifications::class)->dailyAt('04:30')->withoutOverlapping();
         });
     }
 }

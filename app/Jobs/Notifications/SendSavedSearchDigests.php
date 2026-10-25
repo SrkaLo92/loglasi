@@ -10,6 +10,7 @@ use App\Models\SavedSearch;
 use App\Models\SavedSearchMatch;
 use App\Models\User;
 use App\Notifications\SavedSearchDigestNotification;
+use App\Services\Notifications\InAppNotifications;
 use App\Support\Notifications\NotificationPreferences;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -67,6 +68,7 @@ class SendSavedSearchDigests implements ShouldQueue
     /** @param  Collection<int, SavedSearch>  $searches */
     private function sendChunk(Collection $searches, int $maxMatchId): void
     {
+        $inApp = app(InAppNotifications::class);
         $searchIds = $searches->modelKeys();
 
         $users = User::query()
@@ -134,6 +136,7 @@ class SendSavedSearchDigests implements ShouldQueue
                         ])->values()->all(),
                 ];
                 $sentSearchIds[] = $search->id;
+                $inApp->savedSearchMatches($user, $search, $totals[$search->id]);
             }
 
             if ($digest !== []) {

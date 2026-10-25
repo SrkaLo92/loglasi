@@ -6,6 +6,7 @@ use App\Enums\ListingStatus;
 use App\Mail\Admin\ListingStatusMail;
 use App\Models\AuditLog;
 use App\Models\Listing;
+use App\Services\Notifications\InAppNotifications;
 use App\Support\Settings;
 use DomainException;
 use Illuminate\Support\Facades\Mail;
@@ -160,6 +161,7 @@ class ListingModeration
 
     private function notify(Listing $listing, bool $approved, ?string $reason = null): void
     {
+        app(InAppNotifications::class)->moderated($listing, $approved, $reason);
         $email = $listing->user?->email;
 
         if ($email === null || $listing->user->trashed()) {

@@ -21,7 +21,7 @@ loglasi.rs
 <x-mail::footer>
 <span class="tagline">loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu.</span>
 
-[Podešavanja obaveštenja]({{ url_slash('moj-nalog/obavestenja') }})@if ($unsubscribe) · [Odjavite se od ovih poruka]({{ $unsubscribe }})@endif
+[Podešavanja obaveštenja]({{ url_slash('moj-nalog/obavestenja/podesavanja') }})@if ($unsubscribe) · [Odjavite se od ovih poruka]({{ $unsubscribe }})@endif
 </x-mail::footer>
 </x-slot:footer>
 </x-mail::layout>

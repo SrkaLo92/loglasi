@@ -11,7 +11,7 @@
 		<h1>Odjava od obaveštenja</h1>
 		@if ($done)
 			<p role="status">Više vam ne šaljemo obaveštenja „{{ $label }}”.</p>
-			<p class="lgn-help">Možete ih ponovo uključiti u <a href="{{ url_slash('moj-nalog/obavestenja') }}">podešavanjima obaveštenja</a>.</p>
+			<p class="lgn-help">Možete ih ponovo uključiti u <a href="{{ url_slash('moj-nalog/obavestenja/podesavanja') }}">podešavanjima obaveštenja</a>.</p>
 		@else
 			<p>Da li želite da vam više ne šaljemo obaveštenja „{{ $label }}”?</p>
 			<form method="post" action="{{ $action }}">

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Notifications\InAppController;
 use App\Http\Controllers\Notifications\SavedSearchController;
 use App\Http\Controllers\Notifications\SettingsController;
 use App\Http\Controllers\Notifications\UnsubscribeController;
@@ -7,11 +8,14 @@ use App\Support\Notifications\NotificationPreferences;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\Route;
 
-// Notifications: settings, one-click unsubscribe, saved searches. Links via url_slash().
+// Notifications: the in-app list (bell), settings, one-click unsubscribe, saved searches. Links via url_slash().
 
 Route::middleware('auth')->group(function () {
-    Route::get('/moj-nalog/obavestenja', [SettingsController::class, 'show'])->name('notifications.settings');
-    Route::put('/moj-nalog/obavestenja', [SettingsController::class, 'update'])
+    Route::get('/moj-nalog/obavestenja', [InAppController::class, 'index'])->name('notifications.index');
+    Route::post('/moj-nalog/obavestenja/procitano', [InAppController::class, 'read'])
+        ->middleware('throttle:notifications-account')->name('notifications.read');
+    Route::get('/moj-nalog/obavestenja/podesavanja', [SettingsController::class, 'show'])->name('notifications.settings');
+    Route::put('/moj-nalog/obavestenja/podesavanja', [SettingsController::class, 'update'])
         ->middleware('throttle:notifications-account')->name('notifications.settings.update');
 
     Route::get('/moj-nalog/pretrage', [SavedSearchController::class, 'index'])->name('saved-searches.index');

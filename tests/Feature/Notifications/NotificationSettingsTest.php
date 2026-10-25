@@ -12,16 +12,16 @@ class NotificationSettingsTest extends TestCase
 {
     public function test_guest_is_sent_to_login(): void
     {
-        $this->get('/moj-nalog/obavestenja/')->assertRedirect(url_slash('login-registracija'));
-        $this->put('/moj-nalog/obavestenja/', [])->assertRedirect(url_slash('login-registracija'));
+        $this->get('/moj-nalog/obavestenja/podesavanja/')->assertRedirect(url_slash('login-registracija'));
+        $this->put('/moj-nalog/obavestenja/podesavanja/', [])->assertRedirect(url_slash('login-registracija'));
     }
 
     public function test_page_shows_defaults_with_newsletter_off(): void
     {
         $user = User::factory()->create();
 
-        $html = $this->actingAs($user)->get('/moj-nalog/obavestenja/')->assertOk()
-            ->assertSee('<h1>Obaveštenja</h1>', false)
+        $html = $this->actingAs($user)->get('/moj-nalog/obavestenja/podesavanja/')->assertOk()
+            ->assertSee('<h1>Podešavanja obaveštenja</h1>', false)
             ->assertSee('Nove poruke')->assertSee('Novi oglasi za sačuvane pretrage')->assertSee('Istek oglasa')
             ->assertSee('Novosti sa loglasi.rs')
             ->assertSee('noindex', false)
@@ -38,8 +38,8 @@ class NotificationSettingsTest extends TestCase
         $user = User::factory()->create(['email' => 'pera@example.com']);
         $user->forceFill(['notification_settings' => ['payments' => false, 'listing_status' => true]])->save();
 
-        $this->actingAs($user)->put('/moj-nalog/obavestenja/', ['messages' => '1', 'newsletter' => '1'])
-            ->assertRedirect(url_slash('moj-nalog/obavestenja'))->assertSessionHas('status');
+        $this->actingAs($user)->put('/moj-nalog/obavestenja/podesavanja/', ['messages' => '1', 'newsletter' => '1'])
+            ->assertRedirect(url_slash('moj-nalog/obavestenja/podesavanja'))->assertSessionHas('status');
 
         $user->refresh();
         $this->assertSame([
@@ -52,7 +52,7 @@ class NotificationSettingsTest extends TestCase
     public function test_invalid_values_are_rejected(): void
     {
         $user = User::factory()->create();
-        $this->actingAs($user)->put('/moj-nalog/obavestenja/', ['messages' => 'možda'])->assertSessionHasErrors('messages');
+        $this->actingAs($user)->put('/moj-nalog/obavestenja/podesavanja/', ['messages' => 'možda'])->assertSessionHasErrors('messages');
     }
 
     public function test_unsubscribe_link_asks_then_turns_the_category_off(): void

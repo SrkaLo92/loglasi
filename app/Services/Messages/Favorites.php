@@ -5,6 +5,7 @@ namespace App\Services\Messages;
 use App\Enums\ListingStatus;
 use App\Models\Listing;
 use App\Models\User;
+use App\Services\Notifications\InAppNotifications;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,7 @@ class Favorites
 
         if ($inserted && $listing->user_id !== $user->id) {
             ListingStats::increment($listing->id, 'favorites');
+            app(InAppNotifications::class)->favorited($listing, $user);
         }
 
         return $inserted;

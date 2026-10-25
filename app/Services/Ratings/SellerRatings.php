@@ -9,6 +9,7 @@ use App\Models\Message;
 use App\Models\SellerRating;
 use App\Models\User;
 use App\Notifications\NewRatingNotification;
+use App\Services\Notifications\InAppNotifications;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -97,6 +98,7 @@ class SellerRatings
         $this->refresh((int) $conversation->seller_id);
         if ($rating->wasRecentlyCreated && ($seller = $conversation->seller) !== null) {
             $seller->notify(new NewRatingNotification($rating));
+            app(InAppNotifications::class)->rated($rating);
         }
 
         return $rating;

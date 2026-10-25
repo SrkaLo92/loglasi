@@ -145,9 +145,9 @@
 	</section>
 
 	<section class="lga-card lga-card--links" aria-label="Ostalo">
-		<a class="lga-linkrow" href="{{ url_slash('moj-nalog/obavestenja') }}">
+		<a class="lga-linkrow" href="{{ url_slash('moj-nalog/obavestenja/podesavanja') }}">
 			<span class="lga-task__icon">{{ Ikonice::svg('bell', 20) }}</span>
-			<span><strong>Obaveštenja</strong><small>Šta vam šaljemo mejlom i na telefon.</small></span>
+			<span><strong>Podešavanja obaveštenja</strong><small>Šta vam šaljemo mejlom i na telefon.</small></span>
 			{{ Ikonice::svg('chevron-r', 18) }}
 		</a>
 		<a class="lga-linkrow" href="{{ $user->profileUrl() }}">
