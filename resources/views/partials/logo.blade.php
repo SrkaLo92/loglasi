@@ -6,7 +6,7 @@
 @endphp
 <a class="{{ $logoClass ?? 'lg-logo' }}" href="{{ url_slash('/') }}" aria-label="loglasi.rs, početna strana">
 	@if ($logoHasImage)
-		<img src="{{ asset_v($logoFile) }}" alt="" width="{{ $logoWidth ?? 120 }}" height="{{ $logoHeight ?? 45 }}" decoding="async" fetchpriority="{{ $logoTheme === 'dark' ? 'high' : 'auto' }}">
+		<img src="{{ asset_v($logoFile) }}" alt="" width="{{ $logoWidth ?? 120 }}" height="{{ $logoHeight ?? 45 }}" decoding="async" @if ($logoTheme === 'dark') fetchpriority="high" @else loading="lazy" @endif>
 	@else
 		loglasi<span>.rs</span>
 	@endif
