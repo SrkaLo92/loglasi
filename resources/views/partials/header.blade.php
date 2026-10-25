@@ -18,7 +18,7 @@
 			</div>
 			@if ($lgKategorije)
 				<label class="lg-visually-hidden" for="lg-kat">Kategorija</label>
-				<select class="lg-search__izbor lg-search__izbor--kat" id="lg-kat" name="kategorija">
+				<select class="lg-search__izbor lg-search__izbor--kat" id="lg-kat" name="kategorija" data-pick="bar">
 					<option value="">Sve kategorije</option>
 					@foreach ($lgKategorije as $kat)
 						<option value="{{ $kat['slug'] }}" @selected(request('kategorija') === $kat['slug'])>{{ $kat['name'] }}</option>
@@ -27,7 +27,7 @@
 			@endif
 			@if ($lgMesta)
 				<label class="lg-visually-hidden" for="lg-mesto">Mesto</label>
-				<select class="lg-search__izbor lg-search__izbor--mesto" id="lg-mesto" name="mesto">
+				<select class="lg-search__izbor lg-search__izbor--mesto" id="lg-mesto" name="mesto" data-pick="bar">
 					<option value="">Loznica i okolina</option>
 					@foreach ($lgMesta as $mesto)
 						<option value="{{ $mesto['slug'] }}" @selected(request('mesto') === $mesto['slug'])>{{ $mesto['name'] }}</option>

@@ -44,8 +44,12 @@
 			sub: root.querySelector('.lp-sub'),
 			input: root.querySelector('.lp-find__input'),
 			body: root.querySelector('.lp-body'),
+			panel: root.querySelector('.lp-panel'),
 			current: null
 		};
+		// A dropdown under its field follows the page, so it closes when the page moves.
+		window.addEventListener('scroll', function () { if (root.classList.contains('is-pop') && Date.now() - sheet.openedAt > 400) { close(); } }, { passive: true });
+		window.addEventListener('resize', function () { if (root.classList.contains('is-pop')) { close(); } });
 		each(root.querySelectorAll('[data-lp-close]'), function (button) {
 			button.addEventListener('click', function () { close(); });
 		});
@@ -92,6 +96,7 @@
 	var open = function (control) {
 		if (!sheet) { build(); }
 		sheet.current = control;
+		sheet.openedAt = Date.now();
 		sheet.title.textContent = control.title;
 		sheet.input.value = '';
 		sheet.input.placeholder = control.placeholder;
@@ -99,7 +104,10 @@
 		control.refreshSub();
 		render();
 		sheet.root.hidden = false;
-		document.documentElement.classList.add('lp-lock');
+		// A short list on a phone: the sheet is only as tall as its options.
+		sheet.root.classList.toggle('is-short', control.count() <= 8);
+		if (window.matchMedia('(min-width: 720px)').matches && control.trigger) { place(control.trigger); }
+		else { document.documentElement.classList.add('lp-lock'); }
 		window.requestAnimationFrame(function () {
 			sheet.root.classList.add('is-open');
 			// The keyboard on a phone would cover half the list, so focus the search there only for long lists.
@@ -110,11 +118,34 @@
 		});
 	};
 
+	/* On a computer the list opens as a dropdown under its field (below, or above when there is no room). */
+	var place = function (trigger) {
+		var rect = trigger.getBoundingClientRect();
+		var gap = 6;
+		var edge = 16;
+		var width = Math.min(Math.max(rect.width, 340), 440, window.innerWidth - edge * 2);
+		var left = Math.max(edge, Math.min(rect.left, window.innerWidth - width - edge));
+		var below = window.innerHeight - rect.bottom - gap - edge;
+		var above = rect.top - gap - edge;
+		var style = sheet.panel.style;
+		sheet.root.classList.add('is-pop');
+		style.left = left + 'px';
+		style.width = width + 'px';
+		if (below >= 320 || below >= above) {
+			style.top = (rect.bottom + gap) + 'px';
+			style.maxHeight = Math.min(520, below) + 'px';
+		} else {
+			style.bottom = (window.innerHeight - rect.top + gap) + 'px';
+			style.maxHeight = Math.min(520, above) + 'px';
+		}
+	};
+
 	var close = function () {
 		if (!sheet || !sheet.current) { return; }
 		var control = sheet.current;
 		sheet.current = null;
-		sheet.root.classList.remove('is-open');
+		sheet.root.classList.remove('is-open', 'is-pop');
+		sheet.panel.removeAttribute('style');
 		sheet.root.hidden = true;
 		document.documentElement.classList.remove('lp-lock');
 		if (control.trigger) { control.trigger.focus(); }
@@ -160,6 +191,10 @@
 		if (select.getAttribute('aria-invalid') === 'true') { trigger.setAttribute('aria-invalid', 'true'); }
 		if (select.getAttribute('aria-describedby')) { trigger.setAttribute('aria-describedby', select.getAttribute('aria-describedby')); }
 		if (select.classList.contains('sr-input')) { trigger.classList.add('lp-trigger--sm'); }
+		if (select.getAttribute('data-pick') === 'bar') {
+			// Part of a bar (the header search): the button keeps the select's own classes and look.
+			trigger.className += ' lp-trigger--bar ' + select.className;
+		}
 		select.classList.add('lp-native');
 		select.setAttribute('tabindex', '-1');
 		select.setAttribute('aria-hidden', 'true');

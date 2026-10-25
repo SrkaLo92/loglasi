@@ -21,7 +21,7 @@
 			</div>
 			<div class="lgf-field">
 				<label for="firme-mesto">Mesto</label>
-				<select id="firme-mesto" name="mesto">
+				<select id="firme-mesto" data-pick name="mesto">
 					<option value="">Sva mesta</option>
 					@foreach ($places as $p)
 						<option value="{{ $p['slug'] }}" @selected($place === $p['slug'])>{{ $p['name'] }} ({{ $p['count'] }})</option>

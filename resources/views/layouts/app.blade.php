@@ -7,6 +7,7 @@
 <link rel="preload" href="{{ asset('fonts/manrope-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{{ asset('fonts/manrope-latin-ext.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ asset_v('css/osnova.css') }}">
+<link rel="stylesheet" href="{{ asset_v('css/pick.css') }}">
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" href="{{ asset_v('img/brand/icon.svg') }}" type="image/svg+xml">
 <link rel="icon" href="{{ asset_v('img/brand/favicon-32.png') }}" sizes="32x32" type="image/png">
@@ -31,6 +32,7 @@
 @include('partials.bottom-nav')
 @endif
 @include('partials.cookie-bar')
+<script src="{{ asset_v('js/pick.js') }}" defer></script>
 <script src="{{ asset_v('js/recent.js') }}" defer></script>
 <script src="{{ asset_v('js/fav.js') }}" defer></script>
 @stack('scripts')

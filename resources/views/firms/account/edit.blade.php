@@ -77,7 +77,7 @@
 			</div>
 			<div class="lgf-field">
 				<label for="firma-location">Mesto</label>
-				<select id="firma-location" name="location_id" {{ $invalid('location_id') }}>
+				<select id="firma-location" data-pick name="location_id" {{ $invalid('location_id') }}>
 					<option value="">Loznica (podrazumevano)</option>
 					@foreach ($locations as $location)
 						<option value="{{ $location->id }}" @selected((string) old('location_id', $firm->location_id) === (string) $location->id)>{{ $location->name }}</option>

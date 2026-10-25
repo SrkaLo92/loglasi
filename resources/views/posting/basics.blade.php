@@ -43,7 +43,7 @@
 				<input id="pst-price" type="text" name="price" value="{{ $priceValue }}" inputmode="decimal" autocomplete="off" placeholder="npr. 8.900" data-pst-preview="price"
 					@if ($errors->has('price')) aria-invalid="true" aria-describedby="pst-price-error" @endif>
 				<label class="lg-visually-hidden" for="pst-currency">Valuta</label>
-				<select id="pst-currency" name="currency" data-pst-preview="currency">
+				<select id="pst-currency" name="currency" data-pick data-pst-preview="currency">
 					@foreach ($currencies as $c)
 						<option value="{{ $c->value }}" @selected($currency === $c->value)>{{ $c === \App\Enums\Currency::EUR ? 'EUR (€)' : 'RSD (din)' }}</option>
 					@endforeach

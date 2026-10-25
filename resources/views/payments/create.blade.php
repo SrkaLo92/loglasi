@@ -33,7 +33,7 @@
 					<input type="hidden" name="usluga" value="{{ $product->code }}">
 					<div class="lgpay-field">
 						<label for="lgpay-oglas">Oglas</label>
-						<select id="lgpay-oglas" name="oglas" required>
+						<select id="lgpay-oglas" data-pick name="oglas" required>
 							@foreach ($listings as $item)
 								<option value="{{ $item->id }}">{{ $item->title }}</option>
 							@endforeach

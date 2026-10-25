@@ -14,12 +14,10 @@
 		<meta name="lg-recent" content="{{ $srRecent }}">
 	@endif
 	<link rel="stylesheet" href="{{ asset_v('css/search.css') }}">
-	<link rel="stylesheet" href="{{ asset_v('css/pick.css') }}">
 @endpush
 @push('scripts')
 	<script src="{{ asset_v('js/search.js') }}" defer></script>
 	<script src="{{ asset_v('js/fields.js') }}" defer></script>
-	<script src="{{ asset_v('js/pick.js') }}" defer></script>
 @endpush
 
 @php
@@ -126,7 +124,7 @@
 						<div class="sr-range">
 							<label>Od<input class="sr-input" type="text" inputmode="numeric" pattern="[0-9 .]*" name="cena_od" value="{{ $filters->query['cena_od'] ?? '' }}" placeholder="0" autocomplete="off"></label>
 							<label>Do<input class="sr-input" type="text" inputmode="numeric" pattern="[0-9 .]*" name="cena_do" value="{{ $filters->query['cena_do'] ?? '' }}" autocomplete="off"></label>
-							<label>Valuta<select class="sr-input" name="valuta">
+							<label>Valuta<select class="sr-input" name="valuta" data-pick>
 								<option value="EUR" @selected($filters->currency()->value === 'EUR')>€</option>
 								<option value="RSD" @selected($filters->currency()->value === 'RSD')>din</option>
 							</select></label>

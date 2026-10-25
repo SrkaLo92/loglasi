@@ -3,12 +3,10 @@
 @use('App\Support\Posting\Wizard')
 @push('head')
 <link rel="stylesheet" href="{{ asset_v('css/posting.css') }}">
-<link rel="stylesheet" href="{{ asset_v('css/pick.css') }}">
 @endpush
 @push('scripts')
 <script src="{{ asset_v('js/posting.js') }}" defer></script>
 <script src="{{ asset_v('js/fields.js') }}" defer></script>
-<script src="{{ asset_v('js/pick.js') }}" defer></script>
 @endpush
 
 @section('content')

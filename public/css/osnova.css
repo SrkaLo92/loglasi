@@ -223,8 +223,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	font-size: 15px;
 	cursor: pointer;
 }
-.lg-search__izbor--kat { width: 170px; }
-.lg-search__izbor--mesto { width: 172px; }
+.lg-search .lg-search__izbor--kat { flex: none; width: 170px; }
+.lg-search .lg-search__izbor--mesto { flex: none; width: 172px; }
 .lg-search__dugme {
 	border: 0;
 	padding: 0 22px;
@@ -274,7 +274,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* Između tableta i desktopa izbor mesta ne staje u red. */
 @media (max-width: 1100px) {
-	.lg-search__izbor--mesto { display: none; }
+	.lg-search .lg-search__izbor--mesto { display: none; }
 }
 
 /* Kolačići ------------------------------------------------------------ */
@@ -474,7 +474,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	.lg-search { grid-column: 1 / -1; }
 	.lg-search__polje { padding: 0 12px; }
 	.lg-search__input { height: 44px; }
-	.lg-search__izbor,
+	.lg-search .lg-search__izbor,
 	.lg-search__dugme { display: none; }
 	.lg-search__filteri,
 	.lg-search__filteri:visited {

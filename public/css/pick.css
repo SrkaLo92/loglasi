@@ -132,6 +132,16 @@
 	transition: transform .22s cubic-bezier(.2, .8, .2, 1), opacity .18s ease-out;
 }
 
+.lp-sheet.is-short .lp-panel {
+	height: auto;
+	max-height: 88vh;
+	max-height: 88dvh;
+}
+
+.lp-sheet.is-short .lp-body {
+	padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
 .lp-sheet.is-open .lp-scrim {
 	opacity: 1;
 }
@@ -588,4 +598,102 @@
 .lp-chip--more {
 	background: #eef1ef;
 	color: var(--lg-text, #1d2b26);
+}
+
+/* A computer: a dropdown under its field (pick.js places it), with the search on top */
+
+@media (min-width: 720px) {
+	.lp-sheet.is-pop .lp-scrim {
+		background: transparent;
+	}
+
+	.lp-sheet.is-pop .lp-panel,
+	.lp-sheet.is-pop.is-open .lp-panel {
+		position: fixed;
+		right: auto;
+		height: auto;
+		border: 1px solid var(--lg-border, #e3e7e4);
+		border-radius: 14px;
+		box-shadow: 0 18px 44px rgba(16, 24, 20, .18), 0 2px 6px rgba(16, 24, 20, .06);
+		overflow: hidden;
+	}
+
+	.lp-sheet.is-pop .lp-panel {
+		transform: translateY(-4px);
+	}
+
+	.lp-sheet.is-pop.is-open .lp-panel {
+		transform: none;
+	}
+
+	.lp-sheet.is-pop .lp-head {
+		display: none;
+	}
+
+	.lp-sheet.is-pop .lp-find {
+		padding: 10px 10px 6px;
+	}
+
+	.lp-sheet.is-pop .lp-find__icon {
+		top: 22px;
+		left: 22px;
+	}
+
+	.lp-sheet.is-pop .lp-find__input {
+		height: 44px;
+		font-size: 15px;
+	}
+
+	.lp-sheet.is-pop .lp-body {
+		min-height: 0;
+		padding-bottom: 6px;
+	}
+
+	.lp-sheet.is-pop .lp-group__title {
+		padding: 10px 14px 4px;
+		font-size: 11px;
+	}
+
+	.lp-sheet.is-pop .lp-opt {
+		min-height: 40px;
+		padding: 0 14px;
+		border-bottom: 0;
+		font-size: 15px;
+		font-weight: 500;
+	}
+
+	.lp-sheet.is-pop .lp-opt[aria-selected="true"] {
+		font-weight: 700;
+	}
+
+	.lp-sheet.is-pop .lp-list--grid .lp-opt {
+		min-height: 38px;
+	}
+}
+
+/* Inside a bar (the header search): the button looks like the select it replaces */
+
+.lp-trigger--bar,
+.lp-trigger--bar:not(.is-empty) {
+	min-height: 0;
+	border: 0;
+	border-left: 1px solid var(--lg-border, #e3e7e4);
+	border-radius: 0;
+	background: #fff;
+	color: var(--lg-text, #1d2b26);
+	font-weight: 500;
+}
+
+.lp-trigger--bar:hover:not(:disabled) {
+	border-color: var(--lg-border, #e3e7e4);
+	background: #f6f8f7;
+}
+
+.lp-trigger--bar:not(.is-empty) {
+	font-weight: 700;
+}
+
+.lp-trigger--bar:focus-visible {
+	outline: none;
+	box-shadow: inset 0 0 0 2px var(--lg-accent, #b8501a);
 }

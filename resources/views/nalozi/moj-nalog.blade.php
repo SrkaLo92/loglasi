@@ -1,10 +1,8 @@
 @extends('layouts.app')
 @include('nalozi.partials.head')
 @push('head')
-<link rel="stylesheet" href="{{ asset_v('css/pick.css') }}">
 @endpush
 @push('scripts')
-<script src="{{ asset_v('js/pick.js') }}" defer></script>
 @endpush
 @php
 	$title = 'Moj nalog | loglasi.rs';

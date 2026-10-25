@@ -77,7 +77,7 @@
 				<form class="lgm-form" method="post" action="{{ url_slash('moj-nalog/poruke/'.$conversation->id.'/prijava') }}">
 					@csrf
 					<label for="lgm-reason">Razlog</label>
-					<select id="lgm-reason" name="reason" required @if ($reportErrors->has('reason')) aria-invalid="true" aria-describedby="lgm-reason-error" @endif>
+					<select id="lgm-reason" data-pick name="reason" required @if ($reportErrors->has('reason')) aria-invalid="true" aria-describedby="lgm-reason-error" @endif>
 						<option value="">Izaberite razlog</option>
 						@foreach (\App\Support\Listing\ReportReasons::ALL as $key => $label)
 							<option value="{{ $key }}" @selected(old('reason') === $key)>{{ $label }}</option>

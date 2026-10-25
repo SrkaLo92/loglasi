@@ -51,7 +51,7 @@
 
 				<div class="lgx-polje lgx-polje--puno">
 					<label for="k-tema">{{ PageText::get('kontakt.polje.tema') }}</label>
-					<select id="k-tema" name="tema" required aria-required="true" @if ($errors->has('tema')) aria-invalid="true" aria-describedby="greska-tema" @endif>
+					<select id="k-tema" data-pick name="tema" required aria-required="true" @if ($errors->has('tema')) aria-invalid="true" aria-describedby="greska-tema" @endif>
 						<option value="">{{ PageText::get('kontakt.polje.tema_prazno') }}</option>
 						@foreach ($teme as $tema)
 							<option value="{{ $tema }}" @selected($izabranaTema === $tema)>{{ $tema }}</option>
