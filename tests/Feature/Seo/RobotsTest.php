@@ -68,7 +68,7 @@ TXT;
         $this->assertStringContainsString('[Automobili](https://loglasi.rs/oglasi/automobili/)', $body);
         $this->assertStringNotContainsString('oglasi/nekretnine/', $body);
         $this->assertStringContainsString('[O nama](https://loglasi.rs/o-nama/)', $body);
-        $this->assertStringContainsString('Banja Koviljača, Lešnica, Tršić', $body);
+        $this->assertStringContainsString('Banja Koviljača, Lešnica, Klupci', $body);
         $this->assertStringNotContainsString('Podrinj', $body);
         $this->assertStringContainsString('max-age=86400', $response->headers->get('Cache-Control'));
     }

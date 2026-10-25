@@ -25,6 +25,7 @@ class PravniTekstoviTest extends TestCase
         return [
             'plaćanje' => ['/uslovi-placanja/', 'Uslovi kupovine i plaćanja', 'Uslovi kupovine i plaćanja | loglasi.rs', '3. Kako se naručuje'],
             'odustanak' => ['/odustanak-od-ugovora/', 'Odustanak od ugovora', 'Odustanak od ugovora i obrazac | loglasi.rs', 'Kada pravo na odustanak prestaje'],
+            'pravila' => ['/pravila-oglasavanja/', 'Pravila oglašavanja', 'Pravila oglašavanja | loglasi.rs', 'Šta nije dozvoljeno'],
             'reklamacije' => ['/reklamacije/', 'Reklamacije i povraćaj novca', 'Reklamacije i povraćaj novca | loglasi.rs', 'Kako da podnesete reklamaciju'],
         ];
     }
@@ -62,7 +63,19 @@ class PravniTekstoviTest extends TestCase
         $this->get('/')->assertOk()
             ->assertSee('Uslovi kupovine i plaćanja')
             ->assertSee('Odustanak od ugovora')
-            ->assertSee('Reklamacije i povraćaj novca');
+            ->assertSee('Reklamacije i povraćaj novca')
+            ->assertSee('Pravila oglašavanja');
+    }
+
+    public function test_privacy_names_the_controller_cookies_and_processors(): void
+    {
+        Settings::set('payment_recipient', "SRĐAN MARINKOVIĆ PR ALPHASOFT DEV\nMarka Kulića 57G, Klupci, 15300 Loznica");
+
+        $this->get('/politika-privatnosti/')->assertOk()
+            ->assertSee('Rukovalac podacima je SRĐAN MARINKOVIĆ PR ALPHASOFT DEV, Marka Kulića 57G, Klupci, 15300 Loznica')
+            ->assertSee('Ne, hvala')
+            ->assertSee('Ko još obrađuje podatke')
+            ->assertSee('Poverenik', false);
     }
 
     public function test_payment_terms_list_services_and_prices_from_products(): void

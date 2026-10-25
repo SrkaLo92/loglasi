@@ -310,6 +310,28 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	cursor: pointer;
 }
 .lg-kolacici__ok:hover { background: var(--lg-green-dark); }
+.lg-kolacici__ne {
+	flex: none;
+	min-height: 44px;
+	padding: 8px 12px;
+	border: 0;
+	background: none;
+	color: inherit;
+	font-size: 15px;
+	font-weight: 600;
+	text-decoration: underline;
+	cursor: pointer;
+}
+.lg-footer__kolacici {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	text-decoration: underline;
+	cursor: pointer;
+}
+.lg-footer__kolacici[hidden] { display: none; }
 @media (max-width: 767.98px) {
 	.lg-kolacici { justify-content: space-between; padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); }
 	.lg-kolacici p { font-size: 13px; }

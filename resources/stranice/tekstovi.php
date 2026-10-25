@@ -187,17 +187,85 @@ return [
 
     'faq.naslov' => 'Česta pitanja',
     'faq.uvod' => 'Odgovori na pitanja koja nam najčešće postavljate. Ako ne nađete odgovor, [pišite nam](/kontakt/).',
+    // The first sentence of every answer is the whole answer (search engines and AI assistants quote it).
     'faq.pitanja' => [
-        ['pitanje' => 'Da li je postavljanje oglasa besplatno?', 'odgovor' => 'Da. Privatni korisnici besplatno imaju {besplatni_oglasi}. Plaćaju se samo promocije koje sami izaberete, kao što je isticanje oglasa.'],
-        ['pitanje' => 'Kako da postavim oglas?', 'odgovor' => 'Prijavite se ili napravite nalog, pa kliknite na „Postavite oglas”. Izaberite kategoriju, upišite naslov, opis i cenu, dodajte fotografije i objavite oglas.'],
-        ['pitanje' => 'Koliko dugo traje oglas?', 'odgovor' => 'Oglas traje {trajanje_oglasa}. Kad istekne, možete besplatno da ga obnovite iz svog naloga.'],
+        ['pitanje' => 'Šta je loglasi.rs?', 'odgovor' => 'loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu. Ovde kupujete i prodajete polovne stvari, vozila, nekretnine, usluge i poslove, od ljudi i firmi iz Loznice, Banje Koviljače, Lešnice i okolnih mesta.'],
+        ['pitanje' => 'Da li je postavljanje oglasa besplatno?', 'odgovor' => 'Da, postavljanje oglasa je besplatno. Privatni korisnici besplatno imaju {besplatni_oglasi}, a plaćaju se samo dodatne usluge koje sami izaberete.'],
+        ['pitanje' => 'Koliko oglasa mogu da imam besplatno?', 'odgovor' => 'Do {besplatni_oglasi} istovremeno. Ako vam treba više, na strani [Cenovnik](/cenovnik/) su dodatni oglasi (+3 za {cena_plus_3}, +10 za {cena_plus_10}) i paket Plus prodavac.'],
+        ['pitanje' => 'Kako da postavim oglas?', 'odgovor' => 'Prijavite se, kliknite na „Postavite oglas”, izaberite kategoriju, upišite naslov, opis i cenu i dodajte fotografije. Što više podataka i jasnih fotografija, to brže prodajete.'],
+        ['pitanje' => 'Koliko traje oglas?', 'odgovor' => 'Oglas traje {trajanje_oglasa}. Kad istekne, besplatno ga obnovite jednim klikom u „Moji oglasi”.'],
+        ['pitanje' => 'Zašto moj oglas nije odmah vidljiv?', 'odgovor' => 'Nove oglase pregleda administrator pre objave, da na sajtu ne bi bilo prevara i neželjenih oglasa. Oglas koji čeka vidite u „Moji oglasi” › „Na čekanju”.'],
+        ['pitanje' => 'Mogu li da izmenim ili obrišem oglas?', 'odgovor' => 'Da, u „Moji oglasi” oglas možete da izmenite, označite kao prodat ili obrišete u bilo kom trenutku.'],
         ['pitanje' => 'Kako da kontaktiram prodavca?', 'odgovor' => 'Na strani oglasa su dugmad za poziv i poruku preko sajta, a ako je prodavac ostavio broj, i za WhatsApp i Viber.'],
-        ['pitanje' => 'Kako da istaknem ili podignem oglas?', 'odgovor' => 'Isticanje na 7 dana košta {cena_istaknuto_7}, a „Brza prodaja” ({cena_brza_prodaja}) je isticanje na 7 dana i 3 podizanja. Plaća se uplatom na račun, a sve cene su na strani [Cenovnik](/cenovnik/).'],
-        ['pitanje' => 'Šta dobija firma uz profil firme?', 'odgovor' => 'Profil firme sa logoom, radnim vremenom, mapom i oznakom „Firma” na svakom oglasu. {ponuda_firme} Više na strani [Za firme](/za-firme/).'],
-        ['pitanje' => 'Kako da prijavim sumnjiv oglas?', 'odgovor' => 'Na strani oglasa kliknite na „Prijavi oglas” i ukratko napišite šta nije u redu. Svaku prijavu pregledamo.'],
-        ['pitanje' => 'Kako da kupujem bezbedno?', 'odgovor' => 'Robu pogledajte uživo pre plaćanja, ne plaćajte unapred nepoznatim osobama i nikome ne šaljite kodove koje dobijete SMS porukom.'],
-        ['pitanje' => 'Kako da obrišem nalog i svoje podatke?', 'odgovor' => 'Uputstvo je na strani [Brisanje ličnih podataka](/brisanje-licnih-podataka/). Možete i da nam pišete preko [kontakt forme](/kontakt/).'],
+        ['pitanje' => 'Šta je Plus prodavac?', 'odgovor' => 'Plus prodavac je paket za privatne korisnike koji prodaju više stvari: do 100 aktivnih oglasa, automatska obnova oglasa i 2 podizanja mesečno, za {cena_plus_prodavac} na 30 dana. Ne važi za usluge i poslove.'],
+        ['pitanje' => 'Kako da moj oglas bude vidljiviji?', 'odgovor' => 'Oglas možete da podignete na vrh ({cena_podizanje}), istaknete na 7 dana ({cena_istaknuto_7}) ili uzmete „Brzu prodaju” ({cena_brza_prodaja}: isticanje 7 dana i 3 podizanja). Prioritetni, TOP i Premium XL oglasi i sve cene su na strani [Cenovnik](/cenovnik/).'],
+        ['pitanje' => 'Kako se plaća?', 'odgovor' => 'Plaća se uplatom na račun, najlakše skeniranjem IPS QR koda u aplikaciji vaše banke. Usluga se uključuje kad uplata stigne, a račun stiže e-poštom.'],
+        ['pitanje' => 'Šta dobija firma?', 'odgovor' => 'Firma dobija profil u imeniku „Firme iz Loznice” sa logoom, radnim vremenom, mapom i oznakom „Firma” na svakom oglasu, od paketa Vizitka ({cena_vizitka} mesečno) do Business Start, Pro i Max. {ponuda_firme} Više na strani [Za firme](/za-firme/).'],
+        ['pitanje' => 'Da li firme dobijaju račun?', 'odgovor' => 'Da, svaka firma dobija račun (fakturu) e-poštom. Pružalac usluge nije u sistemu PDV-a, pa u cenama nema PDV-a.'],
+        ['pitanje' => 'Kako da kupujem bezbedno?', 'odgovor' => 'Robu pogledajte i platite uživo, na javnom mestu. Ne plaćajte unapred nepoznatim osobama, ne šaljite podatke sa kartice i ne otvarajte linkove za „dostavu” ili „plaćanje” koje vam neko pošalje.'],
+        ['pitanje' => 'Kako da prijavim sumnjiv oglas?', 'odgovor' => 'Na strani oglasa kliknite na „Prijavi oglas” i ukratko napišite šta nije u redu. Svaku prijavu pregledamo, a sumnjive oglase uklanjamo.'],
+        ['pitanje' => 'Kako da obrišem nalog i svoje podatke?', 'odgovor' => 'Nalog brišete sami u „Moj nalog” › „Podešavanja naloga” › „Obriši nalog”. Uputstvo je i na strani [Brisanje ličnih podataka](/brisanje-licnih-podataka/).'],
+        ['pitanje' => 'Kako da vas kontaktiram?', 'odgovor' => 'Pišite na {email} ili preko [kontakt forme](/kontakt/), a možete i da pozovete {telefon}.'],
     ],
+
+    /* Pravila oglašavanja ------------------------------------------------- */
+
+    'pravila.naslov' => 'Pravila oglašavanja',
+    'pravila.tekst' => <<<'MD'
+Pravila su tu da kupci brzo nađu ono što traže, a da prevaranti i neželjeni oglasi nemaju mesta na sajtu. Važe za sve oglase, privatne i oglase firmi, uz [Uslove korišćenja](/uslovi-koriscenja/).
+
+## Kako izgleda dobar oglas
+
+- **Naslov** kaže šta prodajete: „Golf 7 1.6 TDI 2015” umesto „Prodajem hitno!!!”.
+- **Kategorija** je ona u koju stvar zaista spada. Oglas u pogrešnoj kategoriji premeštamo ili odbijamo.
+- **Cena** je stvarna cena u dinarima ili evrima. Cena 1 dinar, „pozovite za cenu” uz lažnu cenu i slično nisu dozvoljeni. Ako se cena dogovara, ostavite polje prazno.
+- **Opis** je tačan: stanje, mane, šta ide uz stvar i kako se preuzima.
+- **Fotografije** su vaše i prikazuju baš tu stvar. Bez tuđih fotografija sa interneta, bez telefona, linkova i logotipa drugih sajtova na slici. Na fotografije automatski dodajemo mali znak loglasi.rs.
+- **Mesto** je mesto gde se stvar nalazi ili gde pružate uslugu.
+
+## Jedna stvar, jedan oglas
+
+- Istu stvar ne postavljajte više puta, ni u različitim kategorijama. Duplikate brišemo.
+- Ako oglas želite ponovo na vrh, koristite besplatnu obnovu kad istekne ili podizanje.
+- Kad prodate stvar, označite oglas kao prodat. Mesto za novi oglas se odmah oslobađa.
+
+## Šta nije dozvoljeno
+
+- roba i usluge čija je prodaja zabranjena zakonom: oružje i municija, droge, lekovi na recept, duvan i alkohol bez dozvole, zaštićene životinjske i biljne vrste,
+- falsifikovana, kopirana i ukradena roba, dokumenta i lični podaci,
+- sadržaj za odrasle, uvredljiv, nasilan i diskriminatorski sadržaj,
+- krediti i pozajmice od fizičkih lica, piramidalne šeme, „posao od kuće” uz uplatu unapred, kriptovalute i kladionice,
+- oglasi koji traže uplatu unapred, podatke sa kartice ili kodove iz SMS poruka,
+- oglasi koji su samo reklama za drugi sajt, a ne ponuda konkretne stvari ili usluge,
+- prodaja životinja kada zakon to zabranjuje, i udomljavanje uz naplatu koja se predstavlja kao besplatno.
+
+## Firme i agencije
+
+Firma ili preduzetnik oglašava preko profila firme (paketi su na strani [Za firme](/za-firme/)). Privatni nalog koji stalno oglašava robu ili usluge kao delatnost označavamo kao firmu i nudimo mu profil firme.
+
+## Provera oglasa
+
+Nove oglase pregleda administrator pre objave, najčešće istog dana. Oglas koji ne poštuje pravila odbijamo i u nalogu pišemo razlog, pa ga možete ispraviti i poslati ponovo. Već objavljen oglas možemo da uklonimo bez najave ako krši pravila.
+
+## Šta se dešava kad neko krši pravila
+
+1. Oglas se odbija ili uklanja, uz razlog.
+2. Kod ponovljenog kršenja nalog dobija ograničenje broja oglasa.
+3. Nalog koji služi za prevaru, spam ili zabranjen sadržaj blokiramo odmah i trajno.
+
+Plaćena usluga za oglas uklonjen zbog kršenja pravila se ne vraća.
+
+## Prijava oglasa
+
+Ako vidite oglas koji krši pravila ili deluje kao prevara, kliknite na „Prijavi oglas” na strani oglasa. Prijave pregledamo i javljamo rezultat ako ostavite kontakt.
+
+## Saveti za bezbednu kupovinu
+
+- Robu pogledajte i platite uživo, na javnom mestu.
+- Ne plaćajte unapred nepoznatim osobama i ne šaljite podatke sa platne kartice.
+- Ne otvarajte linkove za „dostavu” ili „naplatu” koje vam neko pošalje porukom.
+- loglasi.rs nikada ne traži lozinku ni kodove iz SMS poruka.
+MD,
 
     /* Uslovi korišćenja --------------------------------------------------- */
 
@@ -221,6 +289,7 @@ loglasi.rs je sajt za oglase za Loznicu i okolinu. Sajt povezuje one koji prodaj
 - Oglas traje {trajanje_oglasa}, a obnova je besplatna.
 - Oglas mora da opisuje stvarnu stvar ili uslugu, sa tačnom cenom i fotografijama na koje imate pravo.
 - Jedna stvar se oglašava jednim oglasom. Isti oglas postavljen više puta se briše.
+- Detaljna pravila (kategorije, fotografije, cena, zabranjene stvari) su na strani [Pravila oglašavanja](/pravila-oglasavanja/).
 
 ## 4. Zabranjen sadržaj
 
@@ -238,10 +307,11 @@ Oglase pregledamo i možemo da uklonimo oglas koji krši ove uslove, bez prethod
 
 ## 6. Plaćene usluge
 
-- Postavljanje oglasa je besplatno. Plaćaju se dodatni oglasi, promocije oglasa (podizanje {cena_podizanje}, paket 10 podizanja {cena_paket_podizanja}, istaknut oglas {cena_istaknuto_7}, prioritetni oglas {cena_prioritet}, TOP oglas {cena_top}, Premium XL kartica {cena_premium_xl}) i paketi za firme (Business Start {cena_start}, Business Pro {cena_pro} i Business Max {cena_max} mesečno, ili godišnje po ceni za 10 meseci), po cenama sa strane [Cenovnik](/cenovnik/).
-- Plaća se uplatom na račun, najlakše skeniranjem IPS QR koda u aplikaciji banke, uz poziv na broj sa predračuna. Ako uplata ne stigne u roku od 7 dana, porudžbina se otkazuje.
-- Usluga počinje odmah posle potvrde uplate i traje koliko piše na Cenovniku. Paket kupljen tokom besplatne prve godine počinje kad ona istekne.
-- Za isticanje, dodatne oglase i pakete, ako odustanete pre isteka, vraćamo srazmeran deo cene za dane koji nisu iskorišćeni; podizanje se izvrši odmah. Ako usluga ne može da se pruži našom greškom, vraćamo ceo iznos.
+- Postavljanje oglasa je besplatno. Plaćaju se samo dodatne usluge koje sami izaberete: dodatni oglasi, Plus prodavac, promocije oglasa (podizanje, Brza prodaja, istaknut, prioritetni, TOP oglas i Premium XL kartica) i paketi za firme (Vizitka, Business Start, Pro i Max). Opis i važeće cene su na strani [Cenovnik](/cenovnik/).
+- Neke usluge za privatne korisnike mogu biti privremeno nedostupne; na Cenovniku su tada označene sa „Uskoro”.
+- Plaća se uplatom na račun, najlakše skeniranjem IPS QR koda u aplikaciji banke, uz poziv na broj sa predračuna. Ako uplata ne stigne u roku od {rok_uplate}, porudžbina se otkazuje.
+- Usluga počinje kad uplatu evidentiramo i traje koliko piše na Cenovniku. Nema automatske obnove ni automatske naplate.
+- Plus prodavac važi za oglase privatnih korisnika; ne važi za usluge i poslove. Oglasi se tokom paketa obnavljaju sami.
 - Sve o naručivanju, plaćanju, računima, odustanku i reklamacijama piše na stranama [Uslovi kupovine i plaćanja](/uslovi-placanja/), [Odustanak od ugovora](/odustanak-od-ugovora/) i [Reklamacije i povraćaj novca](/reklamacije/).
 
 ## 7. Odgovornost
@@ -266,7 +336,7 @@ Svoj nalog i lične podatke možete da obrišete u svakom trenutku, bez obrazlo�
 ## Sami, iz naloga
 
 1. Prijavite se na loglasi.rs.
-2. Otvorite [Moj nalog](/moj-nalog/) i izaberite „Obriši nalog”.
+2. Otvorite [Moj nalog › Podešavanja naloga](/moj-nalog/podesavanja/) i izaberite „Obriši nalog”.
 3. Upišite lozinku, potvrdite i nalog se briše odmah.
 
 ## Na zahtev
@@ -289,6 +359,8 @@ MD,
     'privatnost.naslov' => 'Politika privatnosti',
     'privatnost.tekst' => <<<'MD'
 Ova politika objašnjava koje podatke o ličnosti prikupljamo na sajtu loglasi.rs i u mobilnoj aplikaciji, zašto ih prikupljamo i koja prava imate. Podatke obrađujemo u skladu sa Zakonom o zaštiti podataka o ličnosti.
+
+Rukovalac podacima je {prodavac_kratko}, e-pošta {email}.
 
 ## Koje podatke prikupljamo
 
@@ -316,11 +388,25 @@ Podatke naloga čuvamo dok nalog postoji. Posle brisanja naloga brišemo i oglas
 
 ## Kolačići
 
-Sajt koristi kolačiće koji su neophodni za rad: prijavu na nalog i zaštitu formi. Bez njih prijava nije moguća.
+- **Neophodni kolačići:** prijava na nalog i zaštita formi od zloupotrebe. Bez njih prijava nije moguća, pa za njih ne tražimo saglasnost.
+- **Merenje posećenosti (Google Analytics):** uključuje se tek kad kliknete „U redu” u traci o kolačićima. Ako izaberete „Ne, hvala”, ništa se ne meri. Izbor možete da promenite u svakom trenutku preko linka „Podešavanje kolačića” u podnožju sajta.
+- Reklamne kolačiće i kolačiće drugih oglašivača ne koristimo.
+
+## Ko još obrađuje podatke
+
+Podatke ne prodajemo. Pristup im, u meri koja je potrebna za rad sajta, imaju:
+
+- pružalac usluge hostinga, na čijim serverima su sajt i baza,
+- Google (Google Analytics), samo ako ste pristali na merenje posećenosti, i Google Firebase za obaveštenja u mobilnoj aplikaciji,
+- servis za slanje e-pošte, za poruke koje vam šaljemo,
+- pružalac usluge fiskalizacije i Poreska uprava, za fiskalne račune,
+- banka preko koje primamo uplate i knjigovođa, za podatke o plaćenim uslugama.
+
+Svi oni podatke obrađuju samo po našem nalogu i ne smeju da ih koriste za svoje potrebe. Nadležnim organima podatke dajemo samo kad to zakon nalaže.
 
 ## Vaša prava
 
-Imate pravo da tražite uvid u svoje podatke, ispravku, brisanje i ograničenje obrade, kao i pravo da podnesete pritužbu Povereniku za informacije od javnog značaja i zaštitu podataka o ličnosti. Uputstvo za brisanje naloga je na strani [Brisanje ličnih podataka](/brisanje-licnih-podataka/).
+Imate pravo da tražite uvid u svoje podatke, kopiju, ispravku, brisanje i ograničenje obrade, da uložite prigovor na obradu i da povučete pristanak (na primer za merenje posećenosti), kao i pravo da podnesete pritužbu Povereniku za informacije od javnog značaja i zaštitu podataka o ličnosti (Bulevar kralja Aleksandra 15, Beograd, www.poverenik.rs). Na zahtev odgovaramo najkasnije u roku od 30 dana. Uputstvo za brisanje naloga je na strani [Brisanje ličnih podataka](/brisanje-licnih-podataka/).
 
 ## Podaci o plaćanju
 

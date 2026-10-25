@@ -63,7 +63,7 @@ class FooterAndFaqTest extends TestCase
         $this->get('/brisanje-licnih-podataka/')->assertOk()
             ->assertSee('<h1', false)
             ->assertSee('Brisanje ličnih podataka')
-            ->assertSee('href="/moj-nalog/"', false)
+            ->assertSee('href="/moj-nalog/podesavanja/"', false)
             ->assertSee(Settings::get('contact_email'));
 
         $this->get('/birsanje-licnih-podataka/')->assertRedirect(url_slash('brisanje-licnih-podataka'))->assertStatus(301);

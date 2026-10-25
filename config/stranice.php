@@ -17,6 +17,7 @@ return [
         'o_nama' => '/o-nama/',
         'faq' => '/faq/',
         'uslovi' => '/uslovi-koriscenja/',
+        'pravila' => '/pravila-oglasavanja/',
         'privatnost' => '/politika-privatnosti/',
         'placanje' => '/uslovi-placanja/',
         'odustanak' => '/odustanak-od-ugovora/',

@@ -18,6 +18,8 @@ class GoogleTagTest extends TestCase
             ->assertSee("gtag('consent', 'default', {analytics_storage: 'denied'", false)
             ->assertSee('id="lg-kolacici"', false)
             ->assertSee('<button type="button" class="lg-kolacici__ok" data-kolacici="da">U redu</button>', false)
+            ->assertSee('data-kolacici="ne">Ne, hvala</button>', false)
+            ->assertSee('data-kolacici-izmena hidden>Podešavanje kolačića</button>', false)
             ->assertSee('href="'.url_slash('politika-privatnosti').'"', false)
             ->assertSee("gtag('consent', 'update', {analytics_storage: 'granted'})", false)
             ->assertDontSee('Odbijam');

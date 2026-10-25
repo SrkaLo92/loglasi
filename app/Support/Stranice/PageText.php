@@ -103,6 +103,7 @@ class PageText
             '{rok_uplate}' => self::pendingDays(),
             '{pdv_napomena}' => Prodavac::escape(PaymentDetails::vatNote()),
             '{prodavac}' => Prodavac::markdown(),
+            '{prodavac_kratko}' => Prodavac::short(),
             '{usluge_cenovnik}' => Cenovnik::servicesMarkdown(),
         ];
 

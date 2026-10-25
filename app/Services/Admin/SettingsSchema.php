@@ -177,6 +177,7 @@ class SettingsSchema
             'o_nama' => 'O nama',
             'faq' => 'Česta pitanja',
             'uslovi' => 'Uslovi korišćenja',
+            'pravila' => 'Pravila oglašavanja',
             'privatnost' => 'Privatnost',
             'placanje' => 'Uslovi kupovine i plaćanja',
             'odustanak' => 'Odustanak od ugovora',

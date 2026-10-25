@@ -31,6 +31,8 @@ class Cenovnik
         'cena_brza_prodaja' => 'quick_sale_7',
         'cena_plus_prodavac' => 'plus_seller_30',
         'cena_vizitka' => 'business_vizitka_monthly',
+        'cena_plus_3' => 'listing_slots_3',
+        'cena_plus_10' => 'listing_slots_10',
     ];
 
     /** Podešavanja za uplatu i kontakt (prazno dok ih admin ne unese; račun se nigde ne izmišlja). */

@@ -61,6 +61,15 @@ class Prodavac
         ));
     }
 
+    /** One line for the {prodavac_kratko} placeholder: "Name, address" (or the site name until it is entered). */
+    public static function short(): string
+    {
+        $rows = collect(self::rows())->keyBy('label');
+        $parts = array_filter([$rows['Naziv']['value'] ?? '', $rows['Adresa']['value'] ?? '']);
+
+        return $parts === [] ? 'loglasi.rs' : self::escape(implode(', ', $parts));
+    }
+
     /** Admin-entered values must not turn into Markdown formatting or links. */
     public static function escape(string $text): string
     {

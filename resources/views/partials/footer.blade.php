@@ -15,6 +15,7 @@
 		'privatnost' => 'Politika privatnosti',
 		'brisanje' => 'Brisanje ličnih podataka',
 		'uslovi' => 'Uslovi korišćenja',
+		'pravila' => 'Pravila oglašavanja',
 		'placanje' => 'Uslovi kupovine i plaćanja',
 		'odustanak' => 'Odustanak od ugovora',
 		'reklamacije' => 'Reklamacije i povraćaj novca',
@@ -109,6 +110,7 @@
 
 	<div class="lg-wrap lg-footer__dno">
 		<p>© {{ now()->year }} loglasi.rs · Vaš lokalni portal za kupovinu, prodaju i razmenu. Sva prava zadržana.</p>
+		<button type="button" class="lg-footer__kolacici" data-kolacici-izmena hidden>Podešavanje kolačića</button>
 		<a href="https://alphasoft.dev/" target="_blank" rel="noopener">Alphasoft Development</a>
 	</div>
 </footer>
