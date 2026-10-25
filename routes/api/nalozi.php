@@ -18,4 +18,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/me', [MeController::class, 'update'])->middleware('throttle:nalozi-account');
     Route::delete('/me', [MeController::class, 'destroy'])->middleware('throttle:nalozi-account');
     Route::get('/me/limits', [MeController::class, 'limits']);
+    Route::get('/me/overview', [MeController::class, 'overview']);
 });

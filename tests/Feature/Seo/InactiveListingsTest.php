@@ -6,6 +6,7 @@ use App\Enums\ListingStatus;
 use App\Models\Category;
 use App\Models\Listing;
 use App\Uvoz\Steps\GoneImport;
+use Illuminate\Support\Facades\DB;
 
 class InactiveListingsTest extends SeoTestCase
 {
@@ -64,5 +65,19 @@ class InactiveListingsTest extends SeoTestCase
         $this->get('/')->assertOk()
             ->assertSee('<meta property="og:image:width" content="1200">', false)
             ->assertSee('<meta property="og:image:alt" content="loglasi.rs: Oglasi za Loznicu i okolinu">', false);
+    }
+
+    public function test_redirect_command_loads_the_file_and_clears_410(): void
+    {
+        Category::factory()->create(['slug' => 'stanovi-prodaja']);
+        DB::table('gone_urls')->insert(['path' => '/oglas/%D0%B0%D0%B1/', 'created_at' => now(), 'updated_at' => now()]);
+        $file = tempnam(sys_get_temp_dir(), 'pr');
+        file_put_contents($file, "/oglas/аб/ /oglasi/stanovi-prodaja/\n/oglas/x/ /oglasi/nema/\n");
+
+        $this->artisan('seo:preusmerenja', ['file' => $file])->assertSuccessful();
+        unlink($file);
+
+        $this->get('/oglas/%D0%B0%D0%B1/')->assertStatus(301)->assertTarget('/oglasi/stanovi-prodaja/');
+        $this->get('/oglas/x/')->assertStatus(301)->assertTarget('/oglasi/');
     }
 }

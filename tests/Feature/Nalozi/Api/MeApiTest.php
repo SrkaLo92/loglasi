@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Nalozi\Api;
 
+use App\Enums\ListingStatus;
 use App\Models\Firm;
 use App\Models\Listing;
 use App\Models\ListingImage;
@@ -185,6 +186,7 @@ class MeApiTest extends TestCase
         $this->patchJson('/api/v1/me', ['name' => 'x'])->assertUnauthorized();
         $this->deleteJson('/api/v1/me', ['password' => 'x'])->assertUnauthorized();
         $this->getJson('/api/v1/me/limits')->assertUnauthorized();
+        $this->getJson('/api/v1/me/overview')->assertUnauthorized();
     }
 
     public function test_session_does_not_authenticate_api(): void
@@ -249,6 +251,25 @@ class MeApiTest extends TestCase
 
         $this->withToken($this->tokenFor($firm))->getJson('/api/v1/me/limits')
             ->assertJson(['monthly_limit' => 10, 'unlimited' => false]);
+    }
+
+    public function test_overview_has_counts_tasks_and_numbers(): void
+    {
+        $user = User::factory()->create();
+        Listing::factory()->count(2)->for($user)->create();
+        Listing::factory()->for($user)->create(['status' => ListingStatus::Rejected]);
+
+        $this->withToken($this->tokenFor($user))->getJson('/api/v1/me/overview')
+            ->assertOk()
+            ->assertJsonPath('counts.listings', 2)
+            ->assertJsonPath('counts.unread', 0)
+            ->assertJsonPath('tasks.0.type', 'rejected')
+            ->assertJsonPath('tasks.0.count', 1)
+            ->assertJsonPath('tasks.0.target', ['screen' => 'my_listings', 'status' => 'rejected'])
+            ->assertJsonPath('tasks.1.type', 'missing_location')
+            ->assertJsonPath('last_30_days', ['views' => 0, 'phone_reveals' => 0, 'saves' => 0])
+            ->assertJsonPath('limits.monthly_limit', 10)
+            ->assertJsonPath('plus_seller_until', null);
     }
 
     public function test_patch_is_rate_limited(): void

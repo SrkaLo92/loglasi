@@ -234,6 +234,25 @@ class UvozWordpressTest extends UvozTestCase
         $this->get('/oglas/obrisan-oglas/')->assertStatus(410);
     }
 
+    public function test_redirect_file_gives_301_instead_of_410_and_never_a_missing_category(): void
+    {
+        $gone = tempnam(sys_get_temp_dir(), 'gone');
+        file_put_contents($gone, "/oglas/%D0%BF%D1%80%D0%BE%D0%B4%D0%B0%D1%98%D0%B5%D0%BC/\n/oglas/spam-oglas/\n");
+        $redirects = tempnam(sys_get_temp_dir(), 'redirect');
+        file_put_contents($redirects, "# klikovi\n/oglas/продајем/ /oglasi/nema-te-kategorije/\n/oglas/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d1%98%d0%b5%d0%bc/ /oglasi/nema-te-kategorije/\n/oglas/stari-stan/ /oglasi/stanovi/\n");
+        config(['uvoz.gone_file' => $gone, 'uvoz.redirect_file' => $redirects]);
+
+        $this->import()->assertSuccessful();
+        unlink($gone);
+        unlink($redirects);
+
+        $this->assertFalse(DB::table('gone_urls')->where('path', '/oglas/продајем/')->exists());
+        $this->assertTrue(DB::table('gone_urls')->where('path', '/oglas/spam-oglas/')->exists());
+        $this->get('/oglas/stari-stan/')->assertStatus(301)->assertRedirect(url_slash('oglasi/stanovi'));
+        $this->get('/oglas/%D0%BF%D1%80%D0%BE%D0%B4%D0%B0%D1%98%D0%B5%D0%BC/')->assertStatus(301)->assertRedirect(url_slash('oglasi'));
+        $this->get('/oglas/продајем/')->assertStatus(301);
+    }
+
     public function test_category_seo_texts_are_filled_after_import(): void
     {
         $this->import()->assertSuccessful();

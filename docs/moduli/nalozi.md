@@ -81,7 +81,7 @@ Osnova: `/api/v1`. Ugovor: `api/openapi.yaml` iz repozitorijuma aplikacije.
    Ako neko ponovo pošalje već zamenjen refresh token (npr. ukraden), opoziva se ceo lanac tokena tog uređaja; ostali uređaji ostaju prijavljeni.
 4. `POST /auth/logout` `{refresh_token?, all_devices?}` → 204. Bez tela odjavljuje uređaj za koji je vezan trenutni access token; `all_devices: true` odjavljuje sve.
 5. `POST /auth/password-reset` `{email}` → uvek 204; link vodi na `/nova-lozinka/{token}/` na sajtu.
-6. `GET /me`, `PATCH /me` (`name`, `phone`, `location_id`, `avatar_media_id`, `notifications`), `DELETE /me` `{password}` → 204, `GET /me/limits`.
+6. `GET /me`, `PATCH /me` (`name`, `phone`, `location_id`, `avatar_media_id`, `notifications`), `DELETE /me` `{password}` → 204, `GET /me/limits`, `GET /me/overview` (counts, tasks with type/count/text/target, last_30_days, limits, plus_seller_until). `/me` also has `plus_seller_until`.
 
 API ne prihvata sesiju sajta (`config/sanctum.php`: `guard` prazan), samo Bearer token. Promena ili reset lozinke i brisanje naloga opozivaju sve tokene.
 

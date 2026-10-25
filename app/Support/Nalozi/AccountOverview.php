@@ -23,37 +23,38 @@ final class AccountOverview
     public function __construct(public readonly User $user) {}
 
     /**
-     * Tasks, most important first: [tone, icon, text, link label, url]; tone is warn or info.
+     * Tasks, most important first. type and count are for the API (mobile app), tone (warn or info),
+     * icon, text, link label and url for the site.
      *
-     * @return list<array{tone: string, icon: string, text: string, action: string, url: string}>
+     * @return list<array{type: string, count: int, tone: string, icon: string, text: string, action: string, url: string}>
      */
     public function tasks(): array
     {
         $counts = AccountMenu::counts($this->user);
         $byStatus = $this->statusCounts();
-        $task = fn (string $tone, string $icon, string $text, string $action, string $url) => compact('tone', 'icon', 'text', 'action', 'url');
+        $task = fn (string $type, int $count, string $tone, string $icon, string $text, string $action, string $url) => compact('type', 'count', 'tone', 'icon', 'text', 'action', 'url');
         $tasks = [];
 
         if ($counts['unread'] > 0) {
-            $tasks[] = $task('warn', 'chat', 'Imate '.self::plural($counts['unread'], 'novu poruku', 'nove poruke', 'novih poruka').'.', 'Otvori poruke', url_slash('moj-nalog/poruke'));
+            $tasks[] = $task('unread_messages', $counts['unread'], 'warn', 'chat', 'Imate '.self::plural($counts['unread'], 'novu poruku', 'nove poruke', 'novih poruka').'.', 'Otvori poruke', url_slash('moj-nalog/poruke'));
         }
         if (($expiring = $this->expiringCount()) > 0) {
-            $tasks[] = $task('warn', 'clock', self::plural($expiring, 'oglas ističe', 'oglasa ističu', 'oglasa ističe').' u naredna '.self::EXPIRING_DAYS.' dana. Obnova je besplatna.', 'Pogledaj', url_slash('moj-nalog/oglasi'));
+            $tasks[] = $task('expiring', $expiring, 'warn', 'clock', self::plural($expiring, 'oglas ističe', 'oglasa ističu', 'oglasa ističe').' u naredna '.self::EXPIRING_DAYS.' dana. Obnova je besplatna.', 'Pogledaj', url_slash('moj-nalog/oglasi'));
         }
         if ($byStatus['rejected'] > 0) {
-            $tasks[] = $task('warn', 'alert', self::plural($byStatus['rejected'], 'oglas je odbijen', 'oglasa su odbijena', 'oglasa je odbijeno').'. Pogledajte razlog i ispravite ga.', 'Pogledaj', url_slash('moj-nalog/oglasi').'?status=odbijeni');
+            $tasks[] = $task('rejected', $byStatus['rejected'], 'warn', 'alert', self::plural($byStatus['rejected'], 'oglas je odbijen', 'oglasa su odbijena', 'oglasa je odbijeno').'. Pogledajte razlog i ispravite ga.', 'Pogledaj', url_slash('moj-nalog/oglasi').'?status=odbijeni');
         }
         if ($counts['orders'] > 0) {
-            $tasks[] = $task('warn', 'receipt', self::plural($counts['orders'], 'narudžbina čeka', 'narudžbine čekaju', 'narudžbina čeka').' uplatu.', 'Narudžbine', url_slash('moj-nalog/narudzbine'));
+            $tasks[] = $task('orders_awaiting_payment', $counts['orders'], 'warn', 'receipt', self::plural($counts['orders'], 'narudžbina čeka', 'narudžbine čekaju', 'narudžbina čeka').' uplatu.', 'Narudžbine', url_slash('moj-nalog/narudzbine'));
         }
         if ($byStatus['draft'] > 0) {
-            $tasks[] = $task('info', 'list', 'Imate '.self::plural($byStatus['draft'], 'nedovršen oglas', 'nedovršena oglasa', 'nedovršenih oglasa').'.', 'Nastavi', url_slash('moj-nalog/oglasi').'?status=nacrti');
+            $tasks[] = $task('drafts', $byStatus['draft'], 'info', 'list', 'Imate '.self::plural($byStatus['draft'], 'nedovršen oglas', 'nedovršena oglasa', 'nedovršenih oglasa').'.', 'Nastavi', url_slash('moj-nalog/oglasi').'?status=nacrti');
         }
         if ($byStatus['pending'] > 0) {
-            $tasks[] = $task('info', 'clock', self::plural($byStatus['pending'], 'oglas čeka', 'oglasa čekaju', 'oglasa čeka').' proveru. Obično traje kratko.', 'Pogledaj', url_slash('moj-nalog/oglasi').'?status=na-cekanju');
+            $tasks[] = $task('pending', $byStatus['pending'], 'info', 'clock', self::plural($byStatus['pending'], 'oglas čeka', 'oglasa čekaju', 'oglasa čeka').' proveru. Obično traje kratko.', 'Pogledaj', url_slash('moj-nalog/oglasi').'?status=na-cekanju');
         }
         if ($this->user->location_id === null) {
-            $tasks[] = $task('info', 'pin', 'Dodajte svoje mesto, da bi kupci znali odakle ste.', 'Dodaj', url_slash('moj-nalog/podesavanja'));
+            $tasks[] = $task('missing_location', 1, 'info', 'pin', 'Dodajte svoje mesto, da bi kupci znali odakle ste.', 'Dodaj', url_slash('moj-nalog/podesavanja'));
         }
 
         return $tasks;

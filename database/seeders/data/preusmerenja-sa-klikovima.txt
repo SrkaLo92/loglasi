@@ -1,0 +1,17 @@
+# 301 za neuvezene oglase sa klikovima u GSC (izvoz 2026-10-23, 13 oglasa, 110 klikova za 16 meseci)
+# Format: putanja odredište. Spam (serostim, kredit/pozajmice, bitcoin miner) NIJE ovde i ostaje 410.
+# Ćirilični slug je naveden u oba oblika (dekodiran i percent-encoded), kao u gone-urls.txt.
+/oglas/counterpain-classic-original-grcka-krema/ /oglasi/ostalo-nega-i-licna-higijena/
+/oglas/counterpain-classic-100-original/ /oglasi/ostalo-nega-i-licna-higijena/
+/oglas/flat-sale-bezanija-tenanted-estate-buy-to-let-property/ /oglasi/apartmani-prodaja/
+/oglas/prodaja-stanova-sa-zakupcima-bezanija-beograd-expo-2027-invest-estate/ /oglasi/stanovi-prodaja/
+/oglas/продаја-4-0-стан-челебоновића-бежанијск/ /oglasi/stanovi-prodaja/
+/oglas/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d1%98%d0%b0-4-0-%d1%81%d1%82%d0%b0%d0%bd-%d1%87%d0%b5%d0%bb%d0%b5%d0%b1%d0%be%d0%bd%d0%be%d0%b2%d0%b8%d1%9b%d0%b0-%d0%b1%d0%b5%d0%b6%d0%b0%d0%bd%d0%b8%d1%98%d1%81%d0%ba/ /oglasi/stanovi-prodaja/
+/oglas/flat-sale-vracargmail-com-savski-venac-dorcol-stari-grad-tenanted-estate/ /oglasi/stanovi-prodaja/
+/oglas/kupovina-stana-sa-terasom-bastom-beograd-trazim-kupovinu-stana/ /oglasi/apartmani-prodaja/
+/oglas/kalenic-pijaca-trg-hram-save-park-prodaja-stanova-vracar-beograd-sa-zakupcima/ /oglasi/apartmani-prodaja/
+/oglas/buying-flat-with-terrace-garden-belgrade-searching-apartment-property/ /oglasi/stanovi-prodaja/
+/oglas/pekari-jovanovic-potreban-vozac/ /oglasi/prevoz-i-dostava/
+/oglas/kucna-nega-sabac-i-okolina/ /oglasi/usluge-cuvanje-i-nega-dece-i-odraslih/
+/oglas/altina-zemun-igraonica-rodjendaonica/ /oglasi/usluge-dogadjaji-i-proslave/
+/oglas/ukrasne-i-vocne-sadnice-rasadnik-prestiz/ /oglasi/sadni-materijal-za-bastu/

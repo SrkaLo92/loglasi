@@ -61,9 +61,14 @@ class GoneImport extends Step
     /** 301s from the redirect file (old addresses with clicks in Search Console); they leave the 410 list. */
     private function importRedirects(): void
     {
-        foreach (static::listedRedirects((string) config('uvoz.redirect_file')) as $from => $to) {
-            $this->redirected[$from] = true;
-            DB::table('gone_urls')->where('path', $from)->delete();
+        $redirects = static::listedRedirects((string) config('uvoz.redirect_file'));
+        if ($redirects === []) {
+            return;
+        }
+
+        foreach ($redirects as $from => $to) {
+            $to = $this->existingTarget($to);
+            $this->redirected[UrlTables::key($from)] = true;
             if (! DB::table('redirects')->where('from_path', $from)->update(['to_path' => $to, 'status_code' => 301, 'updated_at' => now()])
                 && ! DB::table('redirects')->where('from_path', $from)->exists()) {
                 DB::table('redirects')->insert(['from_path' => $from, 'to_path' => $to, 'status_code' => 301, 'created_at' => now(), 'updated_at' => now()]);
@@ -71,7 +76,44 @@ class GoneImport extends Step
             $this->report->imported('redirect');
         }
 
+        // Earlier 410 rows for these addresses, stored decoded or percent-encoded.
+        $stale = DB::table('gone_urls')->where('path', 'like', '/oglas/%')->get(['id', 'path'])
+            ->filter(fn ($row) => isset($this->redirected[UrlTables::keyFromStored($row->path)]))->pluck('id');
+        DB::table('gone_urls')->whereIn('id', $stale)->delete();
+
         UrlTables::flushRedirects();
+    }
+
+    /**
+     * A category target that exists here (or redirects on); otherwise its WordPress parent, otherwise
+     * /oglasi/. Never a 404.
+     */
+    private function existingTarget(string $to): string
+    {
+        if (! preg_match('#^/oglasi/([^/]+)/$#', $to, $m)) {
+            return $to;
+        }
+
+        $known = fn (string $slug) => DB::table('categories')->where('slug', $slug)->where('is_active', true)->exists()
+            || DB::table('redirects')->where('from_path', '/oglasi/'.$slug.'/')->exists();
+        if ($known($m[1])) {
+            return $to;
+        }
+
+        $terms = collect($this->wp->terms((string) config('uvoz.tax_category')));
+        $term = $terms->first(fn ($t) => rawurldecode((string) $t->slug) === $m[1]);
+        while ($term && $term->parent > 0 && ($term = $terms->get($term->parent))) {
+            $slug = rawurldecode((string) $term->slug);
+            if ($known($slug)) {
+                $this->report->note('redirect', "{$to}: kategorija ne postoji, ide na roditelja /oglasi/{$slug}/");
+
+                return '/oglasi/'.$slug.'/';
+            }
+        }
+
+        $this->report->note('redirect', "{$to}: kategorija ne postoji, ide na /oglasi/");
+
+        return '/oglasi/';
     }
 
     /** @return array<string, string> "path target" per line (paths or full URLs), "#" starts a comment */
@@ -130,7 +172,7 @@ class GoneImport extends Step
     {
         $this->report->wp('gone');
 
-        if (isset($this->redirected[$path])) {
+        if (isset($this->redirected[UrlTables::key($path)])) {
             return;
         }
 

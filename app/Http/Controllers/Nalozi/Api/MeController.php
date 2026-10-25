@@ -10,6 +10,8 @@ use App\Support\ApiError;
 use App\Support\Auth\AccountDeletion;
 use App\Support\Auth\Avatar;
 use App\Support\ListingLimits;
+use App\Support\Nalozi\AccountMenu;
+use App\Support\Nalozi\AccountOverview;
 use App\Support\Phone;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -89,6 +91,36 @@ class MeController extends Controller
     public function limits(Request $request): JsonResponse
     {
         return response()->json(ListingLimits::for($request->user()));
+    }
+
+    /** GET /me/overview: the account overview of the site (counts, tasks, numbers for the last 30 days). */
+    public function overview(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $overview = new AccountOverview($user);
+        $stats = $overview->stats();
+
+        return response()->json([
+            'counts' => AccountMenu::counts($user),
+            'tasks' => array_map(fn (array $task) => [
+                'type' => $task['type'],
+                'count' => $task['count'],
+                'text' => $task['text'],
+                // Where the app opens it: my listings with a status tab, messages, orders or the profile.
+                'target' => match ($task['type']) {
+                    'unread_messages' => ['screen' => 'messages'],
+                    'orders_awaiting_payment' => ['screen' => 'orders'],
+                    'missing_location' => ['screen' => 'profile'],
+                    'expiring' => ['screen' => 'my_listings', 'status' => 'active'],
+                    'rejected' => ['screen' => 'my_listings', 'status' => 'rejected'],
+                    'drafts' => ['screen' => 'drafts'],
+                    default => ['screen' => 'my_listings', 'status' => 'pending'],
+                },
+            ], $overview->tasks()),
+            'last_30_days' => ['views' => $stats['views'], 'phone_reveals' => $stats['reveals'], 'saves' => $stats['saved']],
+            'limits' => ListingLimits::for($user),
+            'plus_seller_until' => MePresenter::date($stats['plus_until']),
+        ]);
     }
 
     /** Slika otpremljena preko POST /media postaje profilna; null je uklanja. */

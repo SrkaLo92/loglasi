@@ -25,6 +25,7 @@ abstract class UvozTestCase extends TestCase
     {
         parent::setUp();
         config(['uvoz.gone_file' => '']); // the real list of live URLs is not part of the fixture
+        config(['uvoz.redirect_file' => '']);
         config(['uvoz.catalog_definition' => false]); // the fixture checks the import itself; CatalogDefinitionTest covers the rest
 
         $main = (string) config('database.connections.'.config('database.default').'.database');
