@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Notifications;
 
+use App\Mail\Admin\ListingStatusMail;
 use App\Mail\ListingExpiringSoon;
 use App\Models\Listing;
 use App\Models\User;
@@ -49,5 +50,19 @@ class HoldOutgoingMailTest extends TestCase
         $sent = $this->sent();
         $this->assertCount(1, $sent);
         $this->assertSame('office@loglasi.rs', $sent[0]->getTo()[0]->getAddress());
+    }
+
+    public function test_approval_mail_passes_for_a_listing_posted_here_but_not_for_an_imported_one(): void
+    {
+        config(['notifications.allow_requested' => true]);
+        $own = Listing::factory()->create();
+        $imported = Listing::factory()->create(['wp_id' => 12345]);
+
+        Mail::to('ana@example.com')->send(new ListingStatusMail($own, true));
+        Mail::to('pera@example.com')->send(new ListingStatusMail($imported, true));
+
+        $sent = $this->sent();
+        $this->assertCount(1, $sent);
+        $this->assertSame('ana@example.com', $sent[0]->getTo()[0]->getAddress());
     }
 }

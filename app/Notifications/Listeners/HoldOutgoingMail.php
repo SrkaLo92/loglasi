@@ -42,7 +42,7 @@ class HoldOutgoingMail
             return null;
         }
 
-        Log::info('Mail held: notifications are on hold.', ['subject' => $message->getSubject(), 'to' => $recipients]);
+        Log::warning('Mail held: notifications are on hold.', ['subject' => $message->getSubject(), 'to' => $recipients]);
 
         return false;
     }
