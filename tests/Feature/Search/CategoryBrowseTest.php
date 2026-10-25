@@ -18,8 +18,16 @@ class CategoryBrowseTest extends SearchTestCase
             ->assertSee('data-lg-cats', false)
             ->assertSee('Najtraženije')
             ->assertSee('Pretražite kategoriju')
+            ->assertSee('data-lgc-index="'.route('categories.index').'"', false)
+            ->assertDontSee('"n":"Automobili"', false)
             ->getContent();
-        $this->assertStringContainsString('"n":"Automobili","p":"Vozila"', $html);
+        $this->assertStringNotContainsString('<script type="application/json" data-lgc-index', $html);
+
+        $index = $this->get('/kategorije-indeks.json')->assertOk()
+            ->assertHeader('Cache-Control', 'max-age=300, public')
+            ->assertCookieMissing(config('session.cookie'))
+            ->assertJsonFragment(['n' => 'Automobili', 'p' => 'Vozila']);
+        $this->assertStringContainsString('"n":"Automobili","p":"Vozila"', $index->getContent());
 
         $this->getJson('/api/v1/categories/browse')->assertOk()
             ->assertJsonPath('popular.0.slug', 'automobili')

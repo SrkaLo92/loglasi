@@ -17,7 +17,7 @@ $lgcTile = function (array $c) {
 		.($c['count'] > 0 ? '<span class="lgc-tile__n">'.number_format($c['count'], 0, ',', '.').'</span>' : '').'</a>';
 };
 @endphp
-<div class="lgc" id="lg-cats" role="dialog" aria-modal="true" aria-labelledby="lgc-title" hidden>
+<div class="lgc" id="lg-cats" data-lgc-index="{{ route('categories.index') }}" role="dialog" aria-modal="true" aria-labelledby="lgc-title" hidden>
 	<div class="lgc__panel">
 		<div class="lgc__head">
 			<h2 class="lgc__title" id="lgc-title">Sve kategorije</h2>
@@ -51,5 +51,4 @@ $lgcTile = function (array $c) {
 			</div>
 		</div>
 	</div>
-	<script type="application/json" data-lgc-index>{!! json_encode(array_map(fn ($c) => ['n' => $c['name'], 'p' => $c['path'], 'u' => $c['url'], 'c' => $c['count']], $lgcData['all']), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 </div>

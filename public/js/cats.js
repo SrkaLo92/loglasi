@@ -11,17 +11,32 @@
 	var browse = box.querySelector('[data-lgc-browse]');
 	var keyword = box.querySelector('[data-lgc-keyword]');
 	var index = [];
-	try { index = JSON.parse(box.querySelector('[data-lgc-index]').textContent); } catch (e) {}
+	var indexState = ''; // '' | 'loading' | 'ready'
 	var opener = null;
 
 	// Search without š/č/ć/ž/đ worries: "basta" finds "Bašta".
 	var fold = function (s) {
 		return String(s).toLowerCase().replace(/[čć]/g, 'c').replace(/š/g, 's').replace(/ž/g, 'z').replace(/đ/g, 'dj').normalize('NFD').replace(/[̀-ͯ]/g, '');
 	};
-	index.forEach(function (c) { c.f = fold((c.p ? c.p + ' ' : '') + c.n); });
+
+	// The index (every category with its count) is fetched the first time someone types or focuses the search.
+	var load = function () {
+		if (indexState) { return; }
+		indexState = 'loading';
+		fetch(box.getAttribute('data-lgc-index'), { headers: { Accept: 'application/json' } })
+			.then(function (r) { return r.ok ? r.json() : []; })
+			.then(function (list) {
+				index = Array.isArray(list) ? list : [];
+				index.forEach(function (c) { c.f = fold((c.p ? c.p + ' ' : '') + c.n); });
+				indexState = 'ready';
+				render();
+			})
+			.catch(function () { indexState = ''; });
+	};
 
 	var render = function () {
 		var q = fold(input.value.trim());
+		if (q && indexState !== 'ready') { load(); browse.hidden = true; return; }
 		browse.hidden = q !== '';
 		results.innerHTML = '';
 		if (!q) { results.hidden = true; none.hidden = true; return; }
@@ -79,6 +94,7 @@
 	});
 	document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !box.hidden) { close(); } });
 	window.addEventListener('popstate', function () { close(true); });
+	input.addEventListener('focus', load);
 	input.addEventListener('input', render);
 	input.addEventListener('keydown', function (ev) {
 		if (ev.key === 'Enter') {

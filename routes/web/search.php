@@ -1,13 +1,23 @@
 <?php
 
+use App\Http\Controllers\Search\CategoryIndexController;
 use App\Http\Controllers\Search\HomeController;
 use App\Http\Controllers\Search\ListingListController;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 // Home page and listing lists, at the same addresses as the current site.
 // Page 2+ is /page/N/ (WordPress style); ?page= and ?paged= are accepted too.
 
 Route::get('/', HomeController::class)->name('home');
+
+// "Sve kategorije" search index (cats.js): no session or cookies, so it can be cached.
+Route::get('kategorije-indeks.json', CategoryIndexController::class)->name('categories.index')
+    ->withoutMiddleware([EncryptCookies::class, AddQueuedCookiesToResponse::class, StartSession::class, ShareErrorsFromSession::class, PreventRequestForgery::class]);
 
 Route::controller(ListingListController::class)->group(function () {
     Route::get('/oglasi', 'all')->name('listings.all');
