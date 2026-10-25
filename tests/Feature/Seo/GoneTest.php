@@ -35,7 +35,8 @@ class GoneTest extends SeoTestCase
         $listing->delete();
 
         $this->get('/oglas/prodat-golf/')->assertStatus(410);
-        $this->get('/oglas/nikad-nije-postojao/')->assertNotFound();
+        // No old /oglas/ address ends in 404: one that was never imported is gone too.
+        $this->get('/oglas/nikad-nije-postojao/')->assertStatus(410);
     }
 
     public function test_soft_deleted_user_returns_410(): void
@@ -48,10 +49,16 @@ class GoneTest extends SeoTestCase
 
     public function test_gone_cache_is_cleared_on_change(): void
     {
-        $this->get('/oglas/kasnije-spam/')->assertNotFound();
+        $this->get('/korisnik/kasnije-spam/')->assertNotFound();
 
-        GoneUrl::create(['path' => '/oglas/kasnije-spam/']);
+        GoneUrl::create(['path' => '/korisnik/kasnije-spam/']);
 
-        $this->get('/oglas/kasnije-spam/')->assertStatus(410);
+        $this->get('/korisnik/kasnije-spam/')->assertStatus(410);
+    }
+
+    public function test_old_blog_is_gone(): void
+    {
+        $this->get('/blog/')->assertStatus(410);
+        $this->get('/blog/neki-clanak/')->assertStatus(410);
     }
 }

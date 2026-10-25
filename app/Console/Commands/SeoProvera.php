@@ -190,8 +190,16 @@ class SeoProvera extends Command
             return ['pattern' => '/stranica-404/', 'status' => 404];
         }
 
-        if (preg_match('#(^|/)feed/$#', $norm)) {
-            return ['pattern' => 'feed', 'status' => 410];
+        if (preg_match('#(^|/)feed/$#', $norm) || preg_match('#^/(blog|listivo_template)(/|$)#', $norm)) {
+            return ['pattern' => 'feed / blog', 'status' => 410];
+        }
+
+        // Kept on purpose (LegacyUrls): the old data deletion page with a typo and the theme's comparison page.
+        if (in_array($norm, ['/birsanje-licnih-podataka/', '/brisanje-podataka/'], true)) {
+            return ['pattern' => 'stara strana', 'status' => 301, 'target' => '/brisanje-licnih-podataka/'];
+        }
+        if ($norm === '/uporedite-oglase/') {
+            return ['pattern' => 'stara strana', 'status' => 301, 'target' => '/oglasi/'];
         }
 
         if ($norm === '/oglasi/' && $clean !== []) {
@@ -289,7 +297,7 @@ class SeoProvera extends Command
         $listing = Listing::withTrashed()->where('slug', $slug)->first();
 
         if ($listing === null) {
-            return ['pattern' => '/oglas/ (nema ga)', 'status' => null, 'note' => 'nije u novoj bazi ni na 410 listi: ručna provera'];
+            return ['pattern' => '/oglas/ (nema ga)', 'status' => 410];
         }
 
         if ($listing->trashed()) {

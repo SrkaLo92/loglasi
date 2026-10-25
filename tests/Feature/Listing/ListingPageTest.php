@@ -119,9 +119,9 @@ class ListingPageTest extends TestCase
         $this->get($this->url($listing))->assertNotFound();
     }
 
-    public function test_unknown_slug_is_404(): void
+    public function test_unknown_slug_is_410(): void
     {
-        $this->get('/oglas/ne-postoji/')->assertNotFound();
+        $this->get('/oglas/ne-postoji/')->assertStatus(410);
     }
 
     public function test_views_are_counted_once_per_session_with_daily_stats(): void

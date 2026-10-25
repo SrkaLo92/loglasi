@@ -15,3 +15,9 @@
 /oglas/kucna-nega-sabac-i-okolina/ /oglasi/usluge-cuvanje-i-nega-dece-i-odraslih/
 /oglas/altina-zemun-igraonica-rodjendaonica/ /oglasi/usluge-dogadjaji-i-proslave/
 /oglas/ukrasne-i-vocne-sadnice-rasadnik-prestiz/ /oglasi/sadni-materijal-za-bastu/
+# Dodato 2026-10-26 (SEO provera probnog sajta): lokalni oglasi iz GSC indeksa kojih nema u bazi ni na 410 listi
+/oglas/kvalitetne-sertifikovane-vocne-sadnice-iz-rasadnika-antic/ /oglasi/sadni-materijal-za-bastu/
+/oglas/pekari-arsenije-potreban-radnik-na-pecenju-peciva-i-prodavacica/ /oglasi/poslovi/
+/oglas/pekari-jovanovic-potreban-radnik-na-pakovanju-peciva/ /oglasi/poslovi/
+/oglas/izdajem-opremljen-lokal-pekara-proizvodnja-kolaca-kuhinja/ /oglasi/nekretnine/
+/oglas/pasat-b8-4x4-dsg-ch/ /oglasi/automobili/

@@ -28,6 +28,12 @@ class ListingController extends Controller
 {
     public function show(Request $request, string $slug, Catalog $catalog, ListingFields $fields): View|Response
     {
+        // An address that is not (or no longer) a listing here is gone for good: the old site's listings that
+        // were not imported, deleted ones, typos. 410 lets search engines drop it (the 410 list and the
+        // redirects table are checked before this, in the middleware).
+        if (! Listing::query()->where('slug', $slug)->exists()) {
+            return Gone::response();
+        }
         $listing = $this->find($request, $slug, 'view');
         $viewer = $request->user();
 
