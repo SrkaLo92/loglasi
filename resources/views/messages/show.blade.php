@@ -12,7 +12,7 @@
 
 @section('content')
 <div class="lgm lgm--chat lg-wrap">
-	<p class="lgm-back"><a href="{{ url_slash('moj-nalog/poruke') }}">← Sve poruke</a></p>
+	<p class="lgm-back lgm-back--dupe"><a href="{{ url_slash('moj-nalog/poruke') }}">← Sve poruke</a></p>
 
 	<header class="lgm-chat-head">
 		<h1>{{ $otherName }}

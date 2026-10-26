@@ -91,3 +91,4 @@ a.lgm-listing__title { color: var(--lg-text); }
 .lgm-link--green { color: var(--lg-green); }
 .lgm-report summary { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; color: var(--lg-text-2); cursor: pointer; }
 .lgm-report select { width: 100%; min-height: 48px; padding: 10px 14px; border: 1px solid var(--lg-input); border-radius: 10px; background: #fff; font: inherit; }
+@media (max-width: 1023.98px) { .lgm-back--dupe { display: none; } } /* the account back link above says the same */

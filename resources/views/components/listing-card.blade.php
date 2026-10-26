@@ -51,7 +51,8 @@
 						@if ($lcXl)
 							<source type="image/webp" srcset="{{ ImageUrls::url($lcImage, 'medium') }} 800w, {{ ImageUrls::url($lcImage, 'large') }} 1600w" sizes="(max-width: 767px) 100vw, 400px">
 						@else
-							<source type="image/webp" srcset="{{ ImageUrls::url($lcImage, 'thumb') }} 400w, {{ ImageUrls::url($lcImage, 'medium') }} 800w" sizes="(max-width: 767px) 50vw, 300px">
+							{{-- 34vw on a phone (the card is half the screen; a wide card takes the row): a 3x phone still takes the 400 px file, which is sharp at that size, instead of the 800 px one. --}}
+							<source type="image/webp" srcset="{{ ImageUrls::url($lcImage, 'thumb') }} 400w, {{ ImageUrls::url($lcImage, 'medium') }} 800w" sizes="(max-width: 767px) {{ $wide && ! $lcXl ? '100vw' : '34vw' }}, 300px">
 						@endif
 					@endif
 					<img class="lc__img" src="{{ $lcFallback ?? ImageUrls::url($lcImage, 'medium') }}" alt="{{ $listing->title }}" width="400" height="300" loading="{{ $eager ? 'eager' : 'lazy' }}" decoding="async" @if ($eager) fetchpriority="high" @endif>

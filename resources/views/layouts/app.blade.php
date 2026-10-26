@@ -27,7 +27,20 @@
 	<aside class="lg-acct__side">@include('partials.account-tabs')</aside>
 	<div class="lg-acct__main">
 		@unless (request()->is('moj-nalog'))
-			<a class="lg-acct__back" href="{{ url_slash('moj-nalog') }}">{{ \App\Support\Stranice\Ikonice::svg('chevron-l', 18) }} Moj nalog</a>
+			{{-- One way back on a phone: to the section the page belongs to (a conversation goes back to all messages). --}}
+			@php
+				$lgBack = match (true) {
+					request()->is('moj-nalog/poruke/novo') => [null, null],
+					request()->is('moj-nalog/poruke/*') => ['moj-nalog/poruke', 'Sve poruke'],
+					request()->is('moj-nalog/oglasi/*') => ['moj-nalog/oglasi', 'Moji oglasi'],
+					request()->is('moj-nalog/obavestenja/*') => ['moj-nalog/obavestenja', 'Obaveštenja'],
+					request()->is('moj-nalog/narudzbine/*') => ['moj-nalog/narudzbine', 'Narudžbine'],
+					default => ['moj-nalog', 'Moj nalog'],
+				};
+			@endphp
+			@if ($lgBack[0])
+				<a class="lg-acct__back" href="{{ url_slash($lgBack[0]) }}">{{ \App\Support\Stranice\Ikonice::svg('chevron-l', 18) }} {{ $lgBack[1] }}</a>
+			@endif
 		@endunless
 		@yield('content')
 	</div>
