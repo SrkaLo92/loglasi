@@ -637,6 +637,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	/* Na telefonu su nalog i „Postavi oglas” u donjoj navigaciji. */
 	body.lg-has-mnav .lg-header__nav { display: none; }
 	.lg-header__nav { grid-column: 1 / -1; justify-content: space-between; }
+	/* Pages without the bottom bar (posting, a listing with its contact bar): the account links go into the
+	   top row, compact, instead of a loose second row; posting itself is one tap away on every other page. */
+	body:not(.lg-has-mnav) .lg-header__mesto { display: none; }
+	body:not(.lg-has-mnav) .lg-header__nav { grid-row: 1; grid-column: 2; gap: 10px; }
+	body:not(.lg-has-mnav) .lg-header__postavi { display: none; }
 
 	.lg-footer { margin-top: 32px; }
 	.lg-footer__vrh { padding-top: 24px; padding-bottom: 24px; }
