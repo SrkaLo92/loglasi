@@ -36,7 +36,7 @@ class ImportTest extends TestCase
 
     private function table(): UploadedFile
     {
-        $path = sys_get_temp_dir().'/'.uniqid('uvoz', true).'.csv';
+        $path = sys_get_temp_dir().'/'.uniqid('import', true).'.csv';
         file_put_contents($path, "naslov;kategorija;cena;opis;mesto\n"
             ."Krečenje stanova;Usluge;3000;Krečim stanove i kuće, povoljno.;Loznica\n"
             ."K;Usluge;;Prekratak naslov.;Loznica\n");

@@ -10,7 +10,7 @@
 	<h1>Podešavanja obaveštenja</h1>
 	<p class="lgn-lead">Izaberite o čemu želite da vas obaveštavamo mejlom na <strong>{{ $user->email }}</strong> i u aplikaciji.</p>
 
-	@include('nalozi.partials.status')
+	@include('accounts.partials.status')
 
 	<section class="lgn-card" aria-labelledby="lgt-izbor">
 		<h2 id="lgt-izbor">Šta vam šaljemo</h2>

@@ -59,7 +59,7 @@
 								<img src="{{ $svc->url($cover, 'sm', 'jpg') }}" alt="" width="{{ $cover->width ?: 320 }}" height="{{ $cover->height ?: 240 }}" loading="lazy">
 							</picture>
 						@else
-							<span class="pst-mine__ph">{{ \App\Support\Stranice\Ikonice::svg('image', 28) }}</span>
+							<span class="pst-mine__ph">{{ \App\Support\Pages\SiteIcons::svg('image', 28) }}</span>
 						@endif
 					</div>
 					<div class="pst-mine__body">
@@ -83,8 +83,8 @@
 						@endif
 						@if ($item->status !== ListingStatus::Draft)
 							<p class="pst-mine__stats">
-								<span>{{ \App\Support\Stranice\Ikonice::svg('chart', 16) }}{{ \App\Support\Listing\Text::views((int) $item->views) }}</span>
-								<span>{{ \App\Support\Stranice\Ikonice::svg('phone', 16) }}{{ \App\Support\Listing\Text::number((int) $item->phone_reveals) }} {{ \App\Support\Listing\Text::plural((int) $item->phone_reveals, 'prikaz broja', 'prikaza broja', 'prikaza broja') }}</span>
+								<span>{{ \App\Support\Pages\SiteIcons::svg('chart', 16) }}{{ \App\Support\Listing\Text::views((int) $item->views) }}</span>
+								<span>{{ \App\Support\Pages\SiteIcons::svg('phone', 16) }}{{ \App\Support\Listing\Text::number((int) $item->phone_reveals) }} {{ \App\Support\Listing\Text::plural((int) $item->phone_reveals, 'prikaz broja', 'prikaza broja', 'prikaza broja') }}</span>
 								@if ($recentStats)<span class="pst-help">poslednjih 30 dana: {{ (int) $recentStats->views }} / {{ (int) $recentStats->phone_reveals }}</span>@endif
 							</p>
 						@endif

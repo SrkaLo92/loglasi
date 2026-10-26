@@ -2,8 +2,8 @@
 @use('App\Support\Home\FooterSections')
 @use('App\Support\Phone')
 @use('App\Support\Settings')
-@use('App\Support\Stranice\Ikonice')
-@use('App\Support\Stranice\Navigacija')
+@use('App\Support\Pages\SiteIcons')
+@use('App\Support\Pages\Navigation')
 @php
 	$lgFooterLinks = [
 		'o_nama' => 'O nama',
@@ -40,7 +40,7 @@
 				<p class="lg-footer__vesti">Imate nešto za prodaju?</p>
 				<p class="lg-footer__podnaslov">Postavite oglas besplatno, za par minuta, i javite se kupcima iz svog kraja.</p>
 			</div>
-			<a class="lg-btn lg-btn--orange lg-footer__postavi" href="{{ url_slash('/postavi-oglas') }}">{{ Ikonice::svg('plus', 18) }}Postavite oglas</a>
+			<a class="lg-btn lg-btn--orange lg-footer__postavi" href="{{ url_slash('/postavi-oglas') }}">{{ SiteIcons::svg('plus', 18) }}Postavite oglas</a>
 		</div>
 	@endif
 
@@ -66,7 +66,7 @@
 				<summary class="lg-footer__naslov">Korisni linkovi</summary>
 				<ul class="lg-footer__lista">
 					@foreach ($lgFooterLinks as $key => $label)
-						@php($href = Navigacija::link($key))
+						@php($href = Navigation::link($key))
 						<li><a href="{{ $href }}" @if ($href === $lgCurrent) aria-current="page" @endif>{{ $label }}</a></li>
 					@endforeach
 				</ul>
@@ -75,7 +75,7 @@
 				<summary class="lg-footer__naslov">Pravne informacije</summary>
 				<ul class="lg-footer__lista">
 					@foreach ($lgLegalLinks as $key => $label)
-						@php($href = Navigacija::link($key))
+						@php($href = Navigation::link($key))
 						<li><a href="{{ $href }}" @if ($href === $lgCurrent) aria-current="page" @endif>{{ $label }}</a></li>
 					@endforeach
 				</ul>

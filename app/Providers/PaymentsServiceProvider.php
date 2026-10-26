@@ -35,7 +35,7 @@ class PaymentsServiceProvider extends ServiceProvider
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             InProcess::command($schedule, 'orders:cancel-stale')->dailyAt('03:15')->withoutOverlapping()->onOneServer();
             // Receipts the V-PFR could not issue at payment time (does nothing with the manual driver).
-            InProcess::command($schedule, 'fiskal:izdaj')->everyFifteenMinutes()->withoutOverlapping()->onOneServer();
+            InProcess::command($schedule, 'fiscal:issue')->everyFifteenMinutes()->withoutOverlapping()->onOneServer();
         });
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-// Listing fields, the way kupujemprodajem and polovniautomobili ask for them. `katalog:uredi` makes the
+// Listing fields, the way kupujemprodajem and polovniautomobili ask for them. `catalog:apply` makes the
 // database match this file: label, type, filter, unit, depends_on, options (when given) and order.
 // Options are labels (the value is their slug) or [value, label] / [value, label, parent] lists.
 // `values` renames stored values (old => new, null deletes), for type or option changes.

@@ -23,7 +23,7 @@ use Throwable;
  *
  * A number typed in by the admin is recorded as is (receipt issued by hand while the V-PFR was down).
  * When the V-PFR fails the error is logged and nothing is recorded: the order stays paid without a
- * receipt and `fiskal:izdaj` tries again (same RequestId, so no second receipt).
+ * receipt and `fiscal:issue` tries again (same RequestId, so no second receipt).
  */
 class VpfrReceiptIssuer implements FiscalReceiptIssuer
 {

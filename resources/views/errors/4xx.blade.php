@@ -1,1 +1,1 @@
-@include('errors.stranica', ['kod' => isset($exception) && method_exists($exception, 'getStatusCode') ? $exception->getStatusCode() : 400, 'naslov' => 'Zahtev nije moguće obraditi', 'tekst' => 'Proverite adresu ili se vratite na početnu stranu.'])
+@include('errors.page', ['kod' => isset($exception) && method_exists($exception, 'getStatusCode') ? $exception->getStatusCode() : 400, 'naslov' => 'Zahtev nije moguće obraditi', 'tekst' => 'Proverite adresu ili se vratite na početnu stranu.'])

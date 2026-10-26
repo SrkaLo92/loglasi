@@ -5,7 +5,7 @@ namespace Tests\Feature\Seo;
 use App\Enums\ListingStatus;
 use App\Models\Category;
 use App\Models\Listing;
-use App\Uvoz\Steps\GoneImport;
+use App\WordPressImport\Steps\GoneImport;
 use Illuminate\Support\Facades\DB;
 
 class InactiveListingsTest extends SeoTestCase
@@ -74,7 +74,7 @@ class InactiveListingsTest extends SeoTestCase
         $file = tempnam(sys_get_temp_dir(), 'pr');
         file_put_contents($file, "/oglas/аб/ /oglasi/stanovi-prodaja/\n/oglas/x/ /oglasi/nema/\n");
 
-        $this->artisan('seo:preusmerenja', ['file' => $file])->assertSuccessful();
+        $this->artisan('seo:redirects', ['file' => $file])->assertSuccessful();
         unlink($file);
 
         $this->get('/oglas/%D0%B0%D0%B1/')->assertStatus(301)->assertTarget('/oglasi/stanovi-prodaja/');

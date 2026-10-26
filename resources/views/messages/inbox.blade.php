@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @include('messages.partials.head')
 @use('App\Services\Messages\MessageBody')
-@use('App\Support\Stranice\Cenovnik')
+@use('App\Support\Pages\Pricing')
 @php
 	$title = 'Poruke | loglasi.rs';
 	$robots = 'noindex, follow';
@@ -13,7 +13,7 @@
 	@include('messages.partials.status')
 
 	@if ($unreadTotal > 0)
-		<p class="lgm-lead">Imate {{ $unreadTotal }} {{ Cenovnik::plural($unreadTotal, 'nepročitanu poruku', 'nepročitane poruke', 'nepročitanih poruka') }}.</p>
+		<p class="lgm-lead">Imate {{ $unreadTotal }} {{ Pricing::plural($unreadTotal, 'nepročitanu poruku', 'nepročitane poruke', 'nepročitanih poruka') }}.</p>
 	@endif
 
 	@if ($groups->isEmpty())
@@ -57,7 +57,7 @@
 											<time datetime="{{ $conversation->last_message_at->toIso8601String() }}">{{ $conversation->last_message_at->isToday() ? $conversation->last_message_at->format('H:i') : $conversation->last_message_at->format('j. n. Y.') }}</time>
 										@endif
 										@if ($unread > 0)
-											<span class="lgm-count" aria-label="{{ $unread }} {{ Cenovnik::plural($unread, 'nepročitana', 'nepročitane', 'nepročitanih') }}">{{ $unread > 99 ? '99+' : $unread }}</span>
+											<span class="lgm-count" aria-label="{{ $unread }} {{ Pricing::plural($unread, 'nepročitana', 'nepročitane', 'nepročitanih') }}">{{ $unread > 99 ? '99+' : $unread }}</span>
 										@endif
 									</span>
 								</a>

@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
 
         // Samo za lokalni razvoj; pravi podaci dolaze uvozom iz WordPress-a.
         if (app()->isLocal()) {
-            $this->call(KatalogSeeder::class);
+            $this->call(CatalogSeeder::class);
 
             User::factory()->admin()->create([
                 'name' => 'Admin',

@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Katalog\CatalogApiController;
+use App\Http\Controllers\Catalog\CatalogApiController;
 use Illuminate\Support\Facades\Route;
 
 // Katalog za mobilnu aplikaciju (javno, bez prijave).

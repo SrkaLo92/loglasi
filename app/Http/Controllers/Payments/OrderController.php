@@ -12,11 +12,11 @@ use App\Models\Order;
 use App\Services\OrderService;
 use App\Services\Payments\BuyerDetails;
 use App\Services\Payments\ProductCatalog;
+use App\Support\Pages\SellerIdentity;
 use App\Support\Payments\IpsQr;
 use App\Support\Payments\PaymentDetails;
 use App\Support\Payments\PaymentMode;
 use App\Support\Payments\TaxId;
-use App\Support\Stranice\Prodavac;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -201,7 +201,7 @@ class OrderController extends Controller
             'number' => $number,
             'amount' => $credit ? (int) $order->refund_amount_rsd : (int) $order->amount_rsd,
             'issuedAt' => $credit ? ($order->refunded_at ?? now()) : ($order->receipt_issued_at ?? $order->paid_at ?? now()),
-            'seller' => Prodavac::rows(),
+            'seller' => SellerIdentity::rows(),
         ]);
     }
 

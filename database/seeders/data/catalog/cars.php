@@ -3,7 +3,7 @@
 // Car makes and models (polovniautomobili style). Kept from WordPress (Listivo listivo_945 / listivo_946,
 // model -> make from term meta parent_terms) plus makes and models it lacked. Values: make slug, make-model slug.
 // `legacy` maps the WordPress term slugs to these values (old listings and saved searches).
-// Generated once; edit freely (the admin edits the field itself, katalog:uredi resets it from here).
+// Generated once; edit freely (the admin edits the field itself, catalog:apply resets it from here).
 
 return [
     'makes' => [

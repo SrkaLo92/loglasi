@@ -8,11 +8,11 @@ use App\Services\ListingImages;
 use App\Services\Payments\FiscalDriver;
 use App\Services\Payments\PlusSeller;
 use App\Support\Home\HomeSettings;
+use App\Support\Pages\PageText;
+use App\Support\Pages\Pricing;
 use App\Support\Payments\PaymentDetails;
 use App\Support\Payments\PaymentMode;
 use App\Support\Settings;
-use App\Support\Stranice\Cenovnik;
-use App\Support\Stranice\PageText;
 
 /**
  * Settings shown on the admin "Podešavanja" page: key, label, type, default.
@@ -114,7 +114,7 @@ class SettingsSchema
     public static function fiscal(): array
     {
         return [
-            'fiscal.driver' => ['label' => 'Izdavanje fiskalnih računa', 'type' => 'select', 'options' => FiscalDriver::OPTIONS, 'help' => 'Automatski tek kad su FISCAL_VPFR_* podaci upisani na serveru i `php artisan fiskal:provera` prođe.', 'default' => (string) config('fiscal.driver', FiscalDriver::MANUAL)],
+            'fiscal.driver' => ['label' => 'Izdavanje fiskalnih računa', 'type' => 'select', 'options' => FiscalDriver::OPTIONS, 'help' => 'Automatski tek kad su FISCAL_VPFR_* podaci upisani na serveru i `php artisan fiscal:check` prođe.', 'default' => (string) config('fiscal.driver', FiscalDriver::MANUAL)],
             'fiscal.vpfr_url' => ['label' => 'Adresa V-PFR-a', 'type' => 'text', 'help' => 'Bez /api/v3 na kraju. Prazno = FISCAL_VPFR_URL iz .env.', 'default' => ''],
             'fiscal.tax_label' => ['label' => 'Poreska oznaka na računu', 'type' => 'text', 'help' => 'Oznaka za obveznika van sistema PDV-a; proveriti sa knjigovođom (podrazumevano „А”, ćirilica).', 'default' => (string) config('fiscal.vpfr.tax_label', 'А')],
             'fiscal.cashier' => ['label' => 'Kasir na računu', 'type' => 'text', 'default' => (string) config('fiscal.vpfr.cashier', 'loglasi.rs')],
@@ -125,7 +125,7 @@ class SettingsSchema
     public static function payment(): array
     {
         $out = [];
-        foreach (Cenovnik::PAYMENT_KEYS as $key => $label) {
+        foreach (Pricing::PAYMENT_KEYS as $key => $label) {
             $out[$key] = ['label' => $label, 'type' => 'text', 'default' => ''];
         }
         $out['payment_account']['help'] = 'U obliku 160-0000000000000-00. Dok primalac i račun nisu uneti, cenovnik kaže da se podaci šalju na zahtev.';
@@ -144,7 +144,7 @@ class SettingsSchema
     }
 
     /**
-     * page_text.* keys with defaults from resources/stranice/tekstovi.php, grouped by page.
+     * page_text.* keys with defaults from resources/pages/texts.php, grouped by page.
      *
      * @return array<string, array<string, array{label: string, type: string, default: mixed, item_keys?: list<string>}>>
      */
@@ -269,7 +269,7 @@ class SettingsSchema
         }
 
         Settings::flush();
-        Cenovnik::forgetFounding();
+        Pricing::forgetFounding();
 
         if ($changes !== []) {
             AuditLog::record('settings.update', null, $changes);

@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Nalozi\Api\AuthController;
-use App\Http\Controllers\Nalozi\Api\MeController;
+use App\Http\Controllers\Accounts\Api\AuthController;
+use App\Http\Controllers\Accounts\Api\MeController;
 use Illuminate\Support\Facades\Route;
 
 // Nalog u mobilnoj aplikaciji (/api/v1). Access token 15 min, refresh token 30 dana.

@@ -287,7 +287,7 @@ class ListingImport
     private function addImages(Listing $listing, User $owner, array $urls): void
     {
         foreach ($urls as $url) {
-            $file = tempnam(sys_get_temp_dir(), 'uvoz');
+            $file = tempnam(sys_get_temp_dir(), 'import');
             try {
                 $response = Http::timeout(20)->withOptions(['allow_redirects' => true, 'sink' => $file])->get($url);
                 if (! $response->successful() || filesize($file) <= 0 || filesize($file) > self::MAX_IMAGE_BYTES) {

@@ -22,11 +22,11 @@ use Illuminate\Support\Str;
 /**
  * Realistic local data for development and performance tests: Serbian titles,
  * EUR and RSD prices, "Dogovor", featured listings, firms, field values.
- * Never runs in production, except on the test site with --probni (proba:podaci). Needs categories and places (KatalogSeeder).
+ * Never runs in production, except on the test site with --demo (demo:data). Needs categories and places (CatalogSeeder).
  */
 class DevListings extends Command
 {
-    protected $signature = 'dev:listings {count=2000 : number of listings} {--fresh : delete listings made by this command first} {--probni : allow on the test site (production env, not loglasi.rs)}';
+    protected $signature = 'dev:listings {count=2000 : number of listings} {--fresh : delete listings made by this command first} {--demo : allow on the test site (production env, not loglasi.rs)}';
 
     protected $description = 'Create realistic test listings for local development';
 
@@ -71,7 +71,7 @@ class DevListings extends Command
 
     public function handle(Catalog $catalog, SearchIndex $index): int
     {
-        if (app()->isProduction() && (! $this->option('probni') || ProbaPodaci::isLiveHost())) {
+        if (app()->isProduction() && (! $this->option('demo') || DemoData::isLiveHost())) {
             $this->error('This command does not run in production.');
 
             return self::FAILURE;

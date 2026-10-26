@@ -8,8 +8,8 @@ use App\Models\Category;
 use App\Models\Listing;
 use App\Models\ListingImage;
 use App\Models\User;
+use App\Support\Pages\PageText;
 use App\Support\Settings;
-use App\Support\Stranice\PageText;
 use Tests\TestCase;
 
 class ListingPageTest extends TestCase

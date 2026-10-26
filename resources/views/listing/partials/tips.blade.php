@@ -1,5 +1,5 @@
 @use('App\Support\Listing\Icons')
-@use('App\Support\Stranice\PageText')
+@use('App\Support\Pages\PageText')
 @php
 	$tips = array_values(array_filter(PageText::list('oglas.saveti'), fn ($tip) => is_string($tip) && trim($tip) !== ''));
 @endphp

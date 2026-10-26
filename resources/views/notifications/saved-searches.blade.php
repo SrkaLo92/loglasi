@@ -10,7 +10,7 @@
 	<h1>Sačuvane pretrage</h1>
 	<p class="lgn-lead">Kad stigne nov oglas koji odgovara pretrazi, javljamo vam mejlom i u aplikaciji, najviše jednom dnevno po pretrazi.</p>
 
-	@include('nalozi.partials.status')
+	@include('accounts.partials.status')
 	@if ($errors->any())
 		<p class="lgn-alert lgn-alert--warn" role="alert">{{ $errors->first() }}</p>
 	@endif

@@ -80,7 +80,7 @@ class ListingImportPage extends Page
                         ->label('Tabela (CSV, XLSX)')
                         ->acceptedFileTypes(['text/csv', 'text/plain', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
                         ->disk('local')
-                        ->directory('uvoz')
+                        ->directory('listing-import')
                         ->preserveFilenames()
                         ->maxSize(20480)
                         ->required()

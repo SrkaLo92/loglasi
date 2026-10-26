@@ -19,7 +19,7 @@
 		<form class="pst-upload" method="post" action="{{ Wizard::url($listing, 'images') }}" enctype="multipart/form-data" data-pst-upload>
 			@csrf
 			<label class="pst-upload__zone" for="pst-files" data-pst-drop>
-				{{ \App\Support\Stranice\Ikonice::svg('image', 32) }}
+				{{ \App\Support\Pages\SiteIcons::svg('image', 32) }}
 				<span class="pst-upload__title">Izaberite slike</span>
 				<span class="pst-help pst-upload__hint">ili ih prevucite ovde</span>
 			</label>

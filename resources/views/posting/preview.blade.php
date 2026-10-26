@@ -34,7 +34,7 @@
 				<img src="{{ $svc->url($image, $loop->first ? 'lg' : 'sm', 'jpg') }}" alt="{{ $loop->first ? $listing->title : 'Slika '.$loop->iteration }}" width="{{ $image->width ?: 800 }}" height="{{ $image->height ?: 600 }}" loading="{{ $loop->first ? 'eager' : 'lazy' }}">
 			</picture>
 		@empty
-			<div class="pst-review__empty">{{ \App\Support\Stranice\Ikonice::svg('image', 40) }}<span>Oglas nema slika. <a href="{{ Wizard::url($listing, 'images') }}">Dodajte slike</a></span></div>
+			<div class="pst-review__empty">{{ \App\Support\Pages\SiteIcons::svg('image', 40) }}<span>Oglas nema slika. <a href="{{ Wizard::url($listing, 'images') }}">Dodajte slike</a></span></div>
 		@endforelse
 	</div>
 	<div class="pst-review__body">
@@ -42,8 +42,8 @@
 		<h2 id="pst-review-title" class="pst-review__title">{{ $listing->title !== '' ? $listing->title : 'Oglas bez naslova' }}</h2>
 		<p class="pst-review__price">{{ $listing->priceLabel() }}</p>
 		<ul class="pst-review__meta" role="list">
-			<li>{{ \App\Support\Stranice\Ikonice::svg('pin', 16) }}{{ $listing->location?->name ?? 'Mesto nije izabrano' }}</li>
-			<li>{{ \App\Support\Stranice\Ikonice::svg('phone', 16) }}{{ $phone ? \App\Support\Phone::national($phone) : 'Bez broja telefona' }}</li>
+			<li>{{ \App\Support\Pages\SiteIcons::svg('pin', 16) }}{{ $listing->location?->name ?? 'Mesto nije izabrano' }}</li>
+			<li>{{ \App\Support\Pages\SiteIcons::svg('phone', 16) }}{{ $phone ? \App\Support\Phone::national($phone) : 'Bez broja telefona' }}</li>
 		</ul>
 		@if ($fieldValues !== [])
 			<dl class="pst-review__attrs">

@@ -12,7 +12,7 @@ class ListingImportTest extends PostingTestCase
 {
     private function table(string $content, string $name = 'oglasi.csv'): array
     {
-        $path = sys_get_temp_dir().'/'.uniqid('uvoz', true).'-'.$name;
+        $path = sys_get_temp_dir().'/'.uniqid('import', true).'-'.$name;
         file_put_contents($path, $content);
 
         return [$path, $name];
@@ -86,7 +86,7 @@ class ListingImportTest extends PostingTestCase
     public function test_reads_an_excel_table(): void
     {
         $user = $this->user();
-        $path = sys_get_temp_dir().'/'.uniqid('uvoz', true).'.xlsx';
+        $path = sys_get_temp_dir().'/'.uniqid('import', true).'.xlsx';
         $this->writeXlsx($path, [
             ['Naslov', 'Kategorija', 'Opis', 'Mesto'],
             ['Krečenje stanova', 'Usluge', 'Krečim stanove i kuće, povoljno.', 'Loznica'],

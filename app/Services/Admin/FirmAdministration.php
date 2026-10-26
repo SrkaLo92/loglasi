@@ -8,7 +8,7 @@ use App\Models\Firm;
 use App\Models\User;
 use App\Services\OrderFulfillment;
 use App\Support\Firms\FirmPackage;
-use App\Support\Stranice\Cenovnik;
+use App\Support\Pages\Pricing;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
@@ -104,6 +104,6 @@ class FirmAdministration
     /** The firm directory cache is cleared by the firms module on every save. */
     private function forgetCaches(Firm $firm): void
     {
-        Cenovnik::forgetFounding();
+        Pricing::forgetFounding();
     }
 }

@@ -24,38 +24,38 @@ class SeoHeadTest extends SeoTestCase
             Route::get('oglas/{slug}', function (string $slug) {
                 Seo::for(Listing::withTrashed()->where('slug', $slug)->firstOrFail());
 
-                return view('pocetna.index');
+                return view('testing.page');
             });
             Route::get('oglasi', function () {
                 Seo::get()->listings();
 
-                return view('pocetna.index');
+                return view('testing.page');
             });
             Route::get('oglasi/page/{n}', function () {
                 Seo::get()->listings();
 
-                return view('pocetna.index');
+                return view('testing.page');
             });
             Route::get('oglasi/{kategorija}/{mesto?}', function (string $kategorija, ?string $mesto = null) {
                 Seo::for(Category::where('slug', $kategorija)->firstOrFail(), [
                     'location' => $mesto ? Location::where('slug', $mesto)->firstOrFail() : null,
                 ]);
 
-                return view('pocetna.index');
+                return view('testing.page');
             });
             Route::get('korisnik/{slug}', function (string $slug) {
                 Seo::for(User::where('slug', $slug)->firstOrFail());
 
-                return view('pocetna.index');
+                return view('testing.page');
             });
-            Route::get('prijava', fn () => view('pocetna.index'));
+            Route::get('prijava', fn () => view('testing.page'));
             Route::get('faq', function () {
                 Seo::get()->page('Česta pitanja', 'Odgovori na najčešća pitanja.', '/faq/')
                     ->faq([['q' => 'Da li je oglas besplatan?', 'a' => 'Da, postavljanje oglasa je besplatno.']]);
 
-                return view('pocetna.index');
+                return view('testing.page');
             });
-            Route::get('stara-strana', fn () => view('pocetna.index', [
+            Route::get('stara-strana', fn () => view('testing.page', [
                 'title' => 'Stara strana | loglasi.rs', 'robots' => 'noindex, follow',
             ]));
         });

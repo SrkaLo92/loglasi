@@ -1,12 +1,12 @@
 <?php
 
+use App\Providers\AccountsServiceProvider;
 use App\Providers\AppServiceProvider;
+use App\Providers\CatalogServiceProvider;
 use App\Providers\Filament\AdminPanelProvider;
 use App\Providers\FirmsServiceProvider;
-use App\Providers\KatalogServiceProvider;
 use App\Providers\ListingServiceProvider;
 use App\Providers\MessagesServiceProvider;
-use App\Providers\NaloziServiceProvider;
 use App\Providers\NotificationsServiceProvider;
 use App\Providers\PaymentsServiceProvider;
 use App\Providers\PostingServiceProvider;
@@ -16,10 +16,10 @@ use App\Providers\SeoServiceProvider;
 return [
     AppServiceProvider::class,
     AdminPanelProvider::class,
-    KatalogServiceProvider::class,
+    CatalogServiceProvider::class,
     ListingServiceProvider::class,
     MessagesServiceProvider::class,
-    NaloziServiceProvider::class,
+    AccountsServiceProvider::class,
     NotificationsServiceProvider::class,
     PaymentsServiceProvider::class,
     PostingServiceProvider::class,

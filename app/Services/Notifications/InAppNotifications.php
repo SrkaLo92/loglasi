@@ -8,7 +8,7 @@ use App\Models\SavedSearch;
 use App\Models\SellerRating;
 use App\Models\User;
 use App\Models\UserNotification;
-use App\Support\Stranice\Cenovnik;
+use App\Support\Pages\Pricing;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -140,11 +140,11 @@ class InAppNotifications
 
         [$icon, $tone, $text, $body, $url] = match ($n->type) {
             self::FAVORITE => ['heart', 'red', 'Neko je sačuvao vaš oglas', '„'.$title.'”', $listingUrl],
-            self::RATING => ['star', 'amber', ($d['name'] ?? 'Kupac').' vas je ocenio sa '.($d['score'] ?? '?').' '.Cenovnik::plural((int) ($d['score'] ?? 0), 'zvezdicom', 'zvezdice', 'zvezdica'),
+            self::RATING => ['star', 'amber', ($d['name'] ?? 'Kupac').' vas je ocenio sa '.($d['score'] ?? '?').' '.Pricing::plural((int) ($d['score'] ?? 0), 'zvezdicom', 'zvezdice', 'zvezdica'),
                 isset($d['title']) ? 'Oglas „'.$d['title'].'”' : null, $n->user ? url_slash('korisnik/'.$n->user->slug.'/ocene') : url_slash('moj-nalog')],
             self::LISTING_APPROVED => ['check', 'green', 'Vaš oglas je objavljen', '„'.$title.'”', $listingUrl],
             self::LISTING_REJECTED => ['alert', 'orange', 'Vaš oglas nije odobren', '„'.$title.'”'.(isset($d['reason']) ? ' · '.$d['reason'] : ''), url_slash('moj-nalog/oglasi').'?status=odbijeni'],
-            self::SAVED_SEARCH => ['bookmark', 'blue', ($d['count'] ?? 0).' '.Cenovnik::plural((int) ($d['count'] ?? 0), 'novi oglas', 'nova oglasa', 'novih oglasa').' za vašu pretragu',
+            self::SAVED_SEARCH => ['bookmark', 'blue', ($d['count'] ?? 0).' '.Pricing::plural((int) ($d['count'] ?? 0), 'novi oglas', 'nova oglasa', 'novih oglasa').' za vašu pretragu',
                 '„'.($d['name'] ?? 'Sačuvana pretraga').'”', $n->savedSearch?->url() ?? url_slash('moj-nalog/pretrage')],
             default => ['bell', 'gray', 'Obaveštenje', null, url_slash('moj-nalog')],
         };

@@ -1,0 +1,141 @@
+<?php
+
+namespace App\Support\Pages;
+
+use App\Services\Ratings\SellerRatings;
+use App\Support\Payments\PaymentDetails;
+use App\Support\Phone;
+use App\Support\Settings;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
+
+/**
+ * Tekstovi sadržajnih strana: vrednost iz podešavanja (page_text.<ključ>) ili
+ * podrazumevani tekst iz resources/pages/texts.php. Zamene {…} se popunjavaju iz baze.
+ */
+class PageText
+{
+    public const PREFIX = 'page_text.';
+
+    /** @var array<string, mixed>|null */
+    private static ?array $defaults = null;
+
+    /** @return array<string, mixed> */
+    public static function defaults(): array
+    {
+        return self::$defaults ??= require resource_path('pages/texts.php');
+    }
+
+    /** Sirova vrednost (string ili niz), bez zamena. */
+    public static function raw(string $key): mixed
+    {
+        $value = Settings::get(self::PREFIX.$key, false);
+
+        if ($value === false || $value === null || $value === '' || $value === []) {
+            return self::defaults()[$key] ?? '';
+        }
+
+        return $value;
+    }
+
+    /** Kratak tekst sa zamenama, za {{ }} u Blade-u (escapuje Blade). */
+    public static function get(string $key): string
+    {
+        $value = self::raw($key);
+
+        return is_string($value) ? self::replace($value) : '';
+    }
+
+    /** Markdown → HTML (bez sirovog HTML-a, bez nebezbednih linkova). */
+    public static function html(string $key): HtmlString
+    {
+        $value = self::raw($key);
+
+        return self::markdown(is_string($value) ? $value : '');
+    }
+
+    /** Jedan red Markdown-a bez <p> omotača (za odgovore i korake sa linkovima). */
+    public static function inline(string $text): HtmlString
+    {
+        return new HtmlString(trim(Str::inlineMarkdown(self::replace($text), self::options())));
+    }
+
+    public static function markdown(string $text): HtmlString
+    {
+        return new HtmlString(Str::markdown(self::replace($text), self::options()));
+    }
+
+    /** @return array<int, mixed> */
+    public static function list(string $key): array
+    {
+        $value = self::raw($key);
+
+        return is_array($value) ? array_values($value) : [];
+    }
+
+    public static function replace(string $text): string
+    {
+        if (! str_contains($text, '{')) {
+            return $text;
+        }
+
+        return strtr($text, self::vars());
+    }
+
+    /** @return array<string, string> */
+    public static function vars(): array
+    {
+        return once(fn () => self::buildVars());
+    }
+
+    /** @return array<string, string> */
+    private static function buildVars(): array
+    {
+        $email = (string) Settings::get('contact_email');
+        $emailMd = $email !== '' ? '['.$email.'](mailto:'.$email.')' : 'našu adresu e-pošte';
+
+        $vars = [
+            '{besplatni_oglasi}' => Pricing::freeListingsText(),
+            '{trajanje_oglasa}' => Pricing::durationText(),
+            '{besplatne_firme}' => (string) Pricing::foundingTotal(),
+            '{ponuda_firme}' => Pricing::offerText(),
+            '{email}' => $emailMd,
+            '{telefon}' => self::phone(),
+            '{rok_uplate}' => self::pendingDays(),
+            '{dani_izmene_ocene}' => (string) SellerRatings::EDIT_DAYS,
+            '{pdv_napomena}' => SellerIdentity::escape(PaymentDetails::vatNote()),
+            '{prodavac}' => SellerIdentity::markdown(),
+            '{prodavac_kratko}' => SellerIdentity::short(),
+            '{usluge_cenovnik}' => Pricing::servicesMarkdown(),
+        ];
+
+        foreach (Pricing::PLACEHOLDERS as $placeholder => $code) {
+            $product = Pricing::product($code);
+            $vars['{'.$placeholder.'}'] = $product ? Pricing::price($product->price_rsd) : '';
+        }
+
+        return $vars;
+    }
+
+    /** "+381 65 541 5128" as a tel: link, or a pointer to the contact page when no phone is set. */
+    private static function phone(): string
+    {
+        $phone = trim((string) Settings::get('contact_phone'));
+
+        return $phone === '' ? 'telefon sa strane [Kontakt](/kontakt/)' : '['.Phone::display($phone).'](tel:'.$phone.')';
+    }
+
+    /** "7 dana": unpaid orders are cancelled after this (config payments.pending_days). */
+    private static function pendingDays(): string
+    {
+        $days = max(1, (int) config('payments.pending_days', 7));
+
+        return $days.' '.Pricing::plural($days, 'dan', 'dana', 'dana');
+    }
+
+    /** @return array<string, mixed> */
+    private static function options(): array
+    {
+        return ['html_input' => 'escape', 'allow_unsafe_links' => false];
+    }
+}

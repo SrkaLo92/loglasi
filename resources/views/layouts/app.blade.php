@@ -39,7 +39,7 @@
 				};
 			@endphp
 			@if ($lgBack[0])
-				<a class="lg-acct__back" href="{{ url_slash($lgBack[0]) }}">{{ \App\Support\Stranice\Ikonice::svg('chevron-l', 18) }} {{ $lgBack[1] }}</a>
+				<a class="lg-acct__back" href="{{ url_slash($lgBack[0]) }}">{{ \App\Support\Pages\SiteIcons::svg('chevron-l', 18) }} {{ $lgBack[1] }}</a>
 			@endif
 		@endunless
 		@yield('content')

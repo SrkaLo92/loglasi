@@ -3,7 +3,7 @@
 // Which fields each category asks for, by category slug. A rule names categories (`in`) or every last-level
 // category under a main one (`under`, minus `except`); the fields go there in this order, `required` marks the
 // mandatory ones. Rules add up, so a category can take the car fields and then "Stanje".
-// `katalog:uredi` makes category_field match this file for every category (a category no rule names has no fields).
+// `catalog:apply` makes category_field match this file for every category (a category no rule names has no fields).
 
 $carBodies = ['automobili-dzip-suv', 'automobili-hecbek', 'automobili-kabriolet', 'automobili-karavan', 'automobili-kupe', 'automobili-limuzina', 'automobili-minivan', 'automobili-pickup'];
 $computers = ['kompjuteri', 'polovni-kompjuteri', 'mini-pc', 'apple-desktop', 'laptopovi', 'laptopovi-apple', 'netbukovi'];

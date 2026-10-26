@@ -62,7 +62,7 @@
 			<ul>
 				@foreach ($status['packages'] as $package)
 					@if ($package['monthly'] || $package['yearly'])
-						<li><strong>{{ $package['label'] }}</strong>: {{ implode(' ili ', array_filter([$package['monthly'] ? \App\Support\Stranice\Cenovnik::price((int) $package['monthly']).' mesečno' : null, $package['yearly'] ? \App\Support\Stranice\Cenovnik::price((int) $package['yearly']).' godišnje' : null])) }}
+						<li><strong>{{ $package['label'] }}</strong>: {{ implode(' ili ', array_filter([$package['monthly'] ? \App\Support\Pages\Pricing::price((int) $package['monthly']).' mesečno' : null, $package['yearly'] ? \App\Support\Pages\Pricing::price((int) $package['yearly']).' godišnje' : null])) }}
 						</li>
 					@endif
 				@endforeach

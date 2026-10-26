@@ -110,7 +110,7 @@ class VpfrReceiptsTest extends PaymentsTestCase
 
         Http::swap(new Factory);
         $this->fakeProcessor();
-        $this->artisan('fiskal:izdaj')->assertSuccessful();
+        $this->artisan('fiscal:issue')->assertSuccessful();
 
         $this->assertSame('ABCD1234-ABCD1234-loglasi-'.$order->id.'-sale', $order->fresh()->receipt_number);
     }
@@ -133,7 +133,7 @@ class VpfrReceiptsTest extends PaymentsTestCase
         $order = $this->order($this->seller(), 'listing_slots_3');
 
         $this->fulfillment()->markPaid($order);
-        $this->artisan('fiskal:izdaj')->assertSuccessful();
+        $this->artisan('fiscal:issue')->assertSuccessful();
 
         $this->assertNull($order->fresh()->receipt_number);
         Http::assertNothingSent();
@@ -143,7 +143,7 @@ class VpfrReceiptsTest extends PaymentsTestCase
     {
         $this->fakeProcessor();
 
-        $this->artisan('fiskal:provera')->expectsOutput('V-PFR odgovara.')->expectsOutput('UID: ABCD1234')->expectsOutput('Poreska oznaka А: Bez PDV 0%')->assertSuccessful();
+        $this->artisan('fiscal:check')->expectsOutput('V-PFR odgovara.')->expectsOutput('UID: ABCD1234')->expectsOutput('Poreska oznaka А: Bez PDV 0%')->assertSuccessful();
     }
 
     public function test_firm_invoice_page_is_printable_and_only_for_the_owner(): void

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @include('payments.partials.head')
 @use('App\Enums\OrderStatus')
-@use('App\Support\Stranice\PageText')
+@use('App\Support\Pages\PageText')
 @php
 	$title = 'Narudžbina '.$order->reference.' | loglasi.rs';
 	$robots = 'noindex, follow';

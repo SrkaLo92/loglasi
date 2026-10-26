@@ -17,8 +17,8 @@ use App\Services\Payments\IssuedReceipt;
 use App\Services\Payments\PaymentConfirmation;
 use App\Services\Payments\ProductCatalog;
 use App\Support\Firms\FirmPackage;
+use App\Support\Pages\Pricing;
 use App\Support\Settings;
-use App\Support\Stranice\Cenovnik;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -288,7 +288,7 @@ class OrderFulfillment
             return true;
         });
 
-        Cenovnik::forgetFounding();
+        Pricing::forgetFounding();
         $firm->refresh();
 
         return $granted;

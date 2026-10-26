@@ -6,9 +6,9 @@
 @use('App\Support\Search\CategorySheet')
 @use('App\Support\Search\TimeAgo')
 @use('App\Support\Seo')
-@use('App\Support\Stranice\Cenovnik')
+@use('App\Support\Pages\Pricing')
 @use('App\Support\Settings')
-@use('App\Support\Stranice\PageText')
+@use('App\Support\Pages\PageText')
 
 @push('head')
 	<link rel="stylesheet" href="{{ asset_v('css/home.css') }}">
@@ -36,7 +36,7 @@
 	$hmMore = match (true) {
 		$hmTotal === 1 => 'Pogledajte oglas',
 		$hmTotal % 10 === 1 && $hmTotal % 100 !== 11 => 'Pogledajte sve oglase ('.$hmCount.')',
-		default => 'Pogledajte '.Cenovnik::plural($hmTotal, 'svih', 'sva', 'svih').' '.$hmCount.' oglasa',
+		default => 'Pogledajte '.Pricing::plural($hmTotal, 'svih', 'sva', 'svih').' '.$hmCount.' oglasa',
 	};
 @endphp
 
@@ -70,7 +70,7 @@
 					<a class="hm-main__tile hm-main__tile--gray" href="{{ $hmAll }}" data-lg-cats>
 						<span class="hm-main__icon">{{ CategoryIcons::svg('grid', 34) }}</span>
 						<span class="hm-main__name">Sve kategorije</span>
-						<span class="hm-main__count">{{ $hmCatTotal }} {{ Cenovnik::plural($hmCatTotal, 'kategorija', 'kategorije', 'kategorija') }}</span>
+						<span class="hm-main__count">{{ $hmCatTotal }} {{ Pricing::plural($hmCatTotal, 'kategorija', 'kategorije', 'kategorija') }}</span>
 					</a>
 				</li>
 			</ul>
@@ -209,7 +209,7 @@
 								@if ($firm['activity'] !== '' || $firm['place'] !== '')
 									<span class="hm-firm__meta">{{ implode(' · ', array_filter([$firm['activity'], $firm['place']])) }}</span>
 								@endif
-								<span class="hm-firm__foot"><span class="hm-firm__count">{{ number_format($firm['count'], 0, ',', '.') }} {{ Cenovnik::plural($firm['count'], 'oglas', 'oglasa', 'oglasa') }}</span><span class="hm-firm__more">Pogledaj profil</span></span>
+								<span class="hm-firm__foot"><span class="hm-firm__count">{{ number_format($firm['count'], 0, ',', '.') }} {{ Pricing::plural($firm['count'], 'oglas', 'oglasa', 'oglasa') }}</span><span class="hm-firm__more">Pogledaj profil</span></span>
 							</span>
 						</a>
 					</li>
@@ -219,8 +219,8 @@
 				<span class="hm-firms__cta-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/></svg></span>
 				<div class="hm-firms__cta-text">
 					<h3>{{ HomeSettings::get('home.firms_cta_title') }}</h3>
-					@if (Cenovnik::offerOpen())
-						<p>Prvih {{ Cenovnik::foundingTotal() }} firmi koristi loglasi.rs besplatno 12 meseci. {{ sprintf(Cenovnik::plural(Cenovnik::foundingLeft(), 'Ostalo je još %d mesto.', 'Ostala su još %d mesta.', 'Ostalo je još %d mesta.'), Cenovnik::foundingLeft()) }}</p>
+					@if (Pricing::offerOpen())
+						<p>Prvih {{ Pricing::foundingTotal() }} firmi koristi loglasi.rs besplatno 12 meseci. {{ sprintf(Pricing::plural(Pricing::foundingLeft(), 'Ostalo je još %d mesto.', 'Ostala su još %d mesta.', 'Ostalo je još %d mesta.'), Pricing::foundingLeft()) }}</p>
 					@else
 						<p>{{ HomeSettings::get('home.firms_cta_text') }}</p>
 					@endif

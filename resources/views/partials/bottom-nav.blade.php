@@ -1,9 +1,9 @@
 {{-- Donja navigacija za telefon (< 768 px), kao u inc/home/sadrzaj.php. Broj nepročitanih poruka: $unreadMessages (modul poruka). --}}
-@use('App\Support\Stranice\Cenovnik')
-@use('App\Support\Stranice\Ikonice')
-@use('App\Support\Stranice\Navigacija')
+@use('App\Support\Pages\Pricing')
+@use('App\Support\Pages\SiteIcons')
+@use('App\Support\Pages\Navigation')
 @php
-	$lgAktivna = Navigacija::aktivna(request()->path());
+	$lgAktivna = Navigation::aktivna(request()->path());
 	$lgNeprocitano = max(0, (int) ($unreadMessages ?? 0));
 	$lgStavke = [
 		'pocetna' => ['naziv' => 'Početna', 'aria' => 'Početna strana', 'ikonica' => 'home', 'link' => 'pocetna'],
@@ -19,12 +19,12 @@
 			@php
 				$aria = $item['aria'];
 				if ($key === 'poruke' && $lgNeprocitano > 0) {
-					$aria .= ', '.$lgNeprocitano.' '.Cenovnik::plural($lgNeprocitano, 'nepročitana', 'nepročitane', 'nepročitanih');
+					$aria .= ', '.$lgNeprocitano.' '.Pricing::plural($lgNeprocitano, 'nepročitana', 'nepročitane', 'nepročitanih');
 				}
 			@endphp
 			<li class="lg-mnav__stavka{{ $key === 'postavi' ? ' lg-mnav__stavka--cta' : '' }}">
-				<a class="lg-mnav__link" href="{{ Navigacija::link($item['link']) }}" aria-label="{{ $aria }}" @if ($key === $lgAktivna) aria-current="page" @endif>
-					<span class="lg-mnav__ikonica">{{ Ikonice::svg($item['ikonica'], $key === 'postavi' ? 26 : 24) }}@if ($key === 'poruke' && $lgNeprocitano > 0)<span class="lg-mnav__broj" aria-hidden="true">{{ $lgNeprocitano > 99 ? '99+' : $lgNeprocitano }}</span>@endif</span>
+				<a class="lg-mnav__link" href="{{ Navigation::link($item['link']) }}" aria-label="{{ $aria }}" @if ($key === $lgAktivna) aria-current="page" @endif>
+					<span class="lg-mnav__ikonica">{{ SiteIcons::svg($item['ikonica'], $key === 'postavi' ? 26 : 24) }}@if ($key === 'poruke' && $lgNeprocitano > 0)<span class="lg-mnav__broj" aria-hidden="true">{{ $lgNeprocitano > 99 ? '99+' : $lgNeprocitano }}</span>@endif</span>
 					<span class="lg-mnav__naziv">{{ $item['naziv'] }}</span>
 				</a>
 			</li>

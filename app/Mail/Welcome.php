@@ -4,8 +4,8 @@ namespace App\Mail;
 
 use App\Models\User;
 use App\Services\Posting;
+use App\Support\Pages\Pricing;
 use App\Support\Settings;
-use App\Support\Stranice\Cenovnik;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -28,11 +28,11 @@ class Welcome extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'nalozi.mail.welcome',
-            text: 'nalozi.mail.welcome-text',
+            view: 'accounts.mail.welcome',
+            text: 'accounts.mail.welcome-text',
             with: [
                 'name' => $this->user->name,
-                'free' => Cenovnik::freeListingsText(),
+                'free' => Pricing::freeListingsText(),
                 'days' => app(Posting::class)->durationDays(),
                 'contact' => (string) Settings::get('contact_email'),
                 'postUrl' => url_slash('postavi-oglas'),

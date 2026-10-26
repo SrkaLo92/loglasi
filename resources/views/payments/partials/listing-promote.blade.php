@@ -7,13 +7,13 @@
 --}}
 @use('App\Services\OrderService')
 @use('App\Services\Payments\ProductCatalog')
-@use('App\Support\Stranice\Cenovnik')
+@use('App\Support\Pages\Pricing')
 @php($viewer = auth()->user())
 @if ($viewer && (int) $viewer->id === (int) $listing->user_id && $listing->isActive())
 	@php
 		$bumpAt = app(OrderService::class)->bumpAvailableAt($listing);
 		$base = url_slash('moj-nalog/narudzbine/nova');
-		$items = Cenovnik::products()->filter(fn ($p) => ! $p->display_only && ProductCatalog::needsListing($p))->values();
+		$items = Pricing::products()->filter(fn ($p) => ! $p->display_only && ProductCatalog::needsListing($p))->values();
 	@endphp
 	@if ($items->isNotEmpty())
 		<div class="lgpay-promote" role="group" aria-label="Promocija oglasa">
@@ -24,7 +24,7 @@
 				@if (ProductCatalog::type($product) === ProductCatalog::BUMP && $bumpAt)
 					<span class="lg-btn lg-btn--outline lgpay-promote__btn" aria-disabled="true">{{ $product->name }} <small>od {{ $bumpAt->format('j. n. \u H:i') }}</small></span>
 				@else
-					<a class="lg-btn {{ ProductCatalog::type($product) === ProductCatalog::BUMP ? 'lg-btn--outline' : 'lg-btn--orange' }} lgpay-promote__btn" href="{{ $base }}?usluga={{ $product->code }}&amp;oglas={{ $listing->id }}">{{ $product->name }} <small>{{ Cenovnik::price($product->price_rsd) }}</small></a>
+					<a class="lg-btn {{ ProductCatalog::type($product) === ProductCatalog::BUMP ? 'lg-btn--outline' : 'lg-btn--orange' }} lgpay-promote__btn" href="{{ $base }}?usluga={{ $product->code }}&amp;oglas={{ $listing->id }}">{{ $product->name }} <small>{{ Pricing::price($product->price_rsd) }}</small></a>
 				@endif
 			@endforeach
 		</div>

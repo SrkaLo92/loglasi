@@ -11,7 +11,7 @@
 				<img src="{{ $images->url($cover, 'md', 'jpg') }}" alt="" width="{{ $cover->width ?: 800 }}" height="{{ $cover->height ?: 600 }}" loading="lazy">
 			</picture>
 		@else
-			<span class="pst-preview-card__ph">{{ \App\Support\Stranice\Ikonice::svg('image', 32) }}<span>Bez slike</span></span>
+			<span class="pst-preview-card__ph">{{ \App\Support\Pages\SiteIcons::svg('image', 32) }}<span>Bez slike</span></span>
 		@endif
 	</div>
 	<div class="pst-preview-card__body">

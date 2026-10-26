@@ -5,8 +5,8 @@
 --}}
 @php
 	$acctUser = auth()->user();
-	$acctGroups = \App\Support\Nalozi\AccountMenu::groups($acctUser);
-	$acctActive = \App\Support\Nalozi\AccountMenu::active($acctUser, request()->path());
+	$acctGroups = \App\Support\Account\AccountMenu::groups($acctUser);
+	$acctActive = \App\Support\Account\AccountMenu::active($acctUser, request()->path());
 	$acctList = $acctMenuList ?? false;
 @endphp
 <nav class="lg-acct-nav{{ $acctList ? ' lg-acct-nav--list' : '' }}" aria-label="{{ $acctList ? 'Moj nalog, meni' : 'Moj nalog' }}">
@@ -35,13 +35,13 @@
 					@continue($acctList && $item['path'] === 'moj-nalog')
 					<li>
 						<a href="{{ url_slash($item['path']) }}"{!! ! $acctList && $item['path'] === $acctActive ? ' aria-current="page"' : '' !!}>
-							{{ \App\Support\Stranice\Ikonice::svg($item['icon'], 20) }}
+							{{ \App\Support\Pages\SiteIcons::svg($item['icon'], 20) }}
 							<span class="lg-acct-nav__label">{{ $item['label'] }}</span>
 							@if ($item['count'] !== null)
 								<span class="lg-acct-nav__count{{ $item['alert'] ? ' is-alert' : '' }}">{{ $item['count'] }}@if ($item['alert'])<span class="lg-visually-hidden"> novo</span>@endif</span>
 							@endif
 							@if ($acctList)
-								{{ \App\Support\Stranice\Ikonice::svg('chevron-r', 18) }}
+								{{ \App\Support\Pages\SiteIcons::svg('chevron-r', 18) }}
 							@endif
 						</a>
 					</li>
@@ -51,11 +51,11 @@
 	@endforeach
 	<div class="lg-acct-nav__group lg-acct-nav__group--end">
 		<ul>
-			<li><a href="{{ $acctUser->profileUrl() }}">{{ \App\Support\Stranice\Ikonice::svg('eye', 20) }}<span class="lg-acct-nav__label">Moj javni profil</span></a></li>
+			<li><a href="{{ $acctUser->profileUrl() }}">{{ \App\Support\Pages\SiteIcons::svg('eye', 20) }}<span class="lg-acct-nav__label">Moj javni profil</span></a></li>
 			<li>
 				<form method="post" action="{{ url_slash('odjava') }}">
 					@csrf
-					<button type="submit">{{ \App\Support\Stranice\Ikonice::svg('logout', 20) }}<span class="lg-acct-nav__label">Odjavi se</span></button>
+					<button type="submit">{{ \App\Support\Pages\SiteIcons::svg('logout', 20) }}<span class="lg-acct-nav__label">Odjavi se</span></button>
 				</form>
 			</li>
 		</ul>

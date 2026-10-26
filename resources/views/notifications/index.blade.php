@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@use('App\Support\Stranice\Ikonice')
+@use('App\Support\Pages\SiteIcons')
 @include('notifications.partials.head')
 @php
 	$title = 'Obaveštenja | loglasi.rs';
@@ -10,7 +10,7 @@
 <div class="lgn lgt lg-wrap">
 	<div class="lgo-head">
 		<h1>Obaveštenja</h1>
-		<a class="lgo-head__set" href="{{ url_slash('moj-nalog/obavestenja/podesavanja') }}">{{ Ikonice::svg('settings', 18) }}Podešavanja</a>
+		<a class="lgo-head__set" href="{{ url_slash('moj-nalog/obavestenja/podesavanja') }}">{{ SiteIcons::svg('settings', 18) }}Podešavanja</a>
 	</div>
 
 	@if ($items === [])
@@ -24,7 +24,7 @@
 			@foreach ($items as $n)
 				<li>
 					<a class="lgo-item{{ $n['unread'] ? ' is-new' : '' }}" href="{{ $n['url'] }}">
-						<span class="lgo-item__icon lg-tone--{{ $n['tone'] }}">{{ Ikonice::svg($n['icon'], 20) }}</span>
+						<span class="lgo-item__icon lg-tone--{{ $n['tone'] }}">{{ SiteIcons::svg($n['icon'], 20) }}</span>
 						<span class="lgo-item__text">
 							<span class="lgo-item__title">{{ $n['title'] }}</span>
 							@if ($n['body'])<span class="lgo-item__body">{{ $n['body'] }}</span>@endif
