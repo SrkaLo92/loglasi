@@ -8,9 +8,9 @@
 
 @section('content')
 @php
-	$polja = ['ime', 'kontakt', 'tema', 'poruka'];
-	$greske = collect($polja)->filter(fn ($p) => $errors->has($p))->values();
-	$opis = fn (string $polje) => $errors->has($polje) ? 'greska-'.$polje : null;
+	$fields = ['ime', 'kontakt', 'tema', 'poruka'];
+	$fieldErrors = collect($fields)->filter(fn ($p) => $errors->has($p))->values();
+	$describedBy = fn (string $field) => $errors->has($field) ? 'greska-'.$field : null;
 @endphp
 <div class="lg-page lgx">
 	<header class="lg-page__header">
@@ -22,13 +22,13 @@
 		<section class="lgx-form-card" id="forma" aria-labelledby="forma-naslov">
 			<h2 class="lgx-form__title" id="forma-naslov">{{ PageText::get('kontakt.forma.naslov') }}</h2>
 
-			@if ($poslato)
+			@if ($sent)
 				<p class="lgx-message lgx-message--success" id="poruka-poslata" role="status" tabindex="-1">{{ PageText::get('kontakt.poslato') }}</p>
 			@endif
 
 			@if ($errors->has('forma'))
 				<p class="lgx-message lgx-message--error" role="alert">{{ $errors->first('forma') }}</p>
-			@elseif ($greske->isNotEmpty())
+			@elseif ($fieldErrors->isNotEmpty())
 				<p class="lgx-message lgx-message--error" role="alert">{{ PageText::get('kontakt.poruka.validacija') }}</p>
 			@endif
 
@@ -44,7 +44,7 @@
 
 				<div class="lgx-field">
 					<label for="k-kontakt">{{ PageText::get('kontakt.polje.kontakt') }}</label>
-					<input id="k-kontakt" type="text" name="kontakt" value="{{ old('kontakt') }}" autocomplete="email" maxlength="120" required aria-required="true" aria-describedby="{{ trim('pomoc-kontakt '.($opis('kontakt') ?? '')) }}" @if ($errors->has('kontakt')) aria-invalid="true" @endif>
+					<input id="k-kontakt" type="text" name="kontakt" value="{{ old('kontakt') }}" autocomplete="email" maxlength="120" required aria-required="true" aria-describedby="{{ trim('pomoc-kontakt '.($describedBy('kontakt') ?? '')) }}" @if ($errors->has('kontakt')) aria-invalid="true" @endif>
 					<p class="lgx-field__help" id="pomoc-kontakt">{{ PageText::get('kontakt.polje.kontakt_pomoc') }}</p>
 					@error('kontakt')<p class="lgx-field__error" id="greska-kontakt">{{ $message }}</p>@enderror
 				</div>
@@ -53,8 +53,8 @@
 					<label for="k-tema">{{ PageText::get('kontakt.polje.tema') }}</label>
 					<select id="k-tema" data-pick name="tema" required aria-required="true" @if ($errors->has('tema')) aria-invalid="true" aria-describedby="greska-tema" @endif>
 						<option value="">{{ PageText::get('kontakt.polje.tema_prazno') }}</option>
-						@foreach ($teme as $tema)
-							<option value="{{ $tema }}" @selected($izabranaTema === $tema)>{{ $tema }}</option>
+						@foreach ($topics as $topic)
+							<option value="{{ $topic }}" @selected($selectedTopic === $topic)>{{ $topic }}</option>
 						@endforeach
 					</select>
 					@error('tema')<p class="lgx-field__error" id="greska-tema">{{ $message }}</p>@enderror
@@ -97,7 +97,7 @@
 					@if ($hours)
 						<li class="lgx-contact__row">
 							<span class="lgx-contact__icon">{{ SiteIcons::svg('clock', 22) }}</span>
-							<span><span class="lgx-contact__label">Radno vreme</span><span class="lgx-contact__value lgx-contact__value--plain">@foreach ($hours as $red){{ $red }}@if (! $loop->last)<br>@endif @endforeach</span></span>
+							<span><span class="lgx-contact__label">Radno vreme</span><span class="lgx-contact__value lgx-contact__value--plain">@foreach ($hours as $row){{ $row }}@if (! $loop->last)<br>@endif @endforeach</span></span>
 						</li>
 					@endif
 				</ul>

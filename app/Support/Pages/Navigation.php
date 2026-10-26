@@ -14,11 +14,18 @@ class Navigation
 
     public static function link(string $key): string
     {
-        return url_slash((string) config('pages.links.'.$key, '/'));
+        $path = config('pages.links.'.$key);
+        if (! is_string($path)) {
+            // A wrong key would quietly link to the home page; fail loudly everywhere but production.
+            throw_unless(app()->isProduction(), \InvalidArgumentException::class, "Unknown navigation link: {$key}");
+            $path = '/';
+        }
+
+        return url_slash($path);
     }
 
     /** @return array<int, array{slug: string, name: string}> Main active categories for the search picker. */
-    public static function kategorije(): array
+    public static function categories(): array
     {
         return self::safe('pages.nav.categories', fn () => Category::query()
             ->whereNull('parent_id')
@@ -31,7 +38,7 @@ class Navigation
     }
 
     /** @return array<int, array{slug: string, name: string}> */
-    public static function mesta(): array
+    public static function places(): array
     {
         return self::safe('pages.nav.places', fn () => Location::query()
             ->orderBy('sort')
@@ -42,16 +49,16 @@ class Navigation
     }
 
     /** Key of the active bottom navigation item for the current path. */
-    public static function aktivna(string $path): string
+    public static function active(string $path): string
     {
         $path = trim($path, '/');
 
         return match (true) {
-            $path === '' => 'pocetna',
-            str_starts_with($path, 'postavi-oglas') => 'postavi',
-            str_starts_with($path, 'moj-nalog/poruke') => 'poruke',
-            str_starts_with($path, 'moj-nalog'), str_starts_with($path, 'login-registracija') => 'nalog',
-            $path === 'oglasi', str_starts_with($path, 'oglasi/'), str_starts_with($path, 'oglas/') => 'pretraga',
+            $path === '' => 'home',
+            str_starts_with($path, 'postavi-oglas') => 'post',
+            str_starts_with($path, 'moj-nalog/poruke') => 'messages',
+            str_starts_with($path, 'moj-nalog'), str_starts_with($path, 'login-registracija') => 'account',
+            $path === 'oglasi', str_starts_with($path, 'oglasi/'), str_starts_with($path, 'oglas/') => 'search',
             default => '',
         };
     }

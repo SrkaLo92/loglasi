@@ -63,7 +63,7 @@ class TextPageController extends Controller
         $counts = Cache::remember('pages.about.stats', 600, fn () => [
             'listings' => Listing::query()->where('status', ListingStatus::Published)
                 ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))->count(),
-            'categories' => count(Navigation::kategorije()),
+            'categories' => count(Navigation::categories()),
         ]);
         $number = fn (int $n) => number_format($n, 0, ',', '.');
         $free = Pricing::freeListings();

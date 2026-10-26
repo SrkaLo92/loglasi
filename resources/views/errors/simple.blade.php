@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ $naslov }} | loglasi.rs</title>
+<title>{{ $title }} | loglasi.rs</title>
 <meta name="robots" content="noindex">
 <link rel="preload" href="{{ asset('fonts/manrope-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{{ asset('fonts/manrope-latin-ext.woff2') }}" as="font" type="font/woff2" crossorigin>
@@ -19,9 +19,9 @@
 </header>
 <main id="sadrzaj" class="lg-page lgx">
 	<section class="lgx-error" aria-labelledby="greska-naslov">
-		<p class="lgx-error__code" aria-hidden="true">{{ $kod }}</p>
-		<h1 class="lgx-error__title" id="greska-naslov">{{ $naslov }}</h1>
-		<p class="lgx-error__text">{{ $tekst }}</p>
+		<p class="lgx-error__code" aria-hidden="true">{{ $code }}</p>
+		<h1 class="lgx-error__title" id="greska-naslov">{{ $title }}</h1>
+		<p class="lgx-error__text">{{ $text }}</p>
 		<div class="lgx-error__buttons">
 			<a class="lgx-btn lgx-btn--green" href="{{ url('/') }}/">Početna strana</a>
 		</div>

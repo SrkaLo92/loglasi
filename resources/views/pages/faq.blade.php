@@ -29,7 +29,7 @@
 	<div class="lgx-faq-page">
 		<div class="lgx-faq lgx-faq--page">
 			@foreach ($items as $item)
-				@include('pages.partials.question', ['pitanje' => $item['pitanje'], 'odgovor' => $item['odgovor'], 'otvoreno' => $loop->first])
+				@include('pages.partials.question', ['question' => $item['pitanje'], 'answer' => $item['odgovor'], 'open' => $loop->first])
 			@endforeach
 		</div>
 		<aside class="lgx-faq-help" aria-labelledby="faq-pomoc-naslov">

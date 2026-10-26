@@ -8,9 +8,9 @@
 
 	$title = 'Podešavanja naloga | loglasi.rs';
 	$robots = 'noindex, follow';
-	$podaci = $errors->getBag('podaci');
-	$lozinka = $errors->getBag('lozinka');
-	$slika = $errors->getBag('slika');
+	$detailsErrors = $errors->getBag('podaci');
+	$passwordErrors = $errors->getBag('lozinka');
+	$avatarErrors = $errors->getBag('slika');
 @endphp
 
 @section('content')
@@ -43,7 +43,7 @@
 						@csrf
 						<label class="lga-btn lga-btn--line" for="nalog-slika">{{ SiteIcons::svg('camera', 18) }} {{ $user->avatar_path ? 'Promeni sliku' : 'Dodaj sliku' }}</label>
 						<input class="lg-visually-hidden" id="nalog-slika" type="file" name="avatar" accept="image/jpeg,image/png,image/webp" required
-							@if ($slika->has('avatar')) aria-invalid="true" aria-describedby="nalog-avatar-greska" @endif>
+							@if ($avatarErrors->has('avatar')) aria-invalid="true" aria-describedby="nalog-avatar-greska" @endif>
 						<button class="lga-btn lga-btn--line lga-photo__save" type="submit">Sačuvaj sliku</button>
 					</form>
 					@if ($user->avatar_path)
@@ -65,7 +65,7 @@
 				<div class="lgn-field">
 					<label for="nalog-ime">Ime i prezime</label>
 					<input id="nalog-ime" type="text" name="name" value="{{ old('name', $user->name) }}" autocomplete="name" maxlength="80" required
-						@if ($podaci->has('name')) aria-invalid="true" aria-describedby="nalog-name-greska" @endif>
+						@if ($detailsErrors->has('name')) aria-invalid="true" aria-describedby="nalog-name-greska" @endif>
 					@include('accounts.partials.error', ['field' => 'name', 'bag' => 'podaci', 'prefix' => 'nalog-'])
 				</div>
 				<div class="lgn-field">
@@ -81,7 +81,7 @@
 				<div class="lgn-field">
 					<label for="nalog-telefon">Telefon</label>
 					<input id="nalog-telefon" type="tel" name="phone" value="{{ old('phone', \App\Support\Phone::national($user->phone) ?: $user->phone) }}" autocomplete="tel" inputmode="tel" required
-						aria-describedby="nalog-telefon-pomoc{{ $podaci->has('phone') ? ' nalog-phone-greska' : '' }}" @if ($podaci->has('phone')) aria-invalid="true" @endif>
+						aria-describedby="nalog-telefon-pomoc{{ $detailsErrors->has('phone') ? ' nalog-phone-greska' : '' }}" @if ($detailsErrors->has('phone')) aria-invalid="true" @endif>
 					<p class="lga-help" id="nalog-telefon-pomoc">
 						@if ($user->isPhoneVerified())
 							<span class="lga-pill lga-pill--ok">{{ SiteIcons::svg('check', 14) }} Proveren</span> Nov broj ponovo proverava administrator.
@@ -109,7 +109,7 @@
 	</section>
 
 	<section class="lga-card" aria-labelledby="lga-password">
-		<details class="lga-fold" @if ($lozinka->any()) open @endif>
+		<details class="lga-fold" @if ($passwordErrors->any()) open @endif>
 			<summary>
 				<span class="lga-task__icon">{{ SiteIcons::svg('lock', 20) }}</span>
 				<span><strong id="lga-password">Lozinka</strong><small>Promenom lozinke odjavljujete se sa ostalih uređaja.</small></span>
@@ -121,14 +121,14 @@
 				<div class="lgn-field">
 					<label for="nalog-trenutna">Trenutna lozinka</label>
 					<input id="nalog-trenutna" type="password" name="current_password" autocomplete="current-password" required
-						@if ($lozinka->has('current_password')) aria-invalid="true" aria-describedby="nalog-current_password-greska" @endif>
+						@if ($passwordErrors->has('current_password')) aria-invalid="true" aria-describedby="nalog-current_password-greska" @endif>
 					@include('accounts.partials.error', ['field' => 'current_password', 'bag' => 'lozinka', 'prefix' => 'nalog-'])
 				</div>
 				<div class="lga-form__grid">
 					<div class="lgn-field">
 						<label for="nalog-nova">Nova lozinka</label>
-						<input id="nalog-nova" type="password" name="password" autocomplete="new-password" minlength="8" required aria-describedby="nalog-nova-pomoc{{ $lozinka->has('password') ? ' nalog-password-greska' : '' }}"
-							@if ($lozinka->has('password')) aria-invalid="true" @endif>
+						<input id="nalog-nova" type="password" name="password" autocomplete="new-password" minlength="8" required aria-describedby="nalog-nova-pomoc{{ $passwordErrors->has('password') ? ' nalog-password-greska' : '' }}"
+							@if ($passwordErrors->has('password')) aria-invalid="true" @endif>
 						<p class="lga-help" id="nalog-nova-pomoc">Najmanje 8 znakova.</p>
 						@include('accounts.partials.error', ['field' => 'password', 'bag' => 'lozinka', 'prefix' => 'nalog-'])
 					</div>

@@ -94,7 +94,7 @@
 				@endforeach
 				<li>{{ $check() }}Do {{ $maxImages }} {{ Pricing::plural($maxImages, 'slike', 'slike', 'slika') }} po oglasu</li>
 			</ul>
-			<a class="lg-btn lg-btn--orange lgc-free__button" href="{{ Navigation::link('postavi') }}">Postavite oglas</a>
+			<a class="lg-btn lg-btn--orange lgc-free__button" href="{{ Navigation::link('post') }}">Postavite oglas</a>
 		</div>
 
 		@if ($slots)
@@ -213,7 +213,7 @@
 							<div class="lgc-founding__bar" role="progressbar" aria-label="Zauzeta besplatna mesta" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ (int) $counter['percent'] }}"><span style="width: {{ (int) $counter['percent'] }}%"></span></div>
 							<p class="lgc-founding__taken">{{ $counter['note'] }}</p>
 						@endif
-						<a class="lg-btn lg-btn--green" href="{{ Navigation::link('za_firme') }}">Prijavite svoju firmu</a>
+						<a class="lg-btn lg-btn--green" href="{{ Navigation::link('for_firms') }}">Prijavite svoju firmu</a>
 					</div>
 				</div>
 			@endif
@@ -261,7 +261,7 @@
 		<section class="lgc-extra" aria-labelledby="lgc-extra">
 			<div class="lgc-extra__head">
 				<h2 class="lgc-sub__title" id="lgc-extra">{{ PageText::get('cenovnik.dodatno.naslov') }}</h2>
-				<a href="{{ Navigation::link('kontakt') }}#forma">Zatražite ponudu</a>
+				<a href="{{ Navigation::link('contact') }}#forma">Zatražite ponudu</a>
 			</div>
 			<ul class="lgc-extra__list">
 				@foreach ($extras as $extra)
@@ -320,7 +320,7 @@
 		<section class="lgx lgx-faq lgc-faq" aria-labelledby="lgc-pitanja">
 			<h2 class="lgc-sec__heading" id="lgc-pitanja">Česta pitanja</h2>
 			@foreach ($faq as $item)
-				@include('pages.partials.question', ['pitanje' => $item['pitanje'], 'odgovor' => $item['odgovor']])
+				@include('pages.partials.question', ['question' => $item['pitanje'], 'answer' => $item['odgovor']])
 			@endforeach
 		</section>
 	@endif

@@ -83,58 +83,58 @@ class CatalogSeeder extends Seeder
             'sort' => $sort,
         ]);
 
-        $stanje = $f('stanje', 'Stanje', FieldType::Select, FieldFilter::Multi, ['novo' => 'Novo', 'polovno' => 'Polovno', 'osteceno' => 'Oštećeno'], null, 90);
-        $vrsta = $f('vrsta_oglasa', 'Vrsta oglasa', FieldType::Select, FieldFilter::Select, ['prodajem' => 'Prodajem', 'kupujem' => 'Kupujem', 'izdajem' => 'Izdajem'], null, 91);
-        $zamena = $f('moguca_zamena', 'Moguća zamena', FieldType::Checkbox, FieldFilter::Select, [], null, 92);
-        $dostava = $f('dostava', 'Dostava', FieldType::Checkbox, FieldFilter::Select, [], null, 93);
+        $condition = $f('stanje', 'Stanje', FieldType::Select, FieldFilter::Multi, ['novo' => 'Novo', 'polovno' => 'Polovno', 'osteceno' => 'Oštećeno'], null, 90);
+        $kind = $f('vrsta_oglasa', 'Vrsta oglasa', FieldType::Select, FieldFilter::Select, ['prodajem' => 'Prodajem', 'kupujem' => 'Kupujem', 'izdajem' => 'Izdajem'], null, 91);
+        $swap = $f('moguca_zamena', 'Moguća zamena', FieldType::Checkbox, FieldFilter::Select, [], null, 92);
+        $delivery = $f('dostava', 'Dostava', FieldType::Checkbox, FieldFilter::Select, [], null, 93);
 
-        $marka = $f('marka', 'Marka', FieldType::Select, FieldFilter::Multi, [
+        $make = $f('marka', 'Marka', FieldType::Select, FieldFilter::Multi, [
             'Alfa Romeo', 'Audi', 'BMW', 'Chevrolet', 'Citroën', 'Dacia', 'Fiat', 'Ford', 'Honda', 'Hyundai',
             'Kia', 'Lada', 'Mazda', 'Mercedes-Benz', 'Mitsubishi', 'Nissan', 'Opel', 'Peugeot', 'Renault',
             'Seat', 'Škoda', 'Suzuki', 'Toyota', 'Volkswagen', 'Volvo', 'Zastava', 'Ostalo',
         ], null, 1);
         $model = $f('model', 'Model', FieldType::Text, FieldFilter::None, [], null, 2);
-        $godiste = $f('godiste', 'Godište', FieldType::Year, FieldFilter::Range, [], null, 3);
+        $year = $f('godiste', 'Godište', FieldType::Year, FieldFilter::Range, [], null, 3);
         $km = $f('kilometraza', 'Kilometraža', FieldType::Number, FieldFilter::Range, [], 'km', 4);
-        $gorivo = $f('gorivo', 'Gorivo', FieldType::Select, FieldFilter::Multi, [
+        $fuel = $f('gorivo', 'Gorivo', FieldType::Select, FieldFilter::Multi, [
             'benzin' => 'Benzin', 'dizel' => 'Dizel', 'benzin-gas' => 'Benzin + gas (TNG)',
             'metan' => 'Metan (CNG)', 'hibrid' => 'Hibrid', 'elektricni' => 'Električni',
         ], null, 5);
-        $menjac = $f('menjac', 'Menjač', FieldType::Select, FieldFilter::Select, ['manuelni' => 'Manuelni', 'automatski' => 'Automatski'], null, 6);
-        $kubikaza = $f('kubikaza', 'Kubikaža', FieldType::Number, FieldFilter::Range, [], 'cm³', 7);
+        $gearbox = $f('menjac', 'Menjač', FieldType::Select, FieldFilter::Select, ['manuelni' => 'Manuelni', 'automatski' => 'Automatski'], null, 6);
+        $engineSize = $f('kubikaza', 'Kubikaža', FieldType::Number, FieldFilter::Range, [], 'cm³', 7);
 
-        $kvadratura = $f('kvadratura', 'Kvadratura', FieldType::Number, FieldFilter::Range, [], 'm²', 1);
-        $sobe = $f('sobe', 'Broj soba', FieldType::Select, FieldFilter::Multi, [
+        $area = $f('kvadratura', 'Kvadratura', FieldType::Number, FieldFilter::Range, [], 'm²', 1);
+        $rooms = $f('sobe', 'Broj soba', FieldType::Select, FieldFilter::Multi, [
             'garsonjera' => 'Garsonjera', '1' => 'Jednosoban', '1.5' => 'Jednoiposoban', '2' => 'Dvosoban',
             '2.5' => 'Dvoiposoban', '3' => 'Trosoban', '3.5' => 'Troiposoban', '4+' => 'Četvorosoban i veći',
         ], null, 2);
-        $grejanje = $f('grejanje', 'Grejanje', FieldType::Select, FieldFilter::Multi, [
+        $heating = $f('grejanje', 'Grejanje', FieldType::Select, FieldFilter::Multi, [
             'centralno' => 'Centralno', 'etazno' => 'Etažno', 'struja' => 'Struja', 'drva' => 'Drva', 'gas' => 'Gas', 'ta-pec' => 'TA peć',
         ], null, 3);
-        $sprat = $f('sprat', 'Sprat', FieldType::Text, FieldFilter::None, [], null, 4);
+        $floor = $f('sprat', 'Sprat', FieldType::Text, FieldFilter::None, [], null, 4);
 
-        $markaTelefona = $f('marka_telefona', 'Marka telefona', FieldType::Select, FieldFilter::Multi, ['Apple', 'Samsung', 'Xiaomi', 'Huawei', 'Motorola', 'Nokia', 'Ostalo'], null, 1);
-        $memorija = $f('memorija', 'Memorija', FieldType::Select, FieldFilter::Multi, ['32' => '32 GB', '64' => '64 GB', '128' => '128 GB', '256' => '256 GB', '512' => '512 GB', '1024' => '1 TB'], null, 2);
+        $phoneMake = $f('marka_telefona', 'Marka telefona', FieldType::Select, FieldFilter::Multi, ['Apple', 'Samsung', 'Xiaomi', 'Huawei', 'Motorola', 'Nokia', 'Ostalo'], null, 1);
+        $memory = $f('memorija', 'Memorija', FieldType::Select, FieldFilter::Multi, ['32' => '32 GB', '64' => '64 GB', '128' => '128 GB', '256' => '256 GB', '512' => '512 GB', '1024' => '1 TB'], null, 2);
 
-        $radnoVreme = $f('radno_vreme', 'Radno vreme', FieldType::Select, FieldFilter::Select, ['puno' => 'Puno radno vreme', 'skraceno' => 'Skraćeno', 'sezonski' => 'Sezonski posao'], null, 1);
+        $workingHours = $f('radno_vreme', 'Radno vreme', FieldType::Select, FieldFilter::Select, ['puno' => 'Puno radno vreme', 'skraceno' => 'Skraćeno', 'sezonski' => 'Sezonski posao'], null, 1);
 
-        $roba = [$stanje, $vrsta, $zamena, $dostava];
-        $bezStanja = ['Nekretnine', 'Usluge', 'Poslovi', 'Besplatne stvari', 'Kućni ljubimci'];
+        $goods = [$condition, $kind, $swap, $delivery];
+        $withoutCondition = ['Nekretnine', 'Usluge', 'Poslovi', 'Besplatne stvari', 'Kućni ljubimci'];
 
         foreach (array_keys(self::CATEGORIES) as $name) {
-            if (! in_array($name, $bezStanja, true)) {
-                $this->attach($name, $roba, [], 90);
+            if (! in_array($name, $withoutCondition, true)) {
+                $this->attach($name, $goods, [], 90);
             }
         }
 
-        $this->attach('Automobili', [$marka, $model, $godiste, $km, $gorivo, $menjac, $kubikaza], ['marka', 'godiste']);
-        $this->attach('Motocikli', [$godiste, $km, $kubikaza]);
-        $this->attach('Kamioni', [$godiste, $km, $gorivo]);
-        $this->attach('Nekretnine', [$kvadratura, $grejanje, $vrsta], ['kvadratura']);
-        $this->attach('Stanovi', [$sobe, $sprat]);
-        $this->attach('Kuće', [$sobe]);
-        $this->attach('Mobilni telefoni', [$markaTelefona, $memorija]);
-        $this->attach('Poslovi', [$radnoVreme]);
+        $this->attach('Automobili', [$make, $model, $year, $km, $fuel, $gearbox, $engineSize], ['marka', 'godiste']);
+        $this->attach('Motocikli', [$year, $km, $engineSize]);
+        $this->attach('Kamioni', [$year, $km, $fuel]);
+        $this->attach('Nekretnine', [$area, $heating, $kind], ['kvadratura']);
+        $this->attach('Stanovi', [$rooms, $floor]);
+        $this->attach('Kuće', [$rooms]);
+        $this->attach('Mobilni telefoni', [$phoneMake, $memory]);
+        $this->attach('Poslovi', [$workingHours]);
     }
 
     /**

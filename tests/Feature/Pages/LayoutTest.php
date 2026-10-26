@@ -75,13 +75,13 @@ class LayoutTest extends TestCase
 
     public function test_active_item_by_path(): void
     {
-        $this->assertSame('pocetna', Navigation::aktivna('/'));
-        $this->assertSame('pretraga', Navigation::aktivna('oglasi/automobili'));
-        $this->assertSame('pretraga', Navigation::aktivna('oglas/golf-7'));
-        $this->assertSame('postavi', Navigation::aktivna('postavi-oglas'));
-        $this->assertSame('poruke', Navigation::aktivna('moj-nalog/poruke/5'));
-        $this->assertSame('nalog', Navigation::aktivna('moj-nalog'));
-        $this->assertSame('', Navigation::aktivna('cenovnik'));
+        $this->assertSame('home', Navigation::active('/'));
+        $this->assertSame('search', Navigation::active('oglasi/automobili'));
+        $this->assertSame('search', Navigation::active('oglas/golf-7'));
+        $this->assertSame('post', Navigation::active('postavi-oglas'));
+        $this->assertSame('messages', Navigation::active('moj-nalog/poruke/5'));
+        $this->assertSame('account', Navigation::active('moj-nalog'));
+        $this->assertSame('', Navigation::active('cenovnik'));
     }
 
     public function test_fonts_are_self_hosted_and_preloaded(): void

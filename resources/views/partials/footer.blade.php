@@ -6,19 +6,19 @@
 @use('App\Support\Pages\Navigation')
 @php
 	$lgFooterLinks = [
-		'o_nama' => 'O nama',
-		'kontakt' => 'Kontakt',
+		'about' => 'O nama',
+		'contact' => 'Kontakt',
 		'faq' => 'Česta pitanja',
-		'cenovnik' => 'Cenovnik',
+		'pricing' => 'Cenovnik',
 	];
 	$lgLegalLinks = [
-		'privatnost' => 'Politika privatnosti',
-		'brisanje' => 'Brisanje ličnih podataka',
-		'uslovi' => 'Uslovi korišćenja',
-		'pravila' => 'Pravila oglašavanja',
-		'placanje' => 'Uslovi kupovine i plaćanja',
-		'odustanak' => 'Odustanak od ugovora',
-		'reklamacije' => 'Reklamacije i povraćaj novca',
+		'privacy' => 'Politika privatnosti',
+		'data_deletion' => 'Brisanje ličnih podataka',
+		'terms' => 'Uslovi korišćenja',
+		'rules' => 'Pravila oglašavanja',
+		'payment_terms' => 'Uslovi kupovine i plaćanja',
+		'withdrawal' => 'Odustanak od ugovora',
+		'complaints' => 'Reklamacije i povraćaj novca',
 	];
 	$lgCurrent = url_slash(request()->path());
 	// No "post a listing" band while posting or inside the account: the user is already doing it.

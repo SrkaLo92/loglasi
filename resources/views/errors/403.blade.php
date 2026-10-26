@@ -1,1 +1,1 @@
-@include('errors.page', ['kod' => 403, 'naslov' => 'Pristup nije dozvoljen', 'tekst' => 'Nemate pravo da otvorite ovu stranu.'])
+@include('errors.page', ['code' => 403, 'title' => 'Pristup nije dozvoljen', 'text' => 'Nemate pravo da otvorite ovu stranu.'])

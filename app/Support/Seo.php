@@ -22,7 +22,7 @@ use Illuminate\Support\Str;
  * One instance per request; the controller fills it, `partials/seo-head` prints it.
  *
  *   Seo::for($listing);                      // listing, category, firm, profile
- *   Seo::for($category, ['location' => $mesto, 'count' => 12]);
+ *   Seo::for($category, ['location' => $placeModel, 'count' => 12]);
  *   Seo::get()->page('Česta pitanja', 'Odgovori na ...')->faq($questions);
  *   Seo::get()->title('...')->description('...')->noindex();
  *

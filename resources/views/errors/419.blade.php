@@ -1,1 +1,1 @@
-@include('errors.page', ['kod' => 419, 'naslov' => 'Strana je istekla', 'tekst' => 'Forma je bila otvorena predugo. Vratite se, osvežite stranu i pošaljite ponovo.'])
+@include('errors.page', ['code' => 419, 'title' => 'Strana je istekla', 'text' => 'Forma je bila otvorena predugo. Vratite se, osvežite stranu i pošaljite ponovo.'])

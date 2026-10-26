@@ -23,16 +23,16 @@ class ContactController extends Controller
 {
     public function show(Request $request): View
     {
-        $teme = PageText::list('kontakt.teme');
+        $topics = PageText::list('kontakt.teme');
         // ?tema=firma from the firms page preselects the "Za firme" topic.
-        $izabrana = $request->query('tema') === 'firma'
-            ? (collect($teme)->first(fn ($t) => is_string($t) && str_contains(mb_strtolower($t), 'firm')))
+        $selected = $request->query('tema') === 'firma'
+            ? (collect($topics)->first(fn ($t) => is_string($t) && str_contains(mb_strtolower($t), 'firm')))
             : null;
         $phone = (string) Settings::get('contact_phone', '');
 
         return view('pages.contact', [
-            'teme' => $teme,
-            'izabranaTema' => old('tema', $izabrana),
+            'topics' => $topics,
+            'selectedTopic' => old('tema', $selected),
             'token' => Crypt::encryptString((string) now()->getTimestamp()),
             'email' => (string) Settings::get('contact_email'),
             'phone' => Phone::normalize($phone),

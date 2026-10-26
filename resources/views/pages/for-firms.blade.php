@@ -10,7 +10,7 @@
 
 @section('content')
 @php
-	$prijavaUrl = Navigation::link('kontakt').'?tema=firma#forma';
+	$loginUrl = Navigation::link('contact').'?tema=firma#forma';
 @endphp
 <div class="lg-page">
 	<section class="lgx lgx-for-firms" aria-labelledby="firme-naslov">
@@ -26,8 +26,8 @@
 					<p class="lgx-hero__offer">{{ $offer }}</p>
 				@endif
 				<div class="lgx-hero__buttons">
-					<a class="lgx-btn lgx-btn--orange" href="{{ $prijavaUrl }}">Prijavite firmu {{ SiteIcons::svg('arrow', 18) }}</a>
-					<a class="lgx-btn lgx-btn--outline" href="{{ Navigation::link('cenovnik') }}">Pogledajte cenovnik</a>
+					<a class="lgx-btn lgx-btn--orange" href="{{ $loginUrl }}">Prijavite firmu {{ SiteIcons::svg('arrow', 18) }}</a>
+					<a class="lgx-btn lgx-btn--outline" href="{{ Navigation::link('pricing') }}">Pogledajte cenovnik</a>
 				</div>
 			</div>
 			{{-- Illustration of a firm profile (decorative). --}}
@@ -51,12 +51,12 @@
 		<div class="lgx-block">
 			<h2 class="lgx-title">{{ PageText::get('za_firme.prednosti.naslov') }}</h2>
 			<ul class="lgx-benefits">
-				@foreach (PageText::list('za_firme.prednosti') as $prednost)
-					@continue(! is_array($prednost) || empty($prednost['naslov']))
+				@foreach (PageText::list('za_firme.prednosti') as $benefit)
+					@continue(! is_array($benefit) || empty($benefit['naslov']))
 					<li class="lgx-benefit">
-						<span class="lgx-benefit__icon">{{ SiteIcons::svg((string) ($prednost['ikonica'] ?? 'check'), 26) }}</span>
-						<h3 class="lgx-benefit__title">{{ $prednost['naslov'] }}</h3>
-						<p class="lgx-benefit__text">{{ $prednost['tekst'] ?? '' }}</p>
+						<span class="lgx-benefit__icon">{{ SiteIcons::svg((string) ($benefit['ikonica'] ?? 'check'), 26) }}</span>
+						<h3 class="lgx-benefit__title">{{ $benefit['naslov'] }}</h3>
+						<p class="lgx-benefit__text">{{ $benefit['tekst'] ?? '' }}</p>
 					</li>
 				@endforeach
 			</ul>
@@ -65,7 +65,7 @@
 		<div class="lgx-block">
 			<h2 class="lgx-title">{{ PageText::get('za_firme.poredjenje.naslov') }}</h2>
 			@php
-				$redovi = [
+				$rows = [
 					['Besplatni aktivni oglasi', $freeListings > 0 ? 'do '.$freeListings : 'da', 'prema paketu'],
 					['Oznaka „Firma” na oglasima', false, true],
 					['Logo i naslovna slika', false, true],
@@ -84,16 +84,16 @@
 						</tr>
 					</thead>
 					<tbody>
-						@foreach ($redovi as $red)
+						@foreach ($rows as $row)
 							<tr>
-								<th scope="row">{{ $red[0] }}</th>
-								@foreach ([$red[1], $red[2]] as $celija)
-									@if ($celija === true)
+								<th scope="row">{{ $row[0] }}</th>
+								@foreach ([$row[1], $row[2]] as $cell)
+									@if ($cell === true)
 										<td class="lgx-table__yes">{{ SiteIcons::svg('check', 20) }}<span class="lg-visually-hidden">Da</span></td>
-									@elseif ($celija === false)
+									@elseif ($cell === false)
 										<td class="lgx-table__no">{{ SiteIcons::svg('minus', 20) }}<span class="lg-visually-hidden">Ne</span></td>
 									@else
-										<td>{{ $celija }}</td>
+										<td>{{ $cell }}</td>
 									@endif
 								@endforeach
 							</tr>
@@ -125,13 +125,13 @@
 						</li>
 					@endforeach
 				</ul>
-				<p class="lgx-packages__link"><a href="{{ Navigation::link('cenovnik') }}">Sve cene i detalji paketa na strani Cenovnik</a></p>
+				<p class="lgx-packages__link"><a href="{{ Navigation::link('pricing') }}">Sve cene i detalji paketa na strani Cenovnik</a></p>
 			</div>
 		@endif
 
 		<div class="lgx-block">
 			<h2 class="lgx-title">{{ PageText::get('za_firme.koraci.naslov') }}</h2>
-			@include('pages.partials.steps', ['koraci' => PageText::list('za_firme.koraci'), 'mreza' => true])
+			@include('pages.partials.steps', ['steps' => PageText::list('za_firme.koraci'), 'grid' => true])
 		</div>
 
 		<div class="lgx-cta">
@@ -140,7 +140,7 @@
 				<p>{{ PageText::get('za_firme.cta.tekst') }}</p>
 			</div>
 			<div class="lgx-cta__buttons">
-				<a class="lgx-btn lgx-btn--orange" href="{{ $prijavaUrl }}">Pošaljite prijavu {{ SiteIcons::svg('arrow', 18) }}</a>
+				<a class="lgx-btn lgx-btn--orange" href="{{ $loginUrl }}">Pošaljite prijavu {{ SiteIcons::svg('arrow', 18) }}</a>
 				@if ($phone !== '')
 					<p class="lgx-cta__phone">ili pozovite <a href="tel:{{ $phone }}">{{ $phoneText }}</a></p>
 				@endif
