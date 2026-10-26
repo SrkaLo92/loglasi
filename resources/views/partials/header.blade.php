@@ -9,7 +9,7 @@
 	$lgPoruke = max(0, (int) ($unreadMessages ?? 0));
 	$lgBroj = fn (int $n) => $n > 99 ? '99+' : (string) $n;
 @endphp
-<header class="lg-header">
+<header class="lg-header{{ auth()->check() ? ' lg-header--nalog' : '' }}">
 	<div class="lg-wrap lg-header__in">
 		@include('partials.logo', ['logoClass' => 'lg-logo'])
 		<p class="lg-header__mesto">{{ Ikonice::svg('pin', 14, '2') }}Loznica i okolina</p>

@@ -188,7 +188,8 @@ class SavedSearchAlertsTest extends TestCase
         [$send] = $sends->first();
         $this->assertSame('Novi oglasi za vaše pretrage', $send['message']['notification']['title']);
         $this->assertSame('„Automobili”: 1 novi oglas', $send['message']['notification']['body']);
-        $this->assertSame(['type' => 'saved_search', 'saved_search_id' => (string) $search->id, 'url' => $search->url()], (array) $send['message']['data']);
+        $this->assertSame(['type' => 'saved_search', 'saved_search_id' => (string) $search->id, 'url' => $search->url(), 'title' => 'Novi oglasi za vaše pretrage', 'body' => '„Automobili”: 1 novi oglas'], (array) $send['message']['data']);
+        $this->assertSame('oglasi', $send['message']['android']['notification']['channel_id']);
     }
 
     public function test_first_run_without_watermark_looks_back_one_hour(): void

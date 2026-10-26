@@ -176,7 +176,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .lg-header__mesto { display: none; }
 
 .lg-search {
-	flex: 999 1 560px;
+	flex: 1 1 300px; /* small basis: the account links stay on the same line down to a tablet */
 	min-width: 0;
 	display: flex;
 	align-items: stretch;
@@ -223,8 +223,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	font-size: 15px;
 	cursor: pointer;
 }
-.lg-search .lg-search__izbor--kat { flex: none; width: 170px; }
-.lg-search .lg-search__izbor--mesto { flex: none; width: 172px; }
+.lg-search .lg-search__izbor--kat { flex: none; width: 168px; }
+.lg-search .lg-search__izbor--mesto { flex: none; width: 184px; }
+/* Signed in, the bell, Poruke and Moj nalog take the room: the place is chosen on the results page instead,
+   so the search field and the category stay readable. */
+@media (max-width: 1599.98px) { .lg-header--nalog .lg-search .lg-search__izbor--mesto { display: none; } }
 .lg-search__dugme {
 	border: 0;
 	padding: 0 22px;
@@ -285,8 +288,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	text-align: center;
 }
 .lg-header__zvono .lg-header__broj { top: 2px; right: 0; }
-/* Up to a wide screen "Poruke" is only the icon, so the search keeps its width. */
-@media (max-width: 1399.98px) { .lg-header__tekst { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
+/* Up to a very wide screen "Poruke" is only the icon (like the bell), so the search keeps its width. */
+@media (max-width: 1679.98px) { .lg-header__tekst { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
 .lg-header__postavi,
 .lg-header__postavi:visited {
 	display: flex;

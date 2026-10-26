@@ -28,6 +28,19 @@
 	var searchForm = input && input.closest('form');
 	if (!input || !searchForm) { return; }
 
+	// A narrow header (signed in, with Poruke and the bell) would cut the hint mid-word ("Šta tražite? r"):
+	// then only the question stays.
+	var fullHint = input.placeholder;
+	var fitHint = function () {
+		var ctx = document.createElement('canvas').getContext('2d');
+		var style = window.getComputedStyle(input);
+		ctx.font = style.fontSize + ' ' + style.fontFamily;
+		var room = input.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+		input.placeholder = ctx.measureText(fullHint).width <= room ? fullHint : fullHint.split('?')[0] + '?';
+	};
+	fitHint();
+	window.addEventListener('resize', fitHint);
+
 	var box = document.createElement('div');
 	box.className = 'lg-recent';
 	box.hidden = true;

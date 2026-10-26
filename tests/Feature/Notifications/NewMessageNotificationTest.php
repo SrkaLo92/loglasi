@@ -112,7 +112,10 @@ class NewMessageNotificationTest extends TestCase
             'type' => 'message',
             'conversation_id' => (string) $message->conversation_id,
             'message_id' => (string) $message->id,
+            'title' => 'Ana Kupac',
+            'body' => 'Da li je auto još na prodaju?',
         ], (array) $send['message']['data']);
+        $this->assertSame('poruke', $send['message']['android']['notification']['channel_id']);
     }
 
     public function test_unverified_email_gets_push_only(): void
