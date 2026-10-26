@@ -45,6 +45,8 @@ class NotificationsServiceProvider extends ServiceProvider
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             InProcess::command($schedule, SendSavedSearchAlerts::class)->hourly()->withoutOverlapping(30);
             InProcess::command($schedule, PruneInAppNotifications::class)->dailyAt('04:30')->withoutOverlapping();
+            // Queued mail and notifications: Hostinger has no long-running worker, so the queue is emptied each minute.
+            InProcess::command($schedule, 'queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()->withoutOverlapping(5);
         });
     }
 }
