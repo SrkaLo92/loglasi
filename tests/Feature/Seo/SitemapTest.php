@@ -7,6 +7,7 @@ use App\Models\Listing;
 use App\Models\Location;
 use App\Models\User;
 use DOMDocument;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Testing\TestResponse;
 
 class SitemapTest extends SeoTestCase
@@ -122,6 +123,16 @@ class SitemapTest extends SeoTestCase
         $this->assertContains('https://loglasi.rs/oglasi/', $locs);
         $this->assertContains('https://loglasi.rs/faq/', $locs);
         $this->assertNotContains('https://loglasi.rs/prijava/', $locs);
+    }
+
+    public function test_empty_firm_directory_is_left_out_of_the_pages_sitemap(): void
+    {
+        $this->assertNotContains('https://loglasi.rs/firme/', $this->locs($this->get('/sitemap-strane.xml')));
+
+        User::factory()->firm()->create();
+        Cache::flush();
+
+        $this->assertContains('https://loglasi.rs/firme/', $this->locs($this->get('/sitemap-strane.xml')));
     }
 
     public function test_sitemap_is_cached_and_flushed_on_listing_change(): void

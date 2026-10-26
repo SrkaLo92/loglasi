@@ -406,7 +406,20 @@
 }
 
 .lgc-paket--istaknut {
+	position: relative;
+	padding: 27px; /* the 2px border keeps the content in line with the other cards */
 	border: 2px solid var(--lg-green);
+}
+
+/* The badge sits on the top edge, so the name stays on one line and every card lines up. */
+.lgc-paket--istaknut .lgc-paket__oznaka {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background: var(--lg-green);
+	color: #fff;
+	white-space: nowrap;
 }
 
 .lgc-paket__vrh {

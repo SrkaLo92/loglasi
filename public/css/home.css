@@ -976,7 +976,7 @@
 /* Popularno: round icons in a grid (4 per row on phones), no sideways scrolling */
 .hm-pop__list {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
 	gap: 16px 12px;
 	margin: 0;
 	padding: 0;
@@ -1021,7 +1021,7 @@
 	.hm-main__count { font-size: 12px; }
 	.hm-pop__list { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 6px; }
 	.hm-pop__icon { width: 56px; height: 56px; }
-	.hm-pop__name { font-size: 13px; overflow-wrap: anywhere; }
+	.hm-pop__name { font-size: 13px; overflow-wrap: break-word; hyphens: auto; }
 }
 @media (max-width: 767.98px) {
 	.hm-intro { padding: 18px 0 14px; }

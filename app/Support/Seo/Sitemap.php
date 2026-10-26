@@ -7,6 +7,7 @@ use App\Enums\UserStatus;
 use App\Models\Category;
 use App\Models\Location;
 use App\Models\User;
+use App\Support\Firms\FirmDirectory;
 use App\Support\Seo;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -201,7 +202,9 @@ class Sitemap
     {
         $latest = $this->latest(Seo::activeListings());
 
+        // The firm directory is noindex while it is empty, so it stays out of the sitemap until then.
         return collect(config('seo.pages', []))
+            ->reject(fn ($path) => $path === config('firms.directory.path', '/firme/') && FirmDirectory::all() === [])
             ->map(fn ($path) => ['loc' => $path, 'lastmod' => in_array($path, ['/', '/oglasi/'], true) ? $latest : null])
             ->all();
     }
