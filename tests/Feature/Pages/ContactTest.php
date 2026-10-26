@@ -18,7 +18,7 @@ class ContactTest extends TestCase
         RateLimiter::clear('kontakt:127.0.0.1');
     }
 
-    /** Forma otvorena pre $secondsAgo sekundi. */
+    /** Form opened $secondsAgo seconds ago. */
     private function token(int $secondsAgo = 30): string
     {
         return Crypt::encryptString((string) (now()->getTimestamp() - $secondsAgo));

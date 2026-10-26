@@ -85,7 +85,7 @@ class MyAccountController extends Controller
 
         $user->forceFill(['password' => Hash::make($data['password'])])->save();
 
-        // Ostali uređaji (sajt i aplikacija) se odjavljuju.
+        // The other devices (site and app) are logged out.
         ApiTokens::revokeAll($user);
         DB::table('sessions')->where('user_id', $user->id)->where('id', '!=', $request->session()->getId())->delete();
 

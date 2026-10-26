@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
-/** Zaboravljena lozinka: link mejlom, pa nova lozinka. */
+/** Forgotten password: a link by mail, then a new password. */
 class PasswordController extends Controller
 {
     public const SENT = 'Ako nalog sa tom adresom postoji, poslali smo link za novu lozinku. Proverite i folder za neželjenu poštu.';
@@ -32,11 +32,11 @@ class PasswordController extends Controller
 
         static::sendLink($data['email']);
 
-        // Isti odgovor i kad nalog ne postoji, da se ne otkriva ko ima nalog.
+        // Same response when the account does not exist, so it does not reveal who has an account.
         return back()->with('status', self::SENT);
     }
 
-    /** Šalje link ako nalog postoji i nije blokiran (koristi i API). */
+    /** Sends the link if the account exists and is not blocked (the API uses it too). */
     public static function sendLink(string $email): void
     {
         $user = User::where('email', Accounts::normalizeEmail($email))->first();

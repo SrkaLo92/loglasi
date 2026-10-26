@@ -200,7 +200,7 @@ class MyAccountTest extends TestCase
         [$w, $h] = getimagesizefromstring(Storage::disk('public')->get($path));
         $this->assertSame([400, 400], [$w, $h]);
 
-        // Nova slika briše staru.
+        // A new photo deletes the old one.
         $this->actingAs($user)->post('/moj-nalog/slika/', ['avatar' => UploadedFile::fake()->image('ja2.png', 300, 300)]);
         Storage::disk('public')->assertMissing($path);
         $second = $user->fresh()->avatar_path;
@@ -279,7 +279,7 @@ class MyAccountTest extends TestCase
         $this->assertDatabaseMissing('personal_access_tokens', ['tokenable_id' => $user->id]);
         $this->assertModelExists($order);
 
-        // Isti email može ponovo da se registruje, stara lozinka više ne radi.
+        // The same email can register again, the old password no longer works.
         $this->post('/prijava/', ['email' => 'brisem@example.com', 'password' => 'lozinka123'])->assertSessionHasErrors('email');
         $this->post('/registracija/', [
             'name' => 'Ponovo', 'email' => 'brisem@example.com', 'phone' => '0655415128',

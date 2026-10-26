@@ -19,10 +19,10 @@ use Illuminate\Foundation\Http\Events\RequestHandled;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
-/** SEO modul: jedna Seo instanca po zahtevu, brisanje keša na promenu, raspored za sitemap. */
+/** SEO module: one Seo instance per request, cache clearing on change, the sitemap schedule. */
 class SeoServiceProvider extends ServiceProvider
 {
-    /** Kolone oglasa koje menjaju sitemap (pregledi i otkrivanja telefona ne). */
+    /** Listing columns that change the sitemap (views and phone reveals do not). */
     private const LISTING_COLUMNS = ['status', 'slug', 'expires_at', 'category_id', 'location_id', 'title', 'description', 'price', 'currency', 'published_at', 'deleted_at'];
 
     public function register(): void
@@ -34,7 +34,7 @@ class SeoServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Podaci strane važe samo za jedan zahtev.
+        // Page data is valid for one request only.
         Event::listen(RequestHandled::class, fn () => $this->app->forgetInstance(Seo::class));
         $this->app->terminating(fn () => $this->app->make(Hits::class)->flush());
 
@@ -66,7 +66,7 @@ class SeoServiceProvider extends ServiceProvider
         GoneUrl::deleted(fn () => UrlTables::flushGone());
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
-            // Istekli oglasi ispadaju iz sitemapa i bez izmene u bazi.
+            // Expired listings drop out of the sitemap even without a change in the database.
             InProcess::command($schedule, 'seo:sitemap')->hourly()->withoutOverlapping();
         });
     }

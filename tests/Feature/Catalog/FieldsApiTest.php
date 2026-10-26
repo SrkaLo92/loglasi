@@ -50,7 +50,7 @@ class FieldsApiTest extends TestCase
             'options' => [['value' => 'novo', 'label' => 'Novo'], ['value' => 'polovno', 'label' => 'Polovno']],
             'filter' => 'multi',
         ]);
-        $response->assertJsonPath('1.required', true); // dete menja obaveznost nasleđenog polja
+        $response->assertJsonPath('1.required', true); // the child changes whether the inherited field is required
         $response->assertJsonPath('1.options', []);
         $response->assertJsonPath('2.filter', 'exact');
         $response->assertJsonPath('3.unit', 'km');

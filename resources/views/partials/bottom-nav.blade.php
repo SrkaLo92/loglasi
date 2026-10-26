@@ -1,4 +1,4 @@
-{{-- Donja navigacija za telefon (< 768 px), kao u inc/home/sadrzaj.php. Broj nepročitanih poruka: $unreadMessages (modul poruka). --}}
+{{-- Bottom navigation for phones (< 768 px), as in inc/home/sadrzaj.php. Unread message count: $unreadMessages (messages module). --}}
 @use('App\Support\Pages\Pricing')
 @use('App\Support\Pages\SiteIcons')
 @use('App\Support\Pages\Navigation')

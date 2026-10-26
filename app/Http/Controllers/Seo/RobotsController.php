@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Catalog;
 use Illuminate\Http\Response;
 
-/** robots.txt, llms.txt i /stranica-404/. */
+/** robots.txt, llms.txt and /stranica-404/. */
 class RobotsController extends Controller
 {
     /** Paths no crawler needs (seo-sta-mora-da-ostane.md, section 5). */
@@ -24,7 +24,7 @@ class RobotsController extends Controller
     public function robots(): Response
     {
         if (! config('seo.indexable')) {
-            // Probna i lokalna verzija: ništa se ne indeksira.
+            // Test and local versions: nothing is indexed.
             $body = "User-agent: *\nDisallow: /\n";
         } else {
             // Bots with their own group ignore the `*` group, so both get the same Disallow lines.
@@ -67,7 +67,7 @@ class RobotsController extends Controller
         ]);
     }
 
-    /** Stara WordPress strana „stranica-404” mora da vrati pravi 404. */
+    /** The old WordPress page "stranica-404" must return a real 404. */
     public function notFound(): never
     {
         abort(404);

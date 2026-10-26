@@ -3,23 +3,23 @@
 namespace App\Support;
 
 /**
- * Broj telefona: čuva se i koristi u E.164 obliku (+381655415128).
- * Prikaz za ljude ide kroz display(), linkovi kroz links().
- * Prenet iz loglasi-core (inc/zajednicko/telefon.php), ponašanje je isto.
+ * Phone number: stored and used in E.164 form (+381655415128).
+ * Display for people goes through display(), links through links().
+ * Ported from loglasi-core (inc/zajednicko/telefon.php), with the same behaviour.
  */
 class Phone
 {
-    /** Pozivni broj države bez znaka +. */
+    /** Country calling code without the + sign. */
     public const COUNTRY = '381';
 
     /**
-     * Svodi uneti broj na E.164 (+381…).
+     * Brings an entered number to E.164 (+381…).
      *
-     * Primeri koji daju +381655415128: 0655415128, 065/541-5128, +381 65 541 5128,
-     * 381655415128, 00381655415128, +3810655415128 (vodeća nula iza pozivnog broja).
-     * Fiksni: 015 123456 → +38115123456. Strani brojevi sa + ili 00 ostaju u E.164 obliku.
+     * Examples that give +381655415128: 0655415128, 065/541-5128, +381 65 541 5128,
+     * 381655415128, 00381655415128, +3810655415128 (leading zero after the country code).
+     * Landline: 015 123456 → +38115123456. Foreign numbers with + or 00 stay in E.164 form.
      *
-     * @return string E.164 broj ili '' ako broj nije ispravan.
+     * @return string E.164 number, or '' if the number is not valid.
      */
     public static function normalize(?string $raw): string
     {
@@ -28,7 +28,7 @@ class Phone
             return '';
         }
 
-        // Prefiks "tel:" i lokal (ext.) se odbacuju.
+        // A "tel:" prefix and an extension (ext.) are dropped.
         $raw = (string) preg_replace('/^(tel:|callto:)/i', '', $raw);
         $raw = (string) preg_replace('/\s*(ext\.?|lok\.?|x)\s*\d+$/i', '', $raw);
 
@@ -49,7 +49,7 @@ class Phone
         if ($hasPlus) {
             if (! str_starts_with($digits, $cc)) {
                 // Strani broj. Kod suseda i dijaspore (BiH, CG, HR, SLO, MK, AT, DE, CH)
-                // vodeća nula iza pozivnog broja se ne bira, pa se skida.
+                // the leading zero after the country code is not dialled, so it is removed.
                 $digits = (string) preg_replace('/^(38[2-9]|4[139])0+/', '$1', $digits);
                 $len = strlen($digits);
 
@@ -57,13 +57,13 @@ class Phone
             }
             $national = substr($digits, strlen($cc));
         } elseif (str_starts_with($digits, $cc) && strlen($digits) >= 11) {
-            // 381655415128 bez znaka +.
+            // 381655415128 without the + sign.
             $national = substr($digits, strlen($cc));
         } else {
             $national = $digits;
         }
 
-        // Vodeća nula iza pozivnog broja ili domaći oblik 06x / 0xx.
+        // Leading zero after the country code, or the national form 06x / 0xx.
         $national = ltrim($national, '0');
 
         if (! self::isValidNational($national)) {
@@ -73,27 +73,27 @@ class Phone
         return '+'.$cc.$national;
     }
 
-    /** Da li je broj ispravan (srpski ili strani u međunarodnom obliku). */
+    /** Whether the number is valid (Serbian, or foreign in international form). */
     public static function isValid(?string $raw): bool
     {
         return self::normalize($raw) !== '';
     }
 
-    /** Da li je broj srpski (+381). */
+    /** Whether the number is Serbian (+381). */
     public static function isSerbian(?string $raw): bool
     {
         return str_starts_with(self::normalize($raw), '+'.self::COUNTRY);
     }
 
-    /** Da li je broj srpski mobilni (06x), za WhatsApp i Viber dugmad. */
+    /** Whether the number is a Serbian mobile (06x), for the WhatsApp and Viber buttons. */
     public static function isMobile(?string $raw): bool
     {
         return str_starts_with(self::normalize($raw), '+'.self::COUNTRY.'6');
     }
 
     /**
-     * Provera nacionalnog dela srpskog broja (bez 0 i bez +381).
-     * Mobilni: 6x + 6–8 cifara. Fiksni: 1x–3x, ukupno 8–9 cifara.
+     * Checks the national part of a Serbian number (without 0 and without +381).
+     * Mobile: 6x + 6–8 digits. Landline: 1x–3x, 8–9 digits in total.
      */
     public static function isValidNational(string $national): bool
     {
@@ -113,7 +113,7 @@ class Phone
     }
 
     /**
-     * Deli broj na pozivni broj, mrežni/područni kod i ostatak.
+     * Splits the number into the country code, network/area code and the rest.
      *
      * @return array{cc:string, area:string, number:string}|null
      */
@@ -131,7 +131,7 @@ class Phone
         }
 
         $national = substr($digits, strlen($cc));
-        // Trocifreni područni kodovi (0230, 0280, 0290); ostali su dvocifreni.
+        // Three-digit area codes (0230, 0280, 0290); the others have two digits.
         $areaLen = preg_match('/^(23|28|29)/', $national) ? 3 : 2;
 
         return [
@@ -141,7 +141,7 @@ class Phone
         ];
     }
 
-    /** Grupisanje pretplatničkog dela: 5415128 → "541 5128", 123456 → "123 456". */
+    /** Grouping of the subscriber part: 5415128 → "541 5128", 123456 → "123 456". */
     public static function group(string $number): string
     {
         $len = strlen($number);
@@ -156,9 +156,9 @@ class Phone
     }
 
     /**
-     * Broj za prikaz: "+381 65 541 5128", ili domaći oblik "065 541 5128".
+     * Number for display: "+381 65 541 5128", or the national form "065 541 5128".
      *
-     * @return string '' ako broj nije ispravan.
+     * @return string '' if the number is not valid.
      */
     public static function display(?string $phone, bool $national = false): string
     {
@@ -176,13 +176,13 @@ class Phone
             : '+'.$p['cc'].' '.$p['area'].' '.$rest;
     }
 
-    /** Domaći oblik za prikaz: "065 541 5128". */
+    /** National form for display: "065 541 5128". */
     public static function national(?string $phone): string
     {
         return self::display($phone, true);
     }
 
-    /** Delimično skriven broj pre klika: "+381 65 541 ••••" ili "065 541 ••••". */
+    /** Partly hidden number before the click: "+381 65 541 ••••" or "065 541 ••••". */
     public static function mask(?string $phone, int $hide = 4, bool $national = false): string
     {
         $display = self::display($phone, $national);
@@ -202,7 +202,7 @@ class Phone
     }
 
     /**
-     * Linkovi za poziv i poruke.
+     * Links for calls and messages.
      *
      * @return array{e164:string, tel:string, whatsapp:string, viber:string, sms:string}|array{}
      */
@@ -223,7 +223,7 @@ class Phone
         ];
     }
 
-    /** Isto kao wp_strip_all_tags(): izbacuje script/style sa sadržajem, pa ostale oznake. */
+    /** Same as wp_strip_all_tags(): removes script/style with their content, then the other tags. */
     private static function stripTags(string $value): string
     {
         $value = (string) preg_replace('@<(script|style)[^>]*?>.*?</\\1>@si', '', $value);

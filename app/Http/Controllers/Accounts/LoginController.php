@@ -12,10 +12,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
-/** Prijava i odjava na sajtu. */
+/** Login and logout on the site. */
 class LoginController extends Controller
 {
-    /** /login-registracija/: prijava i registracija u jednoj kartici sa dva taba. */
+    /** /login-registracija/: login and registration in one card with two tabs. */
     public function show(Request $request): View
     {
         LoginPage::rememberBack($request);
@@ -23,7 +23,7 @@ class LoginController extends Controller
         return view('accounts.login', ['tab' => LoginPage::tab($request)]);
     }
 
-    /** GET /prijava/: 301 na tab „Prijava”, poruka (status, greške) ostaje za sledeći zahtev. */
+    /** GET /prijava/: 301 to the "Prijava" tab; the message (status, errors) stays for the next request. */
     public function legacy(Request $request): RedirectResponse
     {
         $request->session()->reflash();

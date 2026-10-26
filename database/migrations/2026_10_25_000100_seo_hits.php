@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-// SEO modul: brojanje pogodaka za preusmerenja, 410 i pravila iz koda.
+// SEO module: hit counts for redirects, 410s and rules from code.
 return new class extends Migration
 {
     public function up(): void
@@ -20,7 +20,7 @@ return new class extends Migration
 
         Schema::create('seo_rule_hits', function (Blueprint $table) {
             $table->id();
-            $table->string('rule', 64)->unique(); // npr. kategorija-param, woo-product, yoast-sitemap
+            $table->string('rule', 64)->unique(); // e.g. kategorija-param, woo-product, yoast-sitemap
             $table->unsignedInteger('hits')->default(0);
             $table->timestamp('last_hit_at')->nullable();
         });

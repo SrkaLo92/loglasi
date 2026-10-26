@@ -15,18 +15,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * Oglasi (listivo_listing) sa istim ID-jem i slugom, cena i valuta, polja i slike.
+ * Listings (listivo_listing) with the same ID and slug, price and currency, fields and images.
  */
 class ListingImport extends Step
 {
-    /** Statusi koji se ne uvoze uopšte. */
+    /** Statuses that are not imported at all. */
     private const IGNORED = ['auto-draft', 'inherit'];
 
     private array $categoryParents = [];
 
     private array $locationParents = [];
 
-    /** @var array<string, object> wp_key → polje */
+    /** @var array<string, object> wp_key → field */
     private array $fields = [];
 
     /** @var string[] */
@@ -204,7 +204,7 @@ class ListingImport extends Step
     }
 
     /**
-     * Najdublji termin (Automobili pre Vozila, naselje pre opštine).
+     * The deepest term (Automobili before Vozila, a village before the municipality).
      *
      * @param  int[]  $ids
      * @param  array<int, int>  $parents
@@ -233,7 +233,7 @@ class ListingImport extends Step
     }
 
     /**
-     * Cena iz ključa listivo_{polje}_listivo_{valuta}; EUR ima prednost ako postoje oba.
+     * Price from the key listivo_{field}_listivo_{currency}; EUR wins if both exist.
      *
      * @return array{0: ?float, 1: Currency}
      */
@@ -262,7 +262,7 @@ class ListingImport extends Step
         return [null, Currency::EUR];
     }
 
-    /** Isti redosled kao Loglasi_Cena::currency_for_term(). */
+    /** Same order as Loglasi_Cena::currency_for_term(). */
     private function currencyForTerm(int $termId): string
     {
         if (isset($this->currencyCache[$termId])) {
@@ -305,7 +305,7 @@ class ListingImport extends Step
         return is_numeric($raw) ? (float) $raw : null;
     }
 
-    /** Istaknut: datum iz mete ako ga ima, inače važi featured_days od prvog uvoza. */
+    /** Featured: the date from the meta if there is one, otherwise featured_days from the first import apply. */
     private function featuredUntil(array $meta, ?object $existing): ?Carbon
     {
         $raw = $meta[config('wordpress_import.meta.featured')][0] ?? null;
@@ -330,7 +330,7 @@ class ListingImport extends Step
             : now()->addDays((int) config('wordpress_import.featured_days'))->startOfMinute();
     }
 
-    /** Istek: iz Listivo mete ako postoji; inače objavljen oglas dobija listing_days od prvog uvoza. */
+    /** Expiry: from the Listivo meta if it exists; otherwise a published listing gets listing_days from the first import. */
     private function expiresAt(array $meta, ListingStatus $status, Carbon $modified, ?object $existing): ?Carbon
     {
         $key = (string) config('wordpress_import.meta.expires');
@@ -356,7 +356,7 @@ class ListingImport extends Step
         return now()->addDays((int) config('wordpress_import.listing_days'))->startOfMinute();
     }
 
-    /** Vrednosti polja se za oglas brišu i upisuju ponovo (samo polja iz uvoza). */
+    /** A listing's field values are deleted and written again (only fields from the import). */
     private function fieldValues(int $listingId, int $categoryId, array $meta, array $terms): void
     {
         if (! $this->fields) {
@@ -425,7 +425,7 @@ class ListingImport extends Step
         return array_values(array_filter(array_map(fn ($id) => $this->slugCache[$id] ?? null, $termIds)));
     }
 
-    /** Meta može da sadrži vrednost ili naziv opcije; vraća vrednost opcije. */
+    /** The meta can hold a value or an option name; returns the option value. */
     private function matchOptions(array $values, object $field): array
     {
         $options = json_decode((string) $field->options, true) ?: [];
@@ -445,7 +445,7 @@ class ListingImport extends Step
     }
 
     /**
-     * Istaknuta slika prvo, pa galerija, bez duplikata (kao Loglasi_API_Formatter::image_ids).
+     * The featured image first, then the gallery, no duplicates (like Loglasi_API_Formatter::image_ids).
      *
      * @return int[]
      */
@@ -512,12 +512,12 @@ class ListingImport extends Step
             $this->report->imported('images');
         }
 
-        // Slike uklonjene iz galerije u WordPress-u
+        // Images removed from the gallery in WordPress
         DB::table('listing_images')->where('listing_id', $listingId)->whereNotNull('wp_attachment_id')
             ->whereNotIn('wp_attachment_id', $keep ?: [0])->delete();
     }
 
-    /** Za delta uvoz: oglasi koji su ovde, a u WordPress-u više ne postoje. */
+    /** For a delta import: listings that are here but no longer exist in WordPress. */
     private function reportMissing(): void
     {
         $wpIds = $this->wp->table('posts')->where('post_type', config('wordpress_import.post_type'))->pluck('ID')->map(fn ($id) => (int) $id)->flip();

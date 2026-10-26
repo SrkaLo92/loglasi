@@ -6,20 +6,20 @@ use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Podešavanja sajta koja se menjaju iz admina (kurs, limiti, tekstovi...).
- * Sve vrednosti se čitaju iz jednog keširanog niza.
+ * Site settings changed from the admin (exchange rate, limits, texts...).
+ * All values are read from one cached array.
  */
 class Settings
 {
     private const CACHE_KEY = 'settings.all';
 
-    /** Podrazumevane vrednosti kad u bazi nema zapisa. */
+    /** Default values when the database has no row. */
     public const DEFAULTS = [
         'eur_rate' => 117.2,               // 1 € = ... din
         'private_active_limit' => 10,      // active listings a private user may have for free
-        'listing_duration_days' => 30,     // oglas traje mesec dana, obnova besplatna
+        'listing_duration_days' => 30,     // a listing lasts a month, renewal is free
         'moderation' => 'all',             // all | new_users | none (all: every listing waits for an admin)
-        'founding_firms_total' => 30,      // prvih 30 firmi besplatno
+        'founding_firms_total' => 30,      // first 30 firms free
         'contact_email' => 'office@loglasi.rs',
         'contact_phone' => '+381655415128',     // footer and FAQ, E.164
         'contact_address' => '15300 Loznica, Srbija',

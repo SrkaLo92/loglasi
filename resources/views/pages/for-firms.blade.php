@@ -30,7 +30,7 @@
 					<a class="lgx-btn lgx-btn--outline" href="{{ Navigation::link('cenovnik') }}">Pogledajte cenovnik</a>
 				</div>
 			</div>
-			{{-- Ilustracija profila firme (dekorativna). --}}
+			{{-- Illustration of a firm profile (decorative). --}}
 			<div class="lgx-mock" aria-hidden="true">
 				<div class="lgx-mock__naslovna"></div>
 				<div class="lgx-mock__telo">

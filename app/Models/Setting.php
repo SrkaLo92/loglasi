@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-/** Čitanje i upis ide preko App\Support\Settings (keš). */
+/** Reads and writes go through App\Support\Settings (cached). */
 class Setting extends Model
 {
     protected $primaryKey = 'key';

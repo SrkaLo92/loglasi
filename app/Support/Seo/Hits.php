@@ -4,7 +4,7 @@ namespace App\Support\Seo;
 
 use Illuminate\Support\Facades\DB;
 
-/** Brojač pogodaka za preusmerenja i 410; upis ide posle slanja odgovora (SeoServiceProvider zove flush()). */
+/** Hit counter for redirects and 410s; written after the response is sent (SeoServiceProvider calls flush()). */
 class Hits
 {
     /** @var list<callable> */
@@ -22,7 +22,7 @@ class Hits
             ->update(['hits' => DB::raw('hits + 1'), 'last_hit_at' => now()]));
     }
 
-    /** Pravila iz koda (kategorija=, Woo, Yoast sitemap...), po ključu pravila. */
+    /** Rules from code (kategorija=, Woo, Yoast sitemap...), by rule key. */
     public static function rule(string $rule): void
     {
         static::queue(function () use ($rule) {
@@ -44,7 +44,7 @@ class Hits
             try {
                 $write();
             } catch (\Throwable $e) {
-                report($e); // brojač nikad ne sme da obori stranu
+                report($e); // the counter must never break the page
             }
         }
     }

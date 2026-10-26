@@ -1,4 +1,4 @@
-{{-- CSS modula; strane naloga imaju noindex ($robots u svakoj strani). --}}
+{{-- Module CSS; account pages are noindex ($robots in every page). --}}
 @push('head')
 <link rel="stylesheet" href="{{ asset_v('css/nalozi.css') }}">
 @endpush

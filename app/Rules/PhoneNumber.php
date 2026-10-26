@@ -6,7 +6,7 @@ use App\Support\Phone;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-/** Broj telefona koji može da se svede na E.164 (srpski ili strani sa pozivnim brojem). */
+/** A phone number that can be brought to E.164 (Serbian, or foreign with a country code). */
 class PhoneNumber implements ValidationRule
 {
     public function validate(string $attribute, mixed $value, Closure $fail): void

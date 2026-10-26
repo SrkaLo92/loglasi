@@ -32,7 +32,7 @@
 	$hmFirms = $sections['firms'];
 	$hmAbout = HomeSettings::get('home.about');
 	$hmCount = number_format($hmTotal, 0, ',', '.');
-	// „Pogledajte svih 30 oglasa”, „Pogledajte sva 3 oglasa”, „Pogledajte sve oglase (21)”
+	// "Pogledajte svih 30 oglasa", "Pogledajte sva 3 oglasa", "Pogledajte sve oglase (21)"
 	$hmMore = match (true) {
 		$hmTotal === 1 => 'Pogledajte oglas',
 		$hmTotal % 10 === 1 && $hmTotal % 100 !== 11 => 'Pogledajte sve oglase ('.$hmCount.')',

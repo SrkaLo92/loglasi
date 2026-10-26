@@ -15,8 +15,8 @@ use Illuminate\Support\Facades\DB;
 use XMLWriter;
 
 /**
- * Sitemap: /sitemap.xml (indeks) i delovi: oglasi (po N), kategorije, mesta (kategorija + mesto od 3 oglasa),
- * firme, strane. XML se kešira; keš se briše na promenu i obnavlja komandom seo:sitemap (svakog sata).
+ * Sitemap: /sitemap.xml (index) and parts: listings (N per file), categories, places (category + place with 3 listings),
+ * firms, pages. The XML is cached; the cache is cleared on change and rebuilt by seo:sitemap (hourly).
  */
 class Sitemap
 {
@@ -24,7 +24,7 @@ class Sitemap
 
     private const NS = 'http://www.sitemaps.org/schemas/sitemap/0.9';
 
-    /** Sadržaj jednog fajla ili null ako ne postoji (404). */
+    /** Content of one file, or null if it does not exist (404). */
     public function get(string $name): ?string
     {
         if (! $this->exists($name)) {
@@ -34,7 +34,7 @@ class Sitemap
         return Cache::remember($this->key($name), (int) config('seo.sitemap.cache_ttl', 86400), fn () => $this->build($name));
     }
 
-    /** Svi delovi koji trenutno postoje, npr. ['strane', 'kategorije', 'oglasi-1']. */
+    /** All parts that exist now, e.g. ['strane', 'kategorije', 'oglasi-1']. */
     public function parts(): array
     {
         return Cache::remember($this->key('parts'), (int) config('seo.sitemap.cache_ttl', 86400), function () {
@@ -63,13 +63,13 @@ class Sitemap
         return $name === 'index' || in_array($name, $this->parts(), true);
     }
 
-    /** Briše keš (nova verzija ključeva); sledeći zahtev pravi sve iznova. */
+    /** Clears the cache (new key version); the next request builds everything again. */
     public function flush(): void
     {
         Cache::forever(self::VERSION_KEY, (int) Cache::get(self::VERSION_KEY, 0) + 1);
     }
 
-    /** Briše keš i odmah pravi sve delove (komanda seo:sitemap). Vraća broj URL-ova. */
+    /** Clears the cache and builds every part at once (seo:sitemap command). Returns the number of URLs. */
     public function rebuild(): int
     {
         $this->flush();
@@ -210,9 +210,9 @@ class Sitemap
     }
 
     /**
-     * Broj aktivnih oglasa i poslednja izmena po kategoriji (i mestu), sa zbirom za nadređene kategorije.
+     * Number of active listings and the last change per category (and place), with a sum for parent categories.
      *
-     * @return array<string, array{count: int, lastmod: ?string}> ključ "kategorija" ili "kategorija|mesto"
+     * @return array<string, array{count: int, lastmod: ?string}> key "category" or "category|place"
      */
     private function counts(bool $byLocation): array
     {
@@ -230,7 +230,7 @@ class Sitemap
             $categoryId = (int) $row->category_id;
             $guard = 0;
 
-            // Oglas se računa u svojoj kategoriji i u svim nadređenim.
+            // A listing counts in its own category and in every parent.
             while ($categoryId && array_key_exists($categoryId, $parents) && $guard++ < 10) {
                 $key = $categoryId.($byLocation ? '|'.$row->location_id : '');
                 $out[$key]['count'] = ($out[$key]['count'] ?? 0) + (int) $row->total;

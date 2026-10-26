@@ -1,4 +1,4 @@
-{{-- Zajednički sadržaj strane greške (404, 410) u punom izgledu sajta. --}}
+{{-- Shared content of an error page (404, 410) in the full site layout. --}}
 @extends('layouts.app', ['title' => ($seoTitle ?? '') !== '' ? $seoTitle : $naslov.' | loglasi.rs', 'robots' => 'noindex, follow'])
 @use('App\Support\Pages\SiteIcons')
 @use('App\Support\Pages\Navigation')

@@ -23,7 +23,7 @@ use Carbon\CarbonImmutable;
  */
 class ListingLimits
 {
-    /** Šta se vraća kao limit kad je neograničeno (aplikacija očekuje ceo broj). */
+    /** What is returned as the limit when it is unlimited (the app expects an integer). */
     public const UNLIMITED = 999;
 
     /** @return array{monthly_limit:int, used_this_month:int, remaining:int, resets_at:string, unlimited:bool} */
@@ -43,7 +43,7 @@ class ListingLimits
         ];
     }
 
-    /** Da li korisnik može da postavi još jedan oglas (za modul oglasa). */
+    /** Whether the user can post one more listing (for the listing module). */
     public static function canCreate(User $user, ?Category $category = null): bool
     {
         $limit = static::monthlyLimit($user, $category);
@@ -51,7 +51,7 @@ class ListingLimits
         return $limit === null || static::activeCount($user) < $limit;
     }
 
-    /** null = bez ograničenja. */
+    /** null = no limit. */
     public static function monthlyLimit(User $user, ?Category $category = null): ?int
     {
         if ($user->isFirm()) {

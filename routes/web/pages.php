@@ -7,7 +7,7 @@ use App\Http\Controllers\Pages\PricingController;
 use App\Http\Controllers\Pages\TextPageController;
 use Illuminate\Support\Facades\Route;
 
-// Sadržajne strane, na istim adresama kao na sadašnjem sajtu.
+// Content pages, at the same addresses as on the old site.
 
 Route::get('/cenovnik', PricingController::class)->name('pages.pricing');
 Route::get('/za-firme', ForFirmsController::class)->name('pages.for-firms');
@@ -22,7 +22,7 @@ Route::get('/pravila-oglasavanja', [TextPageController::class, 'show'])->default
 Route::get('/brisanje-licnih-podataka', [TextPageController::class, 'show'])->defaults('strana', 'brisanje')->name('pages.data-deletion');
 Route::get('/politika-privatnosti', [TextPageController::class, 'show'])->defaults('strana', 'privatnost')->name('pages.privacy');
 
-// Pravni tekstovi za plaćene usluge (Zakon o zaštiti potrošača).
+// Legal texts for paid services (Consumer Protection Act).
 Route::get('/uslovi-placanja', [TextPageController::class, 'show'])->defaults('strana', 'placanje')->name('pages.payment-terms');
 Route::get('/odustanak-od-ugovora', [TextPageController::class, 'show'])->defaults('strana', 'odustanak')->name('pages.withdrawal');
 Route::get('/reklamacije', [TextPageController::class, 'show'])->defaults('strana', 'reklamacije')->name('pages.complaints');

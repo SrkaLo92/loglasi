@@ -6,10 +6,10 @@ use App\Models\Product;
 use App\Support\Settings;
 use App\WordPressImport\Text;
 
-/** Kurs evra, limiti i cenovnik iz WordPress opcija. */
+/** Euro rate, limits and price list from the WordPress options. */
 class SettingsImport extends Step
 {
-    /** Stavka cenovnika (loglasi_cenovnik) → kod proizvoda. */
+    /** Price list item (loglasi_cenovnik) → product code. */
     private const PRODUCTS = [
         'podizanje' => Product::BUMP,
         'istaknuto-7' => Product::FEATURED_7,
@@ -61,7 +61,7 @@ class SettingsImport extends Step
     {
         $items = Text::unserialize($options['loglasi_cenovnik'] ?? '');
         if (! is_array($items) || ! $items) {
-            // Bez sačuvanog cenovnika važe cene iz ProductSeeder-a; Biznis cena može biti zasebno na početnoj.
+            // Without a saved price list the ProductSeeder prices apply; the Biznis price can be separate on the home page.
             if (isset($options['loglasi_pocetna_biznis_cena']) && is_numeric($options['loglasi_pocetna_biznis_cena'])) {
                 $items = [['id' => 'biznis', 'cena' => (int) $options['loglasi_pocetna_biznis_cena']]];
             } else {

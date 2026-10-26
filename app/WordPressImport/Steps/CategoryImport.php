@@ -7,7 +7,7 @@ use App\WordPressImport\Text;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-/** Kategorije (taksonomija listivo_14): stablo, slug, redosled, opis, ikonica. */
+/** Categories (taxonomy listivo_14): tree, slug, order, description, icon. */
 class CategoryImport extends Step
 {
     public function run(): void
@@ -69,7 +69,7 @@ class CategoryImport extends Step
         CategorySeoDefaults::apply(); // the migration ran before the categories existed
     }
 
-    /** Ikonica: ID priloga (kopira se) ili URL (beleži se kao putanja). */
+    /** Icon: attachment ID (copied) or URL (recorded as a path). */
     private function icon(mixed $raw, string $slug): ?string
     {
         if (is_numeric($raw) && (int) $raw > 0) {

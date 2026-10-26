@@ -6,7 +6,7 @@ use App\Support\Phone;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-/** Isti slučajevi kao loglasi-core/tests/telefon-test.php. */
+/** The same cases as loglasi-core/tests/telefon-test.php. */
 class PhoneTest extends TestCase
 {
     public static function normalizeCases(): array
@@ -33,7 +33,7 @@ class PhoneTest extends TestCase
             ['0800 123 456', ''],
             ['+381 12', ''],
             ['06512345678901234', ''],
-            // dodatno: oznake i lokal se odbacuju
+            // extra: labels and extensions are dropped
             ['<b>065 541 5128</b>', '+381655415128'],
             ['065 541 5128 lok. 12', '+381655415128'],
         ];

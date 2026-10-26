@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
         $this->call(ProductSeeder::class);
         $this->call(PayeeSeeder::class);
 
-        // Samo za lokalni razvoj; pravi podaci dolaze uvozom iz WordPress-a.
+        // Local development only; the real data comes from the WordPress import.
         if (app()->isLocal()) {
             $this->call(CatalogSeeder::class);
 

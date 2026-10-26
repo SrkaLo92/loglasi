@@ -29,7 +29,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
-/** Nalozi i prijava: heš lozinki, dozvole, ograničenja zahteva, tokeni za aplikaciju, mejlovi. */
+/** Accounts and login: password hashing, permissions, rate limits, app tokens, mails. */
 class AccountsServiceProvider extends ServiceProvider
 {
     public function boot(Router $router): void
@@ -42,7 +42,7 @@ class AccountsServiceProvider extends ServiceProvider
         $this->tokens();
         $this->mails();
 
-        // Promena broja telefona skida proveru, osim kad admin u istom koraku upiše i proveru.
+        // Changing the phone number removes the verification, unless the admin sets the verification in the same step.
         User::saving(function (User $user) {
             if ($user->exists && $user->isDirty('phone') && ! $user->isDirty('phone_verified_at')) {
                 $user->phone_verified_at = null;
@@ -83,7 +83,7 @@ class AccountsServiceProvider extends ServiceProvider
         ]);
     }
 
-    /** 429: JSON po ugovoru za API, poruka iznad forme za sajt. */
+    /** 429: contract JSON for the API, a message above the form for the site. */
     private function tooMany(Request $request, array $headers)
     {
         $message = 'Previše pokušaja. Sačekajte malo pa probajte ponovo.';
@@ -111,7 +111,7 @@ class AccountsServiceProvider extends ServiceProvider
     {
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
 
-        // Blokiran korisnik ne može da koristi ni postojeći token.
+        // A blocked user cannot use an existing token either.
         Sanctum::authenticateAccessTokensUsing(
             fn (PersonalAccessToken $token, bool $isValid) => $isValid
                 && $token->tokenable instanceof User

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Spoljna bezbednosna provera sajta, samo čitanje (ništa ne menja i ne pogađa lozinke).
-# Upotreba: scripts/bezbednost-provera.sh https://loglasi-custom.alphasoft.dev
-# Izlaz: PASS/FAIL po stavci i broj grešaka (exit 1 ako ih ima). Spisak ručnih provera: docs/bezbednost.md.
+# External security check of the site, read-only (changes nothing and does not guess passwords).
+# Usage: scripts/bezbednost-provera.sh https://loglasi-custom.alphasoft.dev
+# Output: PASS/FAIL per item and the number of failures (exit 1 if there are any). Manual checks: docs/bezbednost.md.
 set -u
 BASE="${1:?Navedite adresu sajta, npr. https://loglasi-custom.alphasoft.dev}"
 BASE="${BASE%/}"

@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
-/** Registracija privatnog lica. Nalog firme pravi samo administrator. */
+/** Registration of a private person. Only an administrator creates a firm account. */
 class RegistrationController extends Controller
 {
-    /** GET /registracija/: 301 na tab „Novi nalog” strane /login-registracija/. */
+    /** GET /registracija/: 301 to the "Novi nalog" tab of /login-registracija/. */
     public function legacy(Request $request): RedirectResponse
     {
         $request->session()->reflash();

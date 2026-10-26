@@ -40,13 +40,13 @@ class Category extends Model
         return $this->hasMany(Listing::class);
     }
 
-    /** Javna adresa kategorije: /oglasi/{slug}/ */
+    /** Public address of the category: /oglasi/{slug}/ */
     public function url(): string
     {
         return url_slash('/oglasi/'.$this->slug);
     }
 
-    /** URL ikonice: pun URL iz uvoza ili putanja na disku "public"; null kad je nema. */
+    /** Icon URL: a full URL from the import or a path on the "public" disk; null when there is none. */
     public function iconUrl(): ?string
     {
         $path = trim((string) $this->icon_path);

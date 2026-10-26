@@ -4,7 +4,7 @@ use App\Http\Controllers\Accounts\Api\AuthController;
 use App\Http\Controllers\Accounts\Api\MeController;
 use Illuminate\Support\Facades\Route;
 
-// Nalog u mobilnoj aplikaciji (/api/v1). Access token 15 min, refresh token 30 dana.
+// Account in the mobile app (/api/v1). Access token 15 min, refresh token 30 days.
 
 Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:nalozi-register');
 Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:nalozi-login');

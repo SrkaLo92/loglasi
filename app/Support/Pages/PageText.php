@@ -10,8 +10,8 @@ use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 /**
- * Tekstovi sadržajnih strana: vrednost iz podešavanja (page_text.<ključ>) ili
- * podrazumevani tekst iz resources/pages/texts.php. Zamene {…} se popunjavaju iz baze.
+ * Texts of the content pages: the value from the settings (page_text.<key>) or
+ * the default text from resources/pages/texts.php. Placeholders {…} are filled from the database.
  */
 class PageText
 {
@@ -26,7 +26,7 @@ class PageText
         return self::$defaults ??= require resource_path('pages/texts.php');
     }
 
-    /** Sirova vrednost (string ili niz), bez zamena. */
+    /** Raw value (string or array), without placeholders filled. */
     public static function raw(string $key): mixed
     {
         $value = Settings::get(self::PREFIX.$key, false);
@@ -38,7 +38,7 @@ class PageText
         return $value;
     }
 
-    /** Kratak tekst sa zamenama, za {{ }} u Blade-u (escapuje Blade). */
+    /** Short text with placeholders filled, for {{ }} in Blade (Blade escapes it). */
     public static function get(string $key): string
     {
         $value = self::raw($key);
@@ -46,7 +46,7 @@ class PageText
         return is_string($value) ? self::replace($value) : '';
     }
 
-    /** Markdown → HTML (bez sirovog HTML-a, bez nebezbednih linkova). */
+    /** Markdown → HTML (no raw HTML, no unsafe links). */
     public static function html(string $key): HtmlString
     {
         $value = self::raw($key);
@@ -54,7 +54,7 @@ class PageText
         return self::markdown(is_string($value) ? $value : '');
     }
 
-    /** Jedan red Markdown-a bez <p> omotača (za odgovore i korake sa linkovima). */
+    /** One line of Markdown without the <p> wrapper (for answers and steps with links). */
     public static function inline(string $text): HtmlString
     {
         return new HtmlString(trim(Str::inlineMarkdown(self::replace($text), self::options())));

@@ -9,12 +9,12 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Javne HTML adrese se završavaju kosom crtom, kao na WordPress-u: /oglasi/automobili -> /oglasi/automobili/ (301).
- * Upit ostaje isti. Ne dira API, admin, /up i fajlove (sitemap.xml, robots.txt, slike).
+ * Public HTML addresses end with a slash, as on WordPress: /oglasi/automobili -> /oglasi/automobili/ (301).
+ * The query stays the same. Does not touch the API, admin, /up and files (sitemap.xml, robots.txt, images).
  */
 class TrailingSlash
 {
-    /** Putanje koje se ne diraju (Request::is obrasci). */
+    /** Paths left alone (Request::is patterns). */
     private const EXCEPT = ['api', 'api/*', 'admin', 'admin/*', 'up', 'livewire/*', 'storage/*', 'build/*'];
 
     public function handle(Request $request, Closure $next): Response
@@ -26,7 +26,7 @@ class TrailingSlash
             || str_ends_with($path, '/')
             || Url::hasExtension($path)
             || $request->is(...self::EXCEPT)
-            || $request->query->has('signature')) { // potpisani linkovi (potvrda emaila) rade i bez kose crte
+            || $request->query->has('signature')) { // signed links (email confirmation) work without the slash too
             return $next($request);
         }
 

@@ -5,8 +5,8 @@ namespace App\Support\Auth;
 use Illuminate\Hashing\Argon2IdHasher;
 
 /**
- * Nove lozinke se hešuju sa argon2id. Heševi preneti iz WordPress-a (phpass, "$wp$2y$", MD5)
- * i stari bcrypt i dalje važe, a posle uspešne prijave se ponovo hešuju (rehash_on_login).
+ * New passwords are hashed with argon2id. Hashes carried over from WordPress (phpass, "$wp$2y$", MD5)
+ * and old bcrypt still work, and are hashed again after a successful login (rehash_on_login).
  */
 class LoglasiHasher extends Argon2IdHasher
 {
@@ -44,7 +44,7 @@ class LoglasiHasher extends Argon2IdHasher
 
     public function verifyConfiguration($value)
     {
-        // Preneti heševi se čuvaju kakvi jesu, do prve prijave.
+        // Carried-over hashes are kept as they are until the first login.
         if ($this->isLegacy((string) $value)) {
             return true;
         }
@@ -52,7 +52,7 @@ class LoglasiHasher extends Argon2IdHasher
         return parent::verifyConfiguration($value);
     }
 
-    /** Sve što nije argon2id: WordPress heševi i bcrypt. */
+    /** Everything that is not argon2id: WordPress hashes and bcrypt. */
     private function isLegacy(string $hash): bool
     {
         return WordPressPassword::isWordPressHash($hash)

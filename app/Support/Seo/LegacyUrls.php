@@ -8,8 +8,8 @@ use App\Models\ListingImage;
 use Illuminate\Http\Request;
 
 /**
- * Pravila za stare adrese sa WordPress/Listivo/WooCommerce/Yoast sajta (09-deploy-seo.md, odeljak 1).
- * Vraća odredište ili null kad pravilo ne važi.
+ * Rules for the old addresses of the WordPress/Listivo/WooCommerce/Yoast site (09-deploy-seo.md, section 1).
+ * Returns the target, or null when the rule does not apply.
  */
 class LegacyUrls
 {
@@ -23,12 +23,12 @@ class LegacyUrls
         $query = $request->query->all();
         $clean = Url::withoutTracking($query);
 
-        // REST API stare verzije: isti metod i telo (308), upit ostaje ceo.
+        // Old REST API: same method and body (308), the whole query stays.
         if (preg_match('#^/wp-json/loglasi/v1(/.*)?$#i', $raw, $m)) {
             return $this->hit('/api/v1'.rtrim($m[1] ?? '', '/'), 308, 'wp-json', $query, raw: true);
         }
 
-        // Stari sitemapovi (Yoast i WordPress core) -> jedan novi indeks.
+        // Old sitemaps (Yoast and WordPress core) -> one new index.
         if ($path === '/sitemap_index.xml'
             || preg_match('#^/[a-z0-9_]+-sitemap\d*\.xml$#', $path)
             || preg_match('#^/wp-sitemap(-[a-z0-9_-]+)?\.xml$#', $path)) {
@@ -102,7 +102,7 @@ class LegacyUrls
         return null;
     }
 
-    /** /oglasi/?kategorija=x i /oglasi/?marka-automobila=y */
+    /** /oglasi/?kategorija=x and /oglasi/?marka-automobila=y */
     private function archiveQuery(array $clean): ?array
     {
         $keys = array_keys($clean);
@@ -140,7 +140,7 @@ class LegacyUrls
         return $this->hit($targets[$tab] ?? config('seo.targets.panel'), 301, 'panel');
     }
 
-    /** /?attachment_id=N (strana priloga) i /?p=N (kratki WordPress link oglasa). */
+    /** /?attachment_id=N (attachment page) and /?p=N (short WordPress link of a listing). */
     private function rootQuery(array $clean): ?array
     {
         if (isset($clean['attachment_id']) && ctype_digit((string) $clean['attachment_id'])) {

@@ -9,8 +9,8 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-// SEO: sitemap, robots.txt, llms.txt. Preusmerenja, 410 i kosa crta su middleware (bootstrap/app.php).
-// Bez sesije i kolačića, da CDN i pregledač mogu da keširaju odgovor.
+// SEO: sitemap, robots.txt, llms.txt. Redirects, 410 and the trailing slash are middleware (bootstrap/app.php).
+// No session or cookies, so the CDN and the browser can cache the response.
 
 Route::withoutMiddleware([
     EncryptCookies::class, AddQueuedCookiesToResponse::class, StartSession::class,

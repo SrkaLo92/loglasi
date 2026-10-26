@@ -4,16 +4,16 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Laravel\Sanctum\Http\Middleware\AuthenticateSession;
 
-// Sanctum služi samo za Bearer tokene mobilne aplikacije (bez prijave kolačićem na API-ju).
+// Sanctum is used only for the mobile app's Bearer tokens (no cookie login on the API).
 
 return [
 
     'stateful' => [],
 
-    // Prazno: API ne prihvata sesiju sajta, samo token.
+    // Empty: the API does not accept the site session, only a token.
     'guard' => [],
 
-    // Access token traje 15 minuta (App\Support\Auth\ApiTokens::ACCESS_MINUTES).
+    // The access token lasts 15 minutes (App\Support\Auth\ApiTokens::ACCESS_MINUTES).
     'expiration' => 15,
 
     'token_prefix' => env('SANCTUM_TOKEN_PREFIX', ''),

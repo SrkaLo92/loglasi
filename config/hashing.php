@@ -2,7 +2,7 @@
 
 return [
 
-    // loglasi: argon2id za nove lozinke, uz proveru heševa iz WordPress-a (App\Support\Auth\LoglasiHasher).
+    // loglasi: argon2id for new passwords, with checks of WordPress hashes (App\Support\Auth\LoglasiHasher).
     'driver' => env('HASH_DRIVER', 'loglasi'),
 
     'bcrypt' => [

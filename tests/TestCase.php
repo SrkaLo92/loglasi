@@ -9,7 +9,7 @@ abstract class TestCase extends BaseTestCase
 {
     use RefreshDatabase;
 
-    /** Laravel u testu inače skida kosu crtu na kraju URL-a; na sajtu je ona deo kanonske adrese. */
+    /** In tests Laravel otherwise drops the trailing slash of the URL; on the site it is part of the canonical address. */
     protected function prepareUrlForRequest($uri)
     {
         $uri = (string) $uri;

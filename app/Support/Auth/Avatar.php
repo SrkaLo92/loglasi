@@ -7,12 +7,12 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
 
-/** Profilna slika: kvadrat 400 px (WebP), na disku "public" u avatars/{id}/. */
+/** Profile photo: a 400 px square (WebP), on the "public" disk in avatars/{id}/. */
 class Avatar
 {
     public const SIZE = 400;
 
-    /** Čuva sliku iz fajla na disku i vraća putanju; staru sliku briše. */
+    /** Stores the image from a file on disk and returns the path; deletes the old image. */
     public static function storeFromFile(User $user, string $sourcePath): string
     {
         $binary = @file_get_contents($sourcePath);
@@ -39,7 +39,7 @@ class Avatar
         imagealphablending($target, false);
         imagesavealpha($target, true);
         imagefill($target, 0, 0, imagecolorallocatealpha($target, 255, 255, 255, 127));
-        // Isečak iz sredine, pa smanjenje.
+        // Crop from the middle, then shrink.
         imagecopyresampled($target, $source, 0, 0, (int) (($w - $side) / 2), (int) (($h - $side) / 2), $size, $size, $side, $side);
 
         ob_start();

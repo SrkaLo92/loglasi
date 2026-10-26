@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
-/** O nama, Uslovi korišćenja, Politika privatnosti, pravni tekstovi za plaćanje i Česta pitanja: tekst iz podešavanja. */
+/** O nama, Uslovi korišćenja, Politika privatnosti, the legal payment texts and Česta pitanja: text from the settings. */
 class TextPageController extends Controller
 {
     private const PAGES = [

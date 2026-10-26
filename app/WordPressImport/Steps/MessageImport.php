@@ -5,8 +5,8 @@ namespace App\WordPressImport\Steps;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Poruke iz Listivo tabele (config uvoz.messages). Razgovor = oglas + kupac,
- * a za poruke bez oglasa par korisnika. Stare poruke se vode kao pročitane.
+ * Messages from the Listivo table (config wordpress_import.messages). Conversation = listing + buyer,
+ * and a pair of users for messages without a listing. Old messages are marked read.
  */
 class MessageImport extends Step
 {
@@ -29,7 +29,7 @@ class MessageImport extends Step
 
         $query = $this->wp->table($table)->orderBy($c['id']);
         if ($this->ctx->since !== null) {
-            // Datum poruke je u lokalnom vremenu sajta
+            // The message date is in the site's local time
             $query->where($c['created_at'], '>=', $this->ctx->since->copy()->setTimezone('Europe/Belgrade')->format('Y-m-d H:i:s'));
         }
 

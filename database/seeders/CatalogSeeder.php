@@ -12,9 +12,9 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 /**
- * Kategorije, mesta i dodatna polja za lokalni razvoj. Pravi podaci dolaze uvozom
- * iz WordPress-a; slugovi glavnih kategorija su isti kao na sajtu (automobili,
- * nekretnine, mobilni-telefoni, poslovi, usluge, besplatne-stvari). Može da se pokrene više puta.
+ * Categories, places and extra fields for local development. The real data comes from the
+ * WordPress import; the main category slugs are the same as on the site (automobili,
+ * nekretnine, mobilni-telefoni, poslovi, usluge, besplatne-stvari). Can be run again.
  */
 class CatalogSeeder extends Seeder
 {
@@ -46,7 +46,7 @@ class CatalogSeeder extends Seeder
         'Ostalo' => [],
     ];
 
-    /** Loznica i okolina. */
+    /** Loznica and surroundings. */
     private const LOCATIONS = [
         'Loznica', 'Banja Koviljača', 'Lešnica', 'Jadranska Lešnica', 'Tršić', 'Klupci', 'Lipnica',
         'Lozničko Polje', 'Runjani', 'Zajača', 'Voćnjak', 'Brezjak', 'Tekeriš', 'Korenita',
@@ -139,8 +139,8 @@ class CatalogSeeder extends Seeder
 
     /**
      * @param  list<Field>  $fields
-     * @param  list<string>  $required  ključevi obaveznih polja
-     * @param  int  $sortFrom  zajednička polja (stanje, vrsta...) idu posle posebnih
+     * @param  list<string>  $required  keys of the required fields
+     * @param  int  $sortFrom  shared fields (stanje, vrsta...) go after the specific ones
      */
     private function attach(string $categoryName, array $fields, array $required = [], int $sortFrom = 0): void
     {
@@ -163,7 +163,7 @@ class CatalogSeeder extends Seeder
     }
 
     /**
-     * ["Novo", ...] ili ["novo" => "Novo", ...] u [{value, label}].
+     * ["Novo", ...] or ["novo" => "Novo", ...] to [{value, label}].
      *
      * @return list<array{value: string, label: string}>
      */
@@ -178,7 +178,7 @@ class CatalogSeeder extends Seeder
         return $out;
     }
 
-    /** Slug bez dijakritika: "Građevinarstvo" => "gradjevinarstvo", "Kuće" => "kuce". */
+    /** Slug without diacritics: "Građevinarstvo" => "gradjevinarstvo", "Kuće" => "kuce". */
     private function slug(string $text): string
     {
         return Str::slug(strtr($text, ['đ' => 'dj', 'Đ' => 'Dj']));

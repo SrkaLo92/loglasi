@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * Tokeni mobilne aplikacije: access token (Sanctum, 15 minuta) i refresh token (30 dana).
- * Refresh token se čuva samo kao SHA-256 heš i menja se pri svakom osvežavanju.
+ * Mobile app tokens: access token (Sanctum, 15 minutes) and refresh token (30 days).
+ * The refresh token is stored only as a SHA-256 hash and changes on every refresh.
  */
 class ApiTokens
 {
@@ -19,7 +19,7 @@ class ApiTokens
     public const REFRESH_DAYS = 30;
 
     /**
-     * Novi par tokena za uređaj.
+     * New token pair for a device.
      *
      * @return array{access_token:string, refresh_token:string, expires_in:int}
      */
@@ -33,8 +33,8 @@ class ApiTokens
     }
 
     /**
-     * Zamena refresh tokena za novi par. Vraća null ako token ne važi.
-     * Ako se iskoristi već zamenjen token (moguća krađa), opoziva se ceo lanac tog uređaja.
+     * Swaps a refresh token for a new pair. Returns null if the token is not valid.
+     * If an already swapped token is used (possible theft), the whole chain of that device is revoked.
      *
      * @return array{user:User, tokens:array{access_token:string, refresh_token:string, expires_in:int}}|null
      */
@@ -66,7 +66,7 @@ class ApiTokens
         });
     }
 
-    /** Odjava jednog uređaja: refresh token iz zahteva i/ili onaj za koji je vezan trenutni access token. */
+    /** Logs out one device: the refresh token from the request and/or the one the current access token is tied to. */
     public static function revokeDevice(User $user, ?PersonalAccessToken $current, ?string $plainRefresh): void
     {
         $ids = [];
@@ -88,7 +88,7 @@ class ApiTokens
         $current?->delete();
     }
 
-    /** Odjava sa svih uređaja (i posle promene lozinke ili blokiranja). */
+    /** Logs out of every device (also after a password change or a block). */
     public static function revokeAll(User $user): void
     {
         $user->refreshTokens()->whereNull('revoked_at')->update(['revoked_at' => now()]);
@@ -122,7 +122,7 @@ class ApiTokens
         ];
     }
 
-    /** Opoziva token i sve koji su nastali iz njega. */
+    /** Revokes the token and every token made from it. */
     private static function revokeChain(RefreshToken $token): void
     {
         $ids = [];

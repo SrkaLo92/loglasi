@@ -11,9 +11,9 @@ use Tests\TestCase;
 use Throwable;
 
 /**
- * Testovi uvoza rade nad primerom WordPress baze (tests/Fixtures/wordpress/wordpress.sql)
- * koja se pre svakog testa učitava u posebnu bazu: WP_DB_TEST_DATABASE, ili ime test baze
- * sa „_wp” (lb_uvoz_test → lb_uvoz_wp_test).
+ * The import tests run against a sample WordPress database (tests/Fixtures/wordpress/wordpress.sql)
+ * which is loaded into a separate database before every test: WP_DB_TEST_DATABASE, or the test database name
+ * with "_wp" (lb_uvoz_test → lb_uvoz_wp_test).
  */
 abstract class WordPressImportTestCase extends TestCase
 {
@@ -34,7 +34,7 @@ abstract class WordPressImportTestCase extends TestCase
         $base = config('database.connections.'.config('database.default'));
         config([
             'database.connections.'.WordPress::CONNECTION => array_merge($base, ['database' => $database, 'prefix' => 'wp_', 'strict' => false]),
-            // Posebna veza bez baze: CREATE DATABASE na glavnoj vezi bi prekinuo transakciju testa.
+            // A separate connection without a database: CREATE DATABASE on the main connection would break the test transaction.
             'database.connections.uvoz_server' => array_merge($base, ['database' => '']),
         ]);
         DB::purge(WordPress::CONNECTION);

@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Kratki token za mobilnu aplikaciju (Sanctum, 15 minuta). Vezan je za refresh token uređaja.
+        // Short-lived token for the mobile app (Sanctum, 15 minutes). Tied to the device's refresh token.
         Schema::create('personal_access_tokens', function (Blueprint $table) {
             $table->id();
             $table->morphs('tokenable');

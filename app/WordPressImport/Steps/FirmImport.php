@@ -8,14 +8,14 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-/** Profili firmi za naloge „business” (polja iz loglasi-core, inc/profil). */
+/** Firm profiles for "business" accounts (fields from loglasi-core, inc/profil). */
 class FirmImport extends Step
 {
     public function run(): void
     {
         $keys = config('wordpress_import.usermeta');
 
-        // Svi poslovni nalozi po datumu registracije; prvih N su „osnivačke” firme (besplatno).
+        // All business accounts by registration date; the first N are "founding" firms (free).
         $firmIds = $this->wp->table('users as u')
             ->join('usermeta as m', 'm.user_id', '=', 'u.ID')
             ->where('m.meta_key', $keys['account_type'])
@@ -100,7 +100,7 @@ class FirmImport extends Step
         }
     }
 
-    /** Radno vreme {1..7: tekst}; null kad ništa nije upisano. */
+    /** Opening hours {1..7: text}; null when nothing is entered. */
     private function hours(mixed $raw): ?string
     {
         $saved = Text::unserialize($raw);

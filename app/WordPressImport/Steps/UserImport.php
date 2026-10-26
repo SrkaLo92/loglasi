@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * Korisnici sa istim ID-jem i slugom (user_nicename). Heš lozinke se prenosi
- * neizmenjen ($P$… phpass ili $wp$2y$…), mimo „hashed” cast-a modela.
+ * Users with the same ID and slug (user_nicename). The password hash is carried over
+ * unchanged ($P$… phpass or $wp$2y$…), bypassing the model's "hashed" cast.
  */
 class UserImport extends Step
 {
@@ -40,7 +40,7 @@ class UserImport extends Step
         $this->ctx->forget('users');
     }
 
-    /** Za --since: novi nalozi i autori izmenjenih oglasa i poruka. */
+    /** For --since: new accounts and the authors of changed listings and messages. */
     private function restrictToDelta($query, string $since): void
     {
         $postType = config('wordpress_import.post_type');
@@ -118,7 +118,7 @@ class UserImport extends Step
             $this->report->note('users', "{$label}: neispravan telefon „{$rawPhone}”, nije prenet");
         }
 
-        // user_registered je u UTC
+        // user_registered is in UTC
         $registered = $this->ctx->date((string) $user->user_registered) ?? now();
 
         $avatar = null;
@@ -135,7 +135,7 @@ class UserImport extends Step
             'password' => (string) $user->user_pass,
             'slug' => $slug,
             'account_type' => ($isFirm ? AccountType::Firm : AccountType::Private)->value,
-            // Uloga dodeljena u novom adminu ostaje, osim kad je nalog administrator u WordPress-u.
+            // A role given in the new admin stays, unless the account is an administrator in WordPress.
             'role' => $role === Role::Admin ? $role->value : ($existing->role ?? Role::User->value),
             'phone' => $phone !== '' ? $phone : null,
             'phone_verified_at' => $first($keys['phone_verified']) === '1' ? ($existing->phone_verified_at ?? now()) : null,
@@ -152,7 +152,7 @@ class UserImport extends Step
                 'email_verified_at' => $registered,
                 'created_at' => $registered,
             ];
-            // Isti ID kao u WordPress-u, ako je slobodan.
+            // Same ID as in WordPress, if it is free.
             if (! DB::table('users')->where('id', $wpId)->exists()) {
                 $values['id'] = $wpId;
             } else {

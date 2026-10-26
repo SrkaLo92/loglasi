@@ -11,7 +11,7 @@ abstract class SeoTestCase extends TestCase
     {
         parent::setUp();
 
-        // Location mora biti tačno ova putanja na domenu zahteva (sa kosom crtom na kraju).
+        // Location must be exactly this path on the request's domain (with the trailing slash).
         TestResponse::macro('assertTarget', function (string $path) {
             /** @var TestResponse $this */
             return $this->assertHeader('Location', rtrim(config('app.url'), '/').$path);

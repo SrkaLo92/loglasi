@@ -29,11 +29,11 @@ return new class extends Migration
             $table->index(['conversation_id', 'id']);
         });
 
-        // Prijave oglasa i korisnika.
+        // Reports of listings and users.
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
             $table->foreignId('reporter_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->morphs('reportable'); // Listing ili User
+            $table->morphs('reportable'); // Listing or User
             $table->string('reason', 32);
             $table->text('details')->nullable();
             $table->string('status', 16)->default('open')->index();
@@ -42,7 +42,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Tokeni za push obaveštenja (mobilna aplikacija).
+        // Push notification tokens (mobile app).
         Schema::create('devices', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();

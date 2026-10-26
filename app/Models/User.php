@@ -102,9 +102,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->phone_verified_at !== null;
     }
 
-    // Nalozi: tokeni, mesto, slika, obaveštenja
+    // Accounts: tokens, place, avatar, notifications
 
-    /** Podrazumevana obaveštenja u aplikaciji (NotificationSettings iz ugovora). */
+    /** Default in-app notification settings (NotificationSettings from the contract). */
     public const NOTIFICATION_DEFAULTS = [
         'messages' => true,
         'listing_status' => true,
@@ -133,7 +133,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->status === UserStatus::Blocked;
     }
 
-    /** Uloga za mobilnu aplikaciju: private, firm ili admin (admin i moderator). */
+    /** Role for the mobile app: private, firm or admin (admin and moderator). */
     public function apiRole(): string
     {
         return match (true) {
@@ -148,7 +148,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->avatar_path ? Storage::disk('public')->url($this->avatar_path) : null;
     }
 
-    /** Inicijali za krug bez slike: "Marko Petrović" → "MP". */
+    /** Initials for the circle without a photo: "Marko Petrović" → "MP". */
     public function initials(): string
     {
         $words = preg_split('/\s+/u', trim((string) $this->name), -1, PREG_SPLIT_NO_EMPTY) ?: ['?'];

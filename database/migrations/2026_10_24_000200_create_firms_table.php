@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Profil firme (nalog tipa "firm"). Biznis paket važi do biznis_until.
+        // Firm profile (account of type "firm"). The Biznis package is valid until biznis_until.
         Schema::create('firms', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->unique()->constrained()->cascadeOnDelete();
@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('pib', 16)->nullable();
             $table->string('mb', 16)->nullable();
             $table->timestamp('biznis_until')->nullable();
-            $table->boolean('founding_free')->default(false); // jedna od prvih 30 firmi
+            $table->boolean('founding_free')->default(false); // one of the first 30 firms
             $table->timestamp('verified_at')->nullable();
             $table->timestamps();
         });

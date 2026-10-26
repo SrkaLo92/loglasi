@@ -18,16 +18,16 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
- * SEO podaci jedne strane: title, opis, canonical, robots, Open Graph, JSON-LD.
- * Jedna instanca po zahtevu; kontroler je popuni, `partials/seo-head` je ispiše.
+ * SEO data of one page: title, description, canonical, robots, Open Graph, JSON-LD.
+ * One instance per request; the controller fills it, `partials/seo-head` prints it.
  *
- *   Seo::for($listing);                      // oglas, kategorija, firma, profil
+ *   Seo::for($listing);                      // listing, category, firm, profile
  *   Seo::for($category, ['location' => $mesto, 'count' => 12]);
- *   Seo::get()->page('Česta pitanja', 'Odgovori na ...')->faq($pitanja);
+ *   Seo::get()->page('Česta pitanja', 'Odgovori na ...')->faq($questions);
  *   Seo::get()->title('...')->description('...')->noindex();
  *
- * Pravila za noindex i canonical iz upita (filteri, paginacija) i za strane naloga
- * primenjuju se sama, u resolve(). Opis: docs/moduli/seo.md
+ * The noindex and canonical rules for the query (filters, pagination) and for the account pages
+ * are applied on their own, in resolve(). Description: docs/moduli/seo.md
  */
 class Seo
 {
@@ -65,7 +65,7 @@ class Seo
         return app(self::class);
     }
 
-    /** Popunjava stranu prema modelu: Listing, Category (+ mesto), User (firma ili privatni profil), Firm. */
+    /** Fills the page from a model: Listing, Category (+ place), User (firm or private profile), Firm. */
     public static function for(Model $model, array $context = []): self
     {
         $seo = static::get();
@@ -109,7 +109,7 @@ class Seo
         return $this;
     }
 
-    /** Putanja (/oglasi/x/) ili apsolutni URL; domen je uvek kanonski. */
+    /** Path (/oglasi/x/) or absolute URL; the domain is always the canonical one. */
     public function canonical(?string $pathOrUrl): self
     {
         $this->canonical = $pathOrUrl;
@@ -146,7 +146,7 @@ class Seo
         return $this;
     }
 
-    /** Open Graph tip: website, product, profile, article. */
+    /** Open Graph type: website, product, profile, article. */
     public function type(string $type): self
     {
         $this->ogType = $type;
@@ -166,7 +166,7 @@ class Seo
         return $this;
     }
 
-    /** @param list<array{0: string, 1?: ?string}|array{name: string, url?: ?string}> $items [naziv, putanja] */
+    /** @param list<array{0: string, 1?: ?string}|array{name: string, url?: ?string}> $items [name, path] */
     public function breadcrumbs(array $items): self
     {
         $this->breadcrumbs = [];
@@ -185,7 +185,7 @@ class Seo
         return $this;
     }
 
-    /** Dodatni JSON-LD objekat (bez @context). */
+    /** Extra JSON-LD object (without @context). */
     public function schema(array $schema): self
     {
         $this->schemas[] = $schema;
@@ -221,7 +221,7 @@ class Seo
         return $this;
     }
 
-    // ---- gotovi šabloni (keyword mapa) ----
+    // ---- ready-made templates (keyword map) ----
 
     public function home(): self
     {
@@ -231,7 +231,7 @@ class Seo
             ->canonical('/');
     }
 
-    /** Obična strana (O nama, FAQ, Kontakt...). */
+    /** Plain page (O nama, FAQ, Kontakt...). */
     public function page(string $name, ?string $description = null, ?string $path = null): self
     {
         $this->title(static::fitTitle($name))->h1($name)->description($description ?? config('seo.tagline'));
@@ -243,7 +243,7 @@ class Seo
         return $this->breadcrumbs([['Početna', '/'], [$name, $path]]);
     }
 
-    /** /oglasi/ (svi oglasi). */
+    /** /oglasi/ (all listings). */
     public function listings(?int $count = null): self
     {
         $count ??= static::activeListings()->count();
@@ -373,7 +373,7 @@ class Seo
         return $this->schema($product);
     }
 
-    /** /oglasi/{kategorija}/ i /oglasi/{kategorija}/{mesto}/ */
+    /** /oglasi/{category}/ and /oglasi/{category}/{place}/ */
     public function category(Category $category, ?Location $location = null, ?int $count = null): self
     {
         $count ??= static::categoryCount($category, $location);
@@ -459,7 +459,7 @@ class Seo
         return $items === [] ? $this : $this->schema(['@type' => 'ItemList', '@id' => Url::canonical($path).'#listings', 'itemListElement' => $items]);
     }
 
-    /** Profil firme (/korisnik/{slug}/): indeksabilan uz aktivan Biznis paket, LocalBusiness schema. */
+    /** Firm profile (/korisnik/{slug}/): indexable with an active business package, LocalBusiness schema. */
     public function firm(User $user, ?string $activity = null): self
     {
         $user->loadMissing('firm.location');
@@ -530,7 +530,7 @@ class Seo
         return $this->schema($business);
     }
 
-    /** Profil privatnog lica: 200, noindex, follow. */
+    /** Private person's profile: 200, noindex, follow. */
     public function profile(User $user): self
     {
         $path = '/korisnik/'.$user->slug.'/';
@@ -545,7 +545,7 @@ class Seo
             ->noindex();
     }
 
-    // ---- čitanje ----
+    // ---- reading ----
 
     public function getTitle(): string
     {
@@ -558,7 +558,7 @@ class Seo
     }
 
     /**
-     * Konačni podaci za <head>, uz pravila iz zahteva (filteri, paginacija, strane naloga).
+     * Final data for <head>, with the rules from the request (filters, pagination, account pages).
      *
      * @return array{title: string, description: string, robots: string, canonical: ?string, og: array<string, string>, twitter: array<string, string>, jsonld: list<array<string, mixed>>}
      */
@@ -580,7 +580,7 @@ class Seo
             $indexable = false;
             $canonical = null;
         } elseif ($filters !== []) {
-            // Filtrirana pretraga: noindex, canonical na čistu stranu.
+            // Filtered search: noindex, canonical to the clean page.
             $indexable = false;
             $canonical = Url::canonical(preg_replace('#page/\d+/$#', '', Url::normalizePath($canonicalPath)));
         } elseif ($isPaged) {
@@ -736,7 +736,7 @@ class Seo
         return [['@context' => 'https://schema.org', '@graph' => $graph]];
     }
 
-    // ---- pomoćne ----
+    // ---- helpers ----
 
     /** SEO text from PageText (admin can change it), with {x} replaced and empty commas or brackets removed. */
     public static function text(string $key, array $vars = []): string
@@ -755,7 +755,7 @@ class Seo
         return str_contains($title, (string) config('seo.site_name')) ? $title : $title.config('seo.title_suffix');
     }
 
-    /** „Svi oglasi Loznica, strana 2 | loglasi.rs” */
+    /** "Svi oglasi Loznica, strana 2 | loglasi.rs" */
     public static function paged(string $title, int $page): string
     {
         $suffix = (string) config('seo.title_suffix');
@@ -846,7 +846,7 @@ class Seo
             || static::activeListings()->where('user_id', $user->id)->exists();
     }
 
-    /** Aktivan oglas: objavljen i nije istekao. */
+    /** Active listing: published and not expired. */
     public static function isActive(Listing $listing): bool
     {
         return $listing->status === ListingStatus::Published
@@ -854,7 +854,7 @@ class Seo
             && ($listing->expires_at === null || $listing->expires_at->isFuture());
     }
 
-    /** Upit za aktivne oglase (objavljeni, neistekli). */
+    /** Query for active listings (published, not expired). */
     public static function activeListings()
     {
         return Listing::query()->published()
@@ -866,7 +866,7 @@ class Seo
         return max(1, (int) Settings::get('seo_place_min_listings', config('seo.place_min_listings', 3)));
     }
 
-    /** „1 oglas”, „21 oglas”, „3 oglasa”, „12 oglasa”. */
+    /** "1 oglas", "21 oglas", "3 oglasa", "12 oglasa". */
     public static function countLabel(int $count): string
     {
         $one = $count % 10 === 1 && $count % 100 !== 11;
@@ -874,7 +874,7 @@ class Seo
         return number_format($count, 0, ',', '.').' '.($one ? 'oglas' : 'oglasa');
     }
 
-    /** Title do 60 znakova sa „ | loglasi.rs”; ako je predugačak, skraćuje se sadržaj, ne sufiks. */
+    /** Title up to 60 characters with " | loglasi.rs"; if it is too long, the content is shortened, not the suffix. */
     public static function fitTitle(string $text, ?string $shorter = null): string
     {
         $suffix = config('seo.title_suffix');
@@ -896,7 +896,7 @@ class Seo
         return rtrim(mb_substr($text, 0, $max - 1)).'…';
     }
 
-    /** Čist tekst bez HTML-a, skraćen na granici reči. */
+    /** Plain text without HTML, cut at a word boundary. */
     public static function excerpt(string $text, int $max): string
     {
         $text = static::clean($text);
@@ -918,7 +918,7 @@ class Seo
         return trim((string) preg_replace('/\s+/u', ' ', $text));
     }
 
-    /** @return array{0: string, 1: ?string} [naziv za title/H1, akuzativ za opis] */
+    /** @return array{0: string, 1: ?string} [name for title/H1, accusative for the description] */
     private static function phrase(Category $category): array
     {
         $map = config('seo.phrases.'.$category->slug);
@@ -931,7 +931,7 @@ class Seo
         return $accusative !== null ? 'za '.$accusative : 'u kategoriji '.$category->name;
     }
 
-    /** Broj aktivnih oglasa u kategoriji i njenim potkategorijama (opciono u jednom mestu). */
+    /** Number of active listings in the category and its subcategories (optionally in one place). */
     private static function categoryCount(Category $category, ?Location $location): int
     {
         $ids = Category::query()->where('parent_id', $category->id)->pluck('id')->push($category->id);
@@ -958,7 +958,7 @@ class Seo
     private static function absolute(string $url): string
     {
         if (preg_match('#^https?://#i', $url)) {
-            // Slike sa diska imaju domen iz APP_URL; u <head> uvek kanonski domen.
+            // Images from the disk have the APP_URL domain; <head> always uses the canonical domain.
             $parts = parse_url($url);
 
             return config('seo.base_url').($parts['path'] ?? '/').(isset($parts['query']) ? '?'.$parts['query'] : '');
@@ -1005,7 +1005,7 @@ class Seo
     }
 
     /**
-     * Radno vreme firme u schema obliku. Prihvata {"mon": "08:00-16:00", ...} ili
+     * Firm opening hours in schema form. Accepts {"mon": "08:00-16:00", ...} or
      * [{"day": "mon", "open": "08:00", "close": "16:00"}].
      */
     private static function openingHours(mixed $hours): array

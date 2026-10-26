@@ -7,8 +7,8 @@ use App\Models\Redirect;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Tabele `redirects` i `gone_urls` kao keširane mape (čitaju se na svakom zahtevu).
- * Keš se briše kad se red promeni (SeoServiceProvider).
+ * The `redirects` and `gone_urls` tables as cached maps (read on every request).
+ * The cache is cleared when a row changes (SeoServiceProvider).
  */
 class UrlTables
 {
@@ -16,7 +16,7 @@ class UrlTables
 
     private const GONE_KEY = 'seo.gone.map';
 
-    /** Ključ za poređenje: normalizovana putanja, dekodirana, malim slovima, uz upit bez praćenja. */
+    /** Comparison key: normalized path, decoded, lower case, with the query minus tracking. */
     public static function key(string $path, array $query = []): string
     {
         $key = mb_strtolower(Url::normalizePath(rawurldecode($path)));
@@ -30,7 +30,7 @@ class UrlTables
         return $key;
     }
 
-    /** Ključ iz zapisa u tabeli („/stari-slug/”, „/?p=123”, „https://loglasi.rs/x”). */
+    /** Key from a table row ("/stari-slug/", "/?p=123", "https://loglasi.rs/x"). */
     public static function keyFromStored(string $stored): string
     {
         $parts = parse_url(trim($stored));
@@ -58,7 +58,7 @@ class UrlTables
         });
     }
 
-    /** @return array<string, int> putanja => id */
+    /** @return array<string, int> path => id */
     public static function gone(): array
     {
         return Cache::rememberForever(self::GONE_KEY, function () {

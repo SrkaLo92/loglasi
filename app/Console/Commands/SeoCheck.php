@@ -15,8 +15,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 /**
- * Provera indeksiranih URL-ova iz Google Search Console izvoza (09-deploy-seo.md, odeljak 9):
- * za svaki URL očekivani status po obrascu (200 / 301 na odredište / 404 / 410), robots i canonical.
+ * Checks indexed URLs from a Google Search Console export (09-deploy-seo.md, section 9):
+ * for each URL the expected status by pattern (200 / 301 to the target / 404 / 410), robots and canonical.
  *
  *   php artisan seo:check raw-indeksirane.tsv http://loglasirs.local --csv=rezultat.csv
  */
@@ -96,7 +96,7 @@ class SeoCheck extends Command
         return collect($rows)->every(fn ($r) => $r['ok']) ? self::SUCCESS : self::FAILURE;
     }
 
-    /** @return list<string> URL-ovi iz prve kolone, bez zaglavlja i duplikata. */
+    /** @return list<string> URLs from the first column, without the header and duplicates. */
     private function readUrls(string $file): array
     {
         $urls = [];
@@ -112,7 +112,7 @@ class SeoCheck extends Command
         return array_keys($urls);
     }
 
-    /** Putanja i upit iz URL-a (domen se zamenjuje adresom koja se proverava). */
+    /** Path and query of the URL (the domain is replaced by the address being checked). */
     private function parts(string $url): array
     {
         $parts = parse_url($url);
@@ -123,7 +123,7 @@ class SeoCheck extends Command
     }
 
     /**
-     * Očekivano ponašanje po obrascu iz tabele 9.2.
+     * Expected behaviour by the pattern from table 9.2.
      *
      * @return array{pattern: string, status: ?int, target?: ?string, index?: ?bool, xrobots?: bool, note?: string}
      */
@@ -361,7 +361,7 @@ class SeoCheck extends Command
         return ['pattern' => $firm ? '/korisnik/ (firma)' : '/korisnik/ (privatni)', 'status' => 200, 'index' => $firm];
     }
 
-    /** Šalje zahtev bez praćenja preusmerenja i upoređuje sa očekivanim. */
+    /** Sends a request without following redirects and compares it with the expected result. */
     private function check(string $url, array $expected): array
     {
         [$path, , $rawQuery] = $this->parts($url);
@@ -460,7 +460,7 @@ class SeoCheck extends Command
         }
     }
 
-    /** robots (meta + X-Robots-Tag) i canonical iz HTML-a. */
+    /** robots (meta + X-Robots-Tag) and canonical from the HTML. */
     private function readHead(Response $response): array
     {
         $html = (string) $response->body();

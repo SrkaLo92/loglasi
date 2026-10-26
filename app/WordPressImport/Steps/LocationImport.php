@@ -6,7 +6,7 @@ use App\WordPressImport\Text;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-/** Mesta (taksonomija listivo_14144). Nova šema je ravna lista; naselja ostaju kao zasebna mesta. */
+/** Places (taxonomy listivo_14144). The new schema is a flat list; villages stay separate places. */
 class LocationImport extends Step
 {
     public function run(): void

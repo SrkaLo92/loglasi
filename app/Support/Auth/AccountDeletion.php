@@ -10,12 +10,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * Brisanje naloga na zahtev korisnika (sajt i aplikacija).
+ * Deletes an account on the user's request (site and app).
  *
- * Brišu se oglasi (meko, da stari URL-ovi vrate 410), razgovori i poruke, omiljeni, sačuvane
- * pretrage, ocene (date i dobijene), uređaji, tokeni, profil firme i slika. Red korisnika ostaje bez ličnih podataka
- * (ime, email, telefon, lozinka), da bi narudžbine i knjigovodstvo ostali tačni.
- * Isti email posle može ponovo da se registruje.
+ * Deleted: listings (soft, so the old URLs return 410), conversations and messages, favourites, saved
+ * searches, ratings (given and received), devices, tokens, the firm profile and the avatar. The user row stays without personal data
+ * (name, email, phone, password), so orders and bookkeeping stay correct.
+ * The same email can register again later.
  */
 class AccountDeletion
 {

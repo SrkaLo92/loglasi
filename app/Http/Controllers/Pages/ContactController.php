@@ -60,7 +60,7 @@ class ContactController extends Controller
 
         RateLimiter::hit($key, (int) $cfg['limit_minutes'] * 60);
 
-        // Zamka: polje koje ljudi ne vide. Botu se pokaže uspeh, a poruka se ne šalje.
+        // Trap: a field people do not see. A bot is shown success, and the message is not sent.
         if (trim((string) $request->input('sajt', '')) !== '') {
             Log::info('Kontakt forma: odbijena poruka (zamka).', ['ip' => $request->ip()]);
 

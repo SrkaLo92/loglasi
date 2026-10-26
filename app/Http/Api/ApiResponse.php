@@ -19,26 +19,26 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Throwable;
 
 /**
- * Zajedničko ponašanje API odgovora (isto kao Loglasi_API_Http u WordPress-u):
- * JSON bez \u escape-a, Cache-Control, slab ETag i 304, oblik greške iz ugovora.
- * Uputstvo: docs/moduli/katalog.md, deo „API pomoćnici”.
+ * Shared behaviour of API responses (the same as Loglasi_API_Http in WordPress):
+ * JSON without \u escapes, Cache-Control, weak ETag and 304, the contract's error shape.
+ * Guide: docs/moduli/katalog.md, section "API pomoćnici".
  */
 class ApiResponse
 {
     public const JSON_FLAGS = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
 
-    /** Podrazumevani keš za javne GET odgovore. */
+    /** Default cache for public GET responses. */
     public const CACHE_DEFAULT = 'public, max-age=60';
 
-    /** Katalog i drugi podaci koji se retko menjaju. */
+    /** Catalog and other data that rarely changes. */
     public const CACHE_CATALOG = 'public, max-age=300';
 
-    /** Odgovori za prijavljenog korisnika. */
+    /** Responses for a logged-in user. */
     public const CACHE_PRIVATE = 'private, no-cache';
 
     /**
-     * Uspešan odgovor. Za GET/HEAD dodaje Cache-Control i ETag i vraća 304 bez tela
-     * kad se If-None-Match poklapa.
+     * Successful response. For GET/HEAD it adds Cache-Control and ETag and returns 304 without a body
+     * when If-None-Match matches.
      *
      * @param  array<string, string>  $headers
      */
@@ -74,7 +74,7 @@ class ApiResponse
     }
 
     /**
-     * Greška po ugovoru. `fields` se šalje samo kad nije prazno.
+     * Error per the contract. `fields` is sent only when it is not empty.
      *
      * @param  array<string, string>  $fields
      * @param  array<string, string>  $headers
@@ -92,13 +92,13 @@ class ApiResponse
         return $response;
     }
 
-    /** Slab ETag nad telom odgovora. */
+    /** Weak ETag over the response body. */
     public static function etag(string $content): string
     {
         return 'W/"'.md5($content).'"';
     }
 
-    /** If-None-Match prema ETag-u: više vrednosti, slabo poređenje, „*”. */
+    /** If-None-Match against the ETag: several values, weak comparison, "*". */
     public static function matches(string $header, string $etag): bool
     {
         $header = trim($header);
@@ -121,7 +121,7 @@ class ApiResponse
         return false;
     }
 
-    /** Uključuje oblik greške za sve rute pod /api (poziva se iz bootstrap/app.php). */
+    /** Turns on the error shape for every route under /api (called from bootstrap/app.php). */
     public static function register(Exceptions $exceptions): void
     {
         $exceptions->render(function (Throwable $e, Request $request) {
@@ -129,7 +129,7 @@ class ApiResponse
         });
     }
 
-    /** Pretvara izuzetak u grešku po ugovoru. */
+    /** Turns an exception into an error per the contract. */
     public static function fromException(Throwable $e, Request $request): ?JsonResponse
     {
         if ($e instanceof HttpResponseException) {
@@ -143,7 +143,7 @@ class ApiResponse
         if ($e instanceof ValidationException) {
             $fields = array_map(fn (array $messages) => (string) reset($messages), $e->errors());
 
-            // Parametri pretrage (GET) daju 400, telo zahteva kod upisa 422, kao u ugovoru.
+            // Search parameters (GET) give 400, the request body on writes 422, as in the contract.
             return $request->isMethodSafe()
                 ? self::error('invalid_param', 'Neispravni parametri.', 400, $fields)
                 : self::error('validation_failed', 'Proverite unete podatke.', 422, $fields);

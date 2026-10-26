@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * Dodatna polja oglasa. Listivo čuva polja izbora kao taksonomije listivo_<ID>,
- * a broj/tekst kao meta listivo_<ID>; <ID> je objava sa definicijom polja (naslov = naziv).
- * Polja se pronalaze iz podataka, a config('wordpress_import.fields') može da pregazi ključ, naziv, tip i jedinicu.
+ * Extra listing fields. Listivo stores choice fields as taxonomies listivo_<ID>,
+ * and number/text as meta listivo_<ID>; <ID> is the post with the field definition (title = name).
+ * Fields are found from the data, and config('wordpress_import.fields') can override key, name, type and unit.
  */
 class FieldImport extends Step
 {
@@ -71,7 +71,7 @@ class FieldImport extends Step
         return $key;
     }
 
-    /** Taksonomije listivo_<ID> koje oglasi koriste (bez kategorije, mesta i valute). */
+    /** listivo_<ID> taxonomies the listings use (without category, place and currency). */
     private function taxonomyFields(): array
     {
         $exclude = [config('wordpress_import.tax_category'), config('wordpress_import.tax_location'), $this->wp->taxonomyOfTerm((int) config('wordpress_import.currency_term_eur'))];
@@ -110,7 +110,7 @@ class FieldImport extends Step
         return $out;
     }
 
-    /** Meta listivo_<ID> na oglasima (broj ili tekst), bez cene i galerije. */
+    /** listivo_<ID> meta on listings (number or text), without price and gallery. */
     private function metaFields(): array
     {
         $priceField = 'listivo_'.(int) config('wordpress_import.price_field_id');
@@ -134,7 +134,7 @@ class FieldImport extends Step
         return $out;
     }
 
-    /** Privremena polja loglasi-core (loglasi_stanje...), samo ako ih neki oglas ima. */
+    /** Temporary loglasi-core fields (loglasi_stanje...), only if some listing has them. */
     private function loglasiFields(): array
     {
         $defs = (array) config('wordpress_import.meta_fields');
@@ -167,7 +167,7 @@ class FieldImport extends Step
     }
 
     /**
-     * Naziv polja = naslov Listivo objave sa istim ID-jem.
+     * Field name = title of the Listivo post with the same ID.
      *
      * @param  string[]  $keys
      * @return array<string, string>

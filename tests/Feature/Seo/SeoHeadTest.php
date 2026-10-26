@@ -19,7 +19,7 @@ class SeoHeadTest extends SeoTestCase
     {
         parent::setUp();
 
-        // Probne rute: prave strane pravi modul oglasa/kataloga, ovde se proverava samo <head>.
+        // Test routes: the real pages are made by the listing/catalog module, only <head> is checked here.
         Route::middleware('web')->group(function () {
             Route::get('oglas/{slug}', function (string $slug) {
                 Seo::for(Listing::withTrashed()->where('slug', $slug)->firstOrFail());

@@ -12,12 +12,12 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Katalog: stablo kategorija sa brojem oglasa, mesta, polja po kategoriji, cene.
+ * Catalog: the category tree with listing counts, places, fields per category, prices.
  *
- * Sve se čita iz keša (jedan zapis po vrsti), a modeli se prave iz keširanih nizova.
- * Keš briše KatalogServiceProvider (događaji modela); posle masovnih izmena preko
- * Query Builder-a (npr. Listing::where(...)->update()) pozvati flushCounts() ili flush().
- * Vraćeni modeli služe za čitanje; za izmenu učitati model iz baze.
+ * Everything is read from the cache (one entry per kind), and models are built from cached arrays.
+ * The cache is cleared by CatalogServiceProvider (model events); after bulk changes through
+ * the Query Builder (e.g. Listing::where(...)->update()) call flushCounts() or flush().
+ * The returned models are for reading; to change one, load the model from the database.
  */
 class Catalog
 {
@@ -29,12 +29,12 @@ class Catalog
 
     public const KEY_PRICES = 'katalog.cene';
 
-    /** Rezervni rok keša, za slučaj izmene mimo događaja modela. */
+    /** Fallback cache lifetime, in case something changes without model events. */
     private const STRUCTURE_TTL = 3600;
 
     private const COUNTS_TTL = 600;
 
-    /** Zaštita od petlje u stablu (roditelj koji pokazuje na potomka). */
+    /** Guard against a loop in the tree (a parent that points to a descendant). */
     private const MAX_DEPTH = 10;
 
     /** @var Collection<int, Category>|null */
@@ -67,7 +67,7 @@ class Catalog
     // ---------------------------------------------------------------- kategorije
 
     /**
-     * Sve kategorije (i neaktivne), po ID-ju, poređane po sort pa nazivu.
+     * All categories (inactive too), by ID, ordered by sort, then name.
      *
      * @return Collection<int, Category>
      */
@@ -91,8 +91,8 @@ class Catalog
     }
 
     /**
-     * Kategorija po putanji iz URL-a: "automobili" ili "vozila/automobili".
-     * Kod više delova svaki mora biti roditelj sledećeg. Samo aktivne kategorije.
+     * Category by a URL path: "automobili" or "vozila/automobili".
+     * With several parts, each must be the parent of the next. Active categories only.
      */
     public function categoryByPath(string $path): ?Category
     {
@@ -117,7 +117,7 @@ class Catalog
     }
 
     /**
-     * Direktna deca, poređana.
+     * Direct children, ordered.
      *
      * @return Collection<int, Category>
      */
@@ -131,7 +131,7 @@ class Catalog
     }
 
     /**
-     * Roditelji od korena do direktnog roditelja (bez same kategorije).
+     * Parents from the root to the direct parent (without the category itself).
      *
      * @return Collection<int, Category>
      */
@@ -143,7 +143,7 @@ class Catalog
     }
 
     /**
-     * Putanja za mrvice: od korena do same kategorije.
+     * Breadcrumb path: from the root to the category itself.
      *
      * @return Collection<int, Category>
      */
@@ -163,7 +163,7 @@ class Catalog
     }
 
     /**
-     * ID kategorije i svih potkategorija, za filter oglasa (whereIn('category_id', ...)).
+     * ID of the category and all its subcategories, for the listing filter (whereIn('category_id', ...)).
      *
      * @return list<int>
      */
@@ -193,7 +193,7 @@ class Catalog
         return $ids;
     }
 
-    /** Aktivna kategorija čiji su svi roditelji aktivni. */
+    /** Active category whose parents are all active. */
     public function isVisible(Category|int $category): bool
     {
         $crumbs = $this->breadcrumbs($category);
@@ -204,8 +204,8 @@ class Catalog
     }
 
     /**
-     * Stablo aktivnih kategorija: [['category' => Category, 'count' => int, 'children' => [...]], ...].
-     * Koren je kategorija bez roditelja.
+     * Tree of active categories: [['category' => Category, 'count' => int, 'children' => [...]], ...].
+     * A root is a category without a parent.
      *
      * @return list<array{category: Category, count: int, children: array}>
      */
@@ -231,8 +231,8 @@ class Catalog
     }
 
     /**
-     * Broj objavljenih oglasa po kategoriji, sa potkategorijama. Oglas ima jednu
-     * kategoriju, pa se u roditelju broji tačno jednom.
+     * Number of published listings per category, with subcategories. A listing has one
+     * category, so it is counted exactly once in the parent.
      *
      * @return array<int, int>
      */
@@ -272,12 +272,12 @@ class Catalog
         return $this->counts()[$category instanceof Category ? $category->id : $category] ?? 0;
     }
 
-    // ---------------------------------------------------------------- polja
+    // ---------------------------------------------------------------- fields
 
     /**
-     * Polja za kategoriju: nasleđena od roditelja pa sopstvena. Redosled: polja bližeg
-     * korenu prvo, pa `sort` iz veze, pa `sort` polja. Kategorija može da promeni
-     * `required` za nasleđeno polje. Svako polje ima atribute `required` (bool) i `position`.
+     * Fields for a category: inherited from the parents, then its own. Order: fields closer to the
+     * root first, then `sort` from the link, then the field's `sort`. A category can change
+     * `required` for an inherited field. Each field has the attributes `required` (bool) and `position`.
      *
      * @return Collection<int, Field>
      */
@@ -375,10 +375,10 @@ class Catalog
         return $this->fields->first(fn (Field $f) => $f->key === $key);
     }
 
-    // ---------------------------------------------------------------- mesta i cene
+    // ---------------------------------------------------------------- places and prices
 
     /**
-     * Mesta po sort pa nazivu.
+     * Places by sort, then name.
      *
      * @return Collection<int, Location>
      */
@@ -402,7 +402,7 @@ class Catalog
     }
 
     /**
-     * Aktivni proizvodi (cene iz admina), po sort.
+     * Active products (prices from the admin), by sort.
      *
      * @return Collection<int, Product>
      */
@@ -415,9 +415,9 @@ class Catalog
         return Product::hydrate($rows);
     }
 
-    // ---------------------------------------------------------------- keš
+    // ---------------------------------------------------------------- cache
 
-    /** Briše keš kategorija, polja i brojeva. */
+    /** Clears the cache of categories, fields and counts. */
     public function flush(): void
     {
         Cache::forget(self::KEY_STRUCTURE);
@@ -427,7 +427,7 @@ class Catalog
         $this->flushCounts();
     }
 
-    /** Briše samo brojeve oglasa (posle promene oglasa). */
+    /** Clears only the listing counts (after a listing changes). */
     public function flushCounts(): void
     {
         Cache::forget(self::KEY_COUNTS);

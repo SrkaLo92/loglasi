@@ -12,7 +12,7 @@ class PricingController extends Controller
 {
     public function __invoke(): View
     {
-        // Pitanje vezano za uslugu se ne prikazuje kad usluga nije aktivna.
+        // A question tied to a service is not shown when the service is not active.
         $faq = array_values(array_filter(
             PageText::list('cenovnik.pitanja'),
             fn ($item) => is_array($item) && (empty($item['uslov']) || Pricing::product((string) $item['uslov']) !== null),

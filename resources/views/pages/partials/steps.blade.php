@@ -1,4 +1,4 @@
-{{-- Numerisani koraci; tekst koraka sme da ima Markdown link. --}}
+{{-- Numbered steps; a step's text may contain a Markdown link. --}}
 @use('App\Support\Pages\PageText')
 <ol class="lgx-koraci{{ ($mreza ?? false) ? ' lgx-koraci--mreza' : '' }}">
 	@foreach ($koraci as $i => $korak)

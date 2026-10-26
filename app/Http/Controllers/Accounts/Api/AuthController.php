@@ -13,7 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-/** /auth/*: registracija, prijava, osvežavanje tokena, odjava, nova lozinka. */
+/** /auth/*: registration, login, token refresh, logout, new password. */
 class AuthController extends Controller
 {
     public function register(Request $request): JsonResponse

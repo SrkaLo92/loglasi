@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-/** Registracija i provera prijave, isto za sajt i za mobilnu aplikaciju. */
+/** Registration and login checks, the same for the site and the mobile app. */
 class Accounts
 {
     public const PASSWORD_MIN = 8;
@@ -43,7 +43,7 @@ class Accounts
     }
 
     /**
-     * Novi nalog privatnog lica. Tip firme i uloge postavlja samo administrator.
+     * New private account. Only an administrator sets the firm type and roles.
      *
      * @param  array{name:string, email:string, phone?:?string, password:string}  $data
      */
@@ -74,16 +74,16 @@ class Accounts
     }
 
     /**
-     * Provera emaila i lozinke. Stari heš (WordPress, bcrypt) se odmah menja u argon2id.
+     * Checks the email and password. An old hash (WordPress, bcrypt) is changed to argon2id at once.
      *
-     * @return array{0: ?User, 1: ?string} korisnik ili kod greške (invalid_credentials, account_blocked)
+     * @return array{0: ?User, 1: ?string} the user, or an error code (invalid_credentials, account_blocked)
      */
     public static function attempt(string $email, string $password): array
     {
         $user = User::where('email', self::normalizeEmail($email))->first();
 
         if ($user === null) {
-            // Isto vreme odgovora i kad nalog ne postoji.
+            // Same response time when the account does not exist.
             Hash::check($password, self::dummyHash());
 
             return [null, 'invalid_credentials'];
@@ -107,7 +107,7 @@ class Accounts
 
     public static function uniqueSlug(string $name): string
     {
-        $base = Str::slug($name, '-', 'sr') ?: 'korisnik'; // đ → dj, kao WordPress za sr_RS
+        $base = Str::slug($name, '-', 'sr') ?: 'korisnik'; // đ → dj, like WordPress for sr_RS
         $base = Str::limit($base, 60, '');
         $slug = $base;
         $i = 2;

@@ -200,14 +200,14 @@ class AuthApiTest extends TestCase
         $this->assertNotSame($first['refresh_token'], $second['refresh_token']);
         $this->assertNotSame($first['access_token'], $second['access_token']);
 
-        // Stari access token je obrisan, novi radi; uređaj ostaje isti.
+        // The old access token is deleted, the new one works; the device stays the same.
         $this->app['auth']->forgetGuards();
         $this->withToken($first['access_token'])->getJson('/api/v1/me')->assertUnauthorized();
         $this->app['auth']->forgetGuards();
         $this->withToken($second['access_token'])->getJson('/api/v1/me')->assertOk();
         $this->assertDatabaseHas('refresh_tokens', ['token_hash' => hash('sha256', $second['refresh_token']), 'device_name' => 'Pixel']);
 
-        // Stari refresh token više ne važi.
+        // The old refresh token is no longer valid.
         $this->postJson('/api/v1/auth/refresh', ['refresh_token' => $first['refresh_token']])
             ->assertUnauthorized()
             ->assertExactJson(['code' => 'invalid_refresh_token', 'message' => 'Prijava je istekla. Prijavite se ponovo.']);
@@ -220,7 +220,7 @@ class AuthApiTest extends TestCase
         $second = $this->postJson('/api/v1/auth/refresh', ['refresh_token' => $first['refresh_token']])->json();
         $third = $this->postJson('/api/v1/auth/refresh', ['refresh_token' => $second['refresh_token']])->json();
 
-        // Neko je ukrao i iskoristio prvi token: opoziva se ceo lanac.
+        // Someone stole and used the first token: the whole chain is revoked.
         $this->postJson('/api/v1/auth/refresh', ['refresh_token' => $first['refresh_token']])->assertUnauthorized();
 
         $this->postJson('/api/v1/auth/refresh', ['refresh_token' => $third['refresh_token']])->assertUnauthorized();
@@ -324,7 +324,7 @@ class AuthApiTest extends TestCase
         $this->postJson('/api/v1/auth/logout')->assertUnauthorized()->assertJsonPath('code', 'unauthorized');
     }
 
-    // Nova lozinka
+    // New password
 
     public function test_password_reset_always_204(): void
     {

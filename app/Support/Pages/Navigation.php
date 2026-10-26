@@ -7,7 +7,7 @@ use App\Models\Location;
 use Illuminate\Support\Facades\Cache;
 use Throwable;
 
-/** Podaci za zaglavlje i donju navigaciju (keširano, radi i kad baza nije dostupna). */
+/** Data for the header and bottom navigation (cached, works even when the database is down). */
 class Navigation
 {
     private const TTL = 600;
@@ -17,7 +17,7 @@ class Navigation
         return url_slash((string) config('pages.links.'.$key, '/'));
     }
 
-    /** @return array<int, array{slug: string, name: string}> Glavne aktivne kategorije za izbor u pretrazi. */
+    /** @return array<int, array{slug: string, name: string}> Main active categories for the search picker. */
     public static function kategorije(): array
     {
         return self::safe('pages.nav.categories', fn () => Category::query()
@@ -41,7 +41,7 @@ class Navigation
             ->all());
     }
 
-    /** Ključ aktivne stavke donje navigacije za trenutnu putanju. */
+    /** Key of the active bottom navigation item for the current path. */
     public static function aktivna(string $path): string
     {
         $path = trim($path, '/');
@@ -68,7 +68,7 @@ class Navigation
         try {
             return Cache::remember($key, self::TTL, $callback);
         } catch (Throwable) {
-            // Strana greške (500, 503) mora da se prikaže i bez baze.
+            // An error page (500, 503) must render without the database too.
             return [];
         }
     }

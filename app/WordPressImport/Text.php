@@ -2,16 +2,16 @@
 
 namespace App\WordPressImport;
 
-/** Tekst, iznosi i serijalizovane vrednosti iz WordPress baze. */
+/** Text, amounts and serialized values from the WordPress database. */
 class Text
 {
-    /** Naslov bez HTML-a i entiteta. */
+    /** Title without HTML and entities. */
     public static function title(string $html): string
     {
         return trim(html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     }
 
-    /** Čist tekst sa novim redovima (kao Loglasi_API_Formatter::plain_text). */
+    /** Plain text with new lines (like Loglasi_API_Formatter::plain_text). */
     public static function plain(string $html): string
     {
         $text = (string) preg_replace('~\[/?[a-z][a-z0-9_-]*[^\]]*\]~i', '', $html);
@@ -27,8 +27,8 @@ class Text
     }
 
     /**
-     * Iznos iz meta vrednosti: „8900”, „8.900”, „8 900”, „12500,50”. Null za prazno ili 0
-     * (isto kao Loglasi_Cena::parse_amount).
+     * Amount from a meta value: "8900", "8.900", "8 900", "12500,50". Null for empty or 0
+     * (the same as Loglasi_Cena::parse_amount).
      */
     public static function amount(mixed $raw): ?float
     {
@@ -54,7 +54,7 @@ class Text
         return $amount > 0 ? $amount : null;
     }
 
-    /** Broj za polje tipa „broj” (može i 0). */
+    /** Number for a "number" field (0 allowed). */
     public static function number(mixed $raw): ?float
     {
         if (! is_scalar($raw)) {
@@ -69,7 +69,7 @@ class Text
         return is_numeric($raw) ? round((float) $raw, 2) : null;
     }
 
-    /** Kao maybe_unserialize(), bez pravljenja objekata. */
+    /** Like maybe_unserialize(), without creating objects. */
     public static function unserialize(mixed $value): mixed
     {
         if (! is_string($value)) {
@@ -88,7 +88,7 @@ class Text
     }
 
     /**
-     * Spisak ID-jeva: niz, serijalizovan niz, JSON ili „1,2,3”.
+     * List of IDs: an array, a serialized array, JSON or "1,2,3".
      *
      * @return int[]
      */
@@ -114,7 +114,7 @@ class Text
     }
 
     /**
-     * Ravan spisak vrednosti iz meta polja (niz, serijalizovano, više redova).
+     * Flat list of values from a meta field (array, serialized, several lines).
      *
      * @param  array<int, mixed>  $values
      * @return string[]

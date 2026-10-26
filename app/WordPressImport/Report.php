@@ -4,7 +4,7 @@ namespace App\WordPressImport;
 
 use Illuminate\Support\Facades\File;
 
-/** Brojači po vrsti podatka i detaljan izveštaj uvoza. */
+/** Counters per kind of data and a detailed import report. */
 class Report
 {
     public const LABELS = [

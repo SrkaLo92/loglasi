@@ -3,8 +3,8 @@
 namespace App\WordPressImport\Steps;
 
 /**
- * Narudžbine se ne prenose: Listivo/WooCommerce paketi nemaju pouzdanu vezu sa
- * proizvodima nove šeme. Ovde se samo prebrojavaju za izveštaj.
+ * Orders are not carried over: Listivo/WooCommerce packages have no reliable link to the
+ * products of the new schema. They are only counted here for the report.
  */
 class OrderImport extends Step
 {

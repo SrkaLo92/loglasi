@@ -18,18 +18,18 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Vrednosti dodatnih polja oglasa: pravila za formu, provera i upis,
- * prikaz (labela + vrednost + jedinica) i filteri za pretragu (f[ključ]=...).
+ * Values of the listing's extra fields: form rules, validation and saving,
+ * display (label + value + unit) and search filters (f[key]=...).
  *
- * Kako se čuva (listing_field_values):
- * - text, select: jedan red, `value`
- * - number, year: jedan red, `value` (tekst) i `value_num` (za opseg)
- * - multiselect: jedan red po izabranoj vrednosti
- * - checkbox: red sa `value` = "1" samo kad je označeno
+ * How it is stored (listing_field_values):
+ * - text, select: one row, `value`
+ * - number, year: one row, `value` (text) and `value_num` (for ranges)
+ * - multiselect: one row per chosen value
+ * - checkbox: a row with `value` = "1" only when checked
  */
 class ListingFields
 {
-    /** Najveći broj koji staje u value_num (decimal 16,2). */
+    /** Largest number that fits in value_num (decimal 16,2). */
     private const NUMBER_MAX = 99999999999999;
 
     public const YEAR_MIN = 1900;
@@ -70,7 +70,7 @@ class ListingFields
     // ---------------------------------------------------------------- forma
 
     /**
-     * Pravila za Validator, npr. ['fields' => ['array'], 'fields.marka' => ['required', ...]].
+     * Validator rules, e.g. ['fields' => ['array'], 'fields.marka' => ['required', ...]].
      *
      * @return array<string, list<mixed>>
      */
@@ -101,7 +101,7 @@ class ListingFields
     }
 
     /**
-     * Poruke na srpskom za pravila iz rules().
+     * Serbian messages for the rules from rules().
      *
      * @return array<string, string>
      */
@@ -143,14 +143,14 @@ class ListingFields
     }
 
     /**
-     * Proverava ulaz (samo deo sa poljima, npr. $request->input('fields', [])) i vraća
-     * očišćene vrednosti [ključ => vrednost] spremne za save(). Nepoznati ključevi se odbacuju.
-     * $requireAll = false (admin): obavezna polja mogu ostati prazna, npr. kod starog oglasa iz uvoza.
+     * Validates the input (only the fields part, e.g. $request->input('fields', [])) and returns
+     * cleaned values [key => value] ready for save(). Unknown keys are dropped.
+     * $requireAll = false (admin): required fields may stay empty, e.g. for an old imported listing.
      *
      * @param  array<string, mixed>  $input
      * @return array<string, string|list<string>|bool>
      *
-     * @throws ValidationException greške su pod ključem "{$prefix}.{ključ}"
+     * @throws ValidationException errors are under the key "{$prefix}.{key}"
      */
     public function validate(Category|int $category, array $input, string $prefix = 'fields', bool $requireAll = true): array
     {
@@ -176,7 +176,7 @@ class ListingFields
     }
 
     /**
-     * Brojevi kako ih ljudi kucaju: "180.000", "180 000 km", "1,6" postaju 180000 i 1.6.
+     * Numbers as people type them: "180.000", "180 000 km", "1,6" become 180000 and 1.6.
      *
      * @param  array<string, mixed>  $input
      * @return array<string, mixed>
@@ -252,8 +252,8 @@ class ListingFields
     }
 
     /**
-     * Svodi već proverene vrednosti na oblik za upis: prazno se izbacuje,
-     * brojevi bez nepotrebnih decimala, checkbox kao bool.
+     * Brings already validated values to the stored form: empty ones are dropped,
+     * numbers without needless decimals, checkbox as bool.
      *
      * @param  array<string, mixed>  $values
      * @return array<string, string|list<string>|bool>
@@ -281,7 +281,7 @@ class ListingFields
     }
 
     /**
-     * Upisuje vrednosti oglasa (zamenjuje postojeće). Ulaz je rezultat validate()/normalize().
+     * Writes the listing's values (replaces the existing ones). The input is the result of validate()/normalize().
      *
      * @param  array<string, string|list<string>|bool>  $values
      */
@@ -310,12 +310,12 @@ class ListingFields
         $listing->unsetRelation('fieldValues');
     }
 
-    // ---------------------------------------------------------------- prikaz
+    // ---------------------------------------------------------------- display
 
     /**
-     * Vrednosti za prikaz (FieldValue iz ugovora), redosledom polja kategorije:
-     * [['key', 'label', 'value', 'display'], ...]. Prazna polja se preskaču.
-     * Za listu oglasa unapred učitati: $listings->load('fieldValues').
+     * Values for display (FieldValue from the contract), in the category's field order:
+     * [['key', 'label', 'value', 'display'], ...]. Empty fields are skipped.
+     * For a list of listings, preload: $listings->load('fieldValues').
      *
      * @return list<array{key: string, label: string, value: string, display: string}>
      */
@@ -352,7 +352,7 @@ class ListingFields
     }
 
     /**
-     * Tekst za prikaz: "180.000 km", "2014.", "Dizel", "Lično preuzimanje, Dostava", "Da".
+     * Display text: "180.000 km", "2014.", "Dizel", "Lično preuzimanje, Dostava", "Da".
      *
      * @param  list<string>  $raw
      */
@@ -372,7 +372,7 @@ class ListingFields
             return $text;
         }
 
-        // Snaga: "85 kW (116 KS)", kao na polovniautomobili.
+        // Power: "85 kW (116 KS)", as on polovniautomobili.
         if ($field->type === FieldType::Number && $field->unit === 'kW' && count($raw) === 1 && is_numeric($raw[0])) {
             return $text.' kW ('.number_format((float) $raw[0] * 1.35962, 0, ',', '.').' KS)';
         }
@@ -380,7 +380,7 @@ class ListingFields
         return $text.' '.$field->unit;
     }
 
-    /** Vrednost jednog polja na oglasu (prva), npr. value('stanje', $oglas) === 'novo'. */
+    /** Value of one field on a listing (the first), e.g. value('stanje', $listing) === 'novo'. */
     public function value(string $key, Listing $listing): ?string
     {
         foreach ($this->values($listing) as $value) {
@@ -392,7 +392,7 @@ class ListingFields
         return null;
     }
 
-    /** `condition` iz ugovora: "novo", "polovno" ili null, iz polja Stanje. */
+    /** `condition` from the contract: "novo", "polovno" or null, from the Stanje field. */
     public function condition(Listing $listing): ?string
     {
         $value = $this->value('stanje', $listing);
@@ -407,10 +407,10 @@ class ListingFields
     // ---------------------------------------------------------------- pretraga
 
     /**
-     * Polja koja se koriste u pretrazi (filter različit od none), sa imenima parametara.
-     * `filter` je u obliku iz ugovora: exact | multi | range.
+     * Fields used in search (filter other than none), with their parameter names.
+     * `filter` is in the contract's form: exact | multi | range.
      *
-     * Polja potkategorija su uključena (Catalog::filterFieldsFor), pa i „Automobili” filtrira po marki.
+     * Subcategory fields are included (Catalog::filterFieldsFor), so "Automobili" filters by make too.
      *
      * @return list<array{key: string, label: string, type: string, filter: string, unit: ?string, depends_on: ?string, options: list<array{value: string, label: string, parent?: string}>, params: list<string>}>
      */
@@ -441,10 +441,10 @@ class ListingFields
     }
 
     /**
-     * Proverava f[...] iz zahteva prema poljima kategorije (null = bez kategorije, nema polja)
-     * i vraća uslove za apply(): [ključ => ['values' => [...], 'min' => ?float, 'max' => ?float]].
+     * Validates f[...] from the request against the category's fields (null = no category, no fields)
+     * and returns the conditions for apply(): [key => ['values' => [...], 'min' => ?float, 'max' => ?float]].
      *
-     * @throws ValidationException poruka pod ključem "f" (API ga pretvara u 400 invalid_param)
+     * @throws ValidationException message under the key "f" (the API turns it into 400 invalid_param)
      */
     public function parseFilters(Category|int|null $category, mixed $input): array
     {
@@ -514,8 +514,8 @@ class ListingFields
     }
 
     /**
-     * Dodaje uslove iz parseFilters() na upit oglasa (jedan EXISTS po polju, koristi indekse
-     * field_id+value i field_id+value_num).
+     * Adds the conditions from parseFilters() to the listing query (one EXISTS per field, using the indexes
+     * field_id+value and field_id+value_num).
      *
      * @param  Builder<Listing>  $query
      * @return Builder<Listing>
@@ -560,8 +560,8 @@ class ListingFields
     // ---------------------------------------------------------------- API oblik
 
     /**
-     * Field iz ugovora: key, label, type, required, unit, depends_on, options, filter.
-     * Zavisno polje (model) ima depends_on = ključ roditelja (marka), a svaka opcija `parent`.
+     * Field from the contract: key, label, type, required, unit, depends_on, options, filter.
+     * A dependent field (model) has depends_on = the parent's key (marka), and each option a `parent`.
      *
      * @return array<string, mixed>
      */
@@ -584,16 +584,16 @@ class ListingFields
         return $field->depends_on !== null && $field->depends_on !== '' ? (string) $field->depends_on : null;
     }
 
-    /** U ugovoru se jedan izbor zove "exact". */
+    /** In the contract a single choice is called "exact". */
     public static function apiFilter(FieldFilter $filter): string
     {
         return $filter === FieldFilter::Select ? 'exact' : $filter->value;
     }
 
-    // ---------------------------------------------------------------- pomoćno
+    // ---------------------------------------------------------------- helpers
 
     /**
-     * Opcije izbora; kod zavisnog polja svaka ima i `parent` (vrednost opcije roditelja).
+     * Choice options; for a dependent field each also has `parent` (the parent option's value).
      *
      * @return list<array{value: string, label: string, parent?: string}>
      */
@@ -615,7 +615,7 @@ class ListingFields
     }
 
     /**
-     * Vrednosti opcija; sa $parents samo opcije tih roditelja.
+     * Option values; with $parents only the options of those parents.
      *
      * @param  list<string>|null  $parents
      * @return list<string>
@@ -654,7 +654,7 @@ class ListingFields
         };
     }
 
-    /** "godiste_od" => ["godiste", "od"] kad je godiste polje sa opsegom. */
+    /** "godiste_od" => ["godiste", "od"] when godiste is a range field. */
     private function splitParam(string $param, Collection $fields): array
     {
         $param = strtolower($param);

@@ -18,7 +18,7 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
-/** Sve greške na /api/* idu u obliku Error iz ugovora, sa porukom na srpskom. */
+/** Every error on /api/* comes in the contract's Error shape, with a Serbian message. */
 class ApiExceptionRenderer
 {
     public static function register(Exceptions $exceptions): void
@@ -34,9 +34,9 @@ class ApiExceptionRenderer
 
     public static function render(Throwable $e, Request $request)
     {
-        // GET parametri (pretraga, katalog) i ApiError iz kataloga idu u ApiResponse.
-        // Ovde samo prijava (token_expired) i telo zahteva kod upisa (422 sa porukom prvog polja);
-        // sve ostalo (GET parametri, 404, 405, 429...) vraća App\Http\Api\ApiResponse.
+        // GET parameters (search, catalog) and ApiError from the catalog go through ApiResponse.
+        // Here only login (token_expired) and the request body on writes (422 with the first field's message);
+        // everything else (GET parameters, 404, 405, 429...) is returned by App\Http\Api\ApiResponse.
         $handled = $e instanceof AuthenticationException
             || ($e instanceof ValidationException && ! $request->isMethodSafe());
         if (! $handled) {
@@ -78,7 +78,7 @@ class ApiExceptionRenderer
         return ApiError::response('validation_failed', (string) (reset($fields) ?: 'Proverite unete podatke.'), 422, $fields);
     }
 
-    /** Poslat token koji je istekao ili opozvan → token_expired (aplikacija osvežava token). */
+    /** A token that expired or was revoked → token_expired (the app refreshes the token). */
     private static function unauthenticated(Request $request)
     {
         $token = $request->bearerToken();

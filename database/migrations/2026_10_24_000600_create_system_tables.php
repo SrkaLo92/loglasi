@@ -16,7 +16,7 @@ return new class extends Migration
 
         Schema::create('redirects', function (Blueprint $table) {
             $table->id();
-            $table->string('from_path')->unique(); // putanja bez domena, npr. /stari-slug/
+            $table->string('from_path')->unique(); // path without the domain, e.g. /stari-slug/
             $table->string('to_path');
             $table->unsignedSmallInteger('status_code')->default(301);
             $table->unsignedInteger('hits')->default(0);
@@ -25,7 +25,7 @@ return new class extends Migration
 
         Schema::create('gone_urls', function (Blueprint $table) {
             $table->id();
-            $table->string('path')->unique(); // vraća 410
+            $table->string('path')->unique(); // returns 410
             $table->string('note')->nullable();
             $table->timestamps();
         });
@@ -40,7 +40,7 @@ return new class extends Migration
             $table->timestamp('created_at')->nullable()->index();
         });
 
-        // Dugi token za mobilnu aplikaciju (30 dana), čuva se samo heš.
+        // Long-lived token for the mobile app (30 days), only its hash is stored.
         Schema::create('refresh_tokens', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();

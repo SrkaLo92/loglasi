@@ -76,7 +76,7 @@ class ListingFieldsTest extends TestCase
         $this->assertContains('array', $rules['fields.oprema']);
         $this->assertArrayHasKey('fields.oprema.*', $rules);
         $this->assertContains('boolean', $rules['fields.moguca_zamena']);
-        $this->assertArrayHasKey('fields.stanje', $rules); // nasleđeno od roditelja
+        $this->assertArrayHasKey('fields.stanje', $rules); // inherited from the parent
         $this->assertArrayHasKey('podaci.marka', $this->fields->rules($this->automobili, 'podaci'));
     }
 
@@ -157,7 +157,7 @@ class ListingFieldsTest extends TestCase
 
         $this->assertSame('polovno', $this->fields->condition($listing->fresh()));
 
-        // Ponovni upis zamenjuje stare vrednosti.
+        // Writing again replaces the old values.
         $this->fields->save($listing, ['marka' => 'audi', 'godiste' => '2001', 'stanje' => 'novo']);
         $this->assertDatabaseCount('listing_field_values', 3);
         $this->assertSame('novo', $this->fields->condition($listing->fresh()));

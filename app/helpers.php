@@ -1,7 +1,7 @@
 <?php
 
 if (! function_exists('asset_v')) {
-    /** Putanja do fajla iz public/ sa verzijom (vreme izmene), za dug keš u pregledaču. */
+    /** Path to a file in public/ with a version (modification time), for a long browser cache. */
     function asset_v(string $path): string
     {
         $file = public_path($path);
@@ -12,7 +12,7 @@ if (! function_exists('asset_v')) {
 }
 
 if (! function_exists('url_slash')) {
-    /** Apsolutni URL sa kosom crtom na kraju, kao na sadašnjem sajtu: /oglasi/automobili/ */
+    /** Absolute URL with a trailing slash, as on the old site: /oglasi/automobili/ */
     function url_slash(string $path = '/'): string
     {
         $path = '/'.trim($path, '/');

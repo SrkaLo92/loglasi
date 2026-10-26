@@ -1,4 +1,4 @@
-{{-- Čist tekst (text/plain): bez HTML entiteta, pa se vrednosti ispisuju sirove. --}}
+{{-- Plain text (text/plain): no HTML entities, so the values are printed raw. --}}
 Nova poruka sa kontakt forme na loglasi.rs
 
 Ime: {!! $data['ime'] !!}

@@ -18,7 +18,7 @@ class CatalogApiController extends Controller
 {
     public function __construct(private readonly Catalog $catalog) {}
 
-    /** Stablo kategorija sa brojem objavljenih oglasa (uključuje potkategorije). */
+    /** Category tree with the number of published listings (subcategories included). */
     public function categories(Request $request): Response|JsonResponse
     {
         $tree = array_map([CatalogFormatter::class, 'categoryNode'], $this->catalog->tree());
@@ -56,7 +56,7 @@ class CatalogApiController extends Controller
         return ApiResponse::json($request, $locations, ApiResponse::CACHE_CATALOG);
     }
 
-    /** Polja i filteri za kategoriju: ?category=ID ili /categories/{id}/fields (roditelj: polja potkategorija za filtere). */
+    /** Fields and filters for a category: ?category=ID or /categories/{id}/fields (a parent gets its subcategories' fields for filters). */
     public function fields(Request $request, ListingFields $fields, ?string $id = null): Response|JsonResponse
     {
         $param = $id === null ? 'category' : 'id';
@@ -103,7 +103,7 @@ class CatalogApiController extends Controller
         return ApiResponse::json($request, $out, ApiResponse::CACHE_CATALOG);
     }
 
-    /** Aktuelne cene iz admina (RSD). */
+    /** Current prices from the admin (RSD). */
     public function prices(Request $request): Response|JsonResponse
     {
         $prices = $this->catalog->prices()

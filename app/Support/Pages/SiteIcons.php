@@ -5,8 +5,8 @@ namespace App\Support\Pages;
 use Illuminate\Support\HtmlString;
 
 /**
- * Linijske SVG ikonice (24×24) za zaglavlje, navigaciju i sadržajne strane.
- * Bez fonta sa ikonicama: svaka ide direktno u HTML, uvek dekorativna (aria-hidden).
+ * Line SVG icons (24×24) for the header, navigation and content pages.
+ * No icon font: each goes straight into the HTML, always decorative (aria-hidden).
  */
 class SiteIcons
 {

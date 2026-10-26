@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-/** Blokiran korisnik se odjavljuje i ne može dalje (sajt), odnosno dobija 403 (API). */
+/** A blocked user is logged out and cannot continue (site), or gets 403 (API). */
 class EnsureNotBlocked
 {
     public const MESSAGE = 'Vaš nalog je blokiran. Za više informacija pišite nam na kontakt stranici.';

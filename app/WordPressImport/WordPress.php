@@ -6,14 +6,14 @@ use Illuminate\Database\Connection;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
-/** Čitanje iz WordPress baze (konekcija „wordpress”, prefiks tabela iz WP_DB_PREFIX). */
+/** Reads from the WordPress database (connection "wordpress", table prefix from WP_DB_PREFIX). */
 class WordPress
 {
     public const CONNECTION = 'wordpress';
 
     public function __construct(private ?Connection $db = null) {}
 
-    /** Registruje konekciju iz config/uvoz.php ako već nije podešena. */
+    /** Registers the connection from config/wordpress_import.php if it is not set up yet. */
     public static function register(): void
     {
         if (! config('database.connections.'.self::CONNECTION)) {
@@ -48,7 +48,7 @@ class WordPress
     }
 
     /**
-     * Meta po objektu: [id => [ključ => [vrednosti]]].
+     * Meta per object: [id => [key => [values]]].
      *
      * @param  int[]  $ids
      * @return array<int, array<string, array<int, string|null>>>
@@ -82,7 +82,7 @@ class WordPress
     }
 
     /**
-     * Termini objekata: [object_id => [taksonomija => [term_id, ...]]].
+     * Object terms: [object_id => [taxonomy => [term_id, ...]]].
      *
      * @param  int[]  $ids
      * @param  string[]  $taxonomies
@@ -110,7 +110,7 @@ class WordPress
     }
 
     /**
-     * Svi termini taksonomije, roditelji pre dece.
+     * All terms of a taxonomy, parents before children.
      *
      * @return array<int, object{term_id:int, name:string, slug:string, parent:int, description:string}>
      */
@@ -160,7 +160,7 @@ class WordPress
         return $out;
     }
 
-    /** Taksonomija kojoj termin pripada ili null. */
+    /** Taxonomy the term belongs to, or null. */
     public function taxonomyOfTerm(int $termId): ?string
     {
         $tax = $this->table('term_taxonomy')->where('term_id', $termId)->value('taxonomy');

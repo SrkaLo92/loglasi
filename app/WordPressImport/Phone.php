@@ -3,14 +3,14 @@
 namespace App\WordPressImport;
 
 /**
- * Broj telefona u E.164 (+381...), isto pravilo kao loglasi_phone_normalize()
- * i loglasi_oglas_join_phone() iz loglasi-core.
+ * Phone number in E.164 (+381...), the same rule as loglasi_phone_normalize()
+ * and loglasi_oglas_join_phone() from loglasi-core.
  */
 class Phone
 {
     private const COUNTRY = '381';
 
-    /** Spaja broj i odvojeno sačuvan pozivni broj („+381” + „0655415128”). */
+    /** Joins the number and a separately stored country code ("+381" + "0655415128"). */
     public static function join(string $raw, string $country = ''): string
     {
         $raw = trim($raw);
@@ -18,7 +18,7 @@ class Phone
             return '';
         }
 
-        // Listivo čuva zastavu kao HTML entitet ispred koda ("&#x1F1F7&#x1F1F8 +381"): uzima se samo +NNN.
+        // Listivo stores a flag as an HTML entity before the code ("&#x1F1F7&#x1F1F8 +381"): only +NNN is taken.
         $country = preg_match('/\+\s*(\d{1,4})/', $country, $m) ? $m[1] : (string) preg_replace('/\D+/', '', $country);
         if ($country !== ''
             && ! str_starts_with($raw, '+')
@@ -30,7 +30,7 @@ class Phone
         return static::normalize($raw);
     }
 
-    /** E.164 ili '' kad broj nije ispravan. */
+    /** E.164, or '' when the number is not valid. */
     public static function normalize(string $raw): string
     {
         $raw = trim(strip_tags($raw));
@@ -55,7 +55,7 @@ class Phone
 
         if ($hasPlus) {
             if (! str_starts_with($digits, self::COUNTRY)) {
-                // Strani broj; kod suseda i dijaspore vodeća nula iza pozivnog broja se skida.
+                // Foreign number; for neighbours and the diaspora the leading zero after the country code is removed.
                 $digits = (string) preg_replace('/^(38[2-9]|4[139])0+/', '$1', $digits);
                 $len = strlen($digits);
 
@@ -73,7 +73,7 @@ class Phone
         return static::validNational($national) ? '+'.self::COUNTRY.$national : '';
     }
 
-    /** Mobilni: 6x + 6–8 cifara. Fiksni: 1x–3x, ukupno 8–9 cifara. */
+    /** Mobile: 6x + 6–8 digits. Landline: 1x–3x, 8–9 digits in total. */
     private static function validNational(string $national): bool
     {
         if (! preg_match('/^\d+$/', $national)) {

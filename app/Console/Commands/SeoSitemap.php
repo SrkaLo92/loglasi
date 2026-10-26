@@ -9,7 +9,7 @@ class SeoSitemap extends Command
 {
     protected $signature = 'seo:sitemap';
 
-    protected $description = 'Ponovo pravi sitemap (keš) za /sitemap.xml i sve delove';
+    protected $description = 'Rebuild the sitemap (cache) for /sitemap.xml and all its parts';
 
     public function handle(Sitemap $sitemap): int
     {

@@ -23,7 +23,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
 
-/** /me i /me/limits za mobilnu aplikaciju. */
+/** /me and /me/limits for the mobile app. */
 class MeController extends Controller
 {
     public function show(Request $request): JsonResponse
@@ -123,7 +123,7 @@ class MeController extends Controller
         ]);
     }
 
-    /** Slika otpremljena preko POST /media postaje profilna; null je uklanja. */
+    /** An image uploaded through POST /media becomes the avatar; null removes it. */
     private function setAvatar(User $user, ?int $mediaId): void
     {
         if ($mediaId === null) {

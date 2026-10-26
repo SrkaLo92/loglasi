@@ -10,7 +10,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('listings', function (Blueprint $table) {
-            $table->id(); // isti ID kao u WordPress-u za uvezene oglase
+            $table->id(); // same ID as in WordPress for imported listings
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('category_id')->constrained()->restrictOnDelete();
             $table->foreignId('location_id')->nullable()->constrained()->nullOnDelete();
@@ -19,10 +19,10 @@ return new class extends Migration
             $table->longText('description')->nullable();
             $table->decimal('price', 14, 2)->nullable(); // null = "Dogovor"
             $table->char('currency', 3)->default('EUR'); // EUR | RSD
-            $table->decimal('price_eur', 14, 2)->nullable()->index(); // za sortiranje i filter
+            $table->decimal('price_eur', 14, 2)->nullable()->index(); // for sorting and filtering
             $table->string('status', 16)->default('pending')->index(); // App\Enums\ListingStatus
             $table->string('rejection_reason')->nullable();
-            $table->string('contact_phone', 20)->nullable(); // E.164; prazno = telefon naloga
+            $table->string('contact_phone', 20)->nullable(); // E.164; empty = the account's phone
             $table->decimal('lat', 10, 7)->nullable();
             $table->decimal('lng', 10, 7)->nullable();
             $table->timestamp('featured_until')->nullable()->index();
@@ -48,7 +48,7 @@ return new class extends Migration
             $table->foreignId('listing_id')->constrained()->cascadeOnDelete();
             $table->foreignId('field_id')->constrained()->cascadeOnDelete();
             $table->string('value')->nullable();
-            $table->decimal('value_num', 16, 2)->nullable(); // za opseg (od-do)
+            $table->decimal('value_num', 16, 2)->nullable(); // for ranges (from-to)
             $table->index(['field_id', 'value']);
             $table->index(['field_id', 'value_num']);
             $table->index('listing_id');
@@ -56,9 +56,9 @@ return new class extends Migration
 
         Schema::create('listing_images', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('listing_id')->nullable()->constrained()->cascadeOnDelete(); // null dok se oglas ne sačuva
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete(); // ko je otpremio
-            $table->string('path'); // original na disku "public"
+            $table->foreignId('listing_id')->nullable()->constrained()->cascadeOnDelete(); // null until the listing is saved
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete(); // who uploaded it
+            $table->string('path'); // original on the "public" disk
             $table->json('variants')->nullable(); // {"sm":{"webp":"...","avif":"..."},"md":...}
             $table->unsignedInteger('width')->nullable();
             $table->unsignedInteger('height')->nullable();
@@ -75,7 +75,7 @@ return new class extends Migration
             $table->primary(['user_id', 'listing_id']);
         });
 
-        // Dnevna statistika po oglasu (statistika firme, analitika u adminu).
+        // Daily statistics per listing (firm statistics, admin analytics).
         Schema::create('listing_daily_stats', function (Blueprint $table) {
             $table->foreignId('listing_id')->constrained()->cascadeOnDelete();
             $table->date('date');
@@ -91,7 +91,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('name')->nullable();
-            $table->json('query'); // isti parametri kao /listings
+            $table->json('query'); // same parameters as /listings
             $table->boolean('notify')->default(true);
             $table->timestamp('last_notified_at')->nullable();
             $table->timestamps();

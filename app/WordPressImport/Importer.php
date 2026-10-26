@@ -20,12 +20,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Uvoz iz WordPress/Listivo baze u novu šemu. Svaki korak je ponovljiv:
- * zapis se traži po wp_id / wp_term_id / wp_key i menja, ne duplira.
+ * Import from the WordPress/Listivo database into the new schema. Every step can be repeated:
+ * a row is looked up by wp_id / wp_term_id / wp_key and updated, not duplicated.
  */
 class Importer
 {
-    /** Redosled koraka; ključ je ime za --only. */
+    /** Step order; the key is the name for --only. */
     public const STEPS = [
         'settings' => SettingsImport::class,
         'users' => UserImport::class,
@@ -99,7 +99,7 @@ class Importer
         }
     }
 
-    /** Uslov za --since u UTC (WordPress *_gmt kolone). */
+    /** The --since condition in UTC (WordPress *_gmt columns). */
     public function sinceUtc(): ?string
     {
         return $this->since?->copy()->utc()->format('Y-m-d H:i:s');
@@ -111,7 +111,7 @@ class Importer
     }
 
     /**
-     * WP id → novi id, iz već uvezenih zapisa.
+     * WP id → new id, from the rows already imported.
      *
      * @return array<int, int>
      */
@@ -134,7 +134,7 @@ class Importer
         unset($this->maps[$table]);
     }
 
-    /** Datum iz WordPress-a (GMT, ili lokalni kao rezerva) u vremenskoj zoni aplikacije. */
+    /** Date from WordPress (GMT, or local as a fallback) in the app's time zone. */
     public function date(?string $gmt, ?string $local = null): ?Carbon
     {
         $tz = config('app.timezone');
@@ -149,7 +149,7 @@ class Importer
     }
 
     /**
-     * Podaci o prilozima: fajl (original ako je slika smanjena), dimenzije, alt.
+     * Attachment data: file (the original if the image was scaled down), dimensions, alt.
      *
      * @param  int[]  $ids
      * @return array<int, array{file:string, width:?int, height:?int, alt:?string}>
@@ -175,7 +175,7 @@ class Importer
             $width = isset($md['width']) ? (int) $md['width'] : null;
             $height = isset($md['height']) ? (int) $md['height'] : null;
 
-            // WordPress 5.3+ smanjuje velike slike u „-scaled”; original je u original_image.
+            // WordPress 5.3+ scales big images down to "-scaled"; the original is in original_image.
             if (! empty($md['original_image']) && is_string($md['original_image'])) {
                 $dir = dirname($file);
                 $file = ($dir === '.' ? '' : $dir.'/').basename($md['original_image']);
@@ -190,7 +190,7 @@ class Importer
     }
 
     /**
-     * Kopira fajl iz wp-content/uploads na disk „public”.
+     * Copies a file from wp-content/uploads to the "public" disk.
      *
      * @return string copied | exists | missing | skipped
      */
@@ -224,7 +224,7 @@ class Importer
         return 'copied';
     }
 
-    /** Ime fajla bezbedno za putanju na disku. */
+    /** File name safe for a path on disk. */
     public static function fileName(string $path): string
     {
         $name = basename(str_replace('\\', '/', $path));
@@ -234,7 +234,7 @@ class Importer
     }
 
     /**
-     * Kopira jednu sliku priloga i vraća putanju na disku ili null.
+     * Copies one attachment image and returns the path on disk, or null.
      */
     public function copyAttachment(int $attachmentId, string $dir, string $entity, string $label): ?string
     {

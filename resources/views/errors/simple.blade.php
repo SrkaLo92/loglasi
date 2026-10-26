@@ -1,4 +1,4 @@
-{{-- Strana greške bez baze i sesije (500, 503): samo logo, poruka i link. Tekst je ovde, ne iz podešavanja. --}}
+{{-- Error page without the database and session (500, 503): only the logo, message and link. The text is here, not from the settings. --}}
 <!doctype html>
 <html lang="sr-Latn">
 <head>

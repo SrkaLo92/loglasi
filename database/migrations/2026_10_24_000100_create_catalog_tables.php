@@ -32,17 +32,17 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Dodatna polja oglasa (marka, kilometraža, kvadratura...), definišu se iz admina.
+        // Extra listing fields (make, mileage, floor area...), defined from the admin.
         Schema::create('fields', function (Blueprint $table) {
             $table->id();
-            $table->string('key')->unique(); // ključ u API-ju i u f[ključ]=
+            $table->string('key')->unique(); // key in the API and in f[key]=
             $table->string('label');
             $table->string('type', 16); // App\Enums\FieldType
             $table->string('filter', 16)->default('none'); // App\Enums\FieldFilter
             $table->string('unit', 16)->nullable();
-            $table->json('options')->nullable(); // [{value, label}] za izbor
+            $table->json('options')->nullable(); // [{value, label}] for choices
             $table->unsignedInteger('sort')->default(0);
-            $table->string('wp_key')->nullable(); // Listivo ključ, za uvoz
+            $table->string('wp_key')->nullable(); // Listivo key, for the import
             $table->timestamps();
         });
 

@@ -13,7 +13,7 @@ use App\Support\Settings;
  */
 final class PaymentDetails
 {
-    /** Default legal pages (static pages of the Stranice module) for the payment_page_* settings. */
+    /** Default legal pages (static pages of the Pages module) for the payment_page_* settings. */
     public const LEGAL_PAGES = [
         'terms' => '/uslovi-placanja/',
         'withdrawal' => '/odustanak-od-ugovora/',

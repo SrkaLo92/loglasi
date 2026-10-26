@@ -6,10 +6,10 @@ use App\Models\Category;
 use App\Models\Location;
 use App\Models\Product;
 
-/** Oblici iz ugovora za katalog: Category, Location, Price. Koriste ih i drugi API moduli. */
+/** Contract shapes for the catalog: Category, Location, Price. Other API modules use them too. */
 class CatalogFormatter
 {
-    /** Šifra proizvoda u bazi => `product` iz ugovora. Proizvodi van spiska se ne vraćaju u API-ju. */
+    /** Product code in the database => `product` from the contract. Products outside the list are not returned by the API. */
     public const PRODUCT_CODES = [
         Product::BUMP => 'bump',
         Product::FEATURED_7 => 'featured_7d',
@@ -17,7 +17,7 @@ class CatalogFormatter
         Product::BIZNIS_12M => 'business_year',
     ];
 
-    /** Kratak oblik kategorije (kartica oglasa): id, name, slug. */
+    /** Short category shape (listing card): id, name, slug. */
     public static function categoryRef(Category $category): array
     {
         return [
@@ -28,7 +28,7 @@ class CatalogFormatter
     }
 
     /**
-     * Čvor stabla iz Catalog::tree().
+     * Tree node from Catalog::tree().
      *
      * @param  array{category: Category, count: int, children: array}  $node
      */
@@ -55,7 +55,7 @@ class CatalogFormatter
         return self::PRODUCT_CODES[$product instanceof Product ? $product->code : $product] ?? null;
     }
 
-    /** Price iz ugovora ili null kad proizvod nema šifru u ugovoru. */
+    /** Price from the contract, or null when the product has no code in the contract. */
     public static function price(Product $product): ?array
     {
         $code = self::productCode($product);

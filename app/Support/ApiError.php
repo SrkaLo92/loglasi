@@ -4,7 +4,7 @@ namespace App\Support;
 
 use Illuminate\Http\JsonResponse;
 
-/** Greška API-ja po ugovoru: {"code": "...", "message": "...", "fields": {...}}. */
+/** API error per the contract: {"code": "...", "message": "...", "fields": {...}}. */
 class ApiError
 {
     /** @param  array<string, string>  $fields */

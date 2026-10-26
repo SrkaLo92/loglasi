@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
-/** Samo administrator i moderator (gate "staff"); "staff:admin" traži administratora. */
+/** Only administrator and moderator (gate "staff"); "staff:admin" requires an administrator. */
 class EnsureStaff
 {
     public function handle(Request $request, Closure $next, string $ability = 'staff'): Response

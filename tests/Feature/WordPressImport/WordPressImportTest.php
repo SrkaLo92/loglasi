@@ -24,7 +24,7 @@ class WordPressImportTest extends WordPressImportTestCase
     {
         $this->import()->assertSuccessful();
 
-        // 9 naloga u WP-u, 3 spam se ne prenose
+        // 9 accounts in WP, 3 spam ones are not carried over
         $this->assertSame(6, User::count());
         foreach ([1 => 'srdjan', 2 => 'marko-petrovic', 3 => 'jelena', 5 => 'pera', 7 => 'novak-novi', 117 => 'auto-centar-drina'] as $id => $slug) {
             $user = User::find($id);
@@ -33,13 +33,13 @@ class WordPressImportTest extends WordPressImportTestCase
             $this->assertSame($slug, $user->slug);
         }
 
-        // Oglasi: isti ID i slug; nacrt bez sluga dobija slug sa ID-jem
+        // Listings: same ID and slug; a draft without a slug gets a slug with the ID
         $this->assertEqualsCanonicalizing([5001, 5002, 5003, 5004, 5005, 5009, 5010], Listing::pluck('id')->all());
         $this->assertSame('audi-a4-2-0-tdi', Listing::find(5001)->slug);
         $this->assertSame(5001, (int) Listing::find(5001)->wp_id);
         $this->assertSame('nacrt-bez-sluga-5004', Listing::find(5004)->slug);
 
-        // Kategorije i mesta: slug i stablo
+        // Categories and places: slug and tree
         $this->assertSame(7, Category::count());
         $automobili = Category::where('slug', 'automobili')->first();
         $this->assertSame('vozila', $automobili->parent->slug);
@@ -56,7 +56,7 @@ class WordPressImportTest extends WordPressImportTestCase
         $admin = User::find(1);
         $this->assertSame('$P$BZlPX7NIx8MYpXokBW2AGsN7i.aUOt0', DB::table('users')->where('id', 1)->value('password'));
         $this->assertSame(Role::Admin, $admin->role);
-        $this->assertSame('+381655415128', $admin->phone); // pozivni broj odvojeno
+        $this->assertSame('+381655415128', $admin->phone); // country code stored separately
 
         $marko = User::find(2);
         $this->assertStringStartsWith('$wp$2y$10$', DB::table('users')->where('id', 2)->value('password'));
@@ -65,12 +65,12 @@ class WordPressImportTest extends WordPressImportTestCase
         $this->assertSame('Marko Petrović', $marko->name);
 
         $jelena = User::find(3);
-        $this->assertSame('+381641112222', $jelena->phone); // +3810… bez nule
+        $this->assertSame('+381641112222', $jelena->phone); // +3810… without the zero
         $this->assertNotNull($jelena->phone_verified_at);
         $this->assertSame('avatari/3/6006-jelena.jpg', $jelena->avatar_path);
         Storage::disk('public')->assertExists('avatari/3/6006-jelena.jpg');
 
-        $this->assertNull(User::find(5)->phone); // neispravan broj se ne prenosi
+        $this->assertNull(User::find(5)->phone); // an invalid number is not carried over
         $this->assertNull(User::find(2)->phone_verified_at);
         $this->assertNotNull(User::find(2)->email_verified_at);
         $this->assertSame('2024-05-10 14:30:00', User::find(2)->created_at->format('Y-m-d H:i:s')); // UTC → Beograd
@@ -122,8 +122,8 @@ class WordPressImportTest extends WordPressImportTestCase
         $stan = Listing::find(5002);
         $this->assertSame(Currency::RSD, $stan->currency);
         $this->assertSame('12.500 din', $stan->priceLabel());
-        $this->assertEqualsWithDelta(12500 / 117.5, (float) $stan->price_eur, 0.01); // kurs iz loglasi_kurs_eur
-        $this->assertSame('klupci', $stan->location->slug); // naselje pre opštine
+        $this->assertEqualsWithDelta(12500 / 117.5, (float) $stan->price_eur, 0.01); // rate from loglasi_kurs_eur
+        $this->assertSame('klupci', $stan->location->slug); // the village before the municipality
         $this->assertFalse($stan->isFeatured());
 
         $this->assertSame('11500.00', Listing::find(5009)->price); // „11 500”
@@ -139,8 +139,8 @@ class WordPressImportTest extends WordPressImportTestCase
         $this->assertSame(ListingStatus::Draft, Listing::find(5010)->status); // private
         $this->assertNull(Listing::withTrashed()->find(5006)); // otpad
         $this->assertNull(Listing::withTrashed()->find(5011)); // auto-draft
-        $this->assertNull(Listing::withTrashed()->find(5012)); // autor ne postoji
-        $this->assertNull(Listing::withTrashed()->find(5013)); // bez kategorije
+        $this->assertNull(Listing::withTrashed()->find(5012)); // the author does not exist
+        $this->assertNull(Listing::withTrashed()->find(5013)); // no category
     }
 
     public function test_fields_and_values(): void
@@ -158,8 +158,8 @@ class WordPressImportTest extends WordPressImportTestCase
         $this->assertSame('number', $km->type->value);
         $this->assertSame('range', $km->filter->value);
         $this->assertSame('text', Field::where('wp_key', 'listivo_4661')->first()->type->value);
-        $this->assertNull(Field::where('wp_key', 'listivo_946')->first()); // nekorišćeno
-        $this->assertNull(Field::where('wp_key', 'listivo_434')->first()); // valuta nije polje
+        $this->assertNull(Field::where('wp_key', 'listivo_946')->first()); // unused
+        $this->assertNull(Field::where('wp_key', 'listivo_434')->first()); // the currency is not a field
 
         $values = fn (int $listing, string $wpKey) => DB::table('listing_field_values as v')
             ->join('fields as f', 'f.id', '=', 'v.field_id')
@@ -173,13 +173,13 @@ class WordPressImportTest extends WordPressImportTestCase
         $this->assertSame('54.50', $values(5002, 'listivo_4657')->first()->value_num);
         $this->assertSame('Uknjižen, prvi sprat', $values(5002, 'listivo_4661')->first()->value);
 
-        // Privremena polja loglasi-core: naziv opcije → vrednost
+        // Temporary loglasi-core fields: option name → value
         $this->assertSame(['prodajem'], $values(5003, 'loglasi_vrsta_oglasa')->pluck('value')->all());
         $this->assertSame(['kao-novo'], $values(5003, 'loglasi_stanje')->pluck('value')->all());
         $this->assertSame(['dostava', 'licno-preuzimanje'], $values(5003, 'loglasi_preuzimanje')->pluck('value')->all());
         $this->assertSame(['da'], $values(5001, 'loglasi_moguca_zamena')->pluck('value')->all());
 
-        // Polja su vezana za kategorije u kojima se koriste
+        // Fields are linked to the categories they are used in
         $automobili = Category::where('slug', 'automobili')->first();
         $this->assertEqualsCanonicalizing(['listivo_1910', 'listivo_1911', 'listivo_945', 'listivo_1912', 'loglasi_moguca_zamena'], $automobili->fields->pluck('wp_key')->all());
     }
@@ -287,12 +287,12 @@ class WordPressImportTest extends WordPressImportTestCase
         Storage::disk('public')->assertExists('oglasi/5001/6001-audi-1.jpg');
         Storage::disk('public')->assertExists('oglasi/5001/6002-audi-2.jpg');
 
-        // Smanjena slika (-scaled): kopira se original
+        // Scaled-down image (-scaled): the original is copied
         $stan = Listing::find(5002)->images->first();
         $this->assertSame('oglasi/5002/6003-stan.jpg', $stan->path);
         Storage::disk('public')->assertExists('oglasi/5002/6003-stan.jpg');
 
-        // Slike spam oglasa se ne kopiraju
+        // Images of spam listings are not copied
         Storage::disk('public')->assertMissing('oglasi/5007/6005-kredit.jpg');
         $this->assertSame(3, DB::table('listing_images')->count());
     }
@@ -320,14 +320,14 @@ class WordPressImportTest extends WordPressImportTestCase
             $this->assertContains($path, $gone);
         }
 
-        // Ništa sa 410 liste ne postoji u novoj bazi
+        // Nothing from the 410 list exists in the new database
         foreach ($gone as $path) {
             if (preg_match('~^/oglas/([^/]+)/$~', $path, $m)) {
                 $this->assertFalse(Listing::where('slug', $m[1])->exists(), $path);
             }
         }
 
-        // Spam poruka i omiljeni spam oglas nisu preneti
+        // The spam message and the favourited spam listing are not carried over
         $this->assertSame(0, DB::table('messages')->where('body', 'like', '%lekove%')->count());
         $this->assertFalse(DB::table('favorites')->where('listing_id', 5007)->exists());
     }
@@ -386,11 +386,11 @@ class WordPressImportTest extends WordPressImportTestCase
     {
         $this->import(['--since' => '2026-10-20'])->assertSuccessful();
 
-        // Novi nalog #7 i firma #117 (učesnik nove poruke); samo oglas izmenjen posle preseka
+        // New account #7 and firm #117 (participant of a new message); only the listing changed after the cut-off
         $this->assertEqualsCanonicalizing([7, 117], User::pluck('id')->all());
         $this->assertSame([5009], Listing::pluck('id')->all());
         $this->assertSame(1, DB::table('messages')->count());
-        $this->assertSame(7, Category::count()); // katalog se uvek uvozi ceo
+        $this->assertSame(7, Category::count()); // the catalog is always imported in full
     }
 
     public function test_since_updates_changed_listings_after_full_import(): void

@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
-/** Katalog: servisi i brisanje keša kad se promene kategorije, polja, mesta, cene ili oglasi. */
+/** Catalog: services, and clearing the cache when categories, fields, places, prices or listings change. */
 class CatalogServiceProvider extends ServiceProvider
 {
     public function register(): void
@@ -38,7 +38,7 @@ class CatalogServiceProvider extends ServiceProvider
         Product::saved(fn () => $catalog()->flushPrices());
         Product::deleted(fn () => $catalog()->flushPrices());
 
-        // Brojevi oglasa: samo kad se promeni nešto što utiče na broj (ne na pregled ili podizanje).
+        // Listing counts: only when something that affects the count changes (not a view or a bump).
         Listing::created(fn () => $catalog()->flushCounts());
         Listing::deleted(fn () => $catalog()->flushCounts());
         Listing::restored(fn () => $catalog()->flushCounts());

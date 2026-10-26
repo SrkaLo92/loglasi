@@ -43,7 +43,7 @@ class Listing extends Model
 
     protected static function booted(): void
     {
-        // price_eur se uvek računa iz cene i valute (kurs iz podešavanja).
+        // price_eur is always computed from the price and currency (rate from the settings).
         static::saving(function (Listing $listing) {
             if ($listing->isDirty(['price', 'currency']) || $listing->price_eur === null) {
                 $listing->price_eur = $listing->price === null
@@ -78,7 +78,7 @@ class Listing extends Model
         return $this->hasMany(ListingFieldValue::class);
     }
 
-    /** Javno vidljivi oglasi. */
+    /** Publicly visible listings. */
     public function scopePublished(Builder $query): void
     {
         $query->where('status', ListingStatus::Published);

@@ -3,20 +3,20 @@
 namespace App\Support\Auth;
 
 /**
- * Provera lozinki prenetih iz WordPress-a, isto kao wp_check_password() (WP 6.8+):
- * - "$wp$2y$...": bcrypt nad base64(HMAC-SHA384(lozinka, "wp-sha384")),
- * - "$P$..." / "$H$...": phpass (prenosivi MD5, 8192 kruga za "$P$B"),
- * - do 32 znaka: stari čist MD5,
- * - ostalo ("$2y$..." iz dodataka): password_verify.
+ * Checks passwords carried over from WordPress, the same as wp_check_password() (WP 6.8+):
+ * - "$wp$2y$...": bcrypt over base64(HMAC-SHA384(password, "wp-sha384")),
+ * - "$P$..." / "$H$...": phpass (portable MD5, 8192 rounds for "$P$B"),
+ * - up to 32 characters: old plain MD5,
+ * - the rest ("$2y$..." from plugins): password_verify.
  */
 class WordPressPassword
 {
     private const ITOA64 = './0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
-    /** WordPress ne proverava duže lozinke. */
+    /** WordPress does not check longer passwords. */
     private const MAX_LENGTH = 4096;
 
-    /** Da li heš dolazi iz WordPress-a (i nije običan bcrypt/argon). */
+    /** Whether the hash comes from WordPress (and is not plain bcrypt/argon). */
     public static function isWordPressHash(?string $hash): bool
     {
         if ($hash === null || $hash === '') {
@@ -56,19 +56,19 @@ class WordPressPassword
         return password_verify($password, $hash);
     }
 
-    /** Heš u obliku WordPress 6.8 (koristi se za testove i proveru uvoza). */
+    /** Hash in the WordPress 6.8 form (used for tests and for checking the import). */
     public static function hashWp68(string $password, int $cost = 10): string
     {
         return '$wp'.password_hash(self::preHash(trim($password)), PASSWORD_BCRYPT, ['cost' => $cost]);
     }
 
-    /** base64(HMAC-SHA384) kao u wp_hash_password(). */
+    /** base64(HMAC-SHA384) as in wp_hash_password(). */
     private static function preHash(string $password): string
     {
         return base64_encode(hash_hmac('sha384', $password, 'wp-sha384', true));
     }
 
-    /** PasswordHash::crypt_private() iz phpass (wp-includes/class-phpass.php). */
+    /** PasswordHash::crypt_private() from phpass (wp-includes/class-phpass.php). */
     public static function phpassCrypt(string $password, string $setting): string
     {
         $output = str_starts_with($setting, '*0') ? '*1' : '*0';
@@ -97,7 +97,7 @@ class WordPressPassword
         return substr($setting, 0, 12).self::encode64($hash, 16);
     }
 
-    /** Novi phpass heš (za testove): "$P$B" + so od 8 znakova. */
+    /** New phpass hash (for tests): "$P$B" + an 8-character salt. */
     public static function phpassHash(string $password, ?string $salt = null): string
     {
         $salt ??= self::encode64(random_bytes(6), 6);

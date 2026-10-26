@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class WordPressPasswordsTest extends TestCase
 {
-    /** Primer iz hashcat dokumentacije (phpass, lozinka "hashcat"). */
+    /** Example from the hashcat documentation (phpass, password "hashcat"). */
     private const PHPASS_HASHCAT = '$P$984478476IagS59wHZvyQMArzfx58u.';
 
     public function test_phpass_known_vector(): void
@@ -28,21 +28,21 @@ class WordPressPasswordsTest extends TestCase
         $this->assertSame(34, strlen($hash));
         $this->assertTrue(WordPressPassword::check('lozinka123', $hash));
         $this->assertFalse(WordPressPassword::check('lozinka124', $hash));
-        // Neispravan broj krugova ili so: nikad ne prolazi.
+        // A wrong round count or salt: never passes.
         $this->assertFalse(WordPressPassword::check('x', '$P$'.str_repeat('.', 31)));
         $this->assertSame('*0', WordPressPassword::phpassCrypt('x', '$X$Babcdefgh'));
     }
 
     public function test_wp68_bcrypt_over_hmac_sha384(): void
     {
-        // Isto kao wp_hash_password() u WP 6.8: '$wp' + bcrypt(base64(hmac_sha384(lozinka, 'wp-sha384'))).
+        // Same as wp_hash_password() in WP 6.8: '$wp' + bcrypt(base64(hmac_sha384(password, 'wp-sha384'))).
         $pre = base64_encode(hash_hmac('sha384', 'Šifra-2026!', 'wp-sha384', true));
         $hash = '$wp'.password_hash($pre, PASSWORD_BCRYPT, ['cost' => 4]);
 
         $this->assertStringStartsWith('$wp$2y$04$', $hash);
         $this->assertTrue(WordPressPassword::check('Šifra-2026!', $hash));
         $this->assertFalse(WordPressPassword::check('šifra-2026!', $hash));
-        // Bez pre-heša (obična bcrypt provera) ne sme da prođe.
+        // Without the pre-hash (plain bcrypt check) it must not pass.
         $this->assertFalse(password_verify('Šifra-2026!', substr($hash, 3)));
         $this->assertTrue(WordPressPassword::check('abc', WordPressPassword::hashWp68('abc', 4)));
     }

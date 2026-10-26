@@ -10,12 +10,12 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Podaci za Cenovnik i Za firme: cene iz tabele products (menjaju se u adminu),
- * limiti iz podešavanja, broj zauzetih besplatnih mesta za firme.
+ * Data for the Cenovnik and Za firme pages: prices from the products table (changed in the admin),
+ * limits from the settings, the number of free firm places taken.
  */
 class Pricing
 {
-    /** Zamena u tekstu => šifra proizvoda. */
+    /** Placeholder in the text => product code. */
     public const PLACEHOLDERS = [
         'cena_podizanje' => Product::BUMP,
         'cena_istaknuto_7' => Product::FEATURED_7,
@@ -35,7 +35,7 @@ class Pricing
         'cena_plus_10' => 'listing_slots_10',
     ];
 
-    /** Podešavanja za uplatu i kontakt (prazno dok ih admin ne unese; račun se nigde ne izmišlja). */
+    /** Payment and contact settings (empty until the admin enters them; an account is never made up). */
     public const PAYMENT_KEYS = [
         'payment_recipient' => 'Primalac',
         'payment_account' => 'Račun primaoca',
@@ -46,7 +46,7 @@ class Pricing
 
     private const FOUNDING_CACHE = 'pages.founding_firms_taken';
 
-    /** @return Collection<int, Product> Aktivni proizvodi, redosled kao u adminu. */
+    /** @return Collection<int, Product> Active products, in the admin order. */
     public static function products(): Collection
     {
         return once(fn () => Product::query()
@@ -164,13 +164,13 @@ class Pricing
         return self::products()->firstWhere('code', $code);
     }
 
-    /** „6.000 RSD” (bez prelamanja), 0 je „Besplatno”. */
+    /** "6.000 RSD" (no line break), 0 is "Besplatno". */
     public static function price(int $rsd): string
     {
         return $rsd > 0 ? number_format($rsd, 0, ',', '.')."\u{00A0}RSD" : 'Besplatno';
     }
 
-    /** Trajanje usluge za karticu: jednokratno, 7 dana, godišnje… */
+    /** Service duration for the card: one-off, 7 days, yearly… */
     public static function durationLabel(Product $product): string
     {
         $days = $product->duration_days;
@@ -183,7 +183,7 @@ class Pricing
         };
     }
 
-    /** Opis iz baze, a ako ga nema, podrazumevani tekst za tu šifru. */
+    /** Description from the database, or the default text for that code when there is none. */
     public static function description(Product $product): string
     {
         $description = trim((string) $product->description);
@@ -191,7 +191,7 @@ class Pricing
         return $description !== '' ? $description : PageText::get('cenovnik.opis.'.$product->code);
     }
 
-    /** Srpski oblik imenice uz broj: 1 mesto, 2 mesta, 5 mesta, 21 mesto. */
+    /** Serbian noun form after a number: 1 mesto, 2 mesta, 5 mesta, 21 mesto. */
     public static function plural(int $n, string $one, string $few, string $many): string
     {
         $mod10 = $n % 10;
@@ -212,7 +212,7 @@ class Pricing
         return max(0, (int) Settings::get('private_active_limit'));
     }
 
-    /** „do 5 aktivnih oglasa” */
+    /** "do 5 aktivnih oglasa" */
     public static function freeListingsText(): string
     {
         $n = self::freeListings();
@@ -220,7 +220,7 @@ class Pricing
         return 'do '.$n.' '.self::plural($n, 'aktivnog oglasa', 'aktivna oglasa', 'aktivnih oglasa');
     }
 
-    /** „mesec dana” ili „45 dana” */
+    /** "mesec dana" or "45 dana" */
     public static function durationText(): string
     {
         $days = max(1, (int) Settings::get('listing_duration_days'));
@@ -233,7 +233,7 @@ class Pricing
         return max(0, (int) Settings::get('founding_firms_total'));
     }
 
-    /** Broj firmi koje su dobile besplatan paket (founding_free). Keš 5 minuta. */
+    /** Number of firms that got the free package (founding_free). Cached for 5 minutes. */
     public static function foundingTaken(): int
     {
         return (int) Cache::remember(self::FOUNDING_CACHE, 300, fn () => Firm::query()->holdsFoundingPlace()->count());
@@ -249,7 +249,7 @@ class Pricing
         Cache::forget(self::FOUNDING_CACHE);
     }
 
-    /** Da li ponuda „prvih 30 firmi besplatno” još važi. */
+    /** Whether the "first 30 firms free" offer still holds. */
     public static function offerOpen(): bool
     {
         return self::foundingTotal() > 0 && self::foundingLeft() > 0;
@@ -263,7 +263,7 @@ class Pricing
         return $start && $start->price_rsd > 0 ? (int) $start->price_rsd : null;
     }
 
-    /** „Prvih 30 firmi: 12 meseci besplatno. Posle toga paketi počinju od 1.490 RSD mesečno, bez automatske naplate.” */
+    /** "Prvih 30 firmi: 12 meseci besplatno. Posle toga paketi počinju od 1.490 RSD mesečno, bez automatske naplate." */
     public static function offerText(): string
     {
         $from = self::packagesFrom();
@@ -281,7 +281,7 @@ class Pricing
             : $lead.' Posle toga nema automatske naplate.';
     }
 
-    /** „Prvih 30 firmi besplatno prvu godinu” (kratko, za karticu). */
+    /** "Prvih 30 firmi besplatno prvu godinu" (short, for the card). */
     public static function offerShort(): string
     {
         $free = self::foundingTotal();
@@ -290,7 +290,7 @@ class Pricing
     }
 
     /**
-     * Brojač besplatnih mesta za prikaz.
+     * Counter of free places for display.
      *
      * @return array{text: string, note: string, percent: int}|null
      */
@@ -316,7 +316,7 @@ class Pricing
     }
 
     /**
-     * Uneti podaci za uplatu (prazni se izostavljaju).
+     * Entered payment details (empty ones are left out).
      *
      * @return array<string, array{label: string, value: string}>
      */
@@ -333,7 +333,7 @@ class Pricing
         return $rows;
     }
 
-    /** Primalac i račun su obavezni da bi se podaci prikazali. */
+    /** The recipient and the account are required for the details to be shown. */
     public static function paymentReady(): bool
     {
         $rows = self::paymentRows();

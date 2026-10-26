@@ -1,4 +1,4 @@
-{{-- Zaglavlje sajta po odobrenoj maketi: logo, pretraga, nalog i „Postavite oglas”. --}}
+{{-- Site header per the approved mock-up: logo, search, account and "Postavite oglas". --}}
 @use('App\Support\Pages\SiteIcons')
 @use('App\Support\Pages\Navigation')
 @php

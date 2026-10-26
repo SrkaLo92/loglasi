@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-/** Poruka sa kontakt forme, ide na adresu iz podešavanja (contact_email). */
+/** Message from the contact form, sent to the address from the settings (contact_email). */
 class ContactMessage extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;

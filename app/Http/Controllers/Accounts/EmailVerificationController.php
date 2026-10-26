@@ -10,7 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-/** Potvrda email adrese linkom iz mejla. */
+/** Email address confirmation with the link from the mail. */
 class EmailVerificationController extends Controller
 {
     public function notice(Request $request): View|RedirectResponse
@@ -22,7 +22,7 @@ class EmailVerificationController extends Controller
         return view('accounts.verify-email');
     }
 
-    /** Link radi i bez prijave: potpis i heš emaila dokazuju vlasništvo. */
+    /** The link works without login too: the signature and the email hash prove ownership. */
     public function verify(Request $request, int $id, string $hash): RedirectResponse
     {
         $user = User::find($id);

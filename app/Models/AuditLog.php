@@ -27,7 +27,7 @@ class AuditLog extends Model
         return $this->morphTo();
     }
 
-    /** Upis akcije u dnevnik (admin panel i API admina). */
+    /** Writes an action to the log (admin panel and admin API). */
     public static function record(string $action, ?Model $subject = null, ?array $changes = null): self
     {
         return static::create([

@@ -12,7 +12,7 @@ use Illuminate\Testing\TestResponse;
 
 class SitemapTest extends SeoTestCase
 {
-    /** Proverava da je XML ispravan i vraća sve <loc>. */
+    /** Checks that the XML is valid and returns every <loc>. */
     private function locs(TestResponse $response): array
     {
         $response->assertOk()->assertHeader('Content-Type', 'application/xml; charset=UTF-8');

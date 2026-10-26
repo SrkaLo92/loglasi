@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Services\Payments\PlusSeller;
 use DateTimeInterface;
 
-/** Šema Me iz ugovora. */
+/** The Me schema from the contract. */
 class MePresenter
 {
     public static function me(User $user): array
@@ -42,7 +42,7 @@ class MePresenter
         ];
     }
 
-    /** ISO 8601 u UTC: 2026-10-23T18:30:00Z. */
+    /** ISO 8601 in UTC: 2026-10-23T18:30:00Z. */
     public static function date(?DateTimeInterface $date): ?string
     {
         return $date ? $date->copy()->utc()->format('Y-m-d\TH:i:s\Z') : null;

@@ -7,14 +7,14 @@ use App\Http\Controllers\Accounts\PasswordController;
 use App\Http\Controllers\Accounts\RegistrationController;
 use Illuminate\Support\Facades\Route;
 
-// Nalozi: prijava, registracija, lozinka, potvrda emaila, „Moj nalog”.
-// Linkovi se prave sa url_slash() i LoginPage::url(): /login-registracija/, /moj-nalog/...
+// Accounts: login, registration, password, email confirmation, "Moj nalog".
+// Links are built with url_slash() and LoginPage::url(): /login-registracija/, /moj-nalog/...
 
 Route::middleware('guest')->group(function () {
-    // Jedina strana za prijavu i registraciju (adresa sa starog sajta), kartice ?tab=prijava|registracija.
+    // The only login and registration page (address from the old site), tabs ?tab=prijava|registracija.
     Route::get('/login-registracija', [LoginController::class, 'show'])->name('login');
 
-    // GET /prijava/ i /registracija/ su 301 na nju; forme i dalje šalju POST na ove adrese.
+    // GET /prijava/ and /registracija/ are 301 to it; the forms still POST to these addresses.
     Route::get('/prijava', [LoginController::class, 'legacy'])->name('login.legacy');
     Route::post('/prijava', [LoginController::class, 'store'])->middleware('throttle:nalozi-login');
 
@@ -27,7 +27,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/nova-lozinka', [PasswordController::class, 'update'])->middleware('throttle:nalozi-password')->name('password.update');
 });
 
-// Link iz mejla radi i kad korisnik nije prijavljen (npr. otvori ga na telefonu).
+// The link from the mail works even when the user is not logged in (e.g. opened on a phone).
 Route::get('/potvrda-emaila/{id}/{hash}', [EmailVerificationController::class, 'verify'])
     ->middleware(['signed', 'throttle:6,1'])
     ->whereNumber('id')

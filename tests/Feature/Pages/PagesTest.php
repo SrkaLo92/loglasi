@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 class PagesTest extends TestCase
 {
-    /** Engleske reči koje ne smeju da se pojave u tekstu strane. */
+    /** English words that must not appear in the page text. */
     private const ENGLESKI = [
         'Login', 'Log in', 'Register', 'Submit', 'Search', 'Home', 'Contact us', 'Read more', 'Price',
         'Next', 'Previous', 'Not Found', 'Server Error', 'Too Many Requests', 'Page Expired', 'Forbidden',
@@ -117,7 +117,7 @@ class PagesTest extends TestCase
         foreach (self::ENGLESKI as $word) {
             $this->assertDoesNotMatchRegularExpression('/\b'.preg_quote($word, '/').'\b/u', $text, "Engleska reč „{$word}” na strani.");
         }
-        // Ni u atributima koje čitač ekrana izgovara.
+        // Not in the attributes a screen reader reads out either.
         preg_match_all('/(?:aria-label|placeholder|title|alt)="([^"]*)"/', $html, $m);
         foreach ($m[1] as $attr) {
             foreach (self::ENGLESKI as $word) {

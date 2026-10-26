@@ -1,5 +1,5 @@
-{{-- SEO zaglavlje: podaci iz App\Support\Seo (Seo::for($model) u kontroleru), ili iz promenljivih šablona
-     $title, $description, $canonical, $robots. Pravila: docs/moduli/seo.md --}}
+{{-- SEO head: data from App\Support\Seo (Seo::for($model) in the controller), or from the template variables
+     $title, $description, $canonical, $robots. Rules: docs/moduli/seo.md --}}
 @php
     $seoBuilder = \App\Support\Seo::get();
     if (isset($title)) { $seoBuilder->title($title); }

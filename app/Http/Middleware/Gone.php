@@ -12,8 +12,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * 410 za trajno uklonjene adrese: tabela `gone_urls` (spam, čišćenje), plus obrisani oglasi
- * i nalozi (soft delete) kad bi inače bio 404.
+ * 410 for permanently removed addresses: the `gone_urls` table (spam, clean-up), plus deleted listings
+ * and accounts (soft delete) when it would otherwise be a 404.
  */
 class Gone
 {
@@ -44,7 +44,7 @@ class Gone
         return $response;
     }
 
-    /** Oglas ili nalog koji postoji samo kao obrisan (soft delete). */
+    /** A listing or account that exists only as deleted (soft delete). */
     private function wasDeleted(string $path): bool
     {
         $path = rawurldecode($path);
@@ -60,7 +60,7 @@ class Gone
         return false;
     }
 
-    /** Strana 410: šablon errors.410 ako postoji, inače kratak tekst. */
+    /** 410 page: the errors.410 template if it exists, otherwise a short text. */
     public static function response(): Response
     {
         $headers = ['X-Robots-Tag' => 'noindex', 'Cache-Control' => 'public, max-age=3600'];

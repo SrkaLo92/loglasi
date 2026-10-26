@@ -1,16 +1,16 @@
 <?php
 
 /*
- * Uvoz iz WordPress-a (Listivo + loglasi-core): php artisan import:wordpress
+ * Import from WordPress (Listivo + loglasi-core): php artisan import:wordpress
  *
- * Ključevi su isti kao u loglasi-core (inc/api/rest.php, inc/oglas/oglas.php,
- * inc/profil/profil.php, inc/zajednicko/cena.php). Ako se na pravom sajtu
- * pokaže drugačije, menja se samo ovde.
+ * The keys are the same as in loglasi-core (inc/api/rest.php, inc/oglas/oglas.php,
+ * inc/profil/profil.php, inc/zajednicko/cena.php). If the real site turns out
+ * different, only this file changes.
  */
 
 return [
 
-    // Druga konekcija na bazu WordPress-a (Local: socket ili port iz „Database” taba).
+    // Second connection to the WordPress database (Local: socket or port from the "Database" tab).
     'connection' => [
         'driver' => 'mysql',
         'host' => env('WP_DB_HOST', '127.0.0.1'),
@@ -31,20 +31,20 @@ return [
     'tax_category' => 'listivo_14',
     'tax_location' => 'listivo_14144',
 
-    // Cena: listivo_{ID polja cene}_listivo_{ID termina valute}.
+    // Price: listivo_{price field ID}_listivo_{currency term ID}.
     'price_field_id' => 130,
     'currency_term_eur' => 435,
-    'currency_term_rsd' => 0, // 0 = prepoznaje se po nazivu termina, inače sve što nije EUR je RSD
+    'currency_term_rsd' => 0, // 0 = recognised by the term name, otherwise everything that is not EUR is RSD
 
     'meta' => [
         'featured' => 'featured',           // '1' / '0'
         'featured_expire' => 'featured_expire', // datetime
         'gallery' => 'listivo_145',
         'views' => 'views',
-        'expires' => '',          // Listivo datum isteka, ako postoji
+        'expires' => '',          // Listivo expiry date, if it exists
         'lat' => '',
         'lng' => '',
-        'listing_phone' => '',    // telefon na samom oglasu, ako postoji
+        'listing_phone' => '',    // phone on the listing itself, if it exists
     ],
 
     'usermeta' => [
@@ -55,8 +55,8 @@ return [
         'phone_verified' => 'loglasi_telefon_proveren',
         'avatar' => 'image', // attachment ID, 0 = none
         'favorites' => 'listivo_favorites',
-        'biznis_until' => '',     // datum isteka Biznis paketa, ako se negde čuva
-        // Polja firme (loglasi-core, inc/profil/profil.php)
+        'biznis_until' => '',     // expiry date of the Biznis package, if it is stored somewhere
+        // Firm fields (loglasi-core, inc/profil/profil.php)
         'firm_logo' => 'loglasi_firma_logo',
         'firm_cover' => 'loglasi_firma_naslovna',
         'firm_verified' => 'loglasi_firma_proverena',
@@ -72,11 +72,11 @@ return [
     ],
 
     'termmeta' => [
-        'category_icon' => '',    // ID priloga ili URL ikonice
+        'category_icon' => '',    // attachment ID or icon URL
         'order' => 'order',
     ],
 
-    // Poruke: Listivo ih čuva u svojoj tabeli (bez prefiksa ovde). Ako tabela ne postoji, preskače se.
+    // Messages: Listivo keeps them in its own table (no prefix here). If the table does not exist, it is skipped.
     'messages' => [
         'table' => 'listivo_messages',
         'columns' => [
@@ -89,13 +89,13 @@ return [
         ],
     ],
 
-    // Polja oglasa. Taksonomije listivo_<ID> i meta listivo_<ID> se pronalaze same;
-    // ovde se po izvornom ključu (wp_key) zadaje ključ, naziv, tip, filter i jedinica.
+    // Listing fields. listivo_<ID> taxonomies and listivo_<ID> meta are found on their own;
+    // here, by source key (wp_key), you set the key, name, type, filter and unit.
     'fields' => [
-        // primer: 'listivo_1912' => ['key' => 'kilometraza', 'label' => 'Kilometraža', 'type' => 'number', 'filter' => 'range', 'unit' => 'km'],
+        // example: 'listivo_1912' => ['key' => 'kilometraza', 'label' => 'Kilometraža', 'type' => 'number', 'filter' => 'range', 'unit' => 'km'],
     ],
 
-    // Privremena polja iz loglasi-core (class-loglasi-api-fields.php, defaults()).
+    // Temporary fields from loglasi-core (class-loglasi-api-fields.php, defaults()).
     'meta_fields' => [
         'loglasi_stanje' => ['key' => 'stanje', 'label' => 'Stanje', 'type' => 'select', 'filter' => 'multi', 'options' => ['Novo', 'Kao novo', 'Korišćeno', 'Neispravno']],
         'loglasi_vrsta_oglasa' => ['key' => 'vrsta_oglasa', 'label' => 'Vrsta oglasa', 'type' => 'select', 'filter' => 'select', 'options' => ['Prodajem', 'Kupujem']],
@@ -112,15 +112,15 @@ return [
     // Old addresses with Google clicks whose listing is not imported: "path target" per line, 301 instead of 410.
     'redirect_file' => env('UVOZ_REDIRECT_FILE', database_path('seeders/data/redirects-with-clicks.txt')),
 
-    // Spam nalozi koji se ne prenose (docs/09-deploy-seo.md, odeljak 2); njihovi URL-ovi idu u gone_urls.
+    // Spam accounts that are not carried over (docs/09-deploy-seo.md, section 2); their URLs go to gone_urls.
     'spam_users' => [80, 106, 109],
 
-    // Gde se piše izveštaj (izvestaj-{datum}.txt).
+    // Where the report is written (izvestaj-{date}.txt).
     'report_dir' => storage_path('app/uvoz'),
 
-    // Istaknut oglas bez datuma isteka ostaje istaknut ovoliko dana od uvoza.
+    // A featured listing without an expiry date stays featured this many days from the import.
     'featured_days' => 30,
 
-    // Kad WordPress nema datum isteka: objavljen oglas važi još ovoliko dana od uvoza.
+    // When WordPress has no expiry date: a published listing is valid this many more days from the import.
     'listing_days' => 30,
 ];

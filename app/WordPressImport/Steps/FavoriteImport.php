@@ -5,7 +5,7 @@ namespace App\WordPressImport\Steps;
 use App\WordPressImport\Text;
 use Illuminate\Support\Facades\DB;
 
-/** Omiljeni oglasi iz user mete (Listivo čuva spisak ID-jeva oglasa). */
+/** Favourite listings from the user meta (Listivo stores a list of listing IDs). */
 class FavoriteImport extends Step
 {
     public function run(): void

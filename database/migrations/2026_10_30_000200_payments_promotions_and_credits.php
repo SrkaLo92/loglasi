@@ -22,8 +22,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('listings', function (Blueprint $table) {
-            $table->timestamp('priority_until')->nullable()->after('featured_until');   // Prioritetni oglas
-            $table->timestamp('top_until')->nullable()->after('priority_until');        // TOP oglas
+            $table->timestamp('priority_until')->nullable()->after('featured_until');   // priority listing
+            $table->timestamp('top_until')->nullable()->after('priority_until');        // TOP listing
             $table->timestamp('premium_xl_until')->nullable()->after('top_until');      // bigger card in lists
             $table->timestamp('premium_home_until')->nullable()->after('premium_xl_until'); // also on the home page
             $table->index('premium_home_until');

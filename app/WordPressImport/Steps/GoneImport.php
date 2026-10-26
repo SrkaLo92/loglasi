@@ -6,8 +6,8 @@ use App\Support\Seo\UrlTables;
 use Illuminate\Support\Facades\DB;
 
 /**
- * URL-ovi koji vraćaju 410: profili i oglasi spam naloga i oglasi iz otpada
- * (docs/09-deploy-seo.md, odeljak 2). URL koji postoji u novoj bazi se ne dira.
+ * URLs that return 410: profiles and listings of spam accounts and listings from the trash
+ * (docs/09-deploy-seo.md, section 2). A URL that exists in the new database is not touched.
  */
 class GoneImport extends Step
 {
@@ -162,7 +162,7 @@ class GoneImport extends Step
         return array_values(array_unique($paths));
     }
 
-    /** Slug bez WordPress dodatka „__trashed”. */
+    /** Slug without the WordPress "__trashed" suffix. */
     private function slug(string $name): string
     {
         return (string) preg_replace('/__trashed(-\d+)?$/', '', rawurldecode($name));

@@ -1,4 +1,4 @@
-{{-- Brojač besplatnih mesta za firme: „Još 29 besplatnih mesta od 30”. --}}
+{{-- Counter of free firm places: "Još 29 besplatnih mesta od 30". --}}
 <div class="lgx-brojac{{ ($mali ?? false) ? ' lgx-brojac--mali' : '' }}">
 	<p class="lgx-brojac__tekst"><strong>{{ $counter['text'] }}</strong></p>
 	<div class="lgx-brojac__traka" aria-hidden="true"><span style="width: {{ (int) $counter['percent'] }}%"></span></div>

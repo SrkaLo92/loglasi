@@ -4,10 +4,10 @@ namespace App\Support;
 
 use App\Enums\Currency;
 
-/** Cena u valuti oglasa (EUR ili RSD) i preračun u evre za sortiranje i filter. */
+/** Price in the listing's currency (EUR or RSD) and the conversion to euros for sorting and filtering. */
 class Price
 {
-    /** Koliko dinara vredi 1 €. */
+    /** How many dinars 1 € is worth. */
     public static function rate(): float
     {
         $rate = (float) Settings::get('eur_rate');

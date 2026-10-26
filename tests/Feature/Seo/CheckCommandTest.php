@@ -99,7 +99,7 @@ class CheckCommandTest extends SeoTestCase
         @unlink($csv);
 
         $this->assertSame('URL', $rows[0][0]);
-        $this->assertCount(18, $rows); // zaglavlje + 17 jedinstvenih URL-ova
+        $this->assertCount(18, $rows); // header + 17 unique URLs
         $this->assertSame(['OK'], array_values(array_unique(array_column(array_slice($rows, 1), 7))));
     }
 
@@ -110,13 +110,13 @@ class CheckCommandTest extends SeoTestCase
 
         $b = self::BASE;
         Http::fake([
-            // indeksabilan oglas ima noindex i canonical na lokalni domen
+            // an indexable listing has noindex and a canonical to the local domain
             $b.'/oglas/golf/' => Http::response($this->html('noindex', 'http://loglasirs.local/oglas/golf/')),
             // lanac: 301 -> 301
             $b.'/oglasi/?kategorija=automobili' => Http::response('', 301, ['Location' => $b.'/oglasi/automobili']),
             $b.'/oglasi/automobili' => Http::response('', 301, ['Location' => $b.'/oglasi/automobili/']),
             $b.'/oglas/nepoznat/' => Http::response('', 404),
-            // privatni profil bez noindex
+            // private profile without noindex
             $b.'/korisnik/pera/' => Http::response($this->html('index, follow', 'https://loglasi.rs/korisnik/pera/')),
             // 5xx
             $b.'/product/paket/' => Http::response('', 500),
@@ -141,7 +141,7 @@ class CheckCommandTest extends SeoTestCase
             $b.'/oglas/spam/' => Http::response('', 410),
         ]);
 
-        // spam je u sitemapu: greška i za sitemap (410 umesto 200) i za 410 listu (u sitemapu)
+        // spam is in the sitemap: an error both for the sitemap (410 instead of 200) and for the 410 list (in the sitemap)
         $this->artisan('seo:check', ['file' => $this->tsv, 'base_url' => $b, '--pause' => 0, '--sitemap' => true, '--gone' => true])
             ->expectsOutputToContain('Ukupno: 4, OK: 2, GREŠKA: 2')
             ->assertFailed();

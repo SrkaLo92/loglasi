@@ -23,8 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Only a reverse proxy on the same machine may set X-Forwarded-* headers.
         $middleware->trustProxies(at: ['127.0.0.1', '::1']);
 
-        // SEO: pre rutiranja, da važi i za adrese koje više ne postoje.
-        // Redosled: preusmerenja (jedan skok), pa 410, pa kosa crta na kraju.
+        // SEO: before routing, so it also applies to addresses that no longer exist.
+        // Order: redirects (one hop), then 410, then the trailing slash.
         $middleware->append([
             SecurityHeaders::class,
             Redirects::class,
@@ -36,7 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
-        // Prvo prijava i upis (token_expired, 422), zatim opšti oblik grešaka (400 za GET parametre, 404, 405...).
+        // First login and writes (token_expired, 422), then the general error shape (400 for GET parameters, 404, 405...).
         ApiExceptionRenderer::register($exceptions);
         ApiResponse::register($exceptions);
     })->create();

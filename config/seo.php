@@ -1,14 +1,14 @@
 <?php
 
-// Podešavanja SEO modula: kanonski domen, pravila za indeksiranje, sitemap, preusmerenja.
-// Opis svih pravila: docs/moduli/seo.md
+// SEO module settings: canonical domain, indexing rules, sitemap, redirects.
+// All rules are described in docs/moduli/seo.md
 
 return [
 
-    // Kanonski domen za canonical, og:url, sitemap i robots.txt. Nikad lokalni domen.
+    // Canonical domain for canonical, og:url, sitemap and robots.txt. Never a local domain.
     'base_url' => rtrim((string) env('SEO_BASE_URL', 'https://loglasi.rs'), '/'),
 
-    // Da li pretraživači smeju da indeksiraju sajt (robots.txt). Van produkcije: zabranjeno sve.
+    // Whether search engines may index the site (robots.txt). Outside production: everything is disallowed.
     'indexable' => (bool) env('SEO_INDEXABLE', env('APP_ENV') === 'production'),
 
     'site_name' => 'loglasi.rs',
@@ -18,7 +18,7 @@ return [
     'title_max' => 60,
     'description_max' => 155,
 
-    // Slika za Open Graph kad strana nema svoju (putanja iz public/ ili apsolutni URL).
+    // Open Graph image when a page has none of its own (path from public/ or an absolute URL).
     'default_image' => env('SEO_DEFAULT_IMAGE', '/img/loglasi-og.png'),
     'default_image_alt' => 'Oglasi za Loznicu i okolinu',
 
@@ -39,19 +39,19 @@ return [
         ],
     ],
 
-    // SearchAction u WebSite schemi; {search_term_string} zamenjuje Google.
+    // SearchAction in the WebSite schema; Google replaces {search_term_string}.
     'search_url' => '/oglasi/?keyword={search_term_string}',
 
-    // Parametri koji se ne računaju kao filter i odbacuju se pri preusmeravanju.
+    // Parameters that do not count as a filter and are dropped on redirect.
     'tracking_params' => [
         'utm_*', 'fbclid', 'gclid', 'gbraid', 'wbraid', 'msclkid', 'ttclid', 'igshid',
         'mc_cid', 'mc_eid', '_gl', 'nc',
     ],
 
-    // Parametri paginacije: strana je noindex,follow, canonical na samu sebe.
+    // Pagination parameters: the page is noindex,follow, canonical to itself.
     'page_params' => ['page', 'paged'],
 
-    // Strane naloga i pomoćne strane: 200, noindex,follow, bez canonical-a (Str::is obrasci, bez kose crte na kraju).
+    // Account and helper pages: 200, noindex,follow, no canonical (Str::is patterns, no trailing slash).
     'noindex_paths' => [
         'prijava', 'prijava/*', 'registracija', 'registracija/*', 'odjava',
         'login-registracija', 'zaboravljena-lozinka', 'zaboravljena-lozinka/*', 'nova-lozinka/*',
@@ -61,14 +61,14 @@ return [
         'placanje', 'placanje/*', 'narudzbine', 'narudzbine/*', 'pretraga',
     ],
 
-    // Javne strane koje ulaze u /sitemap-strane.xml (i koje skripta provere očekuje kao 200 + index).
+    // Public pages that go into /sitemap-strane.xml (and that the check script expects as 200 + index).
     'pages' => [
         '/', '/oglasi/', '/o-nama/', '/faq/', '/kontakt/', '/cenovnik/', '/za-firme/', '/firme/',
         '/uslovi-koriscenja/', '/pravila-oglasavanja/', '/politika-privatnosti/', '/brisanje-licnih-podataka/',
         '/uslovi-placanja/', '/odustanak-od-ugovora/', '/reklamacije/',
     ],
 
-    // Narodna fraza po slugu kategorije (keyword mapa): naziv za title i H1, „za” = akuzativ za opis.
+    // Everyday phrase per category slug (keyword map): name for title and H1, "za" = accusative for the description.
     'phrases' => [
         'automobili' => ['naziv' => 'Polovni automobili', 'za' => 'polovne automobile'],
         'nekretnine' => ['naziv' => 'Nekretnine', 'za' => 'nekretnine'],
@@ -80,17 +80,17 @@ return [
         'drva' => ['naziv' => 'Drva', 'za' => 'drva'],
     ],
 
-    // Kategorija + mesto ide u indeks i u sitemap tek od ovoliko aktivnih oglasa
-    // (u adminu: podešavanje „seo_place_min_listings”).
+    // Category + place goes into the index and sitemap only from this many active listings
+    // (in the admin: the "seo_place_min_listings" setting).
     'place_min_listings' => 3,
 
     'sitemap' => [
         'per_file' => 1000,
         'cache_ttl' => 86400,
-        'max_age' => 3600, // Cache-Control za pregledač i CDN
+        'max_age' => 3600, // Cache-Control for the browser and CDN
     ],
 
-    // Odredišta za stare WordPress/WooCommerce adrese (otvorena pitanja za vlasnika, docs/moduli/seo.md).
+    // Targets for old WordPress/WooCommerce addresses (open questions for the owner, docs/moduli/seo.md).
     'targets' => [
         'kategorija_unknown' => '/oglasi/',
         'marka_automobila' => '/oglasi/automobili/',

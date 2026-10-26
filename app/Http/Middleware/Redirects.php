@@ -12,8 +12,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * 301 preusmerenja: tabela `redirects` (iz admina) pa pravila za stare adrese (LegacyUrls).
- * Uvek jedan skok: odredište se razrešava do kraja pre slanja, parametri za praćenje se odbacuju.
+ * 301 redirects: the `redirects` table (from the admin), then the rules for old addresses (LegacyUrls).
+ * Always one hop: the target is resolved to the end before sending, tracking parameters are dropped.
  */
 class Redirects
 {
@@ -37,7 +37,7 @@ class Redirects
 
         if ($row = ($withQuery !== $plain ? $map[$withQuery] ?? null : null) ?? $map[$plain] ?? null) {
             Hits::redirect($row['id']);
-            // Zapis sa upitom (/?p=1) troši upit; zapis samo sa putanjom prenosi ostale parametre.
+            // A row with a query (/?p=1) uses up the query; a row with only a path passes the other parameters on.
             $keep = isset($map[$withQuery]) && $withQuery !== $plain ? [] : Url::withoutTracking($query);
             $target = $this->final($row['to'], $keep, $plain);
 
@@ -62,7 +62,7 @@ class Redirects
     }
 
     /**
-     * Ako je odredište i samo u tabeli preusmerenja, ide se odmah na krajnje (bez lanca).
+     * If the target itself is in the redirects table, go straight to the final one (no chain).
      *
      * @return array{to: string, query: array<string, mixed>}
      */
@@ -91,12 +91,12 @@ class Redirects
 
     private function send(Request $request, string $url, int $code): Response
     {
-        // Zaštita od petlje: odredište isto kao trenutni URL.
+        // Loop guard: target same as the current URL.
         if ($url === $request->fullUrl() || $url === $request->url()) {
             abort(404);
         }
 
-        // RedirectResponse direktno: redirect()->to() bi skinuo kosu crtu na kraju.
+        // RedirectResponse directly: redirect()->to() would drop the trailing slash.
         return new RedirectResponse($url, $code, ['Cache-Control' => 'public, max-age=86400']);
     }
 }
