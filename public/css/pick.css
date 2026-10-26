@@ -626,16 +626,16 @@
 		overflow: hidden;
 	}
 
-	/* A computer: the dropdown fades in and settles from just above its field. */
+	/* A computer: the dropdown appears at once, with only a short slide so the eye follows it; no scaling
+	   (blurry text) and no long fade (the page showing through the list). Closing is instant. */
 	.lp-sheet.is-pop .lp-panel {
 		opacity: 0;
-		transform: translateY(-6px) scale(.985);
-		transform-origin: top center;
-		transition: transform .18s cubic-bezier(.2, .8, .2, 1), opacity .14s ease;
+		transform: translateY(-4px);
+		transition: transform .12s ease-out, opacity .08s linear;
 	}
 
 	.lp-sheet.is-pop.is-closing .lp-panel {
-		transition-duration: .12s;
+		transition: none;
 	}
 
 	.lp-sheet.is-pop.is-open .lp-panel {

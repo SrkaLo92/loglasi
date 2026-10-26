@@ -106,10 +106,14 @@
 		window.clearTimeout(sheet.hideTimer);
 		sheet.root.classList.remove('is-closing', 'is-open', 'is-pop');
 		sheet.panel.removeAttribute('style');
+		// The dropdown class goes on before the sheet is shown, so the opening transition never starts
+		// from the centred dialog (the panel used to fly in from the middle of the screen).
+		var pop = window.matchMedia('(min-width: 720px)').matches && control.trigger;
+		sheet.root.classList.toggle('is-pop', !!pop);
 		sheet.root.hidden = false;
 		// A short list on a phone: the sheet is only as tall as its options.
 		sheet.root.classList.toggle('is-short', control.count() <= 8);
-		if (window.matchMedia('(min-width: 720px)').matches && control.trigger) { place(control.trigger); }
+		if (pop) { place(control.trigger); }
 		else { document.documentElement.classList.add('lp-lock'); }
 		void sheet.panel.offsetHeight; // start the opening transition from the closed state
 		window.requestAnimationFrame(function () {
@@ -159,7 +163,7 @@
 			root.classList.remove('is-closing', 'is-pop');
 			panel.removeAttribute('style');
 			root.hidden = true;
-		}, reduce ? 0 : 230);
+		}, reduce || root.classList.contains('is-pop') ? 0 : 230);
 		if (control.trigger) { control.trigger.focus(); }
 	};
 

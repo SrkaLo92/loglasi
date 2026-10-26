@@ -345,9 +345,6 @@ fieldset.pst-field > legend { margin-bottom: 6px; }
 .pst-chips__count { margin-left: 6px; color: var(--lg-green); font-size: 14px; font-weight: 600; }
 .pst-check--chip { min-height: 40px; padding: 6px 12px; border-radius: 999px; font-weight: 500; }
 .pst-check--chip input { width: 18px; height: 18px; }
-.pst-more { margin-top: 8px; }
-.pst-more > summary { display: inline-flex; min-height: 44px; align-items: center; color: var(--lg-green); font-weight: 700; cursor: pointer; }
-.pst-more[open] > summary { margin-bottom: 8px; }
 
 /* Short lists as one-tap pills, yes/no as switches */
 
