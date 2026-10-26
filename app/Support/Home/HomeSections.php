@@ -8,6 +8,7 @@ use App\Models\Firm;
 use App\Services\Catalog;
 use App\Services\ListingSearch;
 use App\Support\Firms\FirmDirectory;
+use App\Support\Search\CategorySheet;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -65,7 +66,8 @@ class HomeSections
 
         return [
             'total' => $this->search->count([]),
-            'categories_total' => count(array_filter($counts)),
+            // The number of tiles the "Sve kategorije" sheet shows, not every subcategory.
+            'categories_total' => array_sum(array_map(fn (array $theme) => count($theme['items']), CategorySheet::get()['themes'])),
             'premium' => $premium,
             'featured' => array_slice($featured, 0, $featuredCount),
             'latest' => $this->search->ids(['featured_first' => false], HomeSettings::int('home.latest_count', 1, 24)),

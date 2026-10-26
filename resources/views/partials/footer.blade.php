@@ -95,7 +95,7 @@
 		</nav>
 
 		<div class="lg-footer__col lg-footer__zadnja">
-			<h2 class="lg-footer__naslov lg-footer__naslov--najnoviji" id="lg-footer-najnoviji">Najnoviji oglasi</h2>
+			<h2 class="lg-footer__naslov lg-footer__naslov--najnoviji" id="lg-footer-najnoviji">Upravo objavljeno</h2>
 			<ul class="lg-footer__lista lg-footer__najnoviji" data-lg-najnoviji="{{ url_slash('/podnozje/najnoviji-oglasi') }}" aria-labelledby="lg-footer-najnoviji">
 				<li><a class="lg-footer__sve" href="{{ url_slash('/oglasi') }}">Pogledajte sve oglase</a></li>
 			</ul>

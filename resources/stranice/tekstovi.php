@@ -191,7 +191,7 @@ return [
     'faq.pitanja' => [
         ['pitanje' => 'Šta je loglasi.rs?', 'odgovor' => 'loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu. Ovde kupujete i prodajete polovne stvari, vozila, nekretnine, usluge i poslove, od ljudi i firmi iz Loznice, Banje Koviljače, Lešnice i okolnih mesta.'],
         ['pitanje' => 'Da li je postavljanje oglasa besplatno?', 'odgovor' => 'Da, postavljanje oglasa je besplatno. Privatni korisnici besplatno imaju {besplatni_oglasi}, a plaćaju se samo dodatne usluge koje sami izaberete.'],
-        ['pitanje' => 'Koliko oglasa mogu da imam besplatno?', 'odgovor' => 'Do {besplatni_oglasi} istovremeno. Ako vam treba više, na strani [Cenovnik](/cenovnik/) su dodatni oglasi (+3 za {cena_plus_3}, +10 za {cena_plus_10}) i paket Plus prodavac.'],
+        ['pitanje' => 'Koliko oglasa mogu da imam besplatno?', 'odgovor' => 'Istovremeno možete da imate {besplatni_oglasi}. Ako vam treba više, na strani [Cenovnik](/cenovnik/) su dodatni oglasi (+3 za {cena_plus_3}, +10 za {cena_plus_10}) i paket Plus prodavac.'],
         ['pitanje' => 'Kako da postavim oglas?', 'odgovor' => 'Prijavite se, kliknite na „Postavite oglas”, izaberite kategoriju, upišite naslov, opis i cenu i dodajte fotografije. Što više podataka i jasnih fotografija, to brže prodajete.'],
         ['pitanje' => 'Koliko traje oglas?', 'odgovor' => 'Oglas traje {trajanje_oglasa}. Kad istekne, besplatno ga obnovite jednim klikom u „Moji oglasi”.'],
         ['pitanje' => 'Zašto moj oglas nije odmah vidljiv?', 'odgovor' => 'Nove oglase pregleda administrator pre objave, da na sajtu ne bi bilo prevara i neželjenih oglasa. Oglas koji čeka vidite u „Moji oglasi” › „Na čekanju”.'],
