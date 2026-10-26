@@ -168,7 +168,8 @@ class SettingsSchema
                 'default' => $default,
             ];
             if ($type === 'items') {
-                $field['item_keys'] = array_keys($default[0]);
+                // Every key used by any row, so a row without an optional key still compares equal.
+                $field['item_keys'] = array_keys(array_merge(...array_map(fn ($row) => (array) $row, $default)));
             }
 
             $groups[$page][PageText::PREFIX.$key] = $field;
@@ -250,7 +251,7 @@ class SettingsSchema
             $old = $stored[$key] ?? null;
             // Switches are always stored: a missing key must not read as "off" elsewhere.
             $isDefault = ! is_bool($field['default'])
-                && ($value === null || $value === '' || $value === [] || $value == $field['default']);
+                && ($value === null || $value === '' || $value === [] || $value == self::clean($field['default'], $field));
 
             if ($isDefault) {
                 if (array_key_exists($key, $stored)) {
