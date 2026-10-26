@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Models\Listing;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
 class ProbaPodaciCommandTest extends SearchTestCase
@@ -20,7 +21,7 @@ class ProbaPodaciCommandTest extends SearchTestCase
         $real = User::factory()->create(['email' => 'pravi@gmail.com']);
         Listing::factory()->for($real)->create();
 
-        $this->artisan('proba:podaci', ['--sajt' => 'loglasi-custom.alphasoft.dev', '--oglasa' => 20])->assertSuccessful();
+        $this->artisan('proba:podaci', ['--sajt' => 'loglasi-custom.alphasoft.dev', '--oglasa' => 20, '--bez-slika' => true])->assertSuccessful();
 
         $this->assertModelExists($admin);
         $this->assertModelMissing($real);
@@ -41,5 +42,18 @@ class ProbaPodaciCommandTest extends SearchTestCase
         $this->artisan('proba:podaci', ['--sajt' => 'drugi.sajt'])->assertFailed();
 
         $this->assertModelExists($real);
+    }
+
+    public function test_gives_invented_listings_photos(): void
+    {
+        config(['app.url' => 'https://loglasi-custom.alphasoft.dev']);
+        Storage::fake('public');
+        Http::fake(['*' => Http::response(UploadedFile::fake()->image('p.jpg', 800, 600)->getContent(), 200, ['Content-Type' => 'image/jpeg'])]);
+        $this->app->useStoragePath(sys_get_temp_dir().'/proba-'.uniqid());
+
+        $this->artisan('proba:podaci', ['--sajt' => 'loglasi-custom.alphasoft.dev', '--oglasa' => 6, '--bez-brisanja' => true])->assertSuccessful();
+
+        $this->assertSame(6, Listing::query()->whereHas('images')->count());
+        $this->assertNotNull(Listing::query()->first()->images()->first()->variants);
     }
 }

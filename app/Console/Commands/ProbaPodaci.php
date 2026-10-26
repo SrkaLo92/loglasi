@@ -23,7 +23,8 @@ class ProbaPodaci extends Command
     protected $signature = 'proba:podaci
         {--sajt= : host of this site from APP_URL, e.g. loglasi-custom.alphasoft.dev (safety check)}
         {--oglasa=400 : number of invented listings}
-        {--bez-brisanja : only add invented data, keep the existing users}';
+        {--bez-brisanja : only add invented data, keep the existing users}
+        {--bez-slika : do not add photos (proba:slike)}';
 
     protected $description = 'Probni sajt: briše prave korisnike i oglase i ubacuje izmišljene';
 
@@ -68,6 +69,9 @@ class ProbaPodaci extends Command
         }
 
         $this->call('dev:listings', ['count' => max(1, (int) $this->option('oglasa')), '--probni' => true]);
+        if (! $this->option('bez-slika')) {
+            $this->call('proba:slike', ['--sajt' => $host]);
+        }
 
         Cache::flush();
         $index->rebuild();
