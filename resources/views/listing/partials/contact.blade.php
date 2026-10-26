@@ -24,7 +24,7 @@
 	<div class="lgo-contact__pricerow">
 		<p class="lgo-contact__price">{{ $listing->price === null ? 'Cena po dogovoru' : $listing->priceLabel() }}</p>
 		@if ($swap)
-			<span class="lgo-badge lgo-badge--zamena">{{ Icons::listing('swap') }}Moguća zamena</span>
+			<span class="lgo-badge lgo-badge--swap">{{ Icons::listing('swap') }}Moguća zamena</span>
 		@endif
 	</div>
 	@php

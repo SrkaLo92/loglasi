@@ -58,7 +58,7 @@ class LayoutTest extends TestCase
         $html = $this->get('/')->getContent();
 
         foreach (['Početna', 'Pretraga', 'Postavi oglas', 'Poruke', 'Nalog'] as $label) {
-            $this->assertStringContainsString('<span class="lg-mnav__naziv">'.$label.'</span>', $html);
+            $this->assertStringContainsString('<span class="lg-mnav__name">'.$label.'</span>', $html);
         }
         $this->assertStringContainsString('aria-label="Početna strana"  aria-current="page"', $html);
         $this->assertStringContainsString('aria-label="Prijava ili moj nalog"', $html);
@@ -70,7 +70,7 @@ class LayoutTest extends TestCase
         $html = view('partials.bottom-nav', ['unreadMessages' => 3])->render();
 
         $this->assertStringContainsString('aria-label="Poruke, 3 nepročitane"', $html);
-        $this->assertStringContainsString('<span class="lg-mnav__broj" aria-hidden="true">3</span>', $html);
+        $this->assertStringContainsString('<span class="lg-mnav__num" aria-hidden="true">3</span>', $html);
     }
 
     public function test_active_item_by_path(): void

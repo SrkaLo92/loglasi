@@ -35,20 +35,20 @@
 @endphp
 <footer class="lg-footer">
 	@if ($lgFooterCta)
-		<div class="lg-wrap lg-footer__vrh">
+		<div class="lg-wrap lg-footer__top">
 			<div>
-				<p class="lg-footer__vesti">Imate nešto za prodaju?</p>
-				<p class="lg-footer__podnaslov">Postavite oglas besplatno, za par minuta, i javite se kupcima iz svog kraja.</p>
+				<p class="lg-footer__news">Imate nešto za prodaju?</p>
+				<p class="lg-footer__subtitle">Postavite oglas besplatno, za par minuta, i javite se kupcima iz svog kraja.</p>
 			</div>
-			<a class="lg-btn lg-btn--orange lg-footer__postavi" href="{{ url_slash('/postavi-oglas') }}">{{ SiteIcons::svg('plus', 18) }}Postavite oglas</a>
+			<a class="lg-btn lg-btn--orange lg-footer__post" href="{{ url_slash('/postavi-oglas') }}">{{ SiteIcons::svg('plus', 18) }}Postavite oglas</a>
 		</div>
 	@endif
 
 	<div class="lg-wrap lg-footer__in">
-		<div class="lg-footer__col lg-footer__brend">
+		<div class="lg-footer__col lg-footer__brand">
 			@include('partials.logo', ['logoClass' => 'lg-footer__logo', 'logoTheme' => 'light'])
-			<p class="lg-footer__tekst">loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu.</p>
-			<ul class="lg-footer__kontakt">
+			<p class="lg-footer__text">loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu.</p>
+			<ul class="lg-footer__contact">
 				@if ($lgAddress !== '')
 					<li><span>{{ $lgAddress }}</span></li>
 				@endif
@@ -61,19 +61,19 @@
 			</ul>
 		</div>
 
-		<nav class="lg-footer__col lg-footer__grupe" aria-label="Linkovi u podnožju">
-			<details class="lg-footer__grupa" open data-lg-fold>
-				<summary class="lg-footer__naslov">Korisni linkovi</summary>
-				<ul class="lg-footer__lista">
+		<nav class="lg-footer__col lg-footer__groups" aria-label="Linkovi u podnožju">
+			<details class="lg-footer__group" open data-lg-fold>
+				<summary class="lg-footer__title">Korisni linkovi</summary>
+				<ul class="lg-footer__list">
 					@foreach ($lgFooterLinks as $key => $label)
 						@php($href = Navigation::link($key))
 						<li><a href="{{ $href }}" @if ($href === $lgCurrent) aria-current="page" @endif>{{ $label }}</a></li>
 					@endforeach
 				</ul>
 			</details>
-			<details class="lg-footer__grupa" open data-lg-fold>
-				<summary class="lg-footer__naslov">Pravne informacije</summary>
-				<ul class="lg-footer__lista">
+			<details class="lg-footer__group" open data-lg-fold>
+				<summary class="lg-footer__title">Pravne informacije</summary>
+				<ul class="lg-footer__list">
 					@foreach ($lgLegalLinks as $key => $label)
 						@php($href = Navigation::link($key))
 						<li><a href="{{ $href }}" @if ($href === $lgCurrent) aria-current="page" @endif>{{ $label }}</a></li>
@@ -83,24 +83,24 @@
 		</nav>
 
 		<nav class="lg-footer__col" aria-label="Kategorije">
-			<details class="lg-footer__grupa" open data-lg-fold>
-				<summary class="lg-footer__naslov">Kategorije</summary>
-				<ul class="lg-footer__lista">
+			<details class="lg-footer__group" open data-lg-fold>
+				<summary class="lg-footer__title">Kategorije</summary>
+				<ul class="lg-footer__list">
 					@foreach ($lgFooter['categories'] as $item)
 						<li><a href="{{ $item['url'] }}">{{ $item['name'] }}</a></li>
 					@endforeach
-					<li><a class="lg-footer__sve" href="{{ url_slash('/oglasi') }}">Svi oglasi</a></li>
+					<li><a class="lg-footer__all" href="{{ url_slash('/oglasi') }}">Svi oglasi</a></li>
 				</ul>
 			</details>
 		</nav>
 
-		<div class="lg-footer__col lg-footer__zadnja">
-			<h2 class="lg-footer__naslov lg-footer__naslov--najnoviji" id="lg-footer-najnoviji">Upravo objavljeno</h2>
-			<ul class="lg-footer__lista lg-footer__najnoviji" data-lg-najnoviji="{{ url_slash('/podnozje/najnoviji-oglasi') }}" aria-labelledby="lg-footer-najnoviji">
-				<li><a class="lg-footer__sve" href="{{ url_slash('/oglasi') }}">Pogledajte sve oglase</a></li>
+		<div class="lg-footer__col lg-footer__last">
+			<h2 class="lg-footer__title lg-footer__title--latest" id="lg-footer-latest">Upravo objavljeno</h2>
+			<ul class="lg-footer__list lg-footer__latest" data-lg-najnoviji="{{ url_slash('/podnozje/najnoviji-oglasi') }}" aria-labelledby="lg-footer-latest">
+				<li><a class="lg-footer__all" href="{{ url_slash('/oglasi') }}">Pogledajte sve oglase</a></li>
 			</ul>
-			<h2 class="lg-footer__naslov lg-footer__naslov--mreze">Pratite nas</h2>
-			<ul class="lg-footer__mreze">
+			<h2 class="lg-footer__title lg-footer__title--social">Pratite nas</h2>
+			<ul class="lg-footer__social">
 				@foreach ($lgSocial as $name => $social)
 					<li><a href="{{ $social['url'] }}" target="_blank" rel="noopener" aria-label="loglasi.rs na mreži {{ $name }} (otvara se u novom prozoru)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">{!! $social['path'] !!}</svg></a></li>
 				@endforeach
@@ -108,9 +108,9 @@
 		</div>
 	</div>
 
-	<div class="lg-wrap lg-footer__dno">
+	<div class="lg-wrap lg-footer__bottom">
 		<p>© {{ now()->year }} loglasi.rs · Vaš lokalni portal za kupovinu, prodaju i razmenu. Sva prava zadržana.</p>
-		<button type="button" class="lg-footer__kolacici" data-kolacici-izmena hidden>Podešavanje kolačića</button>
+		<button type="button" class="lg-footer__cookies" data-cookies-change hidden>Podešavanje kolačića</button>
 		<a href="https://alphasoft.dev/" target="_blank" rel="noopener">Alphasoft Development</a>
 	</div>
 </footer>
@@ -136,10 +136,10 @@
 					var title = document.createElement('span');
 					var price = document.createElement('span');
 					a.href = item.url;
-					a.className = 'lg-footer__oglas';
+					a.className = 'lg-footer__listing';
 					title.textContent = item.title;
 					price.textContent = item.price;
-					price.className = 'lg-footer__cena';
+					price.className = 'lg-footer__price';
 					a.appendChild(title);
 					a.appendChild(price);
 					li.appendChild(a);

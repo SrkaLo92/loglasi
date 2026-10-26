@@ -38,7 +38,7 @@ class ErrorPagesTest extends TestCase
         $this->get('/test-greska/')
             ->assertStatus(500)
             ->assertSee('Nešto nije u redu')
-            ->assertSee('css/osnova.css', false)
+            ->assertSee('css/base.css', false)
             ->assertDontSee('Server Error');
     }
 

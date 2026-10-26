@@ -32,8 +32,8 @@
 				<form method="get" action="{{ url_slash('moj-nalog/narudzbine/nova') }}" class="lgpay-form">
 					<input type="hidden" name="usluga" value="{{ $product->code }}">
 					<div class="lgpay-field">
-						<label for="lgpay-oglas">Oglas</label>
-						<select id="lgpay-oglas" data-pick name="oglas" required>
+						<label for="lgpay-listing">Oglas</label>
+						<select id="lgpay-listing" data-pick name="oglas" required>
 							@foreach ($listings as $item)
 								<option value="{{ $item->id }}">{{ $item->title }}</option>
 							@endforeach
@@ -106,15 +106,15 @@
 					@php($withdrawal = PaymentDetails::legalLink('withdrawal'))
 					@php($terms = PaymentDetails::legalLink('terms'))
 					<label class="lgpay-check">
-						<input type="checkbox" name="odmah" value="1" @checked(old('odmah')) @error('odmah') aria-invalid="true" aria-describedby="lgpay-odmah-greska" @enderror>
+						<input type="checkbox" name="odmah" value="1" @checked(old('odmah')) @error('odmah') aria-invalid="true" aria-describedby="lgpay-odmah-error" @enderror>
 						<span>Saglasan/na sam da usluga počne odmah po evidentiranju uplate i razumem da time gubim pravo na odustanak od ugovora za izvršenu uslugu. Više na strani <a href="{{ $withdrawal }}">Odustanak od ugovora</a>. <span class="lgpay-help">Obavezno za fizička lica.</span></span>
 					</label>
-					@error('odmah')<p class="lgpay-error" id="lgpay-odmah-greska">{{ $message }}</p>@enderror
+					@error('odmah')<p class="lgpay-error" id="lgpay-odmah-error">{{ $message }}</p>@enderror
 					<label class="lgpay-check">
-						<input type="checkbox" name="uslovi" value="1" required @checked(old('uslovi')) @error('uslovi') aria-invalid="true" aria-describedby="lgpay-uslovi-greska" @enderror>
+						<input type="checkbox" name="uslovi" value="1" required @checked(old('uslovi')) @error('uslovi') aria-invalid="true" aria-describedby="lgpay-uslovi-error" @enderror>
 						<span>Pročitao/la sam i prihvatam <a href="{{ $terms }}">Uslove kupovine i plaćanja</a>.</span>
 					</label>
-					@error('uslovi')<p class="lgpay-error" id="lgpay-uslovi-greska">{{ $message }}</p>@enderror
+					@error('uslovi')<p class="lgpay-error" id="lgpay-uslovi-error">{{ $message }}</p>@enderror
 					<p class="lgpay-help">Reklamacije i povraćaj novca: <a href="{{ PaymentDetails::legalLink('complaints') }}">uslovi i rokovi</a>.</p>
 					<p class="lgpay-help">Plaćanje je uplatom na račun. Posle potvrde dobijate predračun sa pozivom na broj i QR kodom za plaćanje telefonom. Porudžbina koja nije plaćena u roku od {{ config('payments.pending_days') }} dana se otkazuje.@if ($testMode) <strong>Probni režim: uplata se ne knjiži, račun je probni.</strong>@endif</p>
 					<button class="lg-btn lg-btn--green" type="submit">Potvrdi porudžbinu</button>

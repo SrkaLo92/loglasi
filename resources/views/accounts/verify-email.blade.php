@@ -7,8 +7,8 @@
 
 @section('content')
 <div class="lgn lg-wrap">
-	<section class="lgn-card" aria-labelledby="lgn-naslov">
-		<h1 id="lgn-naslov">Potvrdite email adresu</h1>
+	<section class="lgn-card" aria-labelledby="lgn-title">
+		<h1 id="lgn-title">Potvrdite email adresu</h1>
 		@include('accounts.partials.status')
 		<p>Poslali smo link na <strong>{{ auth()->user()->email }}</strong>. Otvorite mejl i kliknite na link. Ako mejl ne stigne za nekoliko minuta, proverite folder za neželjenu poštu.</p>
 		<form method="post" action="{{ url_slash('potvrda-emaila/ponovo') }}">

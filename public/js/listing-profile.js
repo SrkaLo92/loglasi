@@ -100,7 +100,7 @@
 	/* The sticky bar shows when the header buttons are off screen. */
 	function initSticky(root) {
 		var bar = root.querySelector('.lgp-sticky');
-		var actions = root.querySelector('.lgp-firma__actions');
+		var actions = root.querySelector('.lgp-firm__actions');
 		if (!bar || !actions || !('IntersectionObserver' in window)) {
 			return;
 		}

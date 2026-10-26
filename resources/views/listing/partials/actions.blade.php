@@ -7,7 +7,7 @@
 	$formId = 'lgo-otkrij-'.$listing->id;
 @endphp
 @if (! $seller->hasPhone())
-	<div class="lgo-actions lgo-actions--bez-telefona" id="kontakt">
+	<div class="lgo-actions lgo-actions--without-phone" id="kontakt">
 		<a class="lgo-btn lgo-btn--msg" href="{{ $seller->messageUrl }}" rel="nofollow">{{ Icons::listing('message') }}<span>Pošalji poruku</span></a>
 	</div>
 @elseif ($revealed)

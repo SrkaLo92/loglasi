@@ -7,8 +7,8 @@
 
 @section('content')
 <div class="lgn lg-wrap">
-	<section class="lgn-card" aria-labelledby="lgn-naslov">
-		<h1 id="lgn-naslov">Nova lozinka</h1>
+	<section class="lgn-card" aria-labelledby="lgn-title">
+		<h1 id="lgn-title">Nova lozinka</h1>
 		<form class="lgn-form" method="post" action="{{ url_slash('nova-lozinka') }}" novalidate>
 			@csrf
 			<input type="hidden" name="token" value="{{ $token }}">

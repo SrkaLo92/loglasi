@@ -240,6 +240,6 @@
 	.lgf-hours { grid-template-columns: 96px minmax(0, 1fr); }
 }
 
-/* Uvoz oglasa iz tabele: tekstualna tabela sa greškama po redu */
-.lgf-table--uvoz td, .lgf-table--uvoz th { text-align: left; white-space: normal; }
-.lgf-table--uvoz td:first-child { width: 56px; }
+/* Listing import from a table: a text table with errors per row */
+.lgf-table--import td, .lgf-table--import th { text-align: left; white-space: normal; }
+.lgf-table--import td:first-child { width: 56px; }

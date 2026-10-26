@@ -42,9 +42,9 @@ class PricingTest extends TestCase
     {
         $html = $this->get('/cenovnik/')->getContent();
 
-        $this->assertSame(4, substr_count($html, '<li class="lgc-paket'));
-        $this->assertStringNotContainsString('lgx-cene', $html);
-        $this->assertStringContainsString('repeat(auto-fit, minmax(240px, 1fr))', file_get_contents(public_path('css/cenovnik.css')));
+        $this->assertSame(4, substr_count($html, '<li class="lgc-package'));
+        $this->assertStringNotContainsString('lgx-prices', $html);
+        $this->assertStringContainsString('repeat(auto-fit, minmax(240px, 1fr))', file_get_contents(public_path('css/pricing.css')));
     }
 
     public function test_private_users_see_soon_until_private_payments_are_on(): void
@@ -144,8 +144,8 @@ class PricingTest extends TestCase
     {
         $this->get('/cenovnik/')
             ->assertSee('Podatke za uplatu šaljemo na zahtev.')
-            ->assertDontSee('data-lgx-kopiraj', false)
-            ->assertDontSee('js/stranice.js', false);
+            ->assertDontSee('data-lgx-copy', false)
+            ->assertDontSee('js/pages.js', false);
     }
 
     public function test_payment_data_from_settings_with_copy_button(): void
@@ -156,10 +156,10 @@ class PricingTest extends TestCase
 
         $this->get('/cenovnik/')
             ->assertSee('Primalac d.o.o.<br />', false)
-            ->assertSee('data-lgx-kopiraj="160-0000000012345-67"', false)
+            ->assertSee('data-lgx-copy="160-0000000012345-67"', false)
             ->assertSee('Svrha uplate')
             ->assertDontSee('Poziv na broj')
-            ->assertSee('js/stranice.js', false)
+            ->assertSee('js/pages.js', false)
             ->assertDontSee('Podatke za uplatu šaljemo na zahtev.');
     }
 }

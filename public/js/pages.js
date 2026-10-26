@@ -1,6 +1,6 @@
 /**
- * loglasi.rs, Cenovnik: dugme „Kopiraj” za broj računa.
- * Bez JavaScript-a dugme je skriveno, a broj se kopira ručno.
+ * loglasi.rs, Cenovnik: the "Kopiraj" button for the account number.
+ * Without JavaScript the button is hidden and the number is copied by hand.
  */
 (function () {
 	'use strict';
@@ -26,20 +26,20 @@
 		});
 	}
 
-	document.querySelectorAll('[data-lgx-kopiraj]').forEach(function (button) {
+	document.querySelectorAll('[data-lgx-copy]').forEach(function (button) {
 		button.hidden = false;
 	});
 
 	document.addEventListener('click', function (event) {
-		var button = event.target.closest ? event.target.closest('[data-lgx-kopiraj]') : null;
+		var button = event.target.closest ? event.target.closest('[data-lgx-copy]') : null;
 		if (!button) {
 			return;
 		}
-		var box = button.closest('.lgx-uplata__kartica');
-		var status = box ? box.querySelector('.lgx-kopiraj__status') : null;
-		var label = button.querySelector('.lgx-kopiraj__tekst');
+		var box = button.closest('.lgx-payment__card');
+		var status = box ? box.querySelector('.lgx-copy__status') : null;
+		var label = button.querySelector('.lgx-copy__text');
 
-		copyText(button.getAttribute('data-lgx-kopiraj')).then(
+		copyText(button.getAttribute('data-lgx-copy')).then(
 			function () {
 				if (label) {
 					label.textContent = 'Kopirano';

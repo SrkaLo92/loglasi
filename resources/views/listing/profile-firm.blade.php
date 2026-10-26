@@ -7,7 +7,7 @@
 
 @push('head')
 <link rel="stylesheet" href="{{ asset_v('css/listing-profile.css') }}">
-<link rel="stylesheet" href="{{ asset_v('css/ocene.css') }}">
+<link rel="stylesheet" href="{{ asset_v('css/ratings.css') }}">
 @endpush
 
 @push('scripts')
@@ -42,23 +42,23 @@
 		return view('listing.profile.hint', compact('text', 'canEdit', 'editUrl'));
 	};
 @endphp
-<div class="lgp lgp-firma-strana{{ $hasSticky ? ' has-sticky' : '' }}" data-lgp-user="{{ $user->id }}">
-	<section class="lgp-firma" aria-labelledby="lgp-ime-{{ $user->id }}">
-		<div class="lgp-firma__cover{{ $cover ? '' : ' lgp-firma__cover--empty' }}">
+<div class="lgp lgp-firm-page{{ $hasSticky ? ' has-sticky' : '' }}" data-lgp-user="{{ $user->id }}">
+	<section class="lgp-firm" aria-labelledby="lgp-name-{{ $user->id }}">
+		<div class="lgp-firm__cover{{ $cover ? '' : ' lgp-firm__cover--empty' }}">
 			@if ($cover)
-				<img class="lgp-firma__cover-img" src="{{ $cover }}" alt="" width="1240" height="220" loading="eager" fetchpriority="high" decoding="async">
+				<img class="lgp-firm__cover-img" src="{{ $cover }}" alt="" width="1240" height="220" loading="eager" fetchpriority="high" decoding="async">
 			@endif
 		</div>
-		<div class="lgp-firma__head">
-			<div class="lgp-firma__logo">
+		<div class="lgp-firm__head">
+			<div class="lgp-firm__logo">
 				@if ($logo)
-					<img class="lgp-firma__logo-img" src="{{ $logo }}" alt="Logo: {{ $name }}" width="120" height="120" loading="eager" decoding="async">
+					<img class="lgp-firm__logo-img" src="{{ $logo }}" alt="Logo: {{ $name }}" width="120" height="120" loading="eager" decoding="async">
 				@else
-					<span class="lgp-firma__initials" aria-hidden="true">{{ Text::initials($name) }}</span>
+					<span class="lgp-firm__initials" aria-hidden="true">{{ Text::initials($name) }}</span>
 				@endif
 			</div>
-			<div class="lgp-firma__title">
-				<h1 class="lgp-firma__name" id="lgp-ime-{{ $user->id }}">{{ Seo::get()->getH1() ?? $name }}</h1>
+			<div class="lgp-firm__title">
+				<h1 class="lgp-firm__name" id="lgp-name-{{ $user->id }}">{{ Seo::get()->getH1() ?? $name }}</h1>
 				<ul class="lgp-badges" aria-label="Oznake">
 					<li class="lgp-badge lgp-badge--firm">{{ Icons::profile('shop', 14) }}Firma</li>
 					@if ($firm->verified_at)
@@ -69,10 +69,10 @@
 					@endif
 				</ul>
 				@if ($firm->activity)
-					<p class="lgp-firma__activity">{{ $firm->activity }}</p>
+					<p class="lgp-firm__activity">{{ $firm->activity }}</p>
 				@endif
 				<ul class="lgp-facts">
-					<li>{{ Icons::profile('tag', 16) }}<a href="#lgp-oglasi">{{ Text::activeListings($total) }}</a></li>
+					<li>{{ Icons::profile('tag', 16) }}<a href="#lgp-listings">{{ Text::activeListings($total) }}</a></li>
 					<li>{{ Icons::profile('pin', 16) }}<span>{{ $address !== '' ? $address.', '.$city : $city }}</span></li>
 					@if (($since = Text::memberSince($user->created_at)) !== '')
 						<li>{{ Icons::profile('calendar', 16) }}<span>{{ $since }}</span></li>
@@ -85,21 +85,21 @@
 					@endif
 				</ul>
 			</div>
-			<div class="lgp-firma__actions">
+			<div class="lgp-firm__actions">
 				@include('listing.profile.actions', ['isFirm' => true])
 			</div>
 		</div>
 	</section>
 
-	<div class="lgp-firma__cols">
-		<div class="lgp-firma__main">
+	<div class="lgp-firm__cols">
+		<div class="lgp-firm__main">
 			@include('listing.profile.listings', ['title' => 'Oglasi firme'])
 			@include('ratings.partials.brief', ['summary' => $ratingSummary, 'latest' => $ratingLatest])
 		</div>
-		<aside class="lgp-firma__side" aria-label="Podaci o firmi">
-			<details class="lgp-firma__more" open data-lgp-collapse>
-				<summary class="lgp-firma__more-sum">{{ Icons::profile('shop', 20) }}<span>O firmi i kontakt</span><span class="lgp-firma__more-chev" aria-hidden="true"></span></summary>
-				<div class="lgp-firma__more-in">
+		<aside class="lgp-firm__side" aria-label="Podaci o firmi">
+			<details class="lgp-firm__more" open data-lgp-collapse>
+				<summary class="lgp-firm__more-sum">{{ Icons::profile('shop', 20) }}<span>O firmi i kontakt</span><span class="lgp-firm__more-chev" aria-hidden="true"></span></summary>
+				<div class="lgp-firm__more-in">
 					@if ($firm->description || $canEdit)
 						<section class="lgp-box" aria-labelledby="lgp-o-firmi-{{ $user->id }}">
 							<h2 class="lgp-box__title" id="lgp-o-firmi-{{ $user->id }}">{{ Icons::profile('shop', 20) }}<span>O firmi</span></h2>
@@ -114,8 +114,8 @@
 						</section>
 					@endif
 
-					<section class="lgp-box" aria-labelledby="lgp-kontakt-{{ $user->id }}">
-						<h2 class="lgp-box__title" id="lgp-kontakt-{{ $user->id }}">{{ Icons::profile('phone', 20) }}<span>Kontakt</span></h2>
+					<section class="lgp-box" aria-labelledby="lgp-contact-{{ $user->id }}">
+						<h2 class="lgp-box__title" id="lgp-contact-{{ $user->id }}">{{ Icons::profile('phone', 20) }}<span>Kontakt</span></h2>
 						<ul class="lgp-list">
 							@if ($links)
 								<li>{{ Icons::profile('phone', 18) }}<a href="{{ $links['tel'] }}"><span class="lgp-sr">Telefon: </span>{{ Phone::display($phone, true) }}</a></li>
@@ -177,8 +177,8 @@
 						], fn ($s) => preg_match('#^https?://#i', $s[0]));
 					@endphp
 					@if ($socials)
-						<section class="lgp-box" aria-labelledby="lgp-mreze-{{ $user->id }}">
-							<h2 class="lgp-box__title" id="lgp-mreze-{{ $user->id }}">{{ Icons::profile('globe', 20) }}<span>Mreže</span></h2>
+						<section class="lgp-box" aria-labelledby="lgp-social-{{ $user->id }}">
+							<h2 class="lgp-box__title" id="lgp-social-{{ $user->id }}">{{ Icons::profile('globe', 20) }}<span>Mreže</span></h2>
 							<ul class="lgp-socials">
 								@foreach ($socials as $icon => [$url, $label])
 									<li><a class="lgp-social" href="{{ $url }}" target="_blank" rel="noopener nofollow">{{ Icons::profile($icon, 20) }}<span>{{ $label }}</span><span class="lgp-sr"> (otvara se u novom prozoru)</span></a></li>

@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
 @push('head')
-<link rel="stylesheet" href="{{ asset_v('css/stranice.css') }}">
+<link rel="stylesheet" href="{{ asset_v('css/pages.css') }}">
 @endpush
 
 @section('content')
-<div class="lg-strana lgx">
-	<header class="lg-strana__zaglavlje">
-		<h1 class="lg-strana__naslov">{{ $heading }}</h1>
+<div class="lg-page lgx">
+	<header class="lg-page__header">
+		<h1 class="lg-page__title">{{ $heading }}</h1>
 	</header>
-	<article class="lgx-tekst lgx-tekst--{{ $page }}">
+	<article class="lgx-text lgx-text--{{ $page }}">
 		{{ $body }}
 	</article>
 	@if ($page === 'odustanak')

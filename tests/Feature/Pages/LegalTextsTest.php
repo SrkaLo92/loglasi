@@ -144,12 +144,12 @@ class LegalTextsTest extends TestCase
             ->assertSee('Ovim obaveštavam da odustajem od ugovora o pružanju sledeće usluge:')
             ->assertSee('Broj narudžbine (poziv na broj)')
             ->assertSee('Potpis potrošača (samo ako se obrazac šalje na papiru)')
-            ->assertSee('<input type="text" id="lgx-obrazac-0"', false)
-            ->assertSee('<label for="lgx-obrazac-0">', false)
+            ->assertSee('<input type="text" id="lgx-wform-0"', false)
+            ->assertSee('<label for="lgx-wform-0">', false)
             ->assertSee('14 dana')
             ->assertSee('Odštampajte obrazac');
 
-        $this->assertStringContainsString('@media print', (string) file_get_contents(public_path('css/stranice.css')));
+        $this->assertStringContainsString('@media print', (string) file_get_contents(public_path('css/pages.css')));
     }
 
     public function test_complaints_page_states_legal_deadlines(): void

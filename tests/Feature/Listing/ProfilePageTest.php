@@ -26,7 +26,7 @@ class ProfilePageTest extends TestCase
 
         $this->get('/korisnik/'.$user->slug.'/')
             ->assertOk()
-            ->assertSee('<h1 class="lgp-firma__name"', false)
+            ->assertSee('<h1 class="lgp-firm__name"', false)
             ->assertSee($user->firm->name)
             ->assertSee('Proverena firma')
             ->assertSee('Telefon proveren')
@@ -51,7 +51,7 @@ class ProfilePageTest extends TestCase
             ->assertSee('<a class="lgp-btn lgp-btn--call" href="tel:+381641112223">', false)
             ->assertSee('<span>Pozovi</span>', false)
             ->assertSee('<div class="lgp-sticky" role="region" aria-label="Brzi kontakt">', false)
-            ->assertSee('lgp-firma-strana has-sticky', false);
+            ->assertSee('lgp-firm-page has-sticky', false);
     }
 
     public function test_firm_profile_without_phone_has_no_call_button(): void
@@ -86,7 +86,7 @@ class ProfilePageTest extends TestCase
             ->assertSee('2 oglasa')
             ->assertSee('noindex', false)
             ->assertDontSee('Na čekanju')
-            ->assertDontSee('lgp-firma');
+            ->assertDontSee('lgp-firm');
     }
 
     public function test_profile_views_counted_once_and_not_for_owner(): void

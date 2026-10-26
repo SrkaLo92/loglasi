@@ -6,12 +6,12 @@
 	document.querySelectorAll('input[type="password"]').forEach(function (input) {
 		var wrap = document.createElement('span');
 		var button = document.createElement('button');
-		wrap.className = 'lg-lozinka';
+		wrap.className = 'lg-password';
 		input.parentNode.insertBefore(wrap, input);
 		wrap.appendChild(input);
 
 		button.type = 'button';
-		button.className = 'lg-lozinka__oko';
+		button.className = 'lg-password__eye';
 		button.setAttribute('aria-controls', input.id || '');
 		var set = function (shown) {
 			input.type = shown ? 'text' : 'password';

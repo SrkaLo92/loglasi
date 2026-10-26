@@ -249,16 +249,16 @@
 	{{-- 8. Frequently asked questions: the first ones from the FAQ page, the rest on /faq/ --}}
 	@if ($hmFaq)
 		<section class="hm-sec hm-faq" aria-labelledby="hm-faq-title">
-			<div class="hm-faq__uvod">
+			<div class="hm-faq__intro">
 				<h2 class="hm-sec__title" id="hm-faq-title">{{ PageText::get('pocetna.pitanja.naslov') }}</h2>
 				<p>Niste našli odgovor?@if ($hmEmail !== '') Pišite nam na <a href="mailto:{{ $hmEmail }}">{{ $hmEmail }}</a>@endif@if ($hmPhone !== ''){{ $hmEmail !== '' ? ' ili pozovite' : ' Pozovite' }} <a href="tel:{{ $hmPhone }}">{{ Phone::display($hmPhone) }}</a>@endif.</p>
-				<a class="hm-faq__sve" href="{{ url_slash('/faq') }}">Sva pitanja{{ CategoryIcons::svg('arrow', 18, '2') }}</a>
+				<a class="hm-faq__all" href="{{ url_slash('/faq') }}">Sva pitanja{{ CategoryIcons::svg('arrow', 18, '2') }}</a>
 			</div>
-			<div class="hm-faq__lista">
+			<div class="hm-faq__list">
 				@foreach ($hmFaq as $item)
-					<details class="hm-faq__stavka" name="hm-faq">
-						<summary class="hm-faq__pitanje"><span>{{ PageText::replace((string) $item['pitanje']) }}</span>{{ CategoryIcons::svg('chevron', 20, '2.5') }}</summary>
-						<p class="hm-faq__odgovor">{{ PageText::inline((string) $item['odgovor']) }}</p>
+					<details class="hm-faq__item" name="hm-faq">
+						<summary class="hm-faq__question"><span>{{ PageText::replace((string) $item['pitanje']) }}</span>{{ CategoryIcons::svg('chevron', 20, '2.5') }}</summary>
+						<p class="hm-faq__answer">{{ PageText::inline((string) $item['odgovor']) }}</p>
 					</details>
 				@endforeach
 			</div>

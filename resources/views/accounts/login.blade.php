@@ -9,7 +9,7 @@
 @endphp
 
 @push('scripts')
-<script src="{{ asset_v('js/nalozi.js') }}" defer></script>
+<script src="{{ asset_v('js/accounts.js') }}" defer></script>
 @endpush
 
 @section('content')

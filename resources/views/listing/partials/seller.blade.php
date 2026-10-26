@@ -1,6 +1,6 @@
 @use('App\Support\Listing\Icons')
 @use('App\Support\Listing\Text')
-<section class="lgo lgo-card lgo-seller lgo-o4 {{ $seller->isFirm ? 'lgo-seller--firma' : 'lgo-seller--privatno' }}" aria-label="Prodavac: {{ $seller->name }}">
+<section class="lgo lgo-card lgo-seller lgo-o4 {{ $seller->isFirm ? 'lgo-seller--firm' : 'lgo-seller--private' }}" aria-label="Prodavac: {{ $seller->name }}">
 	<div class="lgo-seller__head">
 		<a class="lgo-seller__avatar" href="{{ $seller->profileUrl }}" tabindex="-1" aria-hidden="true">
 			@if ($seller->logoUrl)
@@ -12,11 +12,11 @@
 		<div class="lgo-seller__who">
 			<a class="lgo-seller__name" href="{{ $seller->profileUrl }}">{{ $seller->name }}</a>
 			@if ($seller->user->isStaff())
-				<span class="lgo-badge lgo-badge--firma">{{ Icons::listing('check') }}loglasi.rs</span>
+				<span class="lgo-badge lgo-badge--firm">{{ Icons::listing('check') }}loglasi.rs</span>
 			@elseif ($seller->isFirm)
-				<span class="lgo-badge lgo-badge--firma">{{ Icons::listing('check') }}Firma</span>
+				<span class="lgo-badge lgo-badge--firm">{{ Icons::listing('check') }}Firma</span>
 			@else
-				<span class="lgo-badge lgo-badge--privatno">Privatno lice</span>
+				<span class="lgo-badge lgo-badge--private">Privatno lice</span>
 			@endif
 		</div>
 	</div>

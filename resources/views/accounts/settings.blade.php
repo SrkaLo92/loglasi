@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @include('accounts.partials.head')
 @push('scripts')
-<script src="{{ asset_v('js/nalog.js') }}" defer></script>
+<script src="{{ asset_v('js/account.js') }}" defer></script>
 @endpush
 @php
 	use App\Support\Pages\SiteIcons;
@@ -108,11 +108,11 @@
 		</form>
 	</section>
 
-	<section class="lga-card" aria-labelledby="lga-lozinka">
+	<section class="lga-card" aria-labelledby="lga-password">
 		<details class="lga-fold" @if ($lozinka->any()) open @endif>
 			<summary>
 				<span class="lga-task__icon">{{ SiteIcons::svg('lock', 20) }}</span>
-				<span><strong id="lga-lozinka">Lozinka</strong><small>Promenom lozinke odjavljujete se sa ostalih uređaja.</small></span>
+				<span><strong id="lga-password">Lozinka</strong><small>Promenom lozinke odjavljujete se sa ostalih uređaja.</small></span>
 				{{ SiteIcons::svg('chevron', 18) }}
 			</summary>
 			<form class="lga-form" method="post" action="{{ url_slash('moj-nalog/lozinka') }}" novalidate>

@@ -9,17 +9,17 @@ class GoogleTagTest extends TestCase
 {
     public function test_google_tag_loads_only_in_production_with_consent_denied_first(): void
     {
-        $this->get('/')->assertOk()->assertDontSee('googletagmanager.com', false)->assertDontSee('id="lg-kolacici"', false);
+        $this->get('/')->assertOk()->assertDontSee('googletagmanager.com', false)->assertDontSee('id="lg-cookies"', false);
 
         $this->app['env'] = 'production';
 
         $this->get('/')->assertOk()
             ->assertSee('https://www.googletagmanager.com/gtag/js?id=GT-MKTJD4NV', false)
             ->assertSee("gtag('consent', 'default', {analytics_storage: 'denied'", false)
-            ->assertSee('id="lg-kolacici"', false)
-            ->assertSee('<button type="button" class="lg-kolacici__ok" data-kolacici="da">U redu</button>', false)
-            ->assertSee('data-kolacici="ne">Ne, hvala</button>', false)
-            ->assertSee('data-kolacici-izmena hidden>Podešavanje kolačića</button>', false)
+            ->assertSee('id="lg-cookies"', false)
+            ->assertSee('<button type="button" class="lg-cookies__ok" data-cookies="da">U redu</button>', false)
+            ->assertSee('data-cookies="ne">Ne, hvala</button>', false)
+            ->assertSee('data-cookies-change hidden>Podešavanje kolačića</button>', false)
             ->assertSee('href="'.url_slash('politika-privatnosti').'"', false)
             ->assertSee("gtag('consent', 'update', {analytics_storage: 'granted'})", false)
             ->assertDontSee('Odbijam');

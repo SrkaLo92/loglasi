@@ -52,7 +52,7 @@
 			@if ($preview['unknown'])
 				<p class="lgf-err">Ove kolone ne prepoznajemo i preskačemo ih: {{ implode(', ', $preview['unknown']) }}.</p>
 			@endif
-			<table class="lgf-table lgf-table--uvoz">
+			<table class="lgf-table lgf-table--import">
 				<thead><tr><th>Red</th><th>Naslov</th><th>Kategorija</th><th>Status</th></tr></thead>
 				<tbody>
 				@foreach ($preview['rows'] as $row)
@@ -73,7 +73,7 @@
 			<h2>Izveštaj</h2>
 			<p>Uvezeno oglasa: <strong>{{ $report['created'] }}</strong>, preskočeno: <strong>{{ $report['failed'] }}</strong>.</p>
 			@if ($report['failed'] > 0)
-				<table class="lgf-table lgf-table--uvoz">
+				<table class="lgf-table lgf-table--import">
 					<thead><tr><th>Red</th><th>Naslov</th><th>Greška</th></tr></thead>
 					<tbody>
 					@foreach ($report['rows'] as $row)

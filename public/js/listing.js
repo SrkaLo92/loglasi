@@ -149,7 +149,7 @@
 					visible.delete(e.target);
 				}
 			});
-			bar.classList.toggle('lgo-bar--skriveno', visible.size > 0);
+			bar.classList.toggle('lgo-bar--hidden', visible.size > 0);
 		}, { threshold: 0.4 });
 		targets.forEach(function (el) {
 			io.observe(el);

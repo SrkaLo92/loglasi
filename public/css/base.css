@@ -1,6 +1,6 @@
-/* loglasi.rs: zajednički tokeni, osnova, zaglavlje, podnožje i donja navigacija (boje iz odluke 23. 10. 2026) */
+/* loglasi.rs: shared tokens, base, header, footer and bottom navigation (colours from the 23 Oct 2026 decision) */
 
-/* Manrope (OFL, public/fonts/OFL.txt), varijabilni 200–800, sa sajta, bez spoljnih zahteva */
+/* Manrope (OFL, public/fonts/OFL.txt), variable 200–800, self-hosted, no external requests */
 @font-face {
 	font-family: "Manrope";
 	font-style: normal;
@@ -19,7 +19,7 @@
 	unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
-/* Rezervni font sa istim merama kao Manrope, da zamena fonta ne pomera stranu */
+/* Fallback font with the same metrics as Manrope, so the font swap does not shift the page */
 @font-face {
 	font-family: "Manrope rezerva";
 	src: local("Arial"), local("Liberation Sans"), local("Helvetica");
@@ -45,7 +45,7 @@
 	--lg-border: #e3e7e4;
 	--lg-input: #c9d1cc;
 	--lg-error: #b42318;
-	--lg-footer: #374b5c;      /* podnožje, kao na starom sajtu */
+	--lg-footer: #374b5c;      /* footer, as on the old site */
 	--lg-footer-line: #4c6072;
 	--lg-footer-text: #dce3e9;
 	--lg-radius: 14px;
@@ -117,7 +117,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 .lg-icon { display: block; flex: none; }
 
-/* Dugmad (zajednička) ------------------------------------------------- */
+/* Buttons (shared) ------------------------------------------------- */
 
 .lg-btn {
 	display: inline-flex;
@@ -173,7 +173,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .lg-logo span { color: var(--lg-brand); }
 .lg-logo img { display: block; height: 44px; width: auto; }
 
-.lg-header__mesto { display: none; }
+.lg-header__place { display: none; }
 
 .lg-search {
 	flex: 1 1 300px; /* small basis: the account links stay on the same line down to a tablet */
@@ -188,10 +188,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .lg-search:focus-within { outline: 2px solid var(--lg-orange); outline-offset: 2px; }
 .lg-search :focus-visible { outline: none; }
-.lg-search__izbor:focus-visible,
-.lg-search__dugme:focus-visible,
-.lg-search__filteri:focus-visible { box-shadow: inset 0 0 0 2px var(--lg-accent); }
-.lg-search__polje {
+.lg-search__pick:focus-visible,
+.lg-search__button:focus-visible,
+.lg-search__filters:focus-visible { box-shadow: inset 0 0 0 2px var(--lg-accent); }
+.lg-search__field {
 	flex: 1 1 auto;
 	display: flex;
 	align-items: center;
@@ -213,7 +213,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .lg-search__input::placeholder { color: var(--lg-muted); opacity: 1; }
 .lg-search__input::-webkit-search-decoration { -webkit-appearance: none; }
-.lg-search__izbor {
+.lg-search__pick {
 	border: 0;
 	border-left: 1px solid var(--lg-border);
 	border-radius: 0;
@@ -223,12 +223,12 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	font-size: 15px;
 	cursor: pointer;
 }
-.lg-search .lg-search__izbor--kat { flex: none; width: 168px; }
-.lg-search .lg-search__izbor--mesto { flex: none; width: 184px; }
+.lg-search .lg-search__pick--cat { flex: none; width: 168px; }
+.lg-search .lg-search__pick--place { flex: none; width: 184px; }
 /* Signed in, the bell, Poruke and Moj nalog take the room: the place is chosen on the results page instead,
    so the search field and the category stay readable. */
-@media (max-width: 1599.98px) { .lg-header--nalog .lg-search .lg-search__izbor--mesto { display: none; } }
-.lg-search__dugme {
+@media (max-width: 1599.98px) { .lg-header--account .lg-search .lg-search__pick--place { display: none; } }
+.lg-search__button {
 	border: 0;
 	padding: 0 22px;
 	background: var(--lg-green);
@@ -237,16 +237,16 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	font-weight: 700;
 	cursor: pointer;
 }
-.lg-search__dugme:hover { background: var(--lg-green-dark); }
-.lg-search__filteri { display: none; }
+.lg-search__button:hover { background: var(--lg-green-dark); }
+.lg-search__filters { display: none; }
 
 .lg-header__nav {
 	display: flex;
 	align-items: center;
 	gap: 16px;
 }
-.lg-header__nalog,
-.lg-header__nalog:visited {
+.lg-header__account,
+.lg-header__account:visited {
 	display: flex;
 	align-items: center;
 	gap: 6px;
@@ -256,11 +256,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	font-weight: 600;
 	text-decoration: none;
 }
-.lg-header__nalog:hover { color: var(--lg-green); text-decoration: underline; }
+.lg-header__account:hover { color: var(--lg-green); text-decoration: underline; }
 /* Bell (in-app notifications) and the message count: a small orange badge on the icon */
-.lg-header__ik { position: relative; display: inline-flex; }
-.lg-header__zvono,
-.lg-header__zvono:visited {
+.lg-header__ico { position: relative; display: inline-flex; }
+.lg-header__bell,
+.lg-header__bell:visited {
 	position: relative;
 	display: inline-flex;
 	align-items: center;
@@ -270,8 +270,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	border-radius: 50%;
 	color: var(--lg-text);
 }
-.lg-header__zvono:hover { background: var(--lg-mint); color: var(--lg-green); }
-.lg-header__broj {
+.lg-header__bell:hover { background: var(--lg-mint); color: var(--lg-green); }
+.lg-header__num {
 	position: absolute;
 	top: -6px;
 	right: -10px;
@@ -287,11 +287,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	line-height: 14px;
 	text-align: center;
 }
-.lg-header__zvono .lg-header__broj { top: 2px; right: 0; }
+.lg-header__bell .lg-header__num { top: 2px; right: 0; }
 /* Up to a very wide screen "Poruke" is only the icon (like the bell), so the search keeps its width. */
-@media (max-width: 1679.98px) { .lg-header__tekst { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
-.lg-header__postavi,
-.lg-header__postavi:visited {
+@media (max-width: 1679.98px) { .lg-header__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
+.lg-header__post,
+.lg-header__post:visited {
 	display: flex;
 	align-items: center;
 	gap: 6px;
@@ -306,16 +306,16 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	text-decoration: none;
 	white-space: nowrap;
 }
-.lg-header__postavi:hover { background: var(--lg-orange-dark); color: #fff; }
+.lg-header__post:hover { background: var(--lg-orange-dark); color: #fff; }
 
-/* Između tableta i desktopa izbor mesta ne staje u red. */
+/* Between tablet and desktop the place picker does not fit in the row. */
 @media (max-width: 1100px) {
-	.lg-search .lg-search__izbor--mesto { display: none; }
+	.lg-search .lg-search__pick--place { display: none; }
 }
 
-/* Kolačići ------------------------------------------------------------ */
+/* Cookies ------------------------------------------------------------ */
 
-.lg-kolacici {
+.lg-cookies {
 	position: fixed;
 	right: 0;
 	bottom: 0;
@@ -330,10 +330,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	background: #fff;
 	box-shadow: 0 -4px 16px rgba(29, 43, 38, .08);
 }
-.lg-kolacici[hidden] { display: none; }
-.lg-kolacici p { margin: 0; min-width: 0; font-size: 14px; line-height: 1.4; }
-.lg-kolacici a { white-space: nowrap; }
-.lg-kolacici__ok {
+.lg-cookies[hidden] { display: none; }
+.lg-cookies p { margin: 0; min-width: 0; font-size: 14px; line-height: 1.4; }
+.lg-cookies a { white-space: nowrap; }
+.lg-cookies__ok {
 	flex: none;
 	min-height: 44px;
 	padding: 8px 18px;
@@ -345,8 +345,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	font-weight: 700;
 	cursor: pointer;
 }
-.lg-kolacici__ok:hover { background: var(--lg-green-dark); }
-.lg-kolacici__ne {
+.lg-cookies__ok:hover { background: var(--lg-green-dark); }
+.lg-cookies__no {
 	flex: none;
 	min-height: 44px;
 	padding: 8px 12px;
@@ -358,7 +358,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	text-decoration: underline;
 	cursor: pointer;
 }
-.lg-footer__kolacici {
+.lg-footer__cookies {
 	padding: 0;
 	border: 0;
 	background: none;
@@ -367,15 +367,15 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	text-decoration: underline;
 	cursor: pointer;
 }
-.lg-footer__kolacici[hidden] { display: none; }
+.lg-footer__cookies[hidden] { display: none; }
 @media (max-width: 767.98px) {
-	.lg-kolacici { justify-content: space-between; padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); }
-	.lg-kolacici p { font-size: 13px; }
+	.lg-cookies { justify-content: space-between; padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); }
+	.lg-cookies p { font-size: 13px; }
 	/* Sits right on top of the bottom nav (which already pads for the safe area), not over it. */
-	body.lg-has-mnav .lg-kolacici { bottom: calc(var(--lg-mnav-h) + env(safe-area-inset-bottom, 0px)); padding-bottom: 6px; }
+	body.lg-has-mnav .lg-cookies { bottom: calc(var(--lg-mnav-h) + env(safe-area-inset-bottom, 0px)); padding-bottom: 6px; }
 }
 
-/* Podnožje ------------------------------------------------------------ */
+/* Footer ------------------------------------------------------------ */
 
 .lg-footer {
 	margin-top: 48px;
@@ -385,7 +385,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .lg-footer a,
 .lg-footer a:visited { color: var(--lg-footer-text); text-decoration: none; }
 .lg-footer a:hover { color: #fff; text-decoration: underline; }
-.lg-footer__vrh {
+.lg-footer__top {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
@@ -395,10 +395,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	padding-bottom: 28px;
 	border-bottom: 1px solid var(--lg-footer-line);
 }
-.lg-footer__vesti { margin: 0; color: #fff; font-size: 20px; font-weight: 800; line-height: 1.3; }
-.lg-footer__podnaslov { margin: 4px 0 0; font-size: 15px; line-height: 1.5; }
-.lg-footer a.lg-footer__postavi,
-.lg-footer a.lg-footer__postavi:visited { color: #fff; text-decoration: none; }
+.lg-footer__news { margin: 0; color: #fff; font-size: 20px; font-weight: 800; line-height: 1.3; }
+.lg-footer__subtitle { margin: 4px 0 0; font-size: 15px; line-height: 1.5; }
+.lg-footer a.lg-footer__post,
+.lg-footer a.lg-footer__post:visited { color: #fff; text-decoration: none; }
 .lg-footer__in {
 	display: grid;
 	grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -407,7 +407,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	padding-bottom: 40px;
 }
 .lg-footer__col { min-width: 0; }
-.lg-footer__brend { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.lg-footer__brand { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
 .lg-footer a.lg-footer__logo,
 .lg-footer a.lg-footer__logo:visited {
 	display: inline-flex;
@@ -419,28 +419,28 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .lg-footer__logo span { color: #8fd8c1; }
 .lg-footer__logo img { display: block; height: 48px; width: auto; }
-.lg-footer__tekst { margin: 0; font-size: 15px; line-height: 1.6; }
-.lg-footer__kontakt { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; font-size: 15px; }
-.lg-footer__kontakt a,
-.lg-footer__kontakt span { display: inline-flex; align-items: center; min-height: 44px; overflow-wrap: anywhere; }
-.lg-footer__naslov { margin: 4px 0 10px; color: #fff; font-size: 16px; font-weight: 800; }
-.lg-footer__naslov--mreze { margin-top: 18px; }
+.lg-footer__text { margin: 0; font-size: 15px; line-height: 1.6; }
+.lg-footer__contact { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; font-size: 15px; }
+.lg-footer__contact a,
+.lg-footer__contact span { display: inline-flex; align-items: center; min-height: 44px; overflow-wrap: anywhere; }
+.lg-footer__title { margin: 4px 0 10px; color: #fff; font-size: 16px; font-weight: 800; }
+.lg-footer__title--social { margin-top: 18px; }
 /* Link groups: plain headings on a computer, folding rows on a phone. */
-.lg-footer__grupe { display: grid; gap: 18px; align-content: start; }
-.lg-footer__grupa > summary { display: block; list-style: none; pointer-events: none; }
-.lg-footer__grupa > summary::-webkit-details-marker { display: none; }
-.lg-footer__lista { margin: 0; padding: 0; list-style: none; }
+.lg-footer__groups { display: grid; gap: 18px; align-content: start; }
+.lg-footer__group > summary { display: block; list-style: none; pointer-events: none; }
+.lg-footer__group > summary::-webkit-details-marker { display: none; }
+.lg-footer__list { margin: 0; padding: 0; list-style: none; }
 /* Room for the 4 latest listings + "Pogledajte sve" (5 x 44 px) before they load: no layout shift. */
-.lg-footer__najnoviji { min-height: 220px; }
-.lg-footer__lista a { display: inline-flex; align-items: center; min-height: 44px; font-size: 15px; }
-.lg-footer__lista a[aria-current="page"] { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
-.lg-footer a.lg-footer__sve { color: #fff; font-weight: 700; }
-.lg-footer__lista a.lg-footer__oglas { display: flex; justify-content: space-between; gap: 10px; max-width: 100%; }
-.lg-footer__oglas span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lg-footer__cena { flex: 0 0 auto; color: #fff; font-weight: 700; }
-.lg-footer__mreze { display: flex; gap: 10px; margin: 0; padding: 0; list-style: none; }
-.lg-footer__mreze a,
-.lg-footer__mreze a:visited {
+.lg-footer__latest { min-height: 220px; }
+.lg-footer__list a { display: inline-flex; align-items: center; min-height: 44px; font-size: 15px; }
+.lg-footer__list a[aria-current="page"] { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
+.lg-footer a.lg-footer__all { color: #fff; font-weight: 700; }
+.lg-footer__list a.lg-footer__listing { display: flex; justify-content: space-between; gap: 10px; max-width: 100%; }
+.lg-footer__listing span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-footer__price { flex: 0 0 auto; color: #fff; font-weight: 700; }
+.lg-footer__social { display: flex; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.lg-footer__social a,
+.lg-footer__social a:visited {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -450,9 +450,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	background: var(--lg-footer-line);
 	color: #fff;
 }
-.lg-footer__mreze a:hover { background: var(--lg-brand); color: #fff; }
+.lg-footer__social a:hover { background: var(--lg-brand); color: #fff; }
 .lg-footer :focus-visible { outline-color: #fff; box-shadow: 0 0 0 4px var(--lg-accent); }
-.lg-footer__dno {
+.lg-footer__bottom {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: space-between;
@@ -463,13 +463,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	font-size: 14px;
 	line-height: 1.5;
 }
-.lg-footer__dno p { margin: 0; }
+.lg-footer__bottom p { margin: 0; }
 
 @media (max-width: 1100px) {
 	.lg-footer__in { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* Navigacija naloga: meni sa strane na računaru, lista na pregledu naloga na telefonu --------- */
+/* Account navigation: a side menu on a computer, a list on the account overview on a phone --------- */
 
 .lg-acct {
 	display: grid;
@@ -481,7 +481,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .lg-acct__side { position: sticky; top: 20px; }
 .lg-acct__main { min-width: 0; }
-/* Strane naloga imaju svoj omotač; unutar okvira naloga on ne dodaje širinu ni razmak. */
+/* Account pages have their own wrapper; inside the account frame it adds no width or spacing. */
 .lg-acct__main > .lg-wrap { max-width: none; margin: 0; padding: 0; }
 .lg-acct__back { display: none; }
 
@@ -567,7 +567,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .lg-acct-nav__group--end { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--lg-border); }
 .lg-acct-nav__group--end button:hover { color: var(--lg-error); }
 
-/* Lista na pregledu naloga (samo telefon). */
+/* List on the account overview (phone only). */
 .lg-acct-nav--list { display: none; }
 
 @media (max-width: 1023.98px) {
@@ -592,7 +592,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 	.lg-acct-nav--list .lg-icon--chevron-r { color: var(--lg-input); }
 }
 
-/* Donja navigacija (samo telefon) -------------------------------------- */
+/* Bottom navigation (phone only) -------------------------------------- */
 
 .lg-mnav { display: none; }
 
@@ -611,8 +611,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 		padding-bottom: 12px;
 	}
 	.lg-logo { justify-self: start; font-size: 22px; }
-	.lg-header__zvono { grid-row: 1; grid-column: 3; }
-	.lg-header__mesto {
+	.lg-header__bell { grid-row: 1; grid-column: 3; }
+	.lg-header__place {
 		display: flex;
 		align-items: center;
 		gap: 4px;
@@ -621,12 +621,12 @@ button, input, select, textarea { font: inherit; color: inherit; }
 		color: var(--lg-muted);
 	}
 	.lg-search { grid-column: 1 / -1; }
-	.lg-search__polje { padding: 0 12px; }
+	.lg-search__field { padding: 0 12px; }
 	.lg-search__input { height: 44px; }
-	.lg-search .lg-search__izbor,
-	.lg-search__dugme { display: none; }
-	.lg-search__filteri,
-	.lg-search__filteri:visited {
+	.lg-search .lg-search__pick,
+	.lg-search__button { display: none; }
+	.lg-search__filters,
+	.lg-search__filters:visited {
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -635,27 +635,27 @@ button, input, select, textarea { font: inherit; color: inherit; }
 		border-left: 1px solid var(--lg-border);
 		color: var(--lg-green);
 	}
-	.lg-search__filteri:hover { color: var(--lg-green-dark); background: var(--lg-mint); }
-	/* Na telefonu su nalog i „Postavi oglas” u donjoj navigaciji. */
+	.lg-search__filters:hover { color: var(--lg-green-dark); background: var(--lg-mint); }
+	/* On a phone the account and "Postavi oglas" are in the bottom navigation. */
 	body.lg-has-mnav .lg-header__nav { display: none; }
 	.lg-header__nav { grid-column: 1 / -1; justify-content: space-between; }
 	/* Pages without the bottom bar (posting, a listing with its contact bar): the account links go into the
 	   top row, compact, instead of a loose second row; posting itself is one tap away on every other page. */
-	body:not(.lg-has-mnav) .lg-header__mesto { display: none; }
+	body:not(.lg-has-mnav) .lg-header__place { display: none; }
 	body:not(.lg-has-mnav) .lg-header__nav { grid-row: 1; grid-column: 2; gap: 10px; }
-	body:not(.lg-has-mnav) .lg-header__postavi { display: none; }
+	body:not(.lg-has-mnav) .lg-header__post { display: none; }
 
 	.lg-footer { margin-top: 32px; }
-	.lg-footer__vrh { padding-top: 24px; padding-bottom: 24px; }
-	.lg-footer__vesti { font-size: 18px; }
-	.lg-footer__podnaslov { font-size: 14px; }
-	.lg-footer__postavi { width: 100%; justify-content: center; }
+	.lg-footer__top { padding-top: 24px; padding-bottom: 24px; }
+	.lg-footer__news { font-size: 18px; }
+	.lg-footer__subtitle { font-size: 14px; }
+	.lg-footer__post { width: 100%; justify-content: center; }
 	.lg-footer__in { grid-template-columns: minmax(0, 1fr); gap: 0; padding-top: 28px; padding-bottom: 16px; }
-	.lg-footer__brend { gap: 6px; padding-bottom: 20px; }
-	.lg-footer__kontakt a, .lg-footer__kontakt span { min-height: 36px; }
-	.lg-footer__grupe { gap: 0; }
-	.lg-footer__grupa { border-top: 1px solid var(--lg-footer-line); }
-	.lg-footer__grupa > summary {
+	.lg-footer__brand { gap: 6px; padding-bottom: 20px; }
+	.lg-footer__contact a, .lg-footer__contact span { min-height: 36px; }
+	.lg-footer__groups { gap: 0; }
+	.lg-footer__group { border-top: 1px solid var(--lg-footer-line); }
+	.lg-footer__group > summary {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -664,7 +664,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 		pointer-events: auto;
 		cursor: pointer;
 	}
-	.lg-footer__grupa > summary::after {
+	.lg-footer__group > summary::after {
 		content: "";
 		width: 9px;
 		height: 9px;
@@ -674,14 +674,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
 		transform: rotate(45deg) translateY(-3px);
 		transition: transform .2s;
 	}
-	.lg-footer__grupa[open] > summary::after { transform: rotate(-135deg) translate(-2px, -1px); }
-	.lg-footer__grupa > .lg-footer__lista { padding-bottom: 10px; }
-	.lg-footer__lista a { font-size: 15px; }
-	.lg-footer__zadnja { padding-top: 20px; border-top: 1px solid var(--lg-footer-line); }
+	.lg-footer__group[open] > summary::after { transform: rotate(-135deg) translate(-2px, -1px); }
+	.lg-footer__group > .lg-footer__list { padding-bottom: 10px; }
+	.lg-footer__list a { font-size: 15px; }
+	.lg-footer__last { padding-top: 20px; border-top: 1px solid var(--lg-footer-line); }
 	/* The newest listings are all over the page already; on a phone the footer keeps only the social links. */
-	.lg-footer__naslov--najnoviji, .lg-footer__najnoviji { display: none; }
-	.lg-footer__naslov--mreze { margin-top: 0; }
-	.lg-footer__dno { font-size: 13px; }
+	.lg-footer__title--latest, .lg-footer__latest { display: none; }
+	.lg-footer__title--social { margin-top: 0; }
+	.lg-footer__bottom { font-size: 13px; }
 
 	.lg-mnav {
 		display: block;
@@ -695,7 +695,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 		background: #fff;
 		box-shadow: 0 -4px 16px rgba(29, 43, 38, .06);
 	}
-	.lg-mnav__lista {
+	.lg-mnav__list {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 1fr);
 		height: var(--lg-mnav-h);
@@ -703,7 +703,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 		padding: 0;
 		list-style: none;
 	}
-	.lg-mnav__stavka { display: flex; margin: 0; padding: 0; }
+	.lg-mnav__item { display: flex; margin: 0; padding: 0; }
 	.lg-mnav__link,
 	.lg-mnav__link:visited {
 		position: relative;
@@ -738,19 +738,19 @@ button, input, select, textarea { font: inherit; color: inherit; }
 		background: var(--lg-green);
 		transform: translateX(-50%);
 	}
-	.lg-mnav__ikonica { position: relative; display: flex; }
-	.lg-mnav__naziv { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.lg-mnav__icon { position: relative; display: flex; }
+	.lg-mnav__name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-	/* Srednje dugme: narandžasti krug izdignut iznad trake. */
-	.lg-mnav__stavka--cta .lg-mnav__link,
-	.lg-mnav__stavka--cta .lg-mnav__link:visited {
+	/* Middle button: an orange circle raised above the bar. */
+	.lg-mnav__item--cta .lg-mnav__link,
+	.lg-mnav__item--cta .lg-mnav__link:visited {
 		justify-content: flex-end;
 		padding-bottom: 12px;
 		color: var(--lg-text);
 		font-weight: 700;
 		letter-spacing: -.01em;
 	}
-	.lg-mnav__stavka--cta .lg-mnav__ikonica {
+	.lg-mnav__item--cta .lg-mnav__icon {
 		position: absolute;
 		top: -20px;
 		left: 50%;
@@ -766,9 +766,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 		transform: translateX(-50%);
 		transition: transform .15s ease;
 	}
-	.lg-mnav__stavka--cta .lg-mnav__link:active .lg-mnav__ikonica { transform: translateX(-50%) scale(.94); }
-	.lg-mnav__stavka--cta .lg-mnav__link[aria-current="page"]::before { display: none; }
-	.lg-mnav__broj {
+	.lg-mnav__item--cta .lg-mnav__link:active .lg-mnav__icon { transform: translateX(-50%) scale(.94); }
+	.lg-mnav__item--cta .lg-mnav__link[aria-current="page"]::before { display: none; }
+	.lg-mnav__num {
 		position: absolute;
 		top: -6px;
 		right: -10px;
@@ -846,10 +846,10 @@ details[name][open]::details-content {
 	details[name]::details-content { transition: none; }
 }
 
-/* Password field with a show/hide button (js/lozinka.js) */
-.lg-lozinka { position: relative; display: block; width: 100%; }
-.lg-lozinka > input { width: 100%; padding-right: 52px !important; }
-.lg-lozinka__oko {
+/* Password field with a show/hide button (js/password.js) */
+.lg-password { position: relative; display: block; width: 100%; }
+.lg-password > input { width: 100%; padding-right: 52px !important; }
+.lg-password__eye {
 	position: absolute;
 	top: 50%;
 	right: 4px;
@@ -866,8 +866,8 @@ details[name][open]::details-content {
 	cursor: pointer;
 	transform: translateY(-50%);
 }
-.lg-lozinka__oko:hover { color: var(--lg-text); }
-.lg-lozinka__oko:focus-visible { outline: 2px solid var(--lg-green); outline-offset: -2px; }
+.lg-password__eye:hover { color: var(--lg-text); }
+.lg-password__eye:focus-visible { outline: 2px solid var(--lg-green); outline-offset: -2px; }
 
 /* Category colours (CategorySheet::COLORS / THEME_COLORS): text or icon, soft background, border */
 .lg-tone--blue { --tone: #2563a8; --tone-bg: #e8f0fb; --tone-line: #c9dcf3; }

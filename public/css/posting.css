@@ -1,4 +1,4 @@
-/* loglasi.rs: posting wizard and "my listings" (prefix pst-), tokens from osnova.css */
+/* loglasi.rs: posting wizard and "my listings" (prefix pst-), tokens from base.css */
 
 .pst { padding-top: 24px; padding-bottom: 48px; max-width: 1040px; }
 .pst h1 { margin: 0; font-size: 28px; line-height: 1.2; font-weight: 800; }

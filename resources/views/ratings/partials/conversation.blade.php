@@ -17,7 +17,7 @@
 		<p class="lgr-help">Ocena je javna i pojavljuje se na profilu prodavca. Ocenjujte kako je tekao dogovor, ne cenu.</p>
 		<form method="post" action="{{ url_slash('moj-nalog/poruke/'.$conversation->id.'/ocena') }}" class="lgr-form" novalidate>
 			@csrf
-			<fieldset class="lgr-pick" @if ($errorsBag->has('score')) aria-invalid="true" aria-describedby="lgr-score-greska" @endif>
+			<fieldset class="lgr-pick" @if ($errorsBag->has('score')) aria-invalid="true" aria-describedby="lgr-score-error" @endif>
 				<legend>Ocena</legend>
 				@foreach ([1 => 'Loše', 2 => 'Slabo', 3 => 'Dobro', 4 => 'Vrlo dobro', 5 => 'Odlično'] as $score => $word)
 					<input class="lg-visually-hidden" type="radio" name="score" id="lgr-score-{{ $score }}" value="{{ $score }}" @checked($current === $score) required>
@@ -27,7 +27,7 @@
 					</label>
 				@endforeach
 			</fieldset>
-			@if ($errorsBag->has('score'))<p class="lgm-error" id="lgr-score-greska" role="alert">{{ $errorsBag->first('score') }}</p>@endif
+			@if ($errorsBag->has('score'))<p class="lgm-error" id="lgr-score-error" role="alert">{{ $errorsBag->first('score') }}</p>@endif
 			<label for="lgr-comment">Komentar (nije obavezno)</label>
 			<textarea id="lgr-comment" name="comment" rows="3" maxlength="{{ \App\Services\Ratings\SellerRatings::COMMENT_MAX }}" placeholder="Npr. dogovor je bio brz, stvar je kao u opisu">{{ old('comment', $existing?->comment) }}</textarea>
 			@if ($errorsBag->has('comment'))<p class="lgm-error" role="alert">{{ $errorsBag->first('comment') }}</p>@endif

@@ -73,11 +73,11 @@
 				</section>
 			@endif
 
-			<section class="lgo lgo-card lgo-box lgo-desc lgo-o7" aria-labelledby="lgo-opis">
-				<h2 class="lgo-box__title" id="lgo-opis">Opis</h2>
+			<section class="lgo lgo-card lgo-box lgo-desc lgo-o7" aria-labelledby="lgo-desc">
+				<h2 class="lgo-box__title" id="lgo-desc">Opis</h2>
 				<ul class="lgo-meta" aria-label="Podaci o oglasu">
 					@if ($listing->location)
-						<li class="lgo-meta__mesto">{{ Icons::listing('pin') }}<span>
+						<li class="lgo-meta__place">{{ Icons::listing('pin') }}<span>
 							@if ($listing->category)
 								<a href="{{ url_slash('oglasi/'.$listing->category->slug.'/'.$listing->location->slug) }}">{{ $listing->location->name }}</a>
 							@else
@@ -88,8 +88,8 @@
 					@if ($published)
 						<li class="lgo-meta__vreme">{{ Icons::listing('clock') }}<span>Objavljeno <time datetime="{{ $published->copy()->utc()->toIso8601ZuluString() }}" title="{{ Text::exact($published) }}">{{ Text::relative($published) }}</time></span></li>
 					@endif
-					<li class="lgo-meta__broj">{{ Icons::listing('hash') }}<span>Oglas br. {{ $listing->id }}</span></li>
-					<li class="lgo-meta__pregledi">{{ Icons::listing('eye') }}<span>{{ Text::views((int) $listing->views) }}</span></li>
+					<li class="lgo-meta__num">{{ Icons::listing('hash') }}<span>Oglas br. {{ $listing->id }}</span></li>
+					<li class="lgo-meta__views">{{ Icons::listing('eye') }}<span>{{ Text::views((int) $listing->views) }}</span></li>
 				</ul>
 				<div class="lgo-desc__text">
 					@if (trim((string) $listing->description) !== '')

@@ -81,7 +81,7 @@ class ForFirmsTest extends TestCase
         $this->get('/za-firme/')
             ->assertSee("paketi počinju od 590\u{00A0}RSD mesečno", false)
             ->assertSeeInOrder(['Vizitka', "590\u{00A0}RSD", 'Business Start', "1.490\u{00A0}RSD", 'Business Pro', 'Business Max'], false)
-            ->assertSee('<th scope="col" class="lgx-tabela__biznis">Profil firme</th>', false)
+            ->assertSee('<th scope="col" class="lgx-table__business">Profil firme</th>', false)
             ->assertDontSee('Biznis paket');
     }
 

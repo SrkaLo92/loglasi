@@ -8,8 +8,8 @@
 
 @section('content')
 <div class="lgn lg-wrap">
-	<section class="lgn-card lgn-danger" aria-labelledby="lgn-naslov">
-		<h1 id="lgn-naslov">Brisanje naloga</h1>
+	<section class="lgn-card lgn-danger" aria-labelledby="lgn-title">
+		<h1 id="lgn-title">Brisanje naloga</h1>
 		<p>Trajno se brišu:</p>
 		<ul>
 			<li>nalog <strong>{{ $user->email }}</strong> i podaci (ime, telefon, slika),</li>

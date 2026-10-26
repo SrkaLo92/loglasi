@@ -14,7 +14,7 @@
 	];
 @endphp
 <nav class="lg-mnav" aria-label="Glavna navigacija">
-	<ul class="lg-mnav__lista">
+	<ul class="lg-mnav__list">
 		@foreach ($lgStavke as $key => $item)
 			@php
 				$aria = $item['aria'];
@@ -22,10 +22,10 @@
 					$aria .= ', '.$lgNeprocitano.' '.Pricing::plural($lgNeprocitano, 'nepročitana', 'nepročitane', 'nepročitanih');
 				}
 			@endphp
-			<li class="lg-mnav__stavka{{ $key === 'postavi' ? ' lg-mnav__stavka--cta' : '' }}">
+			<li class="lg-mnav__item{{ $key === 'postavi' ? ' lg-mnav__item--cta' : '' }}">
 				<a class="lg-mnav__link" href="{{ Navigation::link($item['link']) }}" aria-label="{{ $aria }}" @if ($key === $lgAktivna) aria-current="page" @endif>
-					<span class="lg-mnav__ikonica">{{ SiteIcons::svg($item['ikonica'], $key === 'postavi' ? 26 : 24) }}@if ($key === 'poruke' && $lgNeprocitano > 0)<span class="lg-mnav__broj" aria-hidden="true">{{ $lgNeprocitano > 99 ? '99+' : $lgNeprocitano }}</span>@endif</span>
-					<span class="lg-mnav__naziv">{{ $item['naziv'] }}</span>
+					<span class="lg-mnav__icon">{{ SiteIcons::svg($item['ikonica'], $key === 'postavi' ? 26 : 24) }}@if ($key === 'poruke' && $lgNeprocitano > 0)<span class="lg-mnav__num" aria-hidden="true">{{ $lgNeprocitano > 99 ? '99+' : $lgNeprocitano }}</span>@endif</span>
+					<span class="lg-mnav__name">{{ $item['naziv'] }}</span>
 				</a>
 			</li>
 		@endforeach

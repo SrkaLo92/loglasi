@@ -24,8 +24,8 @@
 			<summary>{{ $rating->reply ? 'Izmeni odgovor' : 'Odgovori' }}</summary>
 			<form method="post" action="{{ url_slash('ocene/'.$rating->id.'/odgovor') }}" class="lgr-form">
 				@csrf
-				<label for="lgr-odgovor-{{ $rating->id }}">Vaš javni odgovor</label>
-				<textarea id="lgr-odgovor-{{ $rating->id }}" name="reply" rows="3" maxlength="{{ \App\Services\Ratings\SellerRatings::REPLY_MAX }}">{{ $rating->reply }}</textarea>
+				<label for="lgr-answer-{{ $rating->id }}">Vaš javni odgovor</label>
+				<textarea id="lgr-answer-{{ $rating->id }}" name="reply" rows="3" maxlength="{{ \App\Services\Ratings\SellerRatings::REPLY_MAX }}">{{ $rating->reply }}</textarea>
 				<button class="lg-btn" type="submit">Sačuvaj odgovor</button>
 			</form>
 		</details>

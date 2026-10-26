@@ -113,6 +113,6 @@
 		<p>Dokument je izrađen elektronski i punovažan je bez pečata i potpisa.</p>
 	</div>
 </main>
-<script src="{{ asset_v('js/stampa.js') }}" defer></script>
+<script src="{{ asset_v('js/print.js') }}" defer></script>
 </body>
 </html>

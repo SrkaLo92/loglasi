@@ -2,12 +2,12 @@
 @use('App\Support\Pages\PageText')
 @use('App\Support\Pages\SellerIdentity')
 @php($lgSeller = SellerIdentity::rows())
-<section class="lgx-obrazac" id="obrazac" aria-labelledby="lgx-obrazac-naslov">
-	<h2 class="lgx-obrazac__naslov" id="lgx-obrazac-naslov">{{ PageText::get('odustanak.obrazac.naslov') }}</h2>
-	<p class="lgx-obrazac__uvod">{{ PageText::get('odustanak.obrazac.uvod') }}</p>
+<section class="lgx-wform" id="obrazac" aria-labelledby="lgx-wform-title">
+	<h2 class="lgx-wform__title" id="lgx-wform-title">{{ PageText::get('odustanak.obrazac.naslov') }}</h2>
+	<p class="lgx-wform__intro">{{ PageText::get('odustanak.obrazac.uvod') }}</p>
 
-	<div class="lgx-obrazac__primalac">
-		<p class="lgx-obrazac__oznaka">{{ PageText::get('odustanak.obrazac.primalac') }}:</p>
+	<div class="lgx-wform__recipient">
+		<p class="lgx-wform__label">{{ PageText::get('odustanak.obrazac.primalac') }}:</p>
 		@if ($lgSeller === [])
 			<p>{{ PageText::inline('Podatke o prodavcu šaljemo na zahtev preko [kontakt forme](/kontakt/).') }}</p>
 		@else
@@ -19,29 +19,29 @@
 		@endif
 	</div>
 
-	<p class="lgx-obrazac__izjava">{{ PageText::get('odustanak.obrazac.izjava') }}</p>
+	<p class="lgx-wform__statement">{{ PageText::get('odustanak.obrazac.izjava') }}</p>
 
-	<div class="lgx-obrazac__polja">
+	<div class="lgx-wform__fields">
 		@foreach (PageText::list('odustanak.obrazac.polja') as $i => $label)
-			<div class="lgx-polje lgx-obrazac__polje">
-				<label for="lgx-obrazac-{{ $i }}">{{ $label }}</label>
-				<input type="text" id="lgx-obrazac-{{ $i }}" autocomplete="off">
+			<div class="lgx-field lgx-wform__field">
+				<label for="lgx-wform-{{ $i }}">{{ $label }}</label>
+				<input type="text" id="lgx-wform-{{ $i }}" autocomplete="off">
 			</div>
 		@endforeach
-		<div class="lgx-obrazac__potpis">
-			<div><span class="lgx-obrazac__linija" aria-hidden="true"></span><p>{{ PageText::get('odustanak.obrazac.potpis') }}</p></div>
-			<div><span class="lgx-obrazac__linija" aria-hidden="true"></span><p>{{ PageText::get('odustanak.obrazac.datum') }}</p></div>
+		<div class="lgx-wform__signature">
+			<div><span class="lgx-wform__line" aria-hidden="true"></span><p>{{ PageText::get('odustanak.obrazac.potpis') }}</p></div>
+			<div><span class="lgx-wform__line" aria-hidden="true"></span><p>{{ PageText::get('odustanak.obrazac.datum') }}</p></div>
 		</div>
 	</div>
 
-	<p class="lgx-obrazac__uputstvo">{{ PageText::inline((string) PageText::raw('odustanak.obrazac.uputstvo')) }}</p>
-	<p class="lgx-obrazac__stampa" data-lgx-stampa hidden>
+	<p class="lgx-wform__instructions">{{ PageText::inline((string) PageText::raw('odustanak.obrazac.uputstvo')) }}</p>
+	<p class="lgx-wform__print" data-lgx-print hidden>
 		<button type="button" class="lg-btn lg-btn--green">{{ PageText::get('odustanak.obrazac.stampa') }}</button>
 	</p>
 </section>
 <script>
 (function () {
-	var wrap = document.querySelector('[data-lgx-stampa]');
+	var wrap = document.querySelector('[data-lgx-print]');
 	if (!wrap || !window.print) return;
 	wrap.hidden = false;
 	wrap.querySelector('button').addEventListener('click', function () { window.print(); });

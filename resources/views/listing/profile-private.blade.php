@@ -4,7 +4,7 @@
 
 @push('head')
 <link rel="stylesheet" href="{{ asset_v('css/listing-profile.css') }}">
-<link rel="stylesheet" href="{{ asset_v('css/ocene.css') }}">
+<link rel="stylesheet" href="{{ asset_v('css/ratings.css') }}">
 @endpush
 
 @section('content')
@@ -16,12 +16,12 @@
 		$user->rating_count > 0 ? '★ '.\App\Support\Ratings\RatingPresenter::average((float) $user->rating_avg).' ('.\App\Support\Ratings\RatingPresenter::count((int) $user->rating_count).')' : null,
 	]);
 @endphp
-<section class="lgp lgp-privatni" aria-labelledby="lgp-ime-{{ $user->id }}" data-lgp-user="{{ $user->id }}">
-	<span class="lgp-privatni__avatar" aria-hidden="true">{{ Text::initials($user->name) }}</span>
-	<div class="lgp-privatni__main">
-		<h1 class="lgp-privatni__name" id="lgp-ime-{{ $user->id }}">{{ Seo::get()->getH1() ?? $user->name }}</h1>
-		<p class="lgp-privatni__type">Privatno lice</p>
-		<ul class="lgp-privatni__meta">
+<section class="lgp lgp-private" aria-labelledby="lgp-name-{{ $user->id }}" data-lgp-user="{{ $user->id }}">
+	<span class="lgp-private__avatar" aria-hidden="true">{{ Text::initials($user->name) }}</span>
+	<div class="lgp-private__main">
+		<h1 class="lgp-private__name" id="lgp-name-{{ $user->id }}">{{ Seo::get()->getH1() ?? $user->name }}</h1>
+		<p class="lgp-private__type">Privatno lice</p>
+		<ul class="lgp-private__meta">
 			@foreach ($meta as $item)
 				<li>{{ $item }}</li>
 			@endforeach

@@ -8,8 +8,8 @@
 <meta name="robots" content="noindex">
 <link rel="preload" href="{{ asset('fonts/manrope-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{{ asset('fonts/manrope-latin-ext.woff2') }}" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="{{ asset_v('css/osnova.css') }}">
-<link rel="stylesheet" href="{{ asset_v('css/stranice.css') }}">
+<link rel="stylesheet" href="{{ asset_v('css/base.css') }}">
+<link rel="stylesheet" href="{{ asset_v('css/pages.css') }}">
 </head>
 <body>
 <header class="lg-header">
@@ -17,19 +17,19 @@
 		<a class="lg-logo" href="{{ url('/') }}/" aria-label="loglasi.rs, početna strana">loglasi<span>.rs</span></a>
 	</div>
 </header>
-<main id="sadrzaj" class="lg-strana lgx">
-	<section class="lgx-greska" aria-labelledby="greska-naslov">
-		<p class="lgx-greska__kod" aria-hidden="true">{{ $kod }}</p>
-		<h1 class="lgx-greska__naslov" id="greska-naslov">{{ $naslov }}</h1>
-		<p class="lgx-greska__tekst">{{ $tekst }}</p>
-		<div class="lgx-greska__dugmad">
+<main id="sadrzaj" class="lg-page lgx">
+	<section class="lgx-error" aria-labelledby="greska-naslov">
+		<p class="lgx-error__code" aria-hidden="true">{{ $kod }}</p>
+		<h1 class="lgx-error__title" id="greska-naslov">{{ $naslov }}</h1>
+		<p class="lgx-error__text">{{ $tekst }}</p>
+		<div class="lgx-error__buttons">
 			<a class="lgx-btn lgx-btn--green" href="{{ url('/') }}/">Početna strana</a>
 		</div>
 	</section>
 </main>
 <footer class="lg-footer">
-	<div class="lg-wrap lg-footer__dno">
-		<p class="lg-footer__tekst">loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu.</p>
+	<div class="lg-wrap lg-footer__bottom">
+		<p class="lg-footer__text">loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu.</p>
 	</div>
 </footer>
 </body>

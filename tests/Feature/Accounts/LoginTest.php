@@ -16,7 +16,7 @@ class LoginTest extends TestCase
                 ->assertOk()
                 ->assertSee('<meta name="robots" content="noindex, follow">', false)
                 ->assertSee($text)
-                ->assertSee('css/nalozi.css', false);
+                ->assertSee('css/accounts.css', false);
         }
     }
 
@@ -32,7 +32,7 @@ class LoginTest extends TestCase
             ->assertSee('id="lgn-panel-registracija" aria-labelledby="lgn-tab-registracija"  hidden', false)
             ->assertSee('action="'.url_slash('prijava').'"', false)
             ->assertSee('action="'.url_slash('registracija').'"', false)
-            ->assertSee('js/nalozi.js', false);
+            ->assertSee('js/accounts.js', false);
     }
 
     public function test_tab_is_chosen_by_query_string(): void
@@ -215,7 +215,7 @@ class LoginTest extends TestCase
 
     public function test_password_fields_get_a_show_button(): void
     {
-        $this->get('/login-registracija/')->assertOk()->assertSee('js/lozinka.js', false);
-        $this->assertStringContainsString('Prikaži lozinku', file_get_contents(public_path('js/lozinka.js')));
+        $this->get('/login-registracija/')->assertOk()->assertSee('js/password.js', false);
+        $this->assertStringContainsString('Prikaži lozinku', file_get_contents(public_path('js/password.js')));
     }
 }

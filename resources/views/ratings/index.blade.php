@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @push('head')
 <link rel="stylesheet" href="{{ asset_v('css/listing-profile.css') }}">
-<link rel="stylesheet" href="{{ asset_v('css/ocene.css') }}">
+<link rel="stylesheet" href="{{ asset_v('css/ratings.css') }}">
 @endpush
 
 @section('content')

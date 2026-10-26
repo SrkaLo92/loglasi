@@ -1,4 +1,4 @@
-/* /cenovnik/: sections instead of one row of cards. Prefix lgc-. Tokens from osnova.css. */
+/* /cenovnik/: sections instead of one row of cards. Prefix lgc-. Tokens from base.css. */
 
 .lgc {
 	padding-bottom: 32px;
@@ -9,7 +9,7 @@
 	margin-bottom: 48px;
 }
 
-.lgc-head__uvod {
+.lgc-head__intro {
 	margin: 12px 0 0;
 	color: var(--lg-muted);
 	font-size: 18px;
@@ -30,14 +30,14 @@
 	gap: 6px 12px;
 }
 
-.lgc-sec__broj {
+.lgc-sec__num {
 	color: var(--lg-green);
 	font-size: 13px;
 	font-weight: 700;
 	letter-spacing: 1px;
 }
 
-.lgc-sec__naslov {
+.lgc-sec__heading {
 	margin: 0;
 	color: var(--lg-text);
 	font-size: 28px;
@@ -45,7 +45,7 @@
 	line-height: 1.2;
 }
 
-.lgc-sec__uvod {
+.lgc-sec__intro {
 	color: var(--lg-muted);
 	font-size: 15px;
 }
@@ -57,13 +57,13 @@
 	margin-top: 4px;
 }
 
-.lgc-sub__naslov {
+.lgc-sub__title {
 	margin: 0;
 	font-size: 20px;
 	font-weight: 800;
 }
 
-.lgc-sub__uvod {
+.lgc-sub__intro {
 	margin: 0;
 	color: var(--lg-muted);
 	font-size: 15px;
@@ -82,24 +82,24 @@
 	background: #fff;
 }
 
-.lgc-free__cena {
+.lgc-free__price {
 	display: flex;
 	flex: 1 1 240px;
 	flex-direction: column;
 	gap: 6px;
 }
 
-.lgc-free__naziv,
-.lgc-free__opis {
+.lgc-free__name,
+.lgc-free__desc {
 	color: var(--lg-muted);
 	font-size: 15px;
 }
 
-.lgc-free__naziv {
+.lgc-free__name {
 	font-weight: 700;
 }
 
-.lgc-free__iznos {
+.lgc-free__amount {
 	color: var(--lg-green);
 	font-size: 44px;
 	font-weight: 800;
@@ -107,15 +107,15 @@
 	line-height: 1.1;
 }
 
-.lgc-free__stavke,
-.lgc-prvih__stavke,
-.lgc-paket__stavke {
+.lgc-free__items,
+.lgc-founding__items,
+.lgc-package__items {
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
-.lgc-free__stavke {
+.lgc-free__items {
 	display: grid;
 	flex: 2 1 380px;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -123,21 +123,21 @@
 	font-size: 16px;
 }
 
-.lgc-free__stavke li,
-.lgc-prvih__stavke li,
-.lgc-paket__stavke li {
+.lgc-free__items li,
+.lgc-founding__items li,
+.lgc-package__items li {
 	display: flex;
 	align-items: flex-start;
 	gap: 10px;
 }
 
-.lgc-free__stavke .lg-icon,
-.lgc-paket__stavke .lg-icon {
+.lgc-free__items .lg-icon,
+.lgc-package__items .lg-icon {
 	margin-top: 2px;
 	color: var(--lg-green);
 }
 
-.lgc-free__dugme {
+.lgc-free__button {
 	flex: none;
 }
 
@@ -163,24 +163,24 @@
 	background: #fff;
 }
 
-.lgc-slot__tekst {
+.lgc-slot__text {
 	display: flex;
 	flex-direction: column;
 	gap: 2px;
 	min-width: 0;
 }
 
-.lgc-slot__naziv {
+.lgc-slot__name {
 	font-size: 20px;
 	font-weight: 800;
 }
 
-.lgc-slot__opis {
+.lgc-slot__desc {
 	color: var(--lg-muted);
 	font-size: 14px;
 }
 
-.lgc-slot__cena {
+.lgc-slot__price {
 	flex: none;
 	color: var(--lg-green-dark);
 	font-size: 22px;
@@ -221,16 +221,16 @@
 	padding-right: 32px;
 }
 
-.lgc-promo__usluga {
+.lgc-promo__service {
 	width: 30%;
 	font-weight: 400;
 }
 
-.lgc-promo__usluga {
+.lgc-promo__service {
 	white-space: nowrap;
 }
 
-.lgc-promo__ikona {
+.lgc-promo__icon {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -243,27 +243,27 @@
 	vertical-align: middle;
 }
 
-.lgc-promo__naziv {
+.lgc-promo__name {
 	font-size: 18px;
 	font-weight: 700;
 	white-space: normal;
 	vertical-align: middle;
 }
 
-.lgc-promo__opis {
+.lgc-promo__desc {
 	color: var(--lg-muted);
 	font-size: 15px;
 	line-height: 1.5;
 }
 
-.lgc-promo__trajanje {
+.lgc-promo__duration {
 	width: 110px;
 	color: var(--lg-muted);
 	font-size: 14px;
 	white-space: nowrap;
 }
 
-.lgc-promo__cena {
+.lgc-promo__price {
 	width: 130px;
 	font-size: 22px;
 	font-weight: 800;
@@ -271,7 +271,7 @@
 	white-space: nowrap;
 }
 
-.lgc-table__dno {
+.lgc-table__bottom {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
@@ -284,15 +284,15 @@
 	font-size: 15px;
 }
 
-.lgc-table__dno a,
-.lgc-dodatno__head a {
+.lgc-table__bottom a,
+.lgc-extra__head a {
 	color: var(--lg-green);
 	font-weight: 700;
 }
 
 /* First 30 firms */
 
-.lgc-prvih {
+.lgc-founding {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
@@ -303,7 +303,7 @@
 	color: #fff;
 }
 
-.lgc-prvih__tekst {
+.lgc-founding__text {
 	display: flex;
 	flex: 2 1 420px;
 	flex-direction: column;
@@ -311,7 +311,7 @@
 	min-width: 0;
 }
 
-.lgc-prvih__oznaka {
+.lgc-founding__label {
 	align-self: flex-start;
 	padding: 6px 12px;
 	border-radius: 999px;
@@ -321,14 +321,14 @@
 	font-weight: 700;
 }
 
-.lgc-prvih__naslov {
+.lgc-founding__title {
 	margin: 0;
 	font-size: 30px;
 	font-weight: 800;
 	line-height: 1.2;
 }
 
-.lgc-prvih__stavke {
+.lgc-founding__items {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 10px 20px;
@@ -336,19 +336,19 @@
 	font-size: 16px;
 }
 
-.lgc-prvih__stavke .lg-icon {
+.lgc-founding__items .lg-icon {
 	margin-top: 2px;
 	color: #9fd9c4;
 }
 
-.lgc-prvih__napomena {
+.lgc-founding__note {
 	margin: 0;
 	color: #d8ebe4;
 	font-size: 15px;
 	line-height: 1.6;
 }
 
-.lgc-prvih__kartica {
+.lgc-founding__card {
 	display: flex;
 	flex: 1 1 280px;
 	flex-direction: column;
@@ -359,26 +359,26 @@
 	color: var(--lg-text);
 }
 
-.lgc-prvih__mesta {
+.lgc-founding__places {
 	margin: 0;
 	font-size: 18px;
 	font-weight: 800;
 }
 
-.lgc-prvih__traka {
+.lgc-founding__bar {
 	height: 10px;
 	overflow: hidden;
 	border-radius: 999px;
 	background: var(--lg-border);
 }
 
-.lgc-prvih__traka span {
+.lgc-founding__bar span {
 	display: block;
 	height: 100%;
 	background: var(--lg-orange);
 }
 
-.lgc-prvih__zauzeto {
+.lgc-founding__taken {
 	margin: 0;
 	color: var(--lg-muted);
 	font-size: 14px;
@@ -386,7 +386,7 @@
 
 /* Packages: at most 3 per row */
 
-.lgc-paketi {
+.lgc-packages {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 	gap: 20px;
@@ -395,7 +395,7 @@
 	list-style: none;
 }
 
-.lgc-paket {
+.lgc-package {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
@@ -405,14 +405,14 @@
 	background: #fff;
 }
 
-.lgc-paket--istaknut {
+.lgc-package--featured {
 	position: relative;
 	padding: 27px; /* the 2px border keeps the content in line with the other cards */
 	border: 2px solid var(--lg-green);
 }
 
 /* The badge sits on the top edge, so the name stays on one line and every card lines up. */
-.lgc-paket--istaknut .lgc-paket__oznaka {
+.lgc-package--featured .lgc-package__label {
 	position: absolute;
 	top: 0;
 	left: 50%;
@@ -422,20 +422,20 @@
 	white-space: nowrap;
 }
 
-.lgc-paket__vrh {
+.lgc-package__top {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 8px;
 }
 
-.lgc-paket__naziv {
+.lgc-package__name {
 	margin: 0;
 	font-size: 20px;
 	font-weight: 800;
 }
 
-.lgc-paket__oznaka {
+.lgc-package__label {
 	flex: none;
 	padding: 5px 10px;
 	border-radius: 999px;
@@ -445,28 +445,28 @@
 	font-weight: 700;
 }
 
-.lgc-paket__cena {
+.lgc-package__price {
 	margin: 4px 0 0;
 }
 
-.lgc-paket__iznos {
+.lgc-package__amount {
 	font-size: 34px;
 	font-weight: 800;
 	letter-spacing: -.5px;
 }
 
-.lgc-paket__period,
-.lgc-paket__godisnje {
+.lgc-package__period,
+.lgc-package__yearly {
 	color: var(--lg-muted);
 	font-size: 15px;
 }
 
-.lgc-paket__godisnje {
+.lgc-package__yearly {
 	margin: 0;
 	font-size: 14px;
 }
 
-.lgc-paket__stavke {
+.lgc-package__items {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
@@ -478,7 +478,7 @@
 
 /* Extras */
 
-.lgc-dodatno {
+.lgc-extra {
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
@@ -489,7 +489,7 @@
 	background: #fff;
 }
 
-.lgc-dodatno__head {
+.lgc-extra__head {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: baseline;
@@ -497,7 +497,7 @@
 	gap: 12px;
 }
 
-.lgc-dodatno__lista {
+.lgc-extra__list {
 	display: grid;
 	grid-template-columns: repeat(4, minmax(0, 1fr));
 	gap: 16px 32px;
@@ -506,7 +506,7 @@
 	list-style: none;
 }
 
-.lgc-dodatno__lista li {
+.lgc-extra__list li {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
@@ -514,17 +514,17 @@
 	border-top: 1px solid var(--lg-border);
 }
 
-.lgc-dodatno__naziv {
+.lgc-extra__name {
 	font-size: 16px;
 	font-weight: 700;
 }
 
-.lgc-dodatno__opis {
+.lgc-extra__desc {
 	color: var(--lg-muted);
 	font-size: 14px;
 }
 
-.lgc-dodatno__cena {
+.lgc-extra__price {
 	color: var(--lg-green-dark);
 	font-size: 15px;
 	font-weight: 800;
@@ -532,7 +532,7 @@
 
 /* Payment */
 
-.lgc-uplata {
+.lgc-payment {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 24px;
@@ -540,19 +540,19 @@
 	scroll-margin-top: 16px;
 }
 
-.lgc-uplata__koraci {
+.lgc-payment__steps {
 	display: flex;
 	flex: 1 1 420px;
 	flex-direction: column;
 	gap: 12px;
 }
 
-.lgc-uplata__uvod {
+.lgc-payment__intro {
 	margin: 0;
 	color: var(--lg-muted);
 }
 
-.lgc-uplata__lista {
+.lgc-payment__list {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
@@ -562,7 +562,7 @@
 	line-height: 1.6;
 }
 
-.lgc-uplata__kartica {
+.lgc-payment__card {
 	flex: 1 1 380px;
 	padding: 24px;
 	border: 1px solid var(--lg-border);
@@ -570,7 +570,7 @@
 	background: #fff;
 }
 
-.lgc-uplata__naslov {
+.lgc-payment__title {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -579,19 +579,19 @@
 	font-weight: 800;
 }
 
-.lgc-faq .lgc-sec__naslov {
+.lgc-faq .lgc-sec__heading {
 	margin-bottom: 16px;
 }
 
 @media (max-width: 1100px) {
-	.lgc-dodatno__lista {
+	.lgc-extra__list {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 }
 
 @media (max-width: 900px) {
 	.lgc-slots,
-	.lgc-paketi {
+	.lgc-packages {
 		grid-template-columns: 1fr;
 	}
 
@@ -626,35 +626,35 @@
 		padding-right: 0;
 	}
 
-	.lgc-promo__usluga {
+	.lgc-promo__service {
 		display: flex;
 		align-items: center;
 		white-space: normal;
 	}
 
-	.lgc-promo__ikona {
+	.lgc-promo__icon {
 		flex: none;
 		width: 40px;
 		height: 40px;
 		margin-right: 12px;
 	}
 
-	.lgc-promo__cena {
+	.lgc-promo__price {
 		grid-column: 2;
 		grid-row: 1;
 		align-self: center;
 		font-size: 20px;
 	}
 
-	.lgc-promo__opis {
+	.lgc-promo__desc {
 		grid-column: 1 / -1;
 	}
 
-	.lgc-promo__trajanje {
+	.lgc-promo__duration {
 		grid-column: 1 / -1;
 	}
 
-	.lgc-table__dno {
+	.lgc-table__bottom {
 		padding: 16px 20px;
 	}
 }
@@ -664,7 +664,7 @@
 		margin-bottom: 32px;
 	}
 
-	.lgc-head__uvod {
+	.lgc-head__intro {
 		font-size: 16px;
 	}
 
@@ -672,32 +672,32 @@
 		margin-bottom: 40px;
 	}
 
-	.lgc-sec__naslov {
+	.lgc-sec__heading {
 		font-size: 24px;
 	}
 
 	.lgc-free,
-	.lgc-prvih,
-	.lgc-dodatno {
+	.lgc-founding,
+	.lgc-extra {
 		padding: 22px 20px;
 	}
 
-	.lgc-free__iznos {
+	.lgc-free__amount {
 		font-size: 36px;
 	}
 
-	.lgc-free__stavke,
-	.lgc-prvih__stavke,
-	.lgc-dodatno__lista {
+	.lgc-free__items,
+	.lgc-founding__items,
+	.lgc-extra__list {
 		grid-template-columns: 1fr;
 		flex-basis: 100%;
 	}
 
-	.lgc-free__dugme {
+	.lgc-free__button {
 		width: 100%;
 	}
 
-	.lgc-prvih__naslov {
+	.lgc-founding__title {
 		font-size: 24px;
 	}
 
@@ -707,11 +707,11 @@
 }
 
 /* Payments: order links on sellable products. */
-.lgc-naruci { display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; font-weight: 700; color: var(--lg-green); }
-.lgc-paket__naruci { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.lgc-order { display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; font-weight: 700; color: var(--lg-green); }
+.lgc-package__order { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
 
 /* Not on sale for this viewer yet (private payments off) or only together with a pack */
-.lgc-uskoro {
+.lgc-soon {
 	display: inline-flex;
 	align-items: center;
 	min-height: 28px;
@@ -724,7 +724,7 @@
 	white-space: nowrap;
 }
 
-.lgc-head__napomena {
+.lgc-head__note {
 	display: flex;
 	align-items: flex-start;
 	gap: 10px;
@@ -738,7 +738,7 @@
 	line-height: 1.55;
 }
 
-.lgc-head__napomena .lg-icon {
+.lgc-head__note .lg-icon {
 	flex: none;
 	margin-top: 2px;
 	color: var(--lg-green);
@@ -756,14 +756,14 @@
 	background: linear-gradient(135deg, #fff 0%, #fff 50%, #eef7f3 100%);
 }
 
-.lgc-plus__tekst {
+.lgc-plus__text {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
 	gap: 10px;
 }
 
-.lgc-plus__oznaka {
+.lgc-plus__label {
 	padding: 4px 10px;
 	border-radius: 999px;
 	background: var(--lg-orange);
@@ -774,20 +774,20 @@
 	text-transform: uppercase;
 }
 
-.lgc-plus__naziv {
+.lgc-plus__name {
 	margin: 0;
 	font-size: 26px;
 	font-weight: 800;
 }
 
-.lgc-plus__uvod {
+.lgc-plus__intro {
 	margin: 0;
 	color: var(--lg-muted);
 	font-size: 15px;
 	line-height: 1.55;
 }
 
-.lgc-plus__stavke {
+.lgc-plus__items {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 10px 20px;
@@ -796,19 +796,19 @@
 	list-style: none;
 }
 
-.lgc-plus__stavke li {
+.lgc-plus__items li {
 	display: flex;
 	align-items: flex-start;
 	gap: 10px;
 }
 
-.lgc-plus__stavke .lg-icon {
+.lgc-plus__items .lg-icon {
 	flex: none;
 	margin-top: 2px;
 	color: var(--lg-green);
 }
 
-.lgc-plus__cene {
+.lgc-plus__prices {
 	display: grid;
 	gap: 10px;
 	margin: 0;
@@ -816,7 +816,7 @@
 	list-style: none;
 }
 
-.lgc-plus__cena {
+.lgc-plus__price {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto auto;
 	align-items: center;
@@ -831,7 +831,7 @@
 	font-weight: 700;
 }
 
-.lgc-plus__iznos {
+.lgc-plus__amount {
 	color: var(--lg-green-dark);
 	font-size: 20px;
 	font-weight: 800;
@@ -844,23 +844,23 @@
 		padding: 22px 18px;
 	}
 
-	.lgc-plus__stavke {
+	.lgc-plus__items {
 		grid-template-columns: 1fr;
 	}
 
-	.lgc-plus__cena {
+	.lgc-plus__price {
 		grid-template-columns: minmax(0, 1fr) auto;
 	}
 
-	.lgc-plus__cena .lgc-naruci,
-	.lgc-plus__cena .lgc-uskoro {
+	.lgc-plus__price .lgc-order,
+	.lgc-plus__price .lgc-soon {
 		grid-column: 1 / -1;
 		justify-self: start;
 	}
 }
 
 /* One „Kupovina uskoro” per block while private payments are off */
-.lgc-uskoro-napomena {
+.lgc-soon-note {
 	display: inline-flex;
 	width: fit-content;
 	align-items: center;
@@ -874,17 +874,17 @@
 	font-weight: 700;
 }
 
-.lgc-sec__head .lgc-uskoro-napomena { margin: 0 0 0 auto; }
+.lgc-sec__head .lgc-soon-note { margin: 0 0 0 auto; }
 
-.lgc-plus__desno {
+.lgc-plus__side {
 	display: grid;
 	gap: 12px;
 	justify-items: start;
 }
 
-.lgc-plus__desno .lgc-plus__cene { width: 100%; }
+.lgc-plus__side .lgc-plus__prices { width: 100%; }
 
-.lgc-plus__napomena {
+.lgc-plus__note {
 	display: flex;
 	align-items: flex-start;
 	gap: 8px;
@@ -894,4 +894,4 @@
 	line-height: 1.5;
 }
 
-.lgc-plus__napomena .lg-icon { flex: none; margin-top: 1px; }
+.lgc-plus__note .lg-icon { flex: none; margin-top: 1px; }

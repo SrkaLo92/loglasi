@@ -64,7 +64,7 @@ class PagesTest extends TestCase
             ->assertSee('class="lg-mnav"', false)
             ->assertSee('loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu.')
             ->assertSee('<link rel="canonical" href="'.config('seo.base_url').rtrim($url, '/').'/">', false)
-            ->assertSee('css/stranice.css', false);
+            ->assertSee('css/pages.css', false);
     }
 
     public function test_urls_without_trailing_slash_work_too(): void

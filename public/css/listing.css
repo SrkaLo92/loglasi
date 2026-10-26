@@ -90,7 +90,7 @@
 	color: var(--lgo-green);
 }
 
-.lgo-badge--zamena {
+.lgo-badge--swap {
 	background: var(--lgo-mint);
 	color: var(--lgo-green-dark);
 }
@@ -218,7 +218,7 @@
 }
 
 /* No phone: the message button is the main one. */
-.lgo-actions--bez-telefona .lgo-btn--msg {
+.lgo-actions--without-phone .lgo-btn--msg {
 	min-height: 54px;
 	border-color: var(--lgo-green);
 	background: var(--lgo-green);
@@ -226,11 +226,11 @@
 	font-size: 17px;
 }
 
-.lgo-actions--bez-telefona .lgo-btn--msg .lgo-icon {
+.lgo-actions--without-phone .lgo-btn--msg .lgo-icon {
 	color: #fff;
 }
 
-.lgo-actions--bez-telefona .lgo-btn--msg:hover {
+.lgo-actions--without-phone .lgo-btn--msg:hover {
 	background: var(--lgo-green-dark);
 	color: #fff;
 }
@@ -306,13 +306,13 @@
 	height: 13px;
 }
 
-.lgo-badge--firma {
+.lgo-badge--firm {
 	background: var(--lgo-green);
 	color: #fff;
 	text-transform: uppercase;
 }
 
-.lgo-badge--privatno {
+.lgo-badge--private {
 	background: #eef1ef;
 	color: var(--lgo-muted);
 }
@@ -534,14 +534,14 @@
 }
 
 .lgo-calc-body[hidden],
-.lgo-prazno {
+.lgo-empty {
 	display: none !important;
 }
 
 /* Visibility by width */
 
 @media (min-width: 768px) {
-	.lgo-only-mobilni {
+	.lgo-only-mobile {
 		display: none !important;
 	}
 }
@@ -572,7 +572,7 @@
 		transition: transform 0.2s ease;
 	}
 
-	.lgo-bar--skriveno {
+	.lgo-bar--hidden {
 		transform: translateY(calc(100% + 2px));
 	}
 

@@ -84,9 +84,9 @@
 		</div>
 	</section>
 
-	<section class="lga-card" aria-labelledby="lga-oglasi">
+	<section class="lga-card" aria-labelledby="lga-listings">
 		<div class="lga-card__head">
-			<h2 id="lga-oglasi">Vaši oglasi</h2>
+			<h2 id="lga-listings">Vaši oglasi</h2>
 			@if ($recent->isNotEmpty())
 				<a href="{{ url_slash('moj-nalog/oglasi') }}">Svi oglasi {{ SiteIcons::svg('chevron-r', 16) }}</a>
 			@endif

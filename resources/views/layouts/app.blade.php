@@ -6,7 +6,7 @@
 @include('partials.seo-head')
 <link rel="preload" href="{{ asset('fonts/manrope-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{{ asset('fonts/manrope-latin-ext.woff2') }}" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="{{ asset_v('css/osnova.css') }}">
+<link rel="stylesheet" href="{{ asset_v('css/base.css') }}">
 <link rel="stylesheet" href="{{ asset_v('css/pick.css') }}">
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" href="{{ asset_v('img/brand/icon.svg') }}" type="image/svg+xml">
@@ -58,7 +58,7 @@
 <script src="{{ asset_v('js/accordion.js') }}" defer></script>
 <script src="{{ asset_v('js/recent.js') }}" defer></script>
 <script src="{{ asset_v('js/fav.js') }}" defer></script>
-<script src="{{ asset_v('js/lozinka.js') }}" defer></script>
+<script src="{{ asset_v('js/password.js') }}" defer></script>
 @stack('scripts')
 </body>
 </html>

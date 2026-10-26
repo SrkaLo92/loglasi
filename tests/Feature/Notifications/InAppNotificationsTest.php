@@ -61,9 +61,9 @@ class InAppNotificationsTest extends TestCase
 
         $this->actingAs($owner)->get('/oglasi/')->assertOk()
             ->assertSee('aria-label="Obaveštenja, 2 novih"', false)
-            ->assertSee('<span class="lg-header__broj" aria-hidden="true">2</span>', false);
+            ->assertSee('<span class="lg-header__num" aria-hidden="true">2</span>', false);
         auth()->logout();
-        $this->get('/')->assertDontSee('lg-header__zvono', false);
+        $this->get('/')->assertDontSee('lg-header__bell', false);
     }
 
     public function test_api_lists_counts_and_marks_read(): void

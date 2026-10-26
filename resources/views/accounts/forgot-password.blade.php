@@ -7,8 +7,8 @@
 
 @section('content')
 <div class="lgn lg-wrap">
-	<section class="lgn-card" aria-labelledby="lgn-naslov">
-		<h1 id="lgn-naslov">Zaboravljena lozinka</h1>
+	<section class="lgn-card" aria-labelledby="lgn-title">
+		<h1 id="lgn-title">Zaboravljena lozinka</h1>
 		<p class="lgn-lead">Upišite email adresu naloga. Poslaćemo vam link za novu lozinku.</p>
 		@include('accounts.partials.status')
 		<form class="lgn-form" method="post" action="{{ url_slash('zaboravljena-lozinka') }}" novalidate>

@@ -153,10 +153,10 @@ class LimitsAndInboxTest extends TestCase
         $conversation = Conversation::factory()->create(['seller_unread' => 3]);
 
         $this->actingAs($conversation->seller)->get('/moj-nalog/poruke/')
-            ->assertSee('lg-mnav__broj', false)
+            ->assertSee('lg-mnav__num', false)
             ->assertSee('Poruke, 3 nepročitane', false);
 
-        $this->actingAs($conversation->buyer)->get('/moj-nalog/poruke/')->assertDontSee('lg-mnav__broj', false);
+        $this->actingAs($conversation->buyer)->get('/moj-nalog/poruke/')->assertDontSee('lg-mnav__num', false);
     }
 
     public function test_unread_total_is_cached_and_reset_on_send_and_read(): void

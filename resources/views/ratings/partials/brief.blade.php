@@ -1,7 +1,7 @@
 {{-- Short block on a profile: summary, the newest ratings and a link to all ($summary, $latest from ProfileController). --}}
-<section class="lgr" aria-labelledby="lgr-naslov">
+<section class="lgr" aria-labelledby="lgr-title">
 	<div class="lgr__head">
-		<h2 id="lgr-naslov">Ocene kupaca</h2>
+		<h2 id="lgr-title">Ocene kupaca</h2>
 		@if ($summary['count'] > 3)
 			<a href="{{ url_slash('korisnik/'.$user->slug.'/ocene') }}">Sve ocene ({{ $summary['count'] }})</a>
 		@endif

@@ -1,4 +1,4 @@
-/* Home page. Prefix hm-. Tokens from osnova.css. */
+/* Home page. Prefix hm-. Tokens from base.css. */
 
 .hm-intro {
 	background: var(--lg-mint);
@@ -497,29 +497,29 @@
 	align-items: start;
 }
 
-.hm-faq__uvod {
+.hm-faq__intro {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
 }
 
-.hm-faq__uvod p {
+.hm-faq__intro p {
 	margin: 0;
 	color: var(--lg-muted);
 	font-size: 16px;
 	line-height: 1.6;
 }
 
-.hm-faq__uvod a {
+.hm-faq__intro a {
 	color: var(--lg-green);
 	overflow-wrap: anywhere;
 }
 
-.hm-faq__uvod a[href^="tel:"] {
+.hm-faq__intro a[href^="tel:"] {
 	white-space: nowrap;
 }
 
-.hm-faq__sve {
+.hm-faq__all {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
@@ -528,20 +528,20 @@
 	text-decoration: none;
 }
 
-.hm-faq__lista {
+.hm-faq__list {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
 }
 
-.hm-faq__stavka {
+.hm-faq__item {
 	padding: 0 22px;
 	border: 1px solid var(--lg-border);
 	border-radius: var(--lg-radius);
 	background: #fff;
 }
 
-.hm-faq__pitanje {
+.hm-faq__question {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -554,21 +554,21 @@
 	list-style: none;
 }
 
-.hm-faq__pitanje::-webkit-details-marker {
+.hm-faq__question::-webkit-details-marker {
 	display: none;
 }
 
-.hm-faq__pitanje svg {
+.hm-faq__question svg {
 	flex: 0 0 20px;
 	color: var(--lg-green);
 	transition: transform .2s ease;
 }
 
-.hm-faq__stavka[open] .hm-faq__pitanje svg {
+.hm-faq__item[open] .hm-faq__question svg {
 	transform: rotate(180deg);
 }
 
-.hm-faq__odgovor {
+.hm-faq__answer {
 	margin: 0;
 	padding: 0 0 20px;
 	color: var(--lg-muted);
@@ -576,7 +576,7 @@
 	line-height: 1.65;
 }
 
-.hm-faq__odgovor a {
+.hm-faq__answer a {
 	color: var(--lg-green);
 }
 
@@ -837,11 +837,11 @@
 		grid-template-columns: 1fr;
 	}
 
-	.hm-faq__stavka {
+	.hm-faq__item {
 		padding: 0 16px;
 	}
 
-	.hm-faq__pitanje {
+	.hm-faq__question {
 		font-size: 16px;
 	}
 
@@ -900,24 +900,24 @@
 
 
 /* The open question stands out; the whole row is the button. */
-.hm-faq__stavka {
+.hm-faq__item {
 	transition: border-color .15s ease, box-shadow .15s ease;
 }
 
-.hm-faq__stavka:hover {
+.hm-faq__item:hover {
 	border-color: #c9d6cf;
 }
 
-.hm-faq__stavka[open] {
+.hm-faq__item[open] {
 	border-color: var(--lg-green);
 	box-shadow: 0 4px 16px rgba(16, 24, 20, .06);
 }
 
-.hm-faq__pitanje {
+.hm-faq__question {
 	cursor: pointer;
 }
 
-.hm-faq__stavka[open] .hm-faq__pitanje {
+.hm-faq__item[open] .hm-faq__question {
 	color: var(--lg-green);
 }
 
