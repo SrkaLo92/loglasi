@@ -18,6 +18,8 @@ class PrijavaController extends Controller
     /** /login-registracija/: prijava i registracija u jednoj kartici sa dva taba. */
     public function show(Request $request): View
     {
+        LoginPage::rememberBack($request);
+
         return view('nalozi.login-registracija', ['tab' => LoginPage::tab($request)]);
     }
 

@@ -61,7 +61,8 @@
 					@endif
 					@foreach ($fieldLists as $field)
 						<div class="lgo-fields__group lgo-fields__group--{{ $field['key'] }}">
-							<h3 class="lgo-fields__sub">{{ $field['label'] }}</h3>
+							{{-- A list field named like the section ("Karakteristike" in Nekretnine) would repeat the heading. --}}
+							<h3 class="lgo-fields__sub">{{ mb_strtolower($field['label']) === 'karakteristike' ? 'Oprema i pogodnosti' : $field['label'] }}</h3>
 							<ul class="lgo-fields__chips" role="list">
 								@foreach ($field['items'] as $item)
 									<li>{{ $item }}</li>

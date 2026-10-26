@@ -40,7 +40,12 @@
     Header always set X-Content-Type-Options "nosniff"
     Header always set X-Frame-Options "SAMEORIGIN"
     Header unset X-Powered-By
-    <FilesMatch "\.(css|js|webp|jpe?g|png|gif|svg|ico|woff2?)$">
+    # CSS/JS are versioned and uploaded images get a new name, so they can stay a year.
+    <FilesMatch "\.(css|js|webp|avif|jpe?g|png|gif|woff2?)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+    # Icons keep their name when replaced: 30 days.
+    <FilesMatch "\.(svg|ico)$">
         Header set Cache-Control "public, max-age=2592000"
     </FilesMatch>
 </IfModule>

@@ -93,6 +93,9 @@
 .hm-sec__link,
 .hm-sec__link:visited {
 	flex: none;
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
 	color: var(--lg-green);
 	font-size: 15px;
 	font-weight: 700;

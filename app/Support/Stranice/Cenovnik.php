@@ -236,7 +236,7 @@ class Cenovnik
     /** Broj firmi koje su dobile besplatan paket (founding_free). Keš 5 minuta. */
     public static function foundingTaken(): int
     {
-        return (int) Cache::remember(self::FOUNDING_CACHE, 300, fn () => Firm::query()->where('founding_free', true)->count());
+        return (int) Cache::remember(self::FOUNDING_CACHE, 300, fn () => Firm::query()->holdsFoundingPlace()->count());
     }
 
     public static function foundingLeft(): int

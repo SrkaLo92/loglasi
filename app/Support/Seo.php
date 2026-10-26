@@ -8,6 +8,7 @@ use App\Models\Firm;
 use App\Models\Listing;
 use App\Models\Location;
 use App\Models\User;
+use App\Services\Catalog;
 use App\Services\ListingFields;
 use App\Support\Seo\Url;
 use App\Support\Stranice\PageText;
@@ -770,7 +771,7 @@ class Seo
         $name = static::clean(html_entity_decode((string) $category->name, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
 
         if (! str_contains($name, '|')) {
-            return $name;
+            return static::withParentWhenShared($category, $name);
         }
 
         $parts = array_map('trim', explode('|', $name));
@@ -781,6 +782,21 @@ class Seo
         }
 
         return implode(' – ', array_filter($parts, fn ($part) => $part !== ''));
+    }
+
+    /** "Ostalo" exists under many categories: the parent makes the title and H1 unique ("Ostalo – Nameštaj"). */
+    private static function withParentWhenShared(Category $category, string $name): string
+    {
+        if (! $category->parent_id) {
+            return $name;
+        }
+        $plain = mb_strtolower($name);
+        $shared = app(Catalog::class)->categories()
+            ->filter(fn (Category $c) => $c->id !== $category->id && mb_strtolower(trim((string) $c->name)) === $plain)
+            ->isNotEmpty();
+        $parent = $shared ? static::clean((string) app(Catalog::class)->category((int) $category->parent_id)?->name) : '';
+
+        return $parent !== '' ? $name.' – '.$parent : $name;
     }
 
     private static function topCategory(Category $category): Category

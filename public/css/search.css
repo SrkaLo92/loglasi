@@ -235,8 +235,9 @@ select.sr-input {
 }
 
 .sr-check input {
-	width: 18px;
-	height: 18px;
+	flex: none;
+	width: 20px;
+	height: 20px;
 	margin: 0;
 	accent-color: var(--lg-green);
 }
@@ -371,8 +372,8 @@ select.sr-input {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 40px;
-	height: 40px;
+	width: 44px;
+	height: 44px;
 	border-radius: 50%;
 	color: var(--lg-green-dark);
 	font-size: 18px;
@@ -535,6 +536,38 @@ a.sr-pages__step:hover {
 	line-height: 1.6;
 }
 
+.sr-intro__text {
+	margin: 0;
+}
+
+.sr-intro__more {
+	min-height: 44px;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--lg-green);
+	font: inherit;
+	font-size: 15px;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+/* Phones: two lines of the intro, the listings start on the first screen */
+@media (max-width: 767.98px) {
+	.sr-intro {
+		margin-bottom: 8px;
+		font-size: 15px;
+	}
+
+	.sr-intro.is-clamped .sr-intro__text {
+		display: -webkit-box;
+		overflow: hidden;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+	}
+}
+
 .sr-faq {
 	margin-top: 32px;
 }
@@ -634,7 +667,7 @@ a.sr-pages__step:hover {
 		flex: 0 0 auto;
 		align-items: center;
 		gap: 6px;
-		min-height: 40px;
+		min-height: 44px;
 		padding: 0 12px 0 14px;
 		border: 1px solid var(--lg-input);
 		border-radius: 999px;

@@ -11,6 +11,7 @@ use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -51,6 +52,14 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             'status' => UserStatus::class,
             'notification_settings' => 'array',
         ];
+    }
+
+    /** A name typed all in lowercase ("suncica perisic") is shown with capitals; the stored value stays. */
+    protected function name(): Attribute
+    {
+        return Attribute::make(get: fn (?string $value) => $value !== null && $value !== '' && mb_strtolower($value) === $value && preg_match('/\p{L}/u', $value)
+            ? mb_convert_case($value, MB_CASE_TITLE, 'UTF-8')
+            : $value);
     }
 
     public function firm(): HasOne

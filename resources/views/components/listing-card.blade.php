@@ -99,6 +99,6 @@
 		</form>
 	@else
 		{{-- A guest sees the heart too (as on kupujemprodajem); it leads to login. --}}
-		<div class="lc__fav"><a class="lc__fav-btn" href="{{ \App\Support\Auth\LoginPage::url() }}" rel="nofollow" aria-label="Prijavite se da biste sačuvali oglas: {{ $listing->title }}">{{ CategoryIcons::svg('heart', 20, '2') }}</a></div>
+		<div class="lc__fav"><a class="lc__fav-btn" href="{{ \App\Support\Auth\LoginPage::urlBack(request()) }}" rel="nofollow" aria-label="Prijavite se da biste sačuvali oglas: {{ $listing->title }}">{{ CategoryIcons::svg('heart', 20, '2') }}</a></div>
 	@endif
 </article>

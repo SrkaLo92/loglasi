@@ -15,9 +15,64 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 
-/** POST /reports: report a listing or a user (requires login). */
+/**
+ * POST /reports: report a listing or a user (requires login).
+ * POST /listings/{id}/report: report a listing, guests too (as on the site).
+ * GET /report-reasons: the reasons with their labels.
+ */
 class ReportApiController extends Controller
 {
+    public function reasons(): Response
+    {
+        return response()->json(['data' => collect(ReportReasons::ALL)
+            ->map(fn (string $label, string $key) => ['key' => $key, 'label' => $label])
+            ->values()->all()]);
+    }
+
+    public function listing(Request $request, int $id): Response
+    {
+        $data = $request->validate([
+            'reason' => ['required', Rule::in(ReportReasons::keys())],
+            'details' => ['nullable', 'string', 'max:1000'],
+        ], [
+            'reason.required' => 'Izaberite razlog prijave.',
+            'reason.in' => 'Izaberite razlog prijave.',
+            'details.string' => 'Opis mora biti tekst.',
+            'details.max' => 'Opis može imati najviše 1.000 znakova.',
+        ]);
+
+        $reporter = auth('sanctum')->user();
+        $reporter = $reporter instanceof User ? $reporter : null;
+
+        $listing = Listing::query()->find($id);
+        if ($listing === null || Gate::forUser($reporter)->denies('view', $listing)) {
+            throw ApiError::notFound('Oglas ne postoji ili više nije aktivan.');
+        }
+        if ($reporter !== null && $listing->user_id === $reporter->id) {
+            throw ValidationException::withMessages(['reason' => 'Ne možete prijaviti sopstveni oglas.']);
+        }
+
+        $duplicate = $reporter !== null && Report::query()
+            ->where('reporter_id', $reporter->id)
+            ->where('reportable_type', $listing->getMorphClass())
+            ->where('reportable_id', $listing->id)
+            ->where('status', ReportStatus::Open)
+            ->exists();
+
+        if (! $duplicate) {
+            Report::create([
+                'reporter_id' => $reporter?->id,
+                'reportable_type' => $listing->getMorphClass(),
+                'reportable_id' => $listing->id,
+                'reason' => $data['reason'],
+                'details' => isset($data['details']) ? (trim(strip_tags($data['details'])) ?: null) : null,
+                'status' => ReportStatus::Open,
+            ]);
+        }
+
+        return response()->noContent();
+    }
+
     public function store(Request $request): Response
     {
         $data = $request->validate([

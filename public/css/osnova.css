@@ -430,6 +430,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .lg-footer__grupa > summary { display: block; list-style: none; pointer-events: none; }
 .lg-footer__grupa > summary::-webkit-details-marker { display: none; }
 .lg-footer__lista { margin: 0; padding: 0; list-style: none; }
+/* Room for the 4 latest listings + "Pogledajte sve" (5 x 44 px) before they load: no layout shift. */
+.lg-footer__najnoviji { min-height: 220px; }
 .lg-footer__lista a { display: inline-flex; align-items: center; min-height: 44px; font-size: 15px; }
 .lg-footer__lista a[aria-current="page"] { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
 .lg-footer a.lg-footer__sve { color: #fff; font-weight: 700; }

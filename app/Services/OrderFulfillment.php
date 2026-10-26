@@ -274,7 +274,7 @@ class OrderFulfillment
             }
 
             // Locks the counted rows too, so two admins cannot hand out the last place twice.
-            $taken = Firm::query()->where('founding_free', true)->lockForUpdate()->count();
+            $taken = Firm::query()->holdsFoundingPlace()->lockForUpdate()->count();
             if ($taken >= self::foundingTotal()) {
                 throw new OrderException('Sva besplatna mesta za firme su popunjena.', 'founding_full');
             }
@@ -301,7 +301,7 @@ class OrderFulfillment
 
     public static function foundingLeft(): int
     {
-        return max(0, self::foundingTotal() - Firm::query()->where('founding_free', true)->count());
+        return max(0, self::foundingTotal() - Firm::query()->holdsFoundingPlace()->count());
     }
 
     private function lockOrder(Order $order): Order

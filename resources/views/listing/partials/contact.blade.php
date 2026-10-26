@@ -14,10 +14,10 @@
 				@endphp
 				<form class="lgo-fav" method="post" action="{{ \App\Support\Search\Favorites::url((int) $listing->id) }}" data-lg-fav>
 					@csrf
-					<button class="lgo-fav__btn" type="submit" aria-pressed="{{ $lgoFav ? 'true' : 'false' }}" aria-label="{{ $lgoFav ? 'Ukloni iz omiljenih' : 'Sačuvaj u omiljene' }}">{{ Icons::listing('heart', 20) }}<span data-fav-text>{{ $lgoFav ? 'Sačuvano' : 'Sačuvaj' }}</span></button>
+					<button class="lgo-fav__btn" type="submit" aria-pressed="{{ $lgoFav ? 'true' : 'false' }}" aria-label="{{ $lgoFav ? 'Sačuvano, ukloni iz omiljenih' : 'Sačuvaj u omiljene' }}">{{ Icons::listing('heart', 20) }}<span data-fav-text>{{ $lgoFav ? 'Sačuvano' : 'Sačuvaj' }}</span></button>
 				</form>
 			@else
-				<a class="lgo-fav__btn" href="{{ \App\Support\Auth\LoginPage::url() }}" rel="nofollow" aria-label="Prijavite se da biste sačuvali oglas">{{ Icons::listing('heart', 20) }}<span>Sačuvaj</span></a>
+				<a class="lgo-fav__btn" href="{{ \App\Support\Auth\LoginPage::urlBack(request()) }}" rel="nofollow" aria-label="Sačuvaj (potrebna je prijava)">{{ Icons::listing('heart', 20) }}<span>Sačuvaj</span></a>
 			@endauth
 		@endif
 	</div>

@@ -10,9 +10,9 @@
 		<form class="lgo-bar__in lgo-bar__in--{{ $buttons }}" method="post" action="{{ url_slash('oglas/'.$listing->slug.'/telefon') }}" data-lgo-reveal-form data-lgo-bar-form>
 			@csrf
 			<button type="submit" name="next" value="tel" class="lgo-bar__btn lgo-bar__btn--tel" data-lgo-act="tel" data-lgo-call-now aria-label="Pozovi prodavca">{{ Icons::listing('phone') }}<span>Pozovi</span></button>
-			<a class="lgo-bar__btn lgo-bar__btn--msg" href="{{ $seller->messageUrl }}" rel="nofollow" aria-label="Pošalji poruku prodavcu">{{ Icons::listing('message') }}<span>Poruka</span></a>
+			<a class="lgo-bar__btn lgo-bar__btn--msg" href="{{ $seller->messageUrl }}" rel="nofollow" aria-label="Poruka prodavcu">{{ Icons::listing('message') }}<span>Poruka</span></a>
 			@if ($seller->whatsapp())
-				<button type="submit" name="next" value="whatsapp" class="lgo-bar__btn lgo-bar__btn--wa" data-lgo-act="whatsapp" aria-label="Piši prodavcu na WhatsApp">{{ Icons::listing('whatsapp') }}<span>WhatsApp</span></button>
+				<button type="submit" name="next" value="whatsapp" class="lgo-bar__btn lgo-bar__btn--wa" data-lgo-act="whatsapp" aria-label="WhatsApp poruka prodavcu">{{ Icons::listing('whatsapp') }}<span>WhatsApp</span></button>
 			@endif
 		</form>
 	@else
@@ -20,9 +20,9 @@
 			@if ($hasPhone)
 				<a class="lgo-bar__btn lgo-bar__btn--tel" href="{{ $links['tel'] }}" rel="nofollow" aria-label="Pozovi prodavca">{{ Icons::listing('phone') }}<span>Pozovi</span></a>
 			@endif
-			<a class="lgo-bar__btn lgo-bar__btn--msg" href="{{ $seller->messageUrl }}" rel="nofollow" aria-label="Pošalji poruku prodavcu">{{ Icons::listing('message') }}<span>Poruka</span></a>
+			<a class="lgo-bar__btn lgo-bar__btn--msg" href="{{ $seller->messageUrl }}" rel="nofollow" aria-label="Poruka prodavcu">{{ Icons::listing('message') }}<span>Poruka</span></a>
 			@if ($hasPhone && $seller->whatsapp())
-				<a class="lgo-bar__btn lgo-bar__btn--wa" href="{{ $links['whatsapp'] }}?text={{ rawurlencode(\App\Http\Controllers\Listing\ListingController::whatsappText($listing)) }}" target="_blank" rel="nofollow noopener" aria-label="Piši prodavcu na WhatsApp (otvara se u novom prozoru)">{{ Icons::listing('whatsapp') }}<span>WhatsApp</span></a>
+				<a class="lgo-bar__btn lgo-bar__btn--wa" href="{{ $links['whatsapp'] }}?text={{ rawurlencode(\App\Http\Controllers\Listing\ListingController::whatsappText($listing)) }}" target="_blank" rel="nofollow noopener" aria-label="WhatsApp poruka prodavcu (otvara se u novom prozoru)">{{ Icons::listing('whatsapp') }}<span>WhatsApp</span></a>
 			@endif
 		</div>
 	@endif

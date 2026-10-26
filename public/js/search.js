@@ -354,3 +354,27 @@
 		});
 	}
 })();
+
+/* Category intro: two lines on phones with "Prikaži više" (the full text stays in the page). */
+(function () {
+	'use strict';
+
+	var box = document.querySelector('[data-sr-intro]');
+	if (!box || !window.matchMedia('(max-width: 767.98px)').matches) {
+		return;
+	}
+	var text = box.querySelector('.sr-intro__text');
+	var more = box.querySelector('.sr-intro__more');
+
+	box.classList.add('is-clamped');
+	if (text.scrollHeight <= text.clientHeight + 2) {
+		box.classList.remove('is-clamped');
+		return;
+	}
+	more.hidden = false;
+	more.addEventListener('click', function () {
+		var open = box.classList.toggle('is-clamped') === false;
+		more.setAttribute('aria-expanded', open ? 'true' : 'false');
+		more.textContent = open ? 'Prikaži manje' : 'Prikaži više';
+	});
+})();

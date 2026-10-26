@@ -87,6 +87,27 @@ class PrijavaTest extends TestCase
         $this->assertNotNull($user->fresh()->last_login_at);
     }
 
+    public function test_login_returns_to_the_page_it_came_from(): void
+    {
+        User::factory()->create(['email' => 'marko@example.com']);
+
+        $this->get('/login-registracija/?nazad=%2Foglas%2Fgolf-7%2F')->assertOk();
+        $this->post('/prijava/', ['email' => 'marko@example.com', 'password' => 'lozinka123'])
+            ->assertRedirect(url('/oglas/golf-7/'));
+    }
+
+    public function test_return_address_must_be_on_this_site(): void
+    {
+        User::factory()->create(['email' => 'marko@example.com']);
+
+        foreach (['//evil.example/', 'https://evil.example/', '/\\evil.example'] as $back) {
+            $this->get('/login-registracija/?nazad='.urlencode($back))->assertOk();
+            $this->post('/prijava/', ['email' => 'marko@example.com', 'password' => 'lozinka123'])
+                ->assertRedirect(url_slash('moj-nalog'));
+            $this->post('/odjava/');
+        }
+    }
+
     public function test_remember_me_sets_cookie(): void
     {
         User::factory()->create(['email' => 'marko@example.com']);

@@ -48,6 +48,9 @@
 	box.innerHTML = '<div class="lg-recent__head"><span class="lg-recent__title">Ranije pretrage</span><button type="button" class="lg-recent__clear">Izbriši sve</button></div><ul class="lg-recent__list"></ul>';
 	document.body.appendChild(box);
 	var ul = box.querySelector('ul');
+	// aria-expanded is only valid on a combobox, not on a plain search field
+	input.setAttribute('role', 'combobox');
+	input.setAttribute('aria-autocomplete', 'list');
 	input.setAttribute('aria-controls', 'lg-recent');
 	input.setAttribute('aria-expanded', 'false');
 

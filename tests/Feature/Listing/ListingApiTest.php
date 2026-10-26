@@ -6,6 +6,7 @@ use App\Enums\ListingStatus;
 use App\Models\Category;
 use App\Models\Listing;
 use App\Models\Location;
+use App\Models\Report;
 use App\Models\User;
 use App\Support\Home\HomeSections;
 use Laravel\Sanctum\Sanctum;
@@ -167,6 +168,30 @@ class ListingApiTest extends TestCase
         $this->assertDatabaseHas('reports', ['reporter_id' => $reporter->id, 'reportable_id' => $listing->id, 'details' => 'Traži avans']);
 
         $this->postJson('/api/v1/reports', ['target_type' => 'user', 'target_id' => $listing->user_id, 'reason' => 'drugo'])->assertNoContent();
+    }
+
+    public function test_report_reasons_and_listing_report_for_guests_and_users(): void
+    {
+        $this->getJson('/api/v1/report-reasons')->assertOk()
+            ->assertJsonPath('data.0.key', 'prevara')
+            ->assertJsonStructure(['data' => [['key', 'label']]]);
+
+        $listing = Listing::factory()->create();
+        $this->postJson('/api/v1/listings/'.$listing->id.'/report', ['reason' => 'prevara', 'details' => 'Traži avans'])->assertNoContent();
+        $this->assertDatabaseHas('reports', ['reporter_id' => null, 'reportable_id' => $listing->id, 'details' => 'Traži avans']);
+
+        $this->postJson('/api/v1/listings/'.$listing->id.'/report', ['reason' => 'x', 'details' => str_repeat('a', 1001)])
+            ->assertStatus(422)->assertJsonPath('code', 'validation_failed')->assertJsonStructure(['fields' => ['reason', 'details']]);
+        $this->postJson('/api/v1/listings/999999/report', ['reason' => 'drugo'])->assertNotFound();
+
+        $reporter = User::factory()->create();
+        Sanctum::actingAs($reporter);
+        $this->postJson('/api/v1/listings/'.$listing->id.'/report', ['reason' => 'duplikat'])->assertNoContent();
+        $this->postJson('/api/v1/listings/'.$listing->id.'/report', ['reason' => 'duplikat'])->assertNoContent();
+        $this->assertSame(1, Report::query()->where('reporter_id', $reporter->id)->count());
+
+        Sanctum::actingAs($listing->user);
+        $this->postJson('/api/v1/listings/'.$listing->id.'/report', ['reason' => 'drugo'])->assertStatus(422);
     }
 
     public function test_reports_api_rejects_invalid_self_and_missing_targets(): void

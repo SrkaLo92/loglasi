@@ -11,7 +11,9 @@
 		</a>
 		<div class="lgo-seller__who">
 			<a class="lgo-seller__name" href="{{ $seller->profileUrl }}">{{ $seller->name }}</a>
-			@if ($seller->isFirm)
+			@if ($seller->user->isStaff())
+				<span class="lgo-badge lgo-badge--firma">{{ Icons::listing('check') }}loglasi.rs</span>
+			@elseif ($seller->isFirm)
 				<span class="lgo-badge lgo-badge--firma">{{ Icons::listing('check') }}Firma</span>
 			@else
 				<span class="lgo-badge lgo-badge--privatno">Privatno lice</span>

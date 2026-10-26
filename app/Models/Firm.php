@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\AccountType;
+use App\Enums\UserStatus;
 use App\Support\Firms\FirmPackage;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -84,5 +87,12 @@ class Firm extends Model
         $end = $this->free_program_ends_at ?? $this->package_ends_at;
 
         return $end !== null && $end->isFuture();
+    }
+
+    /** Firms holding one of the free founding places: blocked or converted accounts free their place. */
+    public function scopeHoldsFoundingPlace(Builder $query): Builder
+    {
+        return $query->where('founding_free', true)
+            ->whereHas('user', fn (Builder $q) => $q->where('account_type', AccountType::Firm->value)->where('status', UserStatus::Active->value));
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Stranice;
 
+use App\Enums\AccountType;
 use App\Models\Firm;
 use App\Models\Product;
 use App\Models\User;
@@ -129,7 +130,7 @@ class CenovnikTest extends TestCase
 
     public function test_firms_block_shows_free_spots_counter(): void
     {
-        Firm::factory()->count(2)->create(['user_id' => fn () => User::factory(), 'founding_free' => true]);
+        Firm::factory()->count(2)->create(['user_id' => fn () => User::factory()->create(['account_type' => AccountType::Firm]), 'founding_free' => true]);
         Firm::factory()->create(['user_id' => User::factory(), 'founding_free' => false]);
 
         $this->get('/cenovnik/')

@@ -3,7 +3,9 @@
 namespace Tests\Feature\Search;
 
 use App\Enums\Currency;
+use App\Models\Category;
 use App\Models\User;
+use App\Services\Catalog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\TestResponse;
 
@@ -17,6 +19,19 @@ class ListingListPageTest extends SearchTestCase
     private function canonical(TestResponse $response): ?string
     {
         return preg_match('~<link rel="canonical" href="([^"]+)"~', $response->getContent(), $m) ? $m[1] : null;
+    }
+
+    public function test_categories_with_the_same_name_get_the_parent_in_title_and_h1(): void
+    {
+        $other = Category::create(['name' => 'Ostalo', 'slug' => 'ostalo-vozila', 'parent_id' => $this->vehicles->id]);
+        Category::create(['name' => 'Ostalo', 'slug' => 'ostalo-nekretnine', 'parent_id' => $this->homes->parent_id ?? $this->homes->id]);
+        app(Catalog::class)->flush();
+        $this->listing(['category_id' => $other->id, 'title' => 'Prikolica za auto']);
+
+        $this->get('/oglasi/ostalo-vozila/')->assertOk()
+            ->assertSee('<title>Ostalo – Vozila, oglasi Loznica | loglasi.rs</title>', false)
+            ->assertSee('Ostalo – Vozila u Loznici');
+        $this->get('/oglasi/automobili/')->assertOk()->assertSee('<title>Automobili, oglasi Loznica | loglasi.rs</title>', false);
     }
 
     public function test_all_listings_page_lists_cards_with_count(): void

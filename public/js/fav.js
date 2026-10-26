@@ -21,8 +21,10 @@
 			Array.prototype.forEach.call(buttons, function (b) {
 				b.setAttribute('aria-pressed', data.favorite ? 'true' : 'false');
 				var label = b.getAttribute('aria-label') || '';
-				b.setAttribute('aria-label', label.replace(/^(Ukloni iz omiljenih|Sačuvaj u omiljene)/, data.favorite ? 'Ukloni iz omiljenih' : 'Sačuvaj u omiljene'));
 				var text = b.querySelector('[data-fav-text]');
+				// With visible text the label starts with it ("Sačuvano, ukloni…"), as screen readers and voice control expect.
+				var on = text ? 'Sačuvano, ukloni iz omiljenih' : 'Ukloni iz omiljenih';
+				b.setAttribute('aria-label', label.replace(/^(Sačuvano, ukloni iz omiljenih|Ukloni iz omiljenih|Sačuvaj u omiljene)/, data.favorite ? on : 'Sačuvaj u omiljene'));
 				if (text) { text.textContent = data.favorite ? 'Sačuvano' : 'Sačuvaj'; }
 			});
 		}).catch(function () { form.submit(); });

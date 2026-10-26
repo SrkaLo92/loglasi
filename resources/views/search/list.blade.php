@@ -55,7 +55,10 @@
 		<p class="sr-head__count" role="status">{{ TimeAgo::listings($total) }}</p>
 	</div>
 	@if ($category && ! $location && $results->currentPage() === 1 && trim((string) $category->seo_intro) !== '')
-		<p class="sr-intro">{{ trim(strip_tags((string) $category->seo_intro)) }}</p>
+		<div class="sr-intro" data-sr-intro>
+			<p class="sr-intro__text" id="sr-intro-text">{{ trim(strip_tags((string) $category->seo_intro)) }}</p>
+			<button class="sr-intro__more" type="button" aria-expanded="false" aria-controls="sr-intro-text" hidden>Prikaži više</button>
+		</div>
 	@endif
 
 	{{-- Phone: "Filteri" and quick filters in one row (OLX, KP); a quick filter opens only its own part of the panel. --}}

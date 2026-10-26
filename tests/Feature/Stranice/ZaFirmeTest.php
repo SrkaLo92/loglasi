@@ -2,10 +2,12 @@
 
 namespace Tests\Feature\Stranice;
 
+use App\Enums\AccountType;
 use App\Models\Firm;
 use App\Models\Product;
 use App\Models\User;
 use App\Support\Settings;
+use App\Support\Stranice\Cenovnik;
 use Database\Seeders\ProductSeeder;
 use Tests\TestCase;
 
@@ -19,7 +21,16 @@ class ZaFirmeTest extends TestCase
 
     private function foundingFirms(int $n): void
     {
-        Firm::factory()->count($n)->create(['user_id' => fn () => User::factory(), 'founding_free' => true]);
+        Firm::factory()->count($n)->create(['user_id' => fn () => User::factory()->create(['account_type' => AccountType::Firm]), 'founding_free' => true]);
+    }
+
+    public function test_blocked_or_converted_founding_firm_frees_its_place(): void
+    {
+        $this->foundingFirms(2);
+        Firm::factory()->create(['user_id' => User::factory()->create(['account_type' => AccountType::Firm, 'status' => 'blocked']), 'founding_free' => true]);
+        Firm::factory()->create(['user_id' => User::factory(), 'founding_free' => true]);
+
+        $this->assertSame(28, Cenovnik::foundingLeft());
     }
 
     public function test_counter_is_total_minus_founding_free_firms(): void
