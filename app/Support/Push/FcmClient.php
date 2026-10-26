@@ -84,8 +84,10 @@ class FcmClient
             ->post($url, ['message' => [
                 'token' => $token,
                 'notification' => ['title' => $message->title, 'body' => $message->body],
-                'data' => (object) $message->stringData(),
-                'android' => ['priority' => 'high'],
+                // title/body also in data: the app builds the tap target from data alone.
+                'data' => (object) ($message->stringData() + ['title' => $message->title, 'body' => $message->body]),
+                // The app's two Android channels: "poruke" for messages, "oglasi" for the rest.
+                'android' => ['priority' => 'high', 'notification' => ['channel_id' => isset($message->data['conversation_id']) ? 'poruke' : 'oglasi']],
                 'apns' => ['payload' => ['aps' => ['sound' => 'default']]],
             ]]);
     }

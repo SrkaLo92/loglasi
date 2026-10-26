@@ -182,8 +182,9 @@ class PushTest extends TestCase
         $this->assertSame('Bearer ya29.test', $send->header('Authorization')[0]);
         $this->assertSame($this->token('a'), $send['message']['token']);
         $this->assertSame(['title' => 'Naslov', 'body' => 'Tekst'], $send['message']['notification']);
-        $this->assertSame(['type' => 'message', 'conversation_id' => '7', 'flag' => '1'], (array) $send['message']['data']);
+        $this->assertSame(['type' => 'message', 'conversation_id' => '7', 'flag' => '1', 'title' => 'Naslov', 'body' => 'Tekst'], (array) $send['message']['data']);
         $this->assertSame('high', $send['message']['android']['priority']);
+        $this->assertSame('poruke', $send['message']['android']['notification']['channel_id']);
     }
 
     public function test_unregistered_tokens_are_removed(): void
