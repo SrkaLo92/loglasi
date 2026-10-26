@@ -288,6 +288,18 @@ class Posting
         $listing->touch();
     }
 
+    /**
+     * Checks the category fields of a row that has no listing yet (table import).
+     *
+     * @param  array<string, mixed>  $values
+     *
+     * @throws ValidationException
+     */
+    public function validateFieldsFor(Category $category, array $values): array
+    {
+        return $this->fields->validate($category, $values, 'polja');
+    }
+
     private function checkCondition(Listing $listing, array $values, string $prefix): void
     {
         $owner = $listing->user ?? User::query()->find($listing->user_id);

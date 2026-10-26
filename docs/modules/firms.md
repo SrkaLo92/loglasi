@@ -81,9 +81,19 @@ Measured: EXPLAIN on the dev database confirms the index choice for the stats jo
 
 Each reminder is sent once per term, a renewal starts the series again, and a missed run sends only the closest reminder. Blocked accounts and accounts that are no longer firm accounts are skipped.
 
+## Import from a table
+
+A firm imports its listings from a CSV or XLSX table, in the admin (`/admin/uvoz-oglasa`, staff, any account) or in its own account (`/moj-nalog/firma/uvoz-oglasa/`).
+
+- `App\Support\Import\SpreadsheetReader` reads CSV (`;`, `,` or tab, BOM and Windows-1250 handled) and XLSX (first sheet, shared and inline strings) without an extra package. At most 5000 rows, 20 MB.
+- `App\Services\Admin\ListingImport` maps the columns by their Serbian or English name: naslov, kategorija, cena, valuta, opis, mesto, slike, plus any category field by key or label. Unknown columns are reported, never guessed.
+- Every row goes through the posting service itself (`createDraft`, `fillBasics`, `saveFields`, `submit`), so the limit, duplicates, required fields and moderation work exactly as in the form. A row with an error is skipped and listed in the report.
+- Photos are downloaded from the URLs in `slike` (10 per row at most, 12 MB each) and go through the normal upload pipeline. A photo that cannot be fetched does not stop the listing.
+- Preview writes nothing; the import writes immediately and returns the report.
+
 ## Tests
 
-`tests/Feature/Firms/`: directory (filters, order, SEO, cache, pagination, home link), account (access, saving and cleaning, guarded fields, images, expired/free/pending states), statistics, API, benefits, credits, reminders.
+`tests/Feature/Firms/`: import (access, preview, report, refused file), directory (filters, order, SEO, cache, pagination, home link), account (access, saving and cleaning, guarded fields, images, expired/free/pending states), statistics, API, benefits, credits, reminders.
 
 ```bash
 DB_DATABASE=lb_firms_test php artisan test tests/Feature/Firms

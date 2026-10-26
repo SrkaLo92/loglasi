@@ -32,7 +32,7 @@ class SmokeTest extends TestCase
             '/admin/users/'.$listing->user_id.'/edit', '/admin/firms', '/admin/firms/'.$firmUser->firm->id.'/edit', '/admin/orders',
             '/admin/reports', '/admin/settings', '/admin/products', '/admin/setting-keys', '/admin/categories',
             '/admin/categories/'.$listing->category_id.'/edit', '/admin/categories/create', '/admin/fields', '/admin/fields/'.$field->id.'/edit',
-            '/admin/locations', '/admin/redirects', '/admin/gone-urls', '/admin/audit-logs', '/admin/profile', '/admin/notifications',
+            '/admin/uvoz-oglasa', '/admin/locations', '/admin/redirects', '/admin/gone-urls', '/admin/audit-logs', '/admin/profile', '/admin/notifications',
         ] as $url) {
             $this->get($url)->assertOk();
         }
