@@ -3,6 +3,7 @@
 namespace Tests\Feature\Posting;
 
 use App\Enums\ListingStatus;
+use App\Mail\ListingExpired;
 use App\Mail\ListingExpiringSoon;
 use App\Models\Listing;
 use App\Services\Catalog;
@@ -188,6 +189,28 @@ class MyListingsTest extends PostingTestCase
         $mail->assertHasSubject('Vaš oglas uskoro ističe: Bicikl');
         $mail->assertSeeInHtml('Zdravo, Marko!');
         $mail->assertSeeInHtml(url_slash('moj-nalog/oglasi/'.$listing->id.'/obnova'));
+        $mail->assertSeeInText('Obnova je besplatna');
+    }
+
+    public function test_expire_command_mails_on_expiry_with_free_renew_once(): void
+    {
+        Mail::fake();
+        $user = $this->user(['name' => 'Marko']);
+        $just = $this->published($user, ['title' => 'Bicikl', 'expires_at' => now()->subMinutes(5)]);
+        $this->published($user, ['expires_at' => now()->subDays(10)]);
+        $muted = $this->user(['notification_settings' => ['expiring' => false]]);
+        $this->published($muted, ['expires_at' => now()->subMinute()]);
+
+        $this->artisan('listings:expire')->assertSuccessful();
+        $this->artisan('listings:expire')->assertSuccessful();
+
+        Mail::assertQueued(ListingExpired::class, 1);
+        Mail::assertQueued(ListingExpired::class, fn ($mail) => $mail->hasTo($user->email) && $mail->listing->is($just));
+
+        $mail = new ListingExpired($just);
+        $mail->assertHasSubject('Vaš oglas je istekao: Bicikl');
+        $mail->assertSeeInHtml('Obnovi besplatno');
+        $mail->assertSeeInHtml(url_slash('moj-nalog/oglasi/'.$just->id.'/obnova'));
         $mail->assertSeeInText('Obnova je besplatna');
     }
 

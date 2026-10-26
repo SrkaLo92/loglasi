@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Nalozi;
 
+use App\Mail\Welcome;
 use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
@@ -25,6 +27,25 @@ class PotvrdaEmailaTest extends TestCase
         $this->get($this->link($user))->assertRedirect(url_slash('login-registracija'))->assertSessionHas('status');
 
         $this->assertTrue($user->fresh()->hasVerifiedEmail());
+    }
+
+    public function test_confirmed_email_gets_one_welcome_mail(): void
+    {
+        Mail::fake();
+        $user = User::factory()->unverified()->create(['name' => 'Jelena']);
+
+        $this->get($this->link($user));
+        $this->get($this->link($user));
+
+        Mail::assertQueued(Welcome::class, 1);
+        Mail::assertQueued(Welcome::class, fn ($mail) => $mail->hasTo($user->email));
+
+        $mail = new Welcome($user);
+        $mail->assertHasSubject('Dobro došli na loglasi.rs');
+        $mail->assertSeeInHtml('Zdravo, Jelena!');
+        $mail->assertSeeInHtml('aktivnih oglasa');
+        $mail->assertSeeInHtml(url_slash('za-firme'));
+        $mail->assertSeeInText(url_slash('postavi-oglas'));
     }
 
     public function test_logged_in_user_goes_to_account(): void

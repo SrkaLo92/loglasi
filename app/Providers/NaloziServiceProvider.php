@@ -4,12 +4,14 @@ namespace App\Providers;
 
 use App\Http\Middleware\EnsureNotBlocked;
 use App\Http\Middleware\EnsureStaff;
+use App\Mail\Welcome;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Notifications\Listeners\HoldOutgoingMail;
 use App\Support\ApiError;
 use App\Support\Auth\LoginPage;
 use App\Support\Auth\LoglasiHasher;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -18,8 +20,10 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -117,6 +121,14 @@ class NaloziServiceProvider extends ServiceProvider
 
     private function mails(): void
     {
+        // Welcome mail once the new account's email address is confirmed.
+        Event::listen(Verified::class, function (Verified $event) {
+            $user = $event->user;
+            if ($user instanceof User && $user->email && ! $user->isBlocked()) {
+                Mail::to($user)->queue(new Welcome($user));
+            }
+        });
+
         VerifyEmail::toMailUsing(fn ($notifiable, string $url) => (new MailMessage)
             ->subject('Potvrdite email adresu na loglasi.rs')
             ->greeting('Zdravo!')
