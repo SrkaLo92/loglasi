@@ -18,7 +18,7 @@ use Illuminate\Support\Str;
  */
 class CleanPublicNames extends Command
 {
-    protected $signature = 'users:clean-names {--dry-run : Only list, change nothing}';
+    protected $signature = 'users:clean-names {--dry-run : Only list, change nothing} {--user= : Only this user id (firms are skipped)} {--keep-slug : Change only names, never profile addresses}';
 
     protected $description = 'Remove e-mail addresses and phone numbers from public user and firm names';
 
@@ -29,13 +29,16 @@ class CleanPublicNames extends Command
         $dry = (bool) $this->option('dry-run');
         $rows = [];
 
-        User::withTrashed()->select(['id', 'name', 'slug', 'email'])->orderBy('id')->each(function (User $user) use ($dry, &$rows) {
+        $only = $this->option('user');
+        $keepSlug = (bool) $this->option('keep-slug');
+
+        User::withTrashed()->select(['id', 'name', 'slug', 'email'])->when($only, fn ($q) => $q->whereKey((int) $only))->orderBy('id')->each(function (User $user) use ($dry, $keepSlug, &$rows) {
             $badName = PublicName::hasContact((string) $user->name);
-            if (! $badName && ! $this->slugFromEmail($user)) {
+            if (! $badName && ($keepSlug || ! $this->slugFromEmail($user))) {
                 return;
             }
             $name = $badName ? PublicName::clean((string) $user->name) : (string) $user->name;
-            $slug = $this->slugFromEmail($user) ? Accounts::uniqueSlug($name) : $this->newSlug($user, $name);
+            $slug = $keepSlug ? (string) $user->slug : ($this->slugFromEmail($user) ? Accounts::uniqueSlug($name) : $this->newSlug($user, $name));
             $rows[] = ['korisnik', $user->id, $user->name, $name, $user->slug.' → '.$slug];
 
             if (! $dry) {
@@ -54,7 +57,7 @@ class CleanPublicNames extends Command
             }
         });
 
-        Firm::query()->select(['id', 'name'])->orderBy('id')->each(function (Firm $firm) use ($dry, &$rows) {
+        Firm::query()->select(['id', 'name'])->when($only, fn ($q) => $q->whereRaw('1 = 0'))->orderBy('id')->each(function (Firm $firm) use ($dry, &$rows) {
             if (! PublicName::hasContact((string) $firm->name)) {
                 return;
             }

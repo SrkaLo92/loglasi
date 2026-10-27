@@ -9,6 +9,7 @@ use App\Filament\Support\Options;
 use App\Filament\Support\StaffAccess;
 use App\Models\Firm;
 use App\Models\FirmMonthlyCredit;
+use App\Rules\PublicName;
 use App\Support\Firms\FirmCredits;
 use App\Support\Firms\FirmPackage;
 use App\Support\Firms\WorkingHoursInput;
@@ -106,7 +107,7 @@ class FirmResource extends Resource
             Section::make('Profil')
                 ->columns(2)
                 ->schema([
-                    TextInput::make('name')->label('Naziv firme')->required()->maxLength(255),
+                    TextInput::make('name')->label('Naziv firme')->required()->maxLength(255)->rule(new PublicName),
                     Toggle::make('verified')
                         ->label('Proverena firma')
                         ->helperText('Oznaka „Proverena firma” na profilu.')

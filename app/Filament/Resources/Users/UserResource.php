@@ -14,6 +14,7 @@ use App\Filament\Resources\Users\RelationManagers\OrdersRelationManager;
 use App\Filament\Support\Options;
 use App\Models\User;
 use App\Rules\PhoneNumber;
+use App\Rules\PublicName;
 use App\Support\Firms\FirmPackage;
 use App\Support\LikelyFirm;
 use App\Support\Phone;
@@ -96,7 +97,7 @@ class UserResource extends Resource
             Section::make('Podaci')
                 ->columns(2)
                 ->schema([
-                    TextInput::make('name')->label('Ime i prezime')->required()->maxLength(255),
+                    TextInput::make('name')->label('Ime i prezime')->required()->maxLength(255)->rule(new PublicName),
                     TextInput::make('email')
                         ->label('E-pošta')
                         ->email()->required()->maxLength(255)

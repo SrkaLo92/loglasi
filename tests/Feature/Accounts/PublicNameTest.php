@@ -67,4 +67,17 @@ class PublicNameTest extends TestCase
         $this->assertSame('loglasi-tim', $user->fresh()->slug);
         $this->assertSame('gmail-com-servis', $keep->fresh()->slug);
     }
+
+    public function test_clean_command_for_one_user_keeps_the_slug(): void
+    {
+        $user = User::factory()->create(['name' => 'Flat sale flat@gmail.com', 'slug' => 'flat-sale-flatgmail-com']);
+        $other = User::factory()->create(['name' => 'Drugi drugi@gmail.com']);
+
+        $this->artisan('users:clean-names', ['--user' => $user->id, '--keep-slug' => true])->assertSuccessful();
+
+        $this->assertSame('Flat sale', $user->fresh()->name);
+        $this->assertSame('flat-sale-flatgmail-com', $user->fresh()->slug);
+        $this->assertSame('Drugi drugi@gmail.com', $other->fresh()->name);
+        $this->assertDatabaseCount('redirects', 0);
+    }
 }
