@@ -14,8 +14,8 @@ class Announcements
 {
     public const CAMPAIGNS = [
         'novi-sajt-2026-10' => [
-            'subject' => 'Novi loglasi.rs je stigao!',
-            'preheader' => 'Tvoj nalog i lozinka su isti. Oglas postaviš za minut, a uskoro stiže i aplikacija.',
+            'subject' => 'loglasi.rs je dobio veliki update',
+            'preheader' => 'Prijavljuješ se kao i do sada, a oglas se sada postavlja mnogo lakše.',
             'view' => 'new-site',
         ],
     ];

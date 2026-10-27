@@ -1,27 +1,23 @@
 {{-- Plain text: values are printed raw (no HTML entities). --}}
 Zdravo{!! $name !== '' ? ' '.$name : '' !!},
 
-novi loglasi.rs je stigao!
+pišem ti jer imaš nalog na loglasi.rs, pa želim da prvi čuješ na čemu smo radili prethodnih nedelja.
 
-Potpuno smo ga napravili iznova, da ti prodaja i kupovina u Loznici i okolini budu lakše nego ikad:
+Sajt je dobio veliki update. Najviše smo se trudili da oglas lako postaviš sa telefona, za minut-dva: uslikaš, upišeš cenu i to je to. Kupci ti sada mogu pisati poruku direktno na sajtu, pa ne moraš svima da daješ broj telefona. A ako nešto tražiš, sačuvaj pretragu i javićemo ti mejlom čim se pojavi.
 
-- Oglas za minut, sa telefona: slikaš, upišeš cenu, objaviš.
-- {!! \Illuminate\Support\Str::ucfirst($free) !!} besplatno. Oglas traje {!! $days !!} dana i obnoviš ga jednim klikom, opet besplatno.
-- Poruke na sajtu: kupci ti pišu direktno, bez deljenja broja ako to ne želiš.
-- Sačuvana pretraga: javljamo ti čim se pojavi ono što tražiš.
-- Firme iz Loznice: sve lokalne firme i njihova ponuda na jednom mestu: {!! $firmsUrl !!}
+Postavljanje oglasa je i dalje besplatno. Možeš imati {!! $free !!}, svaki traje {!! $days !!} dana, a kad istekne, obnoviš ga jednim klikom.
 
-Tvoj nalog je ostao isti. Prijavljuješ se istim mejlom i istom lozinkom. Ako si zaboravio lozinku, novu postaviš ovde: {!! $resetUrl !!}
+Tvoj nalog je ostao isti i prijavljuješ se istim mejlom i lozinkom. Ako se ne sećaš lozinke, novu možeš da napraviš ovde: {!! $resetUrl !!}
 
-Postavi oglas: {!! $postUrl !!}
-Prijava: {!! $loginUrl !!}
+Ako imaš nešto što ti više ne treba, sada je dobar trenutak da to postaviš: {!! $postUrl !!}
 
-Uskoro i u telefonu: stiže aplikacija loglasi.rs za Android i iPhone. Javićemo ti čim bude u prodavnicama.
+I još nešto: uskoro izlazi i aplikacija loglasi.rs za Android i iPhone. Javiću ti kad bude dostupna.
 
-Imaš nešto što ti ne treba? Sad je pravi trenutak. Ko oglasi, taj i proda.
+Ako ti nešto ne radi kako treba ili imaš predlog, samo odgovori na ovaj mejl. Čitam svaku poruku.
 
 Pozdrav iz Loznice,
-Srđan i tim loglasi.rs
+Srđan
+loglasi.rs
 
 --
 loglasi.rs je besplatni sajt za oglase za Loznicu i okolinu. {!! $homeUrl !!}

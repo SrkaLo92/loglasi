@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use App\Models\User;
 use App\Services\Posting;
+use App\Support\Accounts\PublicName;
 use App\Support\Notifications\Announcements;
 use App\Support\Notifications\NotificationPreferences;
 use App\Support\Pages\Pricing;
@@ -42,14 +43,13 @@ class Announcement extends BrandedMailable
         $view = 'notifications.mail.announcements.'.$campaign['view'];
 
         return new Content(view: $view, text: $view.'-text', with: [
-            'name' => trim((string) $this->user->name),
+            // The placeholder name of cleaned accounts reads badly in a greeting.
+            'name' => ($name = trim((string) $this->user->name)) === PublicName::FALLBACK ? '' : $name,
             'preheader' => $campaign['preheader'],
             'free' => Pricing::freeListingsText(),
             'days' => app(Posting::class)->durationDays(),
             'postUrl' => url_slash('postavi-oglas'),
-            'loginUrl' => url_slash('login-registracija'),
             'resetUrl' => url_slash('zaboravljena-lozinka'),
-            'firmsUrl' => url_slash('firme'),
             'homeUrl' => url_slash(''),
             'unsubscribeUrl' => $this->unsubscribeUrl(),
         ]);
