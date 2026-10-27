@@ -27,12 +27,13 @@ class CleanPublicNames extends Command
         $dry = (bool) $this->option('dry-run');
         $rows = [];
 
-        User::withTrashed()->select(['id', 'name', 'slug'])->orderBy('id')->each(function (User $user) use ($dry, &$rows) {
-            if (! PublicName::hasContact((string) $user->name)) {
+        User::withTrashed()->select(['id', 'name', 'slug', 'email'])->orderBy('id')->each(function (User $user) use ($dry, &$rows) {
+            $badName = PublicName::hasContact((string) $user->name);
+            if (! $badName && ! $this->slugFromEmail($user)) {
                 return;
             }
-            $name = PublicName::clean((string) $user->name);
-            $slug = $this->newSlug($user, $name);
+            $name = $badName ? PublicName::clean((string) $user->name) : (string) $user->name;
+            $slug = $this->slugFromEmail($user) ? Accounts::uniqueSlug($name) : $this->newSlug($user, $name);
             $rows[] = ['korisnik', $user->id, $user->name, $name, $user->slug.' → '.$slug];
 
             if (! $dry) {
@@ -71,6 +72,17 @@ class CleanPublicNames extends Command
         $this->info(($dry ? 'Za izmenu: ' : 'Izmenjeno: ').count($rows));
 
         return self::SUCCESS;
+    }
+
+    /** Imported accounts often got the e-mail as the profile address (srdjan92@gmail.com → srdjan92gmail-com). */
+    private function slugFromEmail(User $user): bool
+    {
+        $alnum = fn (string $s) => preg_replace('/[^a-z0-9]/', '', Str::lower($s)) ?? '';
+        [$local, $domain] = array_pad(explode('@', (string) $user->email, 2), 2, '');
+        $local = $alnum($local);
+        $host = $alnum(explode('.', $domain)[0]);
+
+        return $local !== '' && $host !== '' && str_contains($alnum((string) $user->slug), $local.$host);
     }
 
     /** Keeps the slug when the cleaned name gives the same one; otherwise a fresh unique slug. */

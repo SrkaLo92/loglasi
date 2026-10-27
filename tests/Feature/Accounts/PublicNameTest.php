@@ -44,4 +44,16 @@ class PublicNameTest extends TestCase
         $this->assertTrue(Redirect::query()->where('from_path', '/korisnik/flat-sale-vracargmail-com/')->where('to_path', '/korisnik/'.$user->slug.'/')->exists());
         $this->get('/korisnik/flat-sale-vracargmail-com/')->assertRedirect();
     }
+
+    public function test_clean_command_renews_slug_made_from_email(): void
+    {
+        $user = User::factory()->create(['name' => 'Srdjan Marinković', 'email' => 'srdjan92@gmail.com', 'slug' => 'srdjan92gmail-com']);
+
+        $this->artisan('users:clean-names')->assertSuccessful();
+
+        $user->refresh();
+        $this->assertSame('Srdjan Marinković', $user->name);
+        $this->assertSame('srdjan-marinkovic', $user->slug);
+        $this->get('/korisnik/srdjan92gmail-com/')->assertRedirect();
+    }
 }
