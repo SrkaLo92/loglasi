@@ -38,7 +38,7 @@ class ContactController extends Controller
             'phone' => Phone::normalize($phone),
             'phoneText' => Phone::display($phone),
             'hours' => array_values(array_filter(array_map('trim', preg_split('/\R/', (string) Settings::get('contact_hours', '')) ?: []))),
-            'poslato' => (bool) $request->session()->get('kontakt_poslato'),
+            'sent' => (bool) $request->session()->get('kontakt_poslato'),
             'title' => PageText::get('seo.kontakt.title'),
             'description' => PageText::get('seo.kontakt.description'),
             'canonical' => '/kontakt/',
