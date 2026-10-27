@@ -25,7 +25,7 @@ class Stats
     /** How long the API remembers a viewer (no session there). */
     private const API_VIEW_TTL = 6 * 3600;
 
-    private const BOT_PATTERN = '/bot|crawl|spider|slurp|preview|facebookexternalhit|headless|lighthouse|curl|wget|python|httpclient|scrapy/i';
+    private const BOT_PATTERN = '/bot|crawl|spider|slurp|preview|facebookexternalhit|headless|lighthouse|curl|wget|python|httpclient|scrapy|apachebench|siege|k6\\/|loadtest/i';
 
     public static function isBot(?string $userAgent): bool
     {
@@ -110,6 +110,21 @@ class Stats
         return true;
     }
 
+    /**
+     * A view of a page served from the page cache: written to a small file instead of the database,
+     * so a crowd of visitors does not open a database connection each; stats:flush-views adds the
+     * counts every minute.
+     */
+    public static function queueView(string $type, int $id): void
+    {
+        @file_put_contents(static::pendingFile(), $type.' '.$id."\n", FILE_APPEND | LOCK_EX);
+    }
+
+    public static function pendingFile(): string
+    {
+        return storage_path('app/pending-views.log');
+    }
+
     /** +1 on the listing column and on today's row (Europe/Belgrade). */
     public static function increment(Listing $listing, string $column): void
     {
@@ -160,7 +175,7 @@ class Stats
         ];
     }
 
-    private static function rememberInSession(Request $request, string $key, int $id): bool
+    public static function rememberInSession(Request $request, string $key, int $id): bool
     {
         if (! $request->hasSession()) {
             return true;

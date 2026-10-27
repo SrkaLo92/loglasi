@@ -52,6 +52,7 @@ class PostingServiceProvider extends ServiceProvider
             InProcess::command($schedule, 'listings:plus-renew')->dailyAt('06:30')->withoutOverlapping()->onOneServer();
             InProcess::command($schedule, 'images:prune')->dailyAt('04:10')->withoutOverlapping();
             InProcess::command($schedule, 'images:variants')->everyTenMinutes()->withoutOverlapping();
+            InProcess::command($schedule, 'stats:flush-views')->everyMinute()->withoutOverlapping();
         });
     }
 

@@ -2,8 +2,6 @@
 
 namespace App\Support;
 
-use App\Models\Firm;
-use App\Models\Listing;
 use App\Support\Listing\Stats;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -73,18 +71,17 @@ class PageCache
         ], (int) config('page_cache.ttl', 120));
     }
 
-    /** Runs the counters of a cached page for this visitor. */
+    /** Counts the views of a cached page for this visitor: once per session, no bots, no database. */
     public static function count(array $hits, Request $request): void
     {
         if ($hits === [] || Stats::isBot($request->userAgent())) {
             return;
         }
         foreach ($hits as [$type, $id]) {
-            match ($type) {
-                'listing' => ($listing = Listing::query()->find($id)) && Stats::viewFromWeb($listing, $request),
-                'firm' => ($firm = Firm::query()->find($id)) && Stats::profileView($firm, $request),
-                default => null,
-            };
+            $key = $type === 'firm' ? Stats::SESSION_PROFILES : Stats::SESSION_VIEWS;
+            if (in_array($type, ['listing', 'firm'], true) && Stats::rememberInSession($request, $key, $id)) {
+                Stats::queueView($type, $id);
+            }
         }
     }
 }

@@ -5,6 +5,7 @@ namespace Tests\Feature\Performance;
 use App\Models\Listing;
 use App\Models\User;
 use App\Support\Listing\Stats;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class GuestPageCacheTest extends TestCase
@@ -14,6 +15,7 @@ class GuestPageCacheTest extends TestCase
         parent::setUp();
 
         config(['page_cache.enabled' => true]);
+        @unlink(Stats::pendingFile());
     }
 
     private function url(Listing $listing): string
@@ -48,7 +50,12 @@ class GuestPageCacheTest extends TestCase
         $this->flushSession();
         $this->withHeader('User-Agent', 'Googlebot/2.1')->get($this->url($listing))->assertHeader('X-Page-Cache', 'hit');
 
+        // The view from the cache waits in a file until the scheduler adds it (no database on a hit).
+        $this->assertSame(1, (int) $listing->fresh()->views);
+        $this->artisan('stats:flush-views')->assertSuccessful();
         $this->assertSame(2, (int) $listing->fresh()->views);
+        $this->assertSame(2, (int) DB::table('listing_daily_stats')->where('listing_id', $listing->id)->sum('views'));
+        $this->assertFileDoesNotExist(Stats::pendingFile());
     }
 
     public function test_signed_in_users_query_strings_and_flash_messages_get_a_fresh_page(): void
