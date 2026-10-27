@@ -58,6 +58,7 @@ class AnnouncementTest extends TestCase
         $this->assertSame('Osvežili smo loglasi.rs', $mail->envelope()->subject);
         $mail->assertHasReplyTo('kontakt@loglasi.rs');
         $mail->assertSeeInHtml('Zdravo Milan,');
+        $mail->assertSeeInHtml('src="'.asset('img/brand/logo-mail.png').'"', false);
         $mail->assertSeeInHtml(url_slash('postavi-oglas'), false);
         $mail->assertSeeInText(url_slash('zaboravljena-lozinka'));
         $mail->assertSeeInText('/moj-nalog/obavestenja/odjava/'.$user->id.'/newsletter');

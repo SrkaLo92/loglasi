@@ -10,7 +10,7 @@
 <body style="margin:0;padding:24px;background:#f6f7f5;font-family:Arial,Helvetica,sans-serif;color:#1d2b26;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;">
 <tr><td style="padding:24px;">
-	<p style="margin:0 0 16px;font-size:20px;font-weight:bold;">loglasi<span style="color:#379b7f;">.rs</span></p>
+	<p style="margin:0 0 16px;">@include('partials.mail-logo')</p>
 	@if ($order->is_test)<p style="margin:0 0 12px;padding:8px 12px;background:#fcebdf;color:#9a4215;border-radius:8px;"><strong>TEST:</strong> ovo je probna porudžbina, uplata se ne knjiži i račun je probni.</p>@endif
 	<p style="margin:0 0 12px;">Zdravo {{ $order->user?->name }},</p>
 	<p style="margin:0 0 16px;">porudžbina je primljena: <strong>{{ $order->product?->name }}</strong>@if ($order->listing) za oglas „{{ $order->listing->title }}”@endif. Usluga se uključuje kad stigne uplata.</p>

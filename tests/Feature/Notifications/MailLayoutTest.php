@@ -50,7 +50,7 @@ class MailLayoutTest extends TestCase
         $text = $email->getTextBody();
 
         $this->assertSame('loglasi.rs', $email->getFrom()[0]->getName());
-        $this->assertStringContainsString('src="'.asset('img/brand/logo.png').'"', $html);
+        $this->assertStringContainsString('src="'.asset('img/brand/logo-mail.png').'"', $html);
         $this->assertStringContainsString('alt="loglasi.rs"', $html);
         $this->assertStringContainsString(self::TAGLINE, $html);
         $this->assertStringContainsString('#2b7a64', $html); // theme inlined
