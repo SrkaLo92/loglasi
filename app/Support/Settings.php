@@ -26,7 +26,7 @@ class Settings
         'listing_duration_days' => 30,     // a listing lasts a month, renewal is free
         'moderation' => 'all',             // all | new_users | none (all: every listing waits for an admin)
         'founding_firms_total' => 30,      // first 30 firms free
-        'contact_email' => 'office@loglasi.rs',
+        'contact_email' => 'kontakt@loglasi.rs',
         'contact_phone' => '+381655415128',     // footer and FAQ, E.164
         'contact_address' => '15300 Loznica, Srbija',
         'new_condition_firms_only' => true,

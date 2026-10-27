@@ -105,7 +105,7 @@ class LegalTextsTest extends TestCase
     {
         $this->get('/uslovi-placanja/')->assertOk()
             ->assertDontSee('PIB:')
-            ->assertSee('<li><strong>E-pošta:</strong> <a href="mailto:office@loglasi.rs">office@loglasi.rs</a></li>', false)
+            ->assertSee('<li><strong>E-pošta:</strong> <a href="mailto:kontakt@loglasi.rs">kontakt@loglasi.rs</a></li>', false)
             ->assertSee('<li><strong>Telefon:</strong> +381 65 541 5128</li>', false)
             ->assertSee('<li><strong>Adresa:</strong> 15300 Loznica, Srbija</li>', false)
             ->assertSee('pozovite <a href="tel:+381655415128">', false);

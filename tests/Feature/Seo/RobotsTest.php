@@ -3,6 +3,7 @@
 namespace Tests\Feature\Seo;
 
 use App\Models\Category;
+use App\Support\Settings;
 
 class RobotsTest extends SeoTestCase
 {
@@ -94,5 +95,12 @@ TXT;
     public function test_unknown_url_is_404_not_redirect_to_home(): void
     {
         $this->get('/nepostojeca-strana/')->assertNotFound();
+    }
+
+    public function test_llms_txt_uses_the_contact_email_from_settings(): void
+    {
+        Settings::set('contact_email', 'novi@loglasi.rs');
+
+        $this->get('/llms.txt')->assertOk()->assertSee('Kontakt: novi@loglasi.rs')->assertDontSee('{email}');
     }
 }

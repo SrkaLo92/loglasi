@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Seo;
 
 use App\Http\Controllers\Controller;
 use App\Services\Catalog;
+use App\Support\Settings;
 use Illuminate\Http\Response;
 
 /** robots.txt, llms.txt and /stranica-404/. */
@@ -45,11 +46,12 @@ class RobotsController extends Controller
 
     /**
      * llms.txt from the approved text; a category line stays only while that category exists
-     * and is active, and every link uses the canonical domain.
+     * and is active, every link uses the canonical domain and {email} is the contact address from the settings.
      */
     public function llms(): Response
     {
         $lines = [];
+        $email = (string) Settings::get('contact_email');
 
         foreach (preg_split('/\R/', (string) file_get_contents(resource_path('seo/llms.txt'))) as $line) {
             if (preg_match('#\(https://loglasi\.rs/oglasi/([a-z0-9-]+)/\)#', $line, $m)) {
@@ -58,7 +60,7 @@ class RobotsController extends Controller
                     continue;
                 }
             }
-            $lines[] = str_replace('https://loglasi.rs', (string) config('seo.base_url'), $line);
+            $lines[] = str_replace(['https://loglasi.rs', '{email}'], [(string) config('seo.base_url'), $email], $line);
         }
 
         return response(implode("\n", $lines), 200, [

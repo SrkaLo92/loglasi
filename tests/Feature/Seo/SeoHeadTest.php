@@ -113,7 +113,7 @@ class SeoHeadTest extends SeoTestCase
         ], $organization['sameAs']);
         $this->assertSame('https://loglasi.rs/#organization', $organization['@id']);
         $this->assertSame('+381655415128', $organization['telephone']);
-        $this->assertSame('office@loglasi.rs', $organization['email']);
+        $this->assertSame('kontakt@loglasi.rs', $organization['email']);
         $this->assertSame('15300', $organization['address']['postalCode']);
         $this->assertSame(['Loznica', 'Banja Koviljača', 'Lešnica', 'Krupanj', 'Ljubovija', 'Mali Zvornik'], array_column($organization['areaServed'], 'name'));
 

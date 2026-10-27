@@ -28,7 +28,7 @@ return [
     'logo' => env('SEO_LOGO', '/img/brand/logo.png'),
 
     'organization' => [
-        'email' => 'office@loglasi.rs',
+        'email' => 'kontakt@loglasi.rs',
         'postal_code' => '15300',
         'city' => 'Loznica',
         'area_served' => ['Loznica', 'Banja Koviljača', 'Lešnica', 'Krupanj', 'Ljubovija', 'Mali Zvornik'],
