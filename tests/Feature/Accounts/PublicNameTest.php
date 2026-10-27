@@ -56,4 +56,15 @@ class PublicNameTest extends TestCase
         $this->assertSame('srdjan-marinkovic', $user->slug);
         $this->get('/korisnik/srdjan92gmail-com/')->assertRedirect();
     }
+
+    public function test_clean_command_renews_slug_from_an_old_email(): void
+    {
+        $user = User::factory()->create(['name' => 'loglasi tim', 'email' => 'kontakt@example.com', 'slug' => 'srdjan92gmail-com']);
+        $keep = User::factory()->create(['name' => 'Gmail Com', 'slug' => 'gmail-com-servis']);
+
+        $this->artisan('users:clean-names')->assertSuccessful();
+
+        $this->assertSame('loglasi-tim', $user->fresh()->slug);
+        $this->assertSame('gmail-com-servis', $keep->fresh()->slug);
+    }
 }

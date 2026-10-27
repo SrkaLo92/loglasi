@@ -22,6 +22,8 @@ class CleanPublicNames extends Command
 
     protected $description = 'Remove e-mail addresses and phone numbers from public user and firm names';
 
+    private const MAIL_HOST_SLUG = '/(gmail|googlemail|yahoo|hotmail|outlook|icloud|yandex|gmx|aol|protonmail|eunet|ptt)-(com|rs|net|org|ru|de)(-\d+)?$/';
+
     public function handle(): int
     {
         $dry = (bool) $this->option('dry-run');
@@ -82,7 +84,12 @@ class CleanPublicNames extends Command
         $local = $alnum($local);
         $host = $alnum(explode('.', $domain)[0]);
 
-        return $local !== '' && $host !== '' && str_contains($alnum((string) $user->slug), $local.$host);
+        if ($local !== '' && $host !== '' && str_contains($alnum((string) $user->slug), $local.$host)) {
+            return true;
+        }
+
+        // An older e-mail (e.g. the WordPress login) left only its mail host in the slug.
+        return preg_match(self::MAIL_HOST_SLUG, (string) $user->slug) === 1;
     }
 
     /** Keeps the slug when the cleaned name gives the same one; otherwise a fresh unique slug. */
