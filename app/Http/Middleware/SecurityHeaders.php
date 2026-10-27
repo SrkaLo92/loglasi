@@ -4,17 +4,22 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Vite;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Browser security headers on every response: no MIME sniffing, no framing by other sites, a strict
  * referrer, no camera/microphone, HSTS over HTTPS. HTML pages of the site also get a Content Security
- * Policy (config/security.php); the admin panel (Filament, Livewire) gets only frame-ancestors.
+ * Policy (config/security.php) where inline scripts run only with the request's nonce; the admin panel
+ * (Filament, Livewire) gets only frame-ancestors.
  */
 class SecurityHeaders
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // One nonce per request for our own inline scripts (cookie bar, Google tag, footer).
+        Vite::useCspNonce();
+
         $response = $next($request);
         $headers = $response->headers;
 
@@ -46,6 +51,7 @@ class SecurityHeaders
         }
 
         $directives = config('security.csp', []);
+        $directives['script-src'][] = "'nonce-".Vite::cspNonce()."'";
         if ($request->isSecure()) {
             $directives['upgrade-insecure-requests'] = [];
         }

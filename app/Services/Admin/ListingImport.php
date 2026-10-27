@@ -10,10 +10,10 @@ use App\Services\Catalog;
 use App\Services\ListingImages;
 use App\Services\Posting;
 use App\Services\PostingRefused;
+use App\Support\Import\RemoteImageDownloader;
 use App\Support\Import\SpreadsheetReader;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -46,6 +46,7 @@ class ListingImport
         private readonly Catalog $catalog,
         private readonly Posting $posting,
         private readonly ListingImages $images,
+        private readonly RemoteImageDownloader $downloader,
     ) {}
 
     /** The columns a table may hold, for the help text on the import page. */
@@ -119,7 +120,8 @@ class ListingImport
                 $rows[] = ['line' => $row['line'], 'title' => $row['title'], 'errors' => array_values(array_map('strval', $e->validator->errors()->all()))];
             } catch (Throwable $e) {
                 $failed++;
-                $rows[] = ['line' => $row['line'], 'title' => $row['title'], 'errors' => ['Greška pri upisu: '.$e->getMessage()]];
+                report($e);
+                $rows[] = ['line' => $row['line'], 'title' => $row['title'], 'errors' => ['Oglas nije mogao da se sačuva. Pokušajte ponovo ili nam pišite.']];
             }
         }
 
@@ -289,8 +291,7 @@ class ListingImport
         foreach ($urls as $url) {
             $file = tempnam(sys_get_temp_dir(), 'import');
             try {
-                $response = Http::timeout(20)->withOptions(['allow_redirects' => true, 'sink' => $file])->get($url);
-                if (! $response->successful() || filesize($file) <= 0 || filesize($file) > self::MAX_IMAGE_BYTES) {
+                if (! $this->downloader->download($url, $file, self::MAX_IMAGE_BYTES)) {
                     continue;
                 }
                 $this->images->upload(

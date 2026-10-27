@@ -42,6 +42,12 @@ class AttackSurfaceTest extends TestCase
         foreach (["frame-ancestors 'self'", "object-src 'none'", "base-uri 'self'", "form-action 'self'"] as $directive) {
             $this->assertStringContainsString($directive, $csp);
         }
+        // Inline scripts run only with this request's nonce, never as plain 'unsafe-inline'.
+        $this->assertMatchesRegularExpression("/script-src [^;]*'nonce-([A-Za-z0-9]+)'/", $csp);
+        preg_match("/'nonce-([A-Za-z0-9]+)'/", $csp, $nonce);
+        $this->assertStringNotContainsString("'unsafe-inline'", explode(';', explode('script-src', $csp)[1])[0]);
+        $response->assertSee('<script nonce="'.$nonce[1].'">', false);
+        $this->assertNotSame($csp, (string) $this->get('/')->headers->get('Content-Security-Policy'), 'a new nonce per request');
         $this->assertFalse($response->headers->has('Strict-Transport-Security'), 'HSTS only over HTTPS');
 
         $this->get('https://localhost/')->assertHeader('Strict-Transport-Security', 'max-age=31536000');

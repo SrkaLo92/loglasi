@@ -7,7 +7,7 @@
 	<button type="button" class="lg-cookies__no" data-cookies="ne">Ne, hvala</button>
 	<button type="button" class="lg-cookies__ok" data-cookies="da">U redu</button>
 </div>
-<script>
+<script nonce="{{ Vite::cspNonce() }}">
 (function () {
 	var bar = document.getElementById('lg-cookies');
 	if (!bar) return;

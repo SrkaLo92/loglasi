@@ -39,7 +39,7 @@
 		<button type="button" class="lg-btn lg-btn--green">{{ PageText::get('odustanak.obrazac.stampa') }}</button>
 	</p>
 </section>
-<script>
+<script nonce="{{ Vite::cspNonce() }}">
 (function () {
 	var wrap = document.querySelector('[data-lgx-print]');
 	if (!wrap || !window.print) return;

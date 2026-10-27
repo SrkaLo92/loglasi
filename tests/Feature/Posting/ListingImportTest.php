@@ -6,6 +6,7 @@ use App\Enums\Currency;
 use App\Enums\ListingStatus;
 use App\Models\Listing;
 use App\Services\Admin\ListingImport;
+use App\Support\Import\RemoteImageDownloader;
 use Illuminate\Support\Facades\Http;
 
 class ListingImportTest extends PostingTestCase
@@ -69,6 +70,7 @@ class ListingImportTest extends PostingTestCase
     public function test_photos_come_from_the_urls_in_the_table(): void
     {
         $user = $this->user();
+        $this->app->instance(RemoteImageDownloader::class, new RemoteImageDownloader(fn () => ['93.184.216.34']));
         Http::fake([
             '*a.jpg' => Http::response(file_get_contents(base_path('tests/Fixtures/images/stripes.jpg'))),
             '*' => Http::response(file_get_contents(base_path('tests/Fixtures/images/photo.webp'))),
@@ -81,6 +83,39 @@ class ListingImportTest extends PostingTestCase
         app(ListingImport::class)->import($path, $name, $user);
 
         $this->assertSame(2, Listing::query()->firstOrFail()->images()->count());
+    }
+
+    public function test_photo_urls_may_point_only_to_public_web_servers(): void
+    {
+        $downloader = new RemoteImageDownloader(fn (string $host) => match ($host) {
+            'localhost' => ['127.0.0.1'],
+            'interno.primer.rs' => ['10.0.0.5'],
+            'mesano.primer.rs' => ['93.184.216.34', '192.168.1.1'],
+            default => ['93.184.216.34'],
+        });
+
+        $this->assertSame('primer.rs:443:93.184.216.34', $downloader->publicTarget('https://primer.rs/a.jpg'));
+        foreach ([
+            'http://127.0.0.1/a.jpg', 'http://localhost/a.jpg', 'http://169.254.169.254/latest/meta-data/',
+            'http://interno.primer.rs/a.jpg', 'http://mesano.primer.rs/a.jpg', 'https://primer.rs:8443/a.jpg',
+            'ftp://primer.rs/a.jpg', 'file:///etc/passwd', 'http://user:pass@primer.rs/a.jpg', 'http://[::1]/a.jpg',
+        ] as $url) {
+            $this->assertNull($downloader->publicTarget($url), $url);
+        }
+    }
+
+    public function test_a_redirect_to_an_internal_address_is_not_followed(): void
+    {
+        $downloader = new RemoteImageDownloader(fn () => ['93.184.216.34']);
+        Http::fake([
+            'primer.rs/*' => Http::response('', 302, ['Location' => 'http://127.0.0.1/admin']),
+            '*' => Http::response(file_get_contents(base_path('tests/Fixtures/images/stripes.jpg'))),
+        ]);
+        $file = tempnam(sys_get_temp_dir(), 'dl');
+
+        $this->assertFalse($downloader->download('https://primer.rs/a.jpg', $file, 1024 * 1024));
+        Http::assertSentCount(1);
+        @unlink($file);
     }
 
     public function test_reads_an_excel_table(): void

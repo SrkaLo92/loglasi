@@ -121,7 +121,7 @@
 		{{ $listings->links() }}
 	@endif
 </div>
-<script>
+<script nonce="{{ Vite::cspNonce() }}">
 // Only one "Još" menu open at a time; a tap outside closes it. Near the bottom of the screen the menu opens upwards.
 Array.prototype.forEach.call(document.querySelectorAll('[data-pst-more]'), function (d) {
 	d.addEventListener('toggle', function () {

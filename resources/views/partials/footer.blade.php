@@ -114,7 +114,7 @@
 		<a href="https://alphasoft.dev/" target="_blank" rel="noopener">Alphasoft Development</a>
 	</div>
 </footer>
-<script>
+<script nonce="{{ Vite::cspNonce() }}">
 (function () {
 	// Link groups fold on phones and stay open on bigger screens.
 	if (window.matchMedia && window.matchMedia('(max-width: 767.98px)').matches) {

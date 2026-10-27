@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Firms;
 use App\Http\Controllers\Controller;
 use App\Services\Admin\ListingImport;
 use App\Support\Firms\FirmAccount;
+use App\Support\Import\ImportFailed;
 use App\Support\Seo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -28,7 +29,7 @@ class ImportController extends Controller
         try {
             return $this->page($request, preview: $this->import->preview($path, $name, $request->user()));
         } catch (Throwable $e) {
-            return $this->page($request, error: $e->getMessage());
+            return $this->page($request, error: $this->message($e));
         }
     }
 
@@ -39,8 +40,19 @@ class ImportController extends Controller
         try {
             return $this->page($request, report: $this->import->import($path, $name, $request->user(), $request->boolean('images', true)));
         } catch (Throwable $e) {
-            return $this->page($request, error: $e->getMessage());
+            return $this->page($request, error: $this->message($e));
         }
+    }
+
+    /** Our own messages are shown; anything else is logged and the user sees a plain sentence. */
+    private function message(Throwable $e): string
+    {
+        if ($e instanceof ImportFailed) {
+            return $e->getMessage();
+        }
+        report($e);
+
+        return 'Tabela nije mogla da se obradi. Proverite da li je ispravan .csv ili .xlsx fajl i pokušajte ponovo.';
     }
 
     /** @return array{0: string, 1: string} */
