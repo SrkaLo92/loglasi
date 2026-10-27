@@ -97,6 +97,10 @@ class ContactTest extends TestCase
         $mail->assertSeeInText('E-mail ili telefon: +381651234567');
         $mail->assertSeeInText('Pošiljalac je ostavio telefon');
         $this->assertSame([], $mail->envelope()->replyTo);
+        $mail->assertDontSeeInText('127.0.0.1');
+        $mail->assertSeeInHtml('Pitanje &amp; odgovor &lt;b&gt;', false);
+        $this->assertSame('127.0.0.1', $mail->headers()->text['X-Sender-IP']);
+        $this->assertSame('Kontakt forma: Nešto drugo (Ana "Anči" Jovanović)', $mail->envelope()->subject);
     }
 
     public function test_required_fields_are_validated_in_serbian(): void

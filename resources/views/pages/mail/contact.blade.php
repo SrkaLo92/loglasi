@@ -8,5 +8,4 @@ Tema: {!! $data['tema'] !!}
 {!! $data['poruka'] !!}
 
 --
-IP adresa: {!! $data['ip'] ?? 'nepoznata' !!}
 {!! $data['email'] !== '' ? 'Odgovorom na ovu poruku pišete pošiljaocu.' : 'Pošiljalac je ostavio telefon, pozovite ga.' !!}

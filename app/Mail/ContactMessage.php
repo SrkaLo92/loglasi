@@ -8,9 +8,10 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 
-/** Message from the contact form, sent to the address from the settings (contact_email). */
+/** Message from the contact form (HTML + plain text), sent to the address from the settings (contact_email). */
 class ContactMessage extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
@@ -25,12 +26,18 @@ class ContactMessage extends Mailable implements ShouldQueue
         // Reply-to only when the sender left an e-mail; a phone number is called back.
         return new Envelope(
             replyTo: $this->data['email'] !== '' ? [new Address($this->data['email'], $this->data['ime'])] : [],
-            subject: 'loglasi.rs: '.$this->data['tema'],
+            subject: 'Kontakt forma: '.$this->data['tema'].' ('.$this->data['ime'].')',
         );
     }
 
     public function content(): Content
     {
-        return new Content(text: 'pages.mail.contact');
+        return new Content(view: 'pages.mail.contact-html', text: 'pages.mail.contact');
+    }
+
+    /** The sender's IP stays out of the body (spam filters dislike it there) but is kept for abuse checks. */
+    public function headers(): Headers
+    {
+        return new Headers(text: ($this->data['ip'] ?? null) ? ['X-Sender-IP' => (string) $this->data['ip']] : []);
     }
 }
