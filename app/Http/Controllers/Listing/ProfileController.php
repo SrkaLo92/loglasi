@@ -14,6 +14,7 @@ use App\Support\Listing\Seller;
 use App\Support\Listing\SimilarListings;
 use App\Support\Listing\Stats;
 use App\Support\Listing\WorkingHours;
+use App\Support\PageCache;
 use App\Support\Phone;
 use App\Support\Seo;
 use Illuminate\Http\Request;
@@ -95,6 +96,7 @@ class ProfileController extends Controller
 
         if ($firm->exists) {
             Stats::profileView($firm, $request);
+            PageCache::onHit('firm', (int) $firm->id);
         }
 
         $hours = WorkingHours::days($firm->working_hours);

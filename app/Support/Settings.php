@@ -66,5 +66,6 @@ class Settings
     {
         self::$memo = null;
         Cache::forget(self::CACHE_KEY);
+        PageCache::flush();
     }
 }

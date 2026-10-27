@@ -8,6 +8,7 @@ use App\Models\Firm;
 use App\Services\Catalog;
 use App\Services\ListingSearch;
 use App\Support\Firms\FirmDirectory;
+use App\Support\PageCache;
 use App\Support\Search\CategorySheet;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -39,6 +40,7 @@ class HomeSections
     {
         Cache::forget(self::CACHE_KEY);
         FooterSections::flush();
+        PageCache::flush();
     }
 
     /**

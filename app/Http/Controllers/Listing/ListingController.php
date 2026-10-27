@@ -13,6 +13,7 @@ use App\Support\Listing\ReportReasons;
 use App\Support\Listing\Seller;
 use App\Support\Listing\SimilarListings;
 use App\Support\Listing\Stats;
+use App\Support\PageCache;
 use App\Support\Seo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -45,6 +46,7 @@ class ListingController extends Controller
 
         Seo::for($listing);
         Stats::viewFromWeb($listing, $request);
+        PageCache::onHit('listing', $listing->id);
 
         $seller = Seller::forListing($listing);
         $isOwner = $viewer !== null && $viewer->id === $listing->user_id;

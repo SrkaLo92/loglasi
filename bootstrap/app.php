@@ -3,6 +3,7 @@
 use App\Exceptions\ApiExceptionRenderer;
 use App\Http\Api\ApiResponse;
 use App\Http\Middleware\Gone;
+use App\Http\Middleware\GuestPageCache;
 use App\Http\Middleware\Redirects;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\TrailingSlash;
@@ -31,6 +32,9 @@ return Application::configure(basePath: dirname(__DIR__))
             Gone::class,
             TrailingSlash::class,
         ]);
+
+        // Inside the session and CSRF middleware: it needs the visitor's session and token.
+        $middleware->web(append: [GuestPageCache::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
