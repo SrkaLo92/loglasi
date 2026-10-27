@@ -55,7 +55,7 @@ class AnnouncementTest extends TestCase
         $user = User::factory()->create(['name' => 'Milan']);
         $mail = new Announcement($user, self::CAMPAIGN);
 
-        $this->assertSame('loglasi.rs je dobio veliki update', $mail->envelope()->subject);
+        $this->assertSame('Osvežili smo loglasi.rs', $mail->envelope()->subject);
         $mail->assertHasReplyTo('kontakt@loglasi.rs');
         $mail->assertSeeInHtml('Zdravo Milan,');
         $mail->assertSeeInHtml(url_slash('postavi-oglas'), false);
