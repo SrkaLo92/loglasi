@@ -6,6 +6,7 @@ use App\Enums\ListingStatus;
 use App\Models\Listing;
 use App\Models\User;
 use App\Services\Payments\PlusSeller;
+use App\Support\Listing\Text;
 use App\Support\ListingLimits;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -116,12 +117,9 @@ final class AccountOverview
             ->count();
     }
 
-    /** "1 oglas", "3 oglasa", "5 oglasa" (Serbian plural forms). */
+    /** "1 oglas", "3 oglasa", "5 oglasa": the number with its noun form. */
     public static function plural(int $n, string $one, string $few, string $many): string
     {
-        $form = $n % 10 === 1 && $n % 100 !== 11 ? $one
-            : (in_array($n % 10, [2, 3, 4], true) && ! in_array($n % 100, [12, 13, 14], true) ? $few : $many);
-
-        return $n.' '.$form;
+        return $n.' '.Text::plural($n, $one, $few, $many);
     }
 }

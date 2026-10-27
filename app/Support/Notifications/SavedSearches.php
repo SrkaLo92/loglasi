@@ -46,6 +46,18 @@ class SavedSearches
         ]);
     }
 
+    /** @param  array{name?: ?string, notify?: bool}  $data  validated fields; an empty name goes back to the description */
+    public function update(SavedSearch $search, array $data): void
+    {
+        if (array_key_exists('name', $data)) {
+            $search->name = self::cleanName($data['name']) ?? $this->queries->describe((array) $search->query);
+        }
+        if (array_key_exists('notify', $data)) {
+            $search->notify = (bool) $data['notify'];
+        }
+        $search->save();
+    }
+
     public static function cleanName(mixed $name): ?string
     {
         $name = trim((string) preg_replace('/\s+/u', ' ', strip_tags((string) $name)));

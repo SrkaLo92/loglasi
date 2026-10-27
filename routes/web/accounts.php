@@ -16,15 +16,15 @@ Route::middleware('guest')->group(function () {
 
     // GET /prijava/ and /registracija/ are 301 to it; the forms still POST to these addresses.
     Route::get('/prijava', [LoginController::class, 'legacy'])->name('login.legacy');
-    Route::post('/prijava', [LoginController::class, 'store'])->middleware('throttle:nalozi-login');
+    Route::post('/prijava', [LoginController::class, 'store'])->middleware('throttle:accounts-login');
 
     Route::get('/registracija', [RegistrationController::class, 'legacy'])->name('register');
-    Route::post('/registracija', [RegistrationController::class, 'store'])->middleware('throttle:nalozi-register');
+    Route::post('/registracija', [RegistrationController::class, 'store'])->middleware('throttle:accounts-register');
 
     Route::get('/zaboravljena-lozinka', [PasswordController::class, 'request'])->name('password.request');
-    Route::post('/zaboravljena-lozinka', [PasswordController::class, 'email'])->middleware('throttle:nalozi-password')->name('password.email');
+    Route::post('/zaboravljena-lozinka', [PasswordController::class, 'email'])->middleware('throttle:accounts-password')->name('password.email');
     Route::get('/nova-lozinka/{token}', [PasswordController::class, 'reset'])->name('password.reset');
-    Route::post('/nova-lozinka', [PasswordController::class, 'update'])->middleware('throttle:nalozi-password')->name('password.update');
+    Route::post('/nova-lozinka', [PasswordController::class, 'update'])->middleware('throttle:accounts-password')->name('password.update');
 });
 
 // The link from the mail works even when the user is not logged in (e.g. opened on a phone).
@@ -43,7 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/moj-nalog/podesavanja', [MyAccountController::class, 'settings'])->name('account.settings');
     Route::get('/moj-nalog/brisanje', [MyAccountController::class, 'confirmDelete'])->name('account.delete.confirm');
 
-    Route::middleware('throttle:nalozi-account')->group(function () {
+    Route::middleware('throttle:accounts-account')->group(function () {
         Route::put('/moj-nalog/podaci', [MyAccountController::class, 'updateProfile'])->name('account.details');
         Route::put('/moj-nalog/lozinka', [MyAccountController::class, 'updatePassword'])->name('account.password');
         Route::post('/moj-nalog/slika', [MyAccountController::class, 'updateAvatar'])->name('account.avatar');

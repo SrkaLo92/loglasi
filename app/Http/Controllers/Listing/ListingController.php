@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Listing;
 
-use App\Enums\ReportStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\Gone;
 use App\Models\Listing;
@@ -125,24 +124,7 @@ class ListingController extends Controller
             'details.max' => 'Opis može imati najviše 1.000 znakova.',
         ]);
 
-        $reporter = $request->user();
-        $duplicate = $reporter !== null && Report::query()
-            ->where('reporter_id', $reporter->id)
-            ->where('reportable_type', $listing->getMorphClass())
-            ->where('reportable_id', $listing->id)
-            ->where('status', ReportStatus::Open)
-            ->exists();
-
-        if (! $duplicate) {
-            Report::create([
-                'reporter_id' => $reporter?->id,
-                'reportable_type' => $listing->getMorphClass(),
-                'reportable_id' => $listing->id,
-                'reason' => $data['reason'],
-                'details' => isset($data['details']) ? trim(strip_tags($data['details'])) ?: null : null,
-                'status' => ReportStatus::Open,
-            ]);
-        }
+        Report::fileOnce($request->user(), $listing, $data['reason'], $data['details'] ?? null);
 
         return redirect()->to($back)->with('report_sent', true);
     }

@@ -51,13 +51,7 @@ class SavedSearchApiController extends Controller
             'notify' => ['sometimes', 'boolean'],
         ]);
 
-        if (array_key_exists('name', $data)) {
-            $savedSearch->name = SavedSearches::cleanName($data['name']) ?? $this->queries->describe((array) $savedSearch->query);
-        }
-        if (array_key_exists('notify', $data)) {
-            $savedSearch->notify = (bool) $data['notify'];
-        }
-        $savedSearch->save();
+        $this->searches->update($savedSearch, $data);
 
         return ApiResponse::json($request, $this->item($savedSearch), ApiResponse::CACHE_PRIVATE);
     }

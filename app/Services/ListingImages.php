@@ -102,6 +102,13 @@ class ListingImages
 
         $stored = $this->store((string) $file->getRealPath(), (int) $file->getSize(), $listing ? (string) $listing->id : 'tmp', $fail);
 
+        // The same photo twice in one listing (a double tap, or picked again from the gallery).
+        // Exact file only: similar shots of the same item are fine.
+        if ($listing !== null && $listing->images()->where('hash', $stored['hash'])->exists()) {
+            $this->disk()->delete($stored['path']);
+            $fail('Ova slika je već dodata u oglas.');
+        }
+
         $image = DB::transaction(function () use ($stored, $user, $listing) {
             $sort = $listing ? ((int) $listing->images()->max('sort') + 1) : 0;
             if ($listing && ! $listing->images()->exists()) {
@@ -238,6 +245,18 @@ class ListingImages
                 throw ValidationException::withMessages([$field => 'Slika #'.$id.' ne postoji ili nije vaša.']);
             }
         }
+
+        // The same photo sent twice is kept once; a left-out upload is cleared by images:prune.
+        $seen = [];
+        $ids = array_values(array_filter($ids, function (int $id) use ($images, &$seen) {
+            $hash = (string) $images->get($id)->hash;
+            if ($hash !== '' && isset($seen[$hash])) {
+                return false;
+            }
+            $seen[$hash] = true;
+
+            return true;
+        }));
 
         $removed = $listing->images()->whereNotIn('id', $ids)->get();
         foreach ($removed as $image) {

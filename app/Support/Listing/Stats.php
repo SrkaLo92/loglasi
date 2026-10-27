@@ -117,9 +117,14 @@ class Stats
         $listing->setAttribute($column, (int) $listing->getAttribute($column) + 1);
         $listing->syncOriginalAttribute($column);
 
-        $date = now(Text::TIMEZONE)->toDateString();
+        static::addDaily($listing->id, $column);
+    }
+
+    /** +1 on today's row (Europe/Belgrade) in one statement: no read-modify-write race. */
+    public static function addDaily(int $listingId, string $column): void
+    {
         DB::table('listing_daily_stats')->upsert(
-            [['listing_id' => $listing->id, 'date' => $date, $column => 1]],
+            [['listing_id' => $listingId, 'date' => now(Text::TIMEZONE)->toDateString(), $column => 1]],
             ['listing_id', 'date'],
             [$column => DB::raw($column.' + 1')],
         );

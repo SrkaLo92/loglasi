@@ -245,6 +245,38 @@ class SeoHeadTest extends SeoTestCase
         }
     }
 
+    public function test_repeated_titles_of_one_seller_get_the_price_or_number(): void
+    {
+        $category = Category::factory()->create(['name' => 'Bicikli', 'slug' => 'bicikli']);
+        $place = Location::factory()->create(['name' => 'Loznica', 'slug' => 'loznica']);
+        $seller = User::factory()->create();
+        $make = fn (string $slug, ?int $price) => Listing::factory()->for($category)->for($place)->for($seller)->create([
+            'slug' => $slug, 'title' => 'Crane šorc', 'price' => $price, 'currency' => Currency::RSD,
+        ]);
+        $make('sorc-1', 2500);
+        $make('sorc-2', 3000);
+        $same = $make('sorc-3', 3000);
+        Listing::factory()->for($category)->for($place)->create(['slug' => 'tudji', 'title' => 'Jedinstven naslov']);
+
+        $this->get('/oglas/sorc-1/')->assertSee('<title>Crane šorc, 2.500 din, Bicikli, Loznica | loglasi.rs</title>', false);
+        $this->get('/oglas/sorc-3/')->assertSee('<title>Crane šorc, br. '.$same->id.', Bicikli, Loznica | loglasi.rs</title>', false);
+        $this->get('/oglas/tudji/')->assertSee('<title>Jedinstven naslov, Bicikli, Loznica | loglasi.rs</title>', false);
+    }
+
+    public function test_share_image_size_is_given_for_a_listing_photo(): void
+    {
+        $listing = Listing::factory()->create(['slug' => 'sa-slikom']);
+        ListingImage::query()->create([
+            'listing_id' => $listing->id, 'user_id' => $listing->user_id, 'path' => 'oglasi/1/b.webp', 'sort' => 0,
+            'width' => 2000, 'height' => 1500,
+            'variants' => ['md' => ['webp' => 'oglasi/1/b-md.webp', 'jpg' => 'oglasi/1/b-md.jpg', 'width' => 800]],
+        ]);
+
+        $this->get('/oglas/sa-slikom/')
+            ->assertSee('<meta property="og:image:width" content="800">', false)
+            ->assertSee('<meta property="og:image:height" content="600">', false);
+    }
+
     public function test_long_listing_title_drops_the_category(): void
     {
         $category = Category::factory()->create(['name' => 'Automobili', 'slug' => 'automobili']);

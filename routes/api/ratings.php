@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 // Seller ratings in the app (/api/v1). Rules: docs/moduli/ocene.md.
 
-Route::get('/users/{id}/ratings', [RatingApiController::class, 'index'])->whereNumber('id');
+Route::get('/users/{id}/ratings', [RatingApiController::class, 'index'])->whereNumber('id')->middleware('throttle:listing-api');
 
 Route::middleware('auth:sanctum')->controller(RatingApiController::class)->group(function () {
     Route::get('/conversations/{conversation}/rating', 'show')->whereNumber('conversation');

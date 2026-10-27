@@ -4,7 +4,7 @@ use App\Http\Controllers\Catalog\CatalogApiController;
 use Illuminate\Support\Facades\Route;
 
 // Catalog for the mobile app (public, no login).
-Route::middleware('throttle:katalog')->controller(CatalogApiController::class)->group(function () {
+Route::middleware('throttle:catalog')->controller(CatalogApiController::class)->group(function () {
     Route::get('/categories', 'categories')->name('api.categories');
     Route::get('/categories/browse', 'browse')->name('api.categories.browse');
     Route::get('/categories/{id}/fields', 'fields')->whereNumber('id')->name('api.categories.fields');

@@ -163,6 +163,23 @@ class ListingImagesTest extends PostingTestCase
         $this->service()->upload($this->image('alpha.png'), $user, $listing);
     }
 
+    public function test_same_photo_twice_in_one_listing_is_refused(): void
+    {
+        $user = $this->user();
+        $listing = $this->draft($user);
+        $this->service()->upload($this->image('stripes.jpg'), $user, $listing);
+        $files = Storage::disk('public')->files('oglasi/'.$listing->id);
+
+        try {
+            $this->service()->upload($this->image('stripes.jpg'), $user, $listing);
+            $this->fail('A duplicate photo should have been refused.');
+        } catch (ValidationException $e) {
+            $this->assertSame('Ova slika je već dodata u oglas.', $e->errors()['file'][0]);
+        }
+        $this->assertSame(1, $listing->images()->count());
+        $this->assertSame($files, Storage::disk('public')->files('oglasi/'.$listing->id));
+    }
+
     public function test_images_are_stored_under_listing_folder_and_moved_from_tmp(): void
     {
         $user = $this->user();

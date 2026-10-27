@@ -5,6 +5,7 @@ namespace App\Support\Pages;
 use App\Models\Firm;
 use App\Models\Product;
 use App\Services\Payments\ProductCatalog;
+use App\Support\Listing\Text;
 use App\Support\Settings;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -194,17 +195,7 @@ class Pricing
     /** Serbian noun form after a number: 1 mesto, 2 mesta, 5 mesta, 21 mesto. */
     public static function plural(int $n, string $one, string $few, string $many): string
     {
-        $mod10 = $n % 10;
-        $mod100 = $n % 100;
-
-        if ($mod10 === 1 && $mod100 !== 11) {
-            return $one;
-        }
-        if ($mod10 >= 2 && $mod10 <= 4 && ($mod100 < 12 || $mod100 > 14)) {
-            return $few;
-        }
-
-        return $many;
+        return Text::plural($n, $one, $few, $many);
     }
 
     public static function freeListings(): int

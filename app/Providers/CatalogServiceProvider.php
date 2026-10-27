@@ -48,6 +48,6 @@ class CatalogServiceProvider extends ServiceProvider
             }
         });
 
-        RateLimiter::for('katalog', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
+        RateLimiter::for('catalog', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
     }
 }

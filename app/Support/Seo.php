@@ -51,6 +51,9 @@ class Seo
     /** @var list<string> */
     private array $images = [];
 
+    /** @var array{0: int, 1: int}|null width and height of the first image, when known */
+    private ?array $imageSize = null;
+
     /** @var list<array{name: string, url: ?string}> */
     private array $breadcrumbs = [];
 
@@ -265,7 +268,7 @@ class Seo
         $top = $listing->category ? static::topCategory($listing->category) : null;
         $topSlug = $top?->slug;
         $vars = [
-            '{naslov}' => static::clean((string) $listing->title),
+            '{naslov}' => static::clean((string) $listing->title).static::titleSuffix($listing),
             '{kategorija}' => $top ? static::categoryName($top) : '',
             '{mesto}' => $place,
         ];
@@ -299,6 +302,12 @@ class Seo
         // JPEG 800 px first: share previews (WhatsApp, Viber) skip large WebP originals.
         $images = $listing->images->take(6)->map(fn ($image) => static::imageUrl($image->variants['md']['jpg'] ?? $image->variants['lg']['jpg'] ?? $image->path))->filter()->values()->all();
         $this->image($images);
+        $cover = $listing->images->first();
+        if ($cover && $cover->width > 0 && $cover->height > 0) {
+            $variant = isset($cover->variants['md']['jpg']) ? $cover->variants['md'] : ($cover->variants['lg'] ?? []);
+            $width = (int) ($variant['width'] ?? $cover->width);
+            $this->imageSize = [$width, (int) round($cover->height * $width / $cover->width)];
+        }
 
         $active = static::isActive($listing);
 
@@ -620,6 +629,8 @@ class Seo
             if ($usesDefault) {
                 $og['og:image:width'] = '1200';
                 $og['og:image:height'] = '630';
+            } elseif ($this->imageSize !== null) {
+                [$og['og:image:width'], $og['og:image:height']] = array_map('strval', $this->imageSize);
             }
             $og['og:image:alt'] = $usesDefault ? config('seo.site_name').': '.config('seo.default_image_alt', 'Oglasi za Loznicu i okolinu') : ($this->getH1() ?? $title);
         }
@@ -847,6 +858,27 @@ class Seo
     }
 
     /** Active listing: published and not expired. */
+    /**
+     * Sellers repeat titles (seven „Crane šorc” listings): the duplicates get the price, or the
+     * listing number when the price is the same too, so every page has its own <title>.
+     */
+    private static function titleSuffix(Listing $listing): string
+    {
+        $prices = static::activeListings()
+            ->where('user_id', $listing->user_id)
+            ->where('title', $listing->title)
+            ->whereKeyNot($listing->id)
+            ->pluck('price');
+        if ($prices->isEmpty()) {
+            return '';
+        }
+
+        $price = $listing->price !== null && (float) $listing->price > 0 ? $listing->priceLabel() : null;
+        $samePrice = $prices->contains(fn ($p) => $p !== null && $listing->price !== null && (float) $p === (float) $listing->price);
+
+        return $price !== null && ! $samePrice ? ', '.$price : ', br. '.$listing->id;
+    }
+
     public static function isActive(Listing $listing): bool
     {
         return $listing->status === ListingStatus::Published

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Listing\Api;
 
-use App\Enums\ReportStatus;
 use App\Http\Api\ApiError;
 use App\Http\Controllers\Controller;
 use App\Models\Listing;
@@ -52,23 +51,7 @@ class ReportApiController extends Controller
             throw ValidationException::withMessages(['reason' => 'Ne možete prijaviti sopstveni oglas.']);
         }
 
-        $duplicate = $reporter !== null && Report::query()
-            ->where('reporter_id', $reporter->id)
-            ->where('reportable_type', $listing->getMorphClass())
-            ->where('reportable_id', $listing->id)
-            ->where('status', ReportStatus::Open)
-            ->exists();
-
-        if (! $duplicate) {
-            Report::create([
-                'reporter_id' => $reporter?->id,
-                'reportable_type' => $listing->getMorphClass(),
-                'reportable_id' => $listing->id,
-                'reason' => $data['reason'],
-                'details' => isset($data['details']) ? (trim(strip_tags($data['details'])) ?: null) : null,
-                'status' => ReportStatus::Open,
-            ]);
-        }
+        Report::fileOnce($reporter, $listing, $data['reason'], $data['details'] ?? null);
 
         return response()->noContent();
     }
@@ -95,23 +78,7 @@ class ReportApiController extends Controller
         $reporter = $request->user();
         $target = $this->target($data['target_type'], (int) $data['target_id'], $reporter);
 
-        $exists = Report::query()
-            ->where('reporter_id', $reporter->id)
-            ->where('reportable_type', $target->getMorphClass())
-            ->where('reportable_id', $target->getKey())
-            ->where('status', ReportStatus::Open)
-            ->exists();
-
-        if (! $exists) {
-            Report::create([
-                'reporter_id' => $reporter->id,
-                'reportable_type' => $target->getMorphClass(),
-                'reportable_id' => $target->getKey(),
-                'reason' => $data['reason'],
-                'details' => isset($data['note']) ? (trim(strip_tags($data['note'])) ?: null) : null,
-                'status' => ReportStatus::Open,
-            ]);
-        }
+        Report::fileOnce($reporter, $target, $data['reason'], $data['note'] ?? null);
 
         return response()->noContent();
     }

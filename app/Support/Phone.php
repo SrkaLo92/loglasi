@@ -48,7 +48,7 @@ class Phone
 
         if ($hasPlus) {
             if (! str_starts_with($digits, $cc)) {
-                // Strani broj. Kod suseda i dijaspore (BiH, CG, HR, SLO, MK, AT, DE, CH)
+                // Foreign number. For neighbours and the diaspora (BiH, CG, HR, SLO, MK, AT, DE, CH)
                 // the leading zero after the country code is not dialled, so it is removed.
                 $digits = (string) preg_replace('/^(38[2-9]|4[139])0+/', '$1', $digits);
                 $len = strlen($digits);

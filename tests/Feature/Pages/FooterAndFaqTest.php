@@ -38,7 +38,7 @@ class FooterAndFaqTest extends TestCase
             ->assertSee('href="'.url_slash('brisanje-licnih-podataka').'"', false)
             ->assertSee('Brisanje ličnih podataka')
             ->assertSee('href="'.url_slash('oglasi/automobili').'"', false)
-            ->assertSee('data-lg-najnoviji="'.url_slash('podnozje/najnoviji-oglasi').'"', false)
+            ->assertSee('data-lg-latest="'.url_slash('podnozje/najnoviji-oglasi').'"', false)
             ->assertSee('Alphasoft Development')
             ->assertSee('Sva prava zadržana.');
     }

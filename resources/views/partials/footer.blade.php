@@ -96,7 +96,7 @@
 
 		<div class="lg-footer__col lg-footer__last">
 			<h2 class="lg-footer__title lg-footer__title--latest" id="lg-footer-latest">Upravo objavljeno</h2>
-			<ul class="lg-footer__list lg-footer__latest" data-lg-najnoviji="{{ url_slash('/podnozje/najnoviji-oglasi') }}" aria-labelledby="lg-footer-latest">
+			<ul class="lg-footer__list lg-footer__latest" data-lg-latest="{{ url_slash('/podnozje/najnoviji-oglasi') }}" aria-labelledby="lg-footer-latest">
 				<li><a class="lg-footer__all" href="{{ url_slash('/oglasi') }}">Pogledajte sve oglase</a></li>
 			</ul>
 			<h2 class="lg-footer__title lg-footer__title--social">Pratite nas</h2>
@@ -122,10 +122,10 @@
 	}
 })();
 (function () {
-	var list = document.querySelector('[data-lg-najnoviji]');
+	var list = document.querySelector('[data-lg-latest]');
 	if (!list || !window.fetch) return;
 	var load = function () {
-		fetch(list.getAttribute('data-lg-najnoviji'), {headers: {Accept: 'application/json'}})
+		fetch(list.getAttribute('data-lg-latest'), {headers: {Accept: 'application/json'}})
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (json) {
 				if (!json || !json.data || !json.data.length) return;

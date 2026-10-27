@@ -140,11 +140,6 @@ class HomeSections
     }
 
     /**
-     * Firm strip: active firm accounts, those with a Biznis package first.
-     *
-     * @return array{total: int, items: list<array{name: string, url: string, logo: ?string, initials: string}>}
-     */
-    /**
      * Firm cards: active firm accounts, firms with a package first, with their place and number of active listings.
      *
      * @return array{total: int, items: list<array<string, mixed>>}

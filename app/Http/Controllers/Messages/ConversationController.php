@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Messages;
 
-use App\Enums\ReportStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Messages\SendMessageRequest;
 use App\Models\Conversation;
@@ -176,24 +175,8 @@ class ConversationController extends Controller
         $other = User::withTrashed()->find($conversation->otherId($user));
         abort_unless($other, 404);
 
-        $open = Report::query()
-            ->where('reporter_id', $user->id)
-            ->where('reportable_type', $other->getMorphClass())
-            ->where('reportable_id', $other->id)
-            ->where('status', ReportStatus::Open)
-            ->exists();
-
-        if (! $open) {
-            $details = trim(MessageBody::clean($data['details'] ?? ''));
-            Report::create([
-                'reporter_id' => $user->id,
-                'reportable_type' => $other->getMorphClass(),
-                'reportable_id' => $other->id,
-                'reason' => $data['reason'],
-                'details' => 'Razgovor #'.$conversation->id.($details !== '' ? ': '.$details : ''),
-                'status' => ReportStatus::Open,
-            ]);
-        }
+        $details = trim(MessageBody::clean($data['details'] ?? ''));
+        Report::fileOnce($user, $other, $data['reason'], 'Razgovor #'.$conversation->id.($details !== '' ? ': '.$details : ''));
 
         return redirect()->to(url_slash('moj-nalog/poruke/'.$conversation->id))->with('status', 'Hvala, prijava je poslata moderatorima.');
     }

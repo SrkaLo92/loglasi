@@ -60,25 +60,25 @@ class AccountsServiceProvider extends ServiceProvider
     {
         $email = fn (Request $request) => Str::lower(trim((string) $request->input('email')));
 
-        RateLimiter::for('nalozi-login', fn (Request $request) => [
+        RateLimiter::for('accounts-login', fn (Request $request) => [
             Limit::perMinute(5)->by('login:'.$email($request).'|'.$request->ip())->response($this->tooMany(...)),
             Limit::perMinute(30)->by('login-ip:'.$request->ip())->response($this->tooMany(...)),
         ]);
 
-        RateLimiter::for('nalozi-register', fn (Request $request) => [
+        RateLimiter::for('accounts-register', fn (Request $request) => [
             Limit::perHour(5)->by('register:'.$request->ip())->response($this->tooMany(...)),
         ]);
 
-        RateLimiter::for('nalozi-password', fn (Request $request) => [
+        RateLimiter::for('accounts-password', fn (Request $request) => [
             Limit::perMinutes(10, 3)->by('reset:'.$email($request))->response($this->tooMany(...)),
             Limit::perHour(10)->by('reset-ip:'.$request->ip())->response($this->tooMany(...)),
         ]);
 
-        RateLimiter::for('nalozi-refresh', fn (Request $request) => [
+        RateLimiter::for('accounts-refresh', fn (Request $request) => [
             Limit::perMinute(30)->by('refresh:'.$request->ip())->response($this->tooMany(...)),
         ]);
 
-        RateLimiter::for('nalozi-account', fn (Request $request) => [
+        RateLimiter::for('accounts-account', fn (Request $request) => [
             Limit::perMinute(20)->by('account:'.($request->user()?->id ?? $request->ip()))->response($this->tooMany(...)),
         ]);
     }

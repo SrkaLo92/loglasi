@@ -2,6 +2,7 @@
 
 namespace App\Support\Search;
 
+use App\Support\Listing\Text;
 use Carbon\CarbonInterface;
 
 /** Relative time in Serbian: „upravo”, „pre 5 minuta”, „pre 2 sata”, „juče”, „pre 3 dana”. */
@@ -42,33 +43,24 @@ class TimeAgo
         if ($days < 30) {
             $n = intdiv($days, 7);
 
-            return 'pre '.$n.' '.self::plural($n, 'nedelju', 'nedelje', 'nedelja');
+            return $n === 1 ? 'pre nedelju dana' : 'pre '.$n.' '.self::plural($n, 'nedelju', 'nedelje', 'nedelja');
         }
         if ($days < 365) {
             $n = max(1, intdiv($days, 30));
 
-            return 'pre '.$n.' '.self::plural($n, 'mesec', 'meseca', 'meseci');
+            return $n === 1 ? 'pre mesec dana' : 'pre '.$n.' '.self::plural($n, 'mesec', 'meseca', 'meseci');
         }
 
         $n = intdiv($days, 365);
 
-        return 'pre '.$n.' '.self::plural($n, 'godinu', 'godine', 'godina');
+        // „pre godinu dana”, not „pre 1 godinu”; the same for a week and a month.
+        return $n === 1 ? 'pre godinu dana' : 'pre '.$n.' '.self::plural($n, 'godinu', 'godine', 'godina');
     }
 
     /** 1 oglas, 2 oglasa, 5 oglasa, 21 oglas. */
     public static function plural(int $n, string $one, string $few, string $many): string
     {
-        $mod10 = $n % 10;
-        $mod100 = $n % 100;
-
-        if ($mod10 === 1 && $mod100 !== 11) {
-            return $one;
-        }
-        if ($mod10 >= 2 && $mod10 <= 4 && ($mod100 < 12 || $mod100 > 14)) {
-            return $few;
-        }
-
-        return $many;
+        return Text::plural($n, $one, $few, $many);
     }
 
     /** „1.250 oglasa”. */
