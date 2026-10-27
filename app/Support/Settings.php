@@ -7,11 +7,17 @@ use Illuminate\Support\Facades\Cache;
 
 /**
  * Site settings changed from the admin (exchange rate, limits, texts...).
- * All values are read from one cached array.
+ * All values are read from one cached array, kept in memory for a few seconds.
  */
 class Settings
 {
     private const CACHE_KEY = 'settings.all';
+
+    /** Seconds the array is kept in memory: a page reads settings dozens of times, a queue worker sees changes soon. */
+    private const MEMO_SECONDS = 5;
+
+    /** @var array{0: float, 1: array<string, mixed>}|null [loaded at, values] */
+    private static ?array $memo = null;
 
     /** Default values when the database has no row. */
     public const DEFAULTS = [
@@ -40,17 +46,25 @@ class Settings
     public static function set(string $key, mixed $value): void
     {
         Setting::updateOrCreate(['key' => $key], ['value' => $value]);
-        Cache::forget(self::CACHE_KEY);
+        static::flush();
     }
 
     /** @return array<string, mixed> */
     public static function all(): array
     {
-        return Cache::rememberForever(self::CACHE_KEY, fn () => Setting::query()->pluck('value', 'key')->all());
+        if (self::$memo !== null && microtime(true) - self::$memo[0] < self::MEMO_SECONDS) {
+            return self::$memo[1];
+        }
+
+        $values = Cache::rememberForever(self::CACHE_KEY, fn () => Setting::query()->pluck('value', 'key')->all());
+        self::$memo = [microtime(true), $values];
+
+        return $values;
     }
 
     public static function flush(): void
     {
+        self::$memo = null;
         Cache::forget(self::CACHE_KEY);
     }
 }

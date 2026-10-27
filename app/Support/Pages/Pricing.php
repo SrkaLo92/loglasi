@@ -47,6 +47,9 @@ class Pricing
 
     private const FOUNDING_CACHE = 'pages.founding_firms_taken';
 
+    /** @var array{0: float, 1: int}|null */
+    private static ?array $foundingMemo = null;
+
     /** @return Collection<int, Product> Active products, in the admin order. */
     public static function products(): Collection
     {
@@ -224,10 +227,14 @@ class Pricing
         return max(0, (int) Settings::get('founding_firms_total'));
     }
 
-    /** Number of firms that got the free package (founding_free). Cached for 5 minutes. */
+    /** Number of firms that got the free package (founding_free). Cached for 5 minutes, read once per page. */
     public static function foundingTaken(): int
     {
-        return (int) Cache::remember(self::FOUNDING_CACHE, 300, fn () => Firm::query()->holdsFoundingPlace()->count());
+        if (self::$foundingMemo === null || microtime(true) - self::$foundingMemo[0] >= 5) {
+            self::$foundingMemo = [microtime(true), (int) Cache::remember(self::FOUNDING_CACHE, 300, fn () => Firm::query()->holdsFoundingPlace()->count())];
+        }
+
+        return self::$foundingMemo[1];
     }
 
     public static function foundingLeft(): int
@@ -237,6 +244,7 @@ class Pricing
 
     public static function forgetFounding(): void
     {
+        self::$foundingMemo = null;
         Cache::forget(self::FOUNDING_CACHE);
     }
 
