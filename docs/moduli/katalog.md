@@ -11,12 +11,12 @@ Modul daje stablo kategorija sa brojem oglasa, mesta, dodatna polja po kategorij
 | `app/Http/Api/ApiResponse.php` | JSON odgovor, Cache-Control, ETag/304, greške za sve rute pod `/api` |
 | `app/Http/Api/ApiError.php` | izuzetak koji postaje greška po ugovoru |
 | `app/Http/Api/CatalogFormatter.php` | oblici `Category`, `Location`, `Price` iz ugovora |
-| `app/Http/Controllers/Katalog/CatalogApiController.php`, `routes/api/katalog.php` | API rute |
-| `app/Providers/KatalogServiceProvider.php` | servisi, brisanje keša na događaje modela, ograničenje `katalog` |
-| `database/seeders/KatalogSeeder.php` | kategorije, mesta i polja za lokalni razvoj |
-| `tests/Feature/Katalog/` | testovi |
+| `app/Http/Controllers/Catalog/CatalogApiController.php`, `routes/api/katalog.php` | API rute |
+| `app/Providers/CatalogServiceProvider.php` | servisi, brisanje keša na događaje modela, ograničenje `katalog` |
+| `database/seeders/CatalogSeeder.php` | kategorije, mesta i polja za lokalni razvoj |
+| `tests/Feature/Catalog/` | testovi |
 
-Izmene u zajedničkim fajlovima: `bootstrap/app.php` (jedan red, `ApiResponse::register`), `bootstrap/providers.php` (provajder), `DatabaseSeeder` (poziva `KatalogSeeder` samo lokalno), `FieldType` dobio `Year` (`year` postoji u ugovoru), `Category` dobio `url()` i `iconUrl()`.
+Izmene u zajedničkim fajlovima: `bootstrap/app.php` (jedan red, `ApiResponse::register`), `bootstrap/providers.php` (provajder), `DatabaseSeeder` (poziva `CatalogSeeder` samo lokalno), `FieldType` dobio `Year` (`year` postoji u ugovoru), `Category` dobio `url()` i `iconUrl()`.
 
 ## API (`/api/v1`)
 
@@ -191,7 +191,7 @@ $fields->apply($upit, $uslovi);  // jedan WHERE EXISTS po polju, koristi indekse
 - Pretraga: `f[model_automobila]` radi i bez marke; sajt bez izabrane marke prikazuje modele grupisane po marki.
 - Brojevi se primaju kako ih ljudi kucaju: „180.000”, „180 000 km”, „1,6”, „2014.” (i u filterima `_od`/`_do`). Snaga u kW se prikazuje i u KS: „103 kW (140 KS)”.
 
-## Definicija kataloga (`php artisan katalog:uredi`)
+## Definicija kataloga (`php artisan catalog:apply`)
 
 `database/seeders/data/catalog/`: `fields.php` (polja, tipovi, opcije, preimenovanje starih vrednosti), `links.php` (koja polja traži koja kategorija, po slugu, i koja su obavezna), `cars.php` (82 marke i 1864 modela po uzoru na polovniautomobili; WordPress marke i modeli i njihovi stari slugovi). Komanda:
 
@@ -200,7 +200,7 @@ $fields->apply($upit, $uslovi);  // jedan WHERE EXISTS po polju, koristi indekse
 - skida naziv roditelja sa potkategorija („Automobili | Džip/SUV” → „Džip/SUV”);
 - prenosi i sačuvane pretrage (`f[model_automobila]`).
 
-`--dry-run` broji izmene bez upisa. Pokreće se sama na kraju `uvoz:wordpress` (isključuje se sa `UVOZ_CATALOG_DEFINITION=false`). Izmene ovih polja u adminu briše sledeće pokretanje; trajne izmene idu u fajlove. Admin za polje sa mnogo opcija (modeli) prikazuje tekst „vrednost | Naziv | roditelj”, red po opciji.
+`--dry-run` broji izmene bez upisa. Pokreće se sama na kraju `import:wordpress` (isključuje se sa `UVOZ_CATALOG_DEFINITION=false`). Izmene ovih polja u adminu briše sledeće pokretanje; trajne izmene idu u fajlove. Admin za polje sa mnogo opcija (modeli) prikazuje tekst „vrednost | Naziv | roditelj”, red po opciji.
 
 ## Prikaz na sajtu
 
@@ -218,8 +218,8 @@ $fields->apply($upit, $uslovi);  // jedan WHERE EXISTS po polju, koristi indekse
 - Nekretnine: Kvadratura* (m²), Grejanje, Vrsta oglasa; Stanovi i Kuće još Broj soba (i Sprat za stanove);
 - Mobilni telefoni: Marka telefona, Memorija; Poslovi: Radno vreme.
 
-Pravi spisak kategorija i mesta dolazi uvozom iz WordPress-a (modul uvoza). Seeder može da se pokrene više puta (`php artisan db:seed --class=KatalogSeeder`).
+Pravi spisak kategorija i mesta dolazi uvozom iz WordPress-a (modul uvoza). Seeder može da se pokrene više puta (`php artisan db:seed --class=CatalogSeeder`).
 
 ## Testovi
 
-`DB_DATABASE=lb_katalog_test php artisan test tests/Feature/Katalog`: sve rute, oblik odgovora, brojevi (potkategorija jednom, samo objavljeni, obrisani i odbijeni ne), sakrivanje neaktivnih, ETag i 304, brisanje keša (novi oglas, promena statusa i kategorije, brisanje i vraćanje, izmena kategorije, polja, mesta i cene; pregled ne briše), greške i ograničenje broja zahteva, pomoćnici kataloga (mrvice, putanja, potkategorije, petlja u stablu), provera, upis, prikaz i filteri polja, seeder.
+`DB_DATABASE=lb_katalog_test php artisan test tests/Feature/Catalog`: sve rute, oblik odgovora, brojevi (potkategorija jednom, samo objavljeni, obrisani i odbijeni ne), sakrivanje neaktivnih, ETag i 304, brisanje keša (novi oglas, promena statusa i kategorije, brisanje i vraćanje, izmena kategorije, polja, mesta i cene; pregled ne briše), greške i ograničenje broja zahteva, pomoćnici kataloga (mrvice, putanja, potkategorije, petlja u stablu), provera, upis, prikaz i filteri polja, seeder.

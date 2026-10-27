@@ -10,7 +10,7 @@
 | Clickjacking | `X-Frame-Options: SAMEORIGIN`, `frame-ancestors 'self'` | `SecurityHeaders` |
 | IDOR (tuđi oglas, poruka, narudžbina menjanjem broja) | Policy za svaki model, razgovor tuđem korisniku je 404, API `me/*` uvek po vlasniku | `app/Policies`, testovi `AttackSurfaceTest` |
 | PHP ili HTML prerušen u sliku | provera `getimagesize` + dekodiranje GD-om + ponovno snimanje u WebP pod nasumičnim imenom; `.htaccess` ne izvršava PHP u `storage/` | `ListingImages::store`, `Avatar`, `FirmImages` |
-| Pogađanje lozinke | 5 pokušaja/min po emailu i IP-u, 30/min po IP-u (sajt i API), isto za registraciju i reset lozinke | `NaloziServiceProvider` |
+| Pogađanje lozinke | 5 pokušaja/min po emailu i IP-u, 30/min po IP-u (sajt i API), isto za registraciju i reset lozinke | `AccountsServiceProvider` |
 | Preuzimanje admina | admin samo za osoblje, obavezan 2FA, moderator ne vidi podešavanja i cene | Filament `StaffAccess`, `EnsureStaff` |
 | Mass assignment (role, verifikacija) | `User::$fillable` bez role i datuma potvrde, kontroleri pišu samo validirana polja | `User`, `Firm::$guarded` |
 | CSRF | Laravel token na svim formama; API radi samo sa Bearer tokenom, CORS ne dozvoljava strane sajtove | `config/cors.php` |

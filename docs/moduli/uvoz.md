@@ -1,6 +1,6 @@
 # Uvoz iz WordPress-a
 
-Komanda `php artisan uvoz:wordpress` prenosi sadržaj sadašnjeg sajta (WordPress + Listivo + loglasi-core) u novu bazu. Može da se pokreće koliko god puta: zapis se traži po izvornom ID-ju (`wp_id`, `wp_term_id`, `wp_key`) i menja, ne duplira se.
+Komanda `php artisan import:wordpress` prenosi sadržaj sadašnjeg sajta (WordPress + Listivo + loglasi-core) u novu bazu. Može da se pokreće koliko god puta: zapis se traži po izvornom ID-ju (`wp_id`, `wp_term_id`, `wp_key`) i menja, ne duplira se.
 
 Šta ostaje isto, da URL-ovi ne bi promenili adresu:
 
@@ -26,7 +26,7 @@ Komanda `php artisan uvoz:wordpress` prenosi sadržaj sadašnjeg sajta (WordPres
 
 Statusi oglasa: `publish` → aktivan, `pending`/`future` → čeka odobrenje, `draft`/`private` → nacrt, sve sa „expire” → istekao, `trash` → ne prenosi se (URL ide u 410; ako je oglas ranije uvezen, ovde se briše), `auto-draft` se preskače.
 
-Pošto WordPress ne čuva datum isteka, objavljen oglas pri prvom uvozu dobija 30 dana od dana uvoza, a istaknut oglas ostaje istaknut 30 dana od uvoza (`config/uvoz.php`: `listing_days`, `featured_days`). Ponovljen uvoz ove datume ne pomera.
+Pošto WordPress ne čuva datum isteka, objavljen oglas pri prvom uvozu dobija 30 dana od dana uvoza, a istaknut oglas ostaje istaknut 30 dana od uvoza (`config/wordpress_import.php`: `listing_days`, `featured_days`). Ponovljen uvoz ove datume ne pomera.
 
 Spam nalozi i sav njihov sadržaj (oglasi, slike, poruke, omiljeni) se ne prenose.
 
@@ -58,13 +58,13 @@ Spam nalozi i sav njihov sadržaj (oglasi, slike, poruke, omiljeni) se ne prenos
 4. Prvo proba, bez upisa:
 
    ```bash
-   php artisan uvoz:wordpress --dry-run
+   php artisan import:wordpress --dry-run
    ```
 
 5. Pravi uvoz sa slikama (putanja do `wp-content/uploads` Local sajta):
 
    ```bash
-   php artisan uvoz:wordpress --uploads="$HOME/Local Sites/loglasirs/app/public/wp-content/uploads"
+   php artisan import:wordpress --uploads="$HOME/Local Sites/loglasirs/app/public/wp-content/uploads"
    php artisan storage:link
    ```
 
@@ -77,7 +77,7 @@ Delovi mogu i posebno, npr. `--only=categories,locations,fields`. Delovi koriste
 Posle punog uvoza, na dan prelaska prenose se samo izmene od preseka:
 
 ```bash
-php artisan uvoz:wordpress --since="2026-11-01 08:00" --uploads=...
+php artisan import:wordpress --since="2026-11-01 08:00" --uploads=...
 ```
 
 Uzimaju se oglasi napravljeni ili izmenjeni posle tog trenutka, novi korisnici i autori tih oglasa, i nove poruke. Kategorije, mesta, polja, podešavanja, omiljeni i 410 lista se uvek prolaze cele. Izveštaj navodi i oglase koji postoje u novoj bazi, a u WordPress-u ih više nema.
@@ -90,15 +90,15 @@ Na kraju se ispisuje tabela (po delu: u WP, uvezeno, preskočeno, greške), a de
 
 1. **Brojevi:** broj oglasa po statusu i korisnika u izveštaju uporediti sa WordPress-om (`SELECT post_status, COUNT(*) FROM wp_posts WHERE post_type='listivo_listing' GROUP BY 1`). Razlika mora da bude objašnjena u izveštaju (spam, otpad, greške).
 2. **Greške:** svaku liniju „GREŠKA” iz izveštaja rešiti (npr. oglas bez kategorije, autor koji ne postoji, zauzet slug) i ponoviti uvoz.
-3. **Cene:** 5 oglasa u evrima i 5 u dinarima (`12.500 din`). Ako je dinar pogrešno prepoznat, u `config/uvoz.php` upisati `currency_term_rsd` (ID iz ključa `listivo_130_listivo_<ID>`).
-4. **Polja:** spisak iz izveštaja. Nazive, ključeve i jedinice (km, m²) ispraviti u `config/uvoz.php` → `fields` (po `wp_key`) i ponoviti `--only=fields,listings`.
+3. **Cene:** 5 oglasa u evrima i 5 u dinarima (`12.500 din`). Ako je dinar pogrešno prepoznat, u `config/wordpress_import.php` upisati `currency_term_rsd` (ID iz ključa `listivo_130_listivo_<ID>`).
+4. **Polja:** spisak iz izveštaja. Nazive, ključeve i jedinice (km, m²) ispraviti u `config/wordpress_import.php` → `fields` (po `wp_key`) i ponoviti `--only=fields,listings`.
 5. **Telefoni:** linije „neispravan telefon” iz izveštaja proveriti ručno.
 6. **Lozinke:** prijaviti se jednim starim nalogom starom lozinkom.
 7. **Slike:** greške „nema fajla” znače da fajl nije u `uploads`; proveriti putanju u `--uploads`.
 8. **Firme:** svaka firma ima profil, logo i radno vreme; „Delatnost” nema svoje polje u novoj šemi (vidi izveštaj).
 9. **410:** nijedan URL sa 410 liste ne sme da postoji u novoj bazi; uvoz to sam proverava i javlja kao grešku.
-10. **Poruke:** ako izveštaj kaže da tabela `wp_listivo_messages` ne postoji, pogledati `SHOW TABLES LIKE '%listivo%'` i upisati pravo ime tabele i kolona u `config/uvoz.php` → `messages`.
+10. **Poruke:** ako izveštaj kaže da tabela `wp_listivo_messages` ne postoji, pogledati `SHOW TABLES LIKE '%listivo%'` i upisati pravo ime tabele i kolona u `config/wordpress_import.php` → `messages`.
 
-## Podešavanja (`config/uvoz.php`)
+## Podešavanja (`config/wordpress_import.php`)
 
 Svi Listivo ključevi su na jednom mestu, isti kao u loglasi-core: tip oglasa, taksonomije, polje cene i ID termina valute, meta ključevi (istaknut, galerija, pregledi, istek, koordinate, telefon oglasa), user meta (tip naloga, telefon, pozivni broj, potvrđen telefon, slika, omiljeni, polja firme), term meta (redosled, ikonica), tabela poruka, spam nalozi i broj dana za istek i isticanje. Prazan ključ znači da tog podatka nema.

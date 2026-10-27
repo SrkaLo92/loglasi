@@ -26,7 +26,7 @@ Uslovi korišćenja i politika privatnosti su linkovani kao `/uslovi-koriscenja/
 ### Pravila
 
 - Email se čuva malim slovima; prijava ne zavisi od velikih slova i razmaka.
-- Telefon se čuva u E.164 (`App\Support\Phone`). Promena broja skida `phone_verified_at` (posmatrač `User::saving` u `NaloziServiceProvider`), osim kad admin u istom čuvanju upiše i proveru.
+- Telefon se čuva u E.164 (`App\Support\Phone`). Promena broja skida `phone_verified_at` (posmatrač `User::saving` u `AccountsServiceProvider`), osim kad admin u istom čuvanju upiše i proveru.
 - Blokiran korisnik (`status = blocked`) ne može da se prijavi; ako je već prijavljen, `EnsureNotBlocked` (u `web` grupi) ga odjavljuje. Na API-ju njegov token prestaje da važi (`account_blocked`).
 - Registracija ne prima `account_type`, `role` ni `status`: nalog firme i uloge postavlja samo administrator.
 - Slug za `/korisnik/{slug}/` se pravi iz imena (đ → dj, kao WordPress za sr_RS) i uvek je jedinstven.
@@ -109,4 +109,4 @@ API ne prihvata sesiju sajta (`config/sanctum.php`: `guard` prazan), samo Bearer
 
 ## Testovi
 
-`tests/Unit/PhoneTest.php` (isti slučajevi kao `telefon-test.php`) i `tests/Feature/Nalozi/` (strane, pravila, WordPress heševi sa poznatim primerima, API sa svim greškama). U testovima argon2id radi sa malo memorije (`ARGON_MEMORY`, `ARGON_TIME` u `phpunit.xml`).
+`tests/Unit/PhoneTest.php` (isti slučajevi kao `telefon-test.php`) i `tests/Feature/Accounts/` (strane, pravila, WordPress heševi sa poznatim primerima, API sa svim greškama). U testovima argon2id radi sa malo memorije (`ARGON_MEMORY`, `ARGON_TIME` u `phpunit.xml`).

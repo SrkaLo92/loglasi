@@ -56,13 +56,13 @@ Rules:
 
 | Mail | Module | Category | Note |
 | --- | --- | --- | --- |
-| Email confirmation, password reset | accounts (`NaloziServiceProvider`) | none | uses this layout through `notifications::email` |
+| Email confirmation, password reset | accounts (`AccountsServiceProvider`) | none | uses this layout through `notifications::email` |
 | New message | **notifications** (`NewMessageNotification`) | `messages` | from `App\Events\MessageSent`; the messages module sends nothing |
 | Saved-search digest | **notifications** (`SavedSearchDigestNotification`) | `saved_searches` | hourly job |
 | Listing expires in 3 days | posting (`ListingExpiringSoon`, `listings:expire`) | `expiring` | posting checks the preference and `expiry_notified_at` (sent once); this module only added the `List-Unsubscribe` header. Not duplicated here. |
 | Order placed (pro-forma, QR), order paid | payments (`OrderPlaced`, `OrderPaid`) | none | transactional; nothing here |
 | Biznis package expiring | firms (`PackageExpiringSoon`, `firms:package-reminders`) | none | transactional, always sent; the earlier "Biznis paket" toggle was removed so the page does not promise an opt-out that does not exist |
-| Contact form | pages (`KontaktPoruka`) | none | to the site address |
+| Contact form | pages (`ContactMessage`) | none | to the site address |
 
 The posting, payments and firms mails still use their own inline HTML templates (same colours and tagline). Moving them onto `BrandedMailable` is a follow-up; their content is not duplicated anywhere.
 

@@ -16,7 +16,7 @@ Izvor pravila: `09-deploy-seo.md` (razvojni paket), mapa ključnih reči (šablo
 | `app/Support/Seo/Sitemap.php` | pravljenje i keš sitemapa |
 | `resources/views/partials/seo-head.blade.php` | ispis `<head>` dela |
 | `routes/web/seo.php` | `/sitemap*.xml`, `/robots.txt`, `/llms.txt`, `/stranica-404/` |
-| `app/Console/Commands/SeoProvera.php` | `php artisan seo:provera` |
+| `app/Console/Commands/SeoProvera.php` | `php artisan seo:check` |
 | `app/Console/Commands/SeoSitemap.php` | `php artisan seo:sitemap` (raspored: svakog sata) |
 | `resources/seo/llms.txt` | tekst za `/llms.txt`, bez izmena u odnosu na odobreni |
 
@@ -164,8 +164,8 @@ Ne ulaze: istekli, nacrti, na čekanju, odbijeni i obrisani oglasi, privatni pro
 ## Provera URL-ova iz GSC-a
 
 ```bash
-php artisan seo:provera raw-indeksirane.tsv http://loglasirs.local --csv=rezultat-$(date +%Y%m%d-%H%M).csv
-php artisan seo:provera raw-indeksirane.tsv https://loglasi.rs --sitemap --gone --samo-greske
+php artisan seo:check raw-indeksirane.tsv http://loglasirs.local --csv=rezultat-$(date +%Y%m%d-%H%M).csv
+php artisan seo:check raw-indeksirane.tsv https://loglasi.rs --sitemap --gone --samo-greske
 ```
 
 - Čita TSV (prva kolona URL), preskače zaglavlje i duplikate, domen zamenjuje adresom iz drugog argumenta.

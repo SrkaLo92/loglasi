@@ -10,7 +10,7 @@
 ## 1. Pre prelaska (probni sajt)
 
 - [ ] `php artisan test` prolazi lokalno, `composer audit` bez nalaza.
-- [ ] SEO nit ponovila `seo:provera` nad probnim sajtom: bez 5xx, bez lanaca, bez neočekivanog 404.
+- [ ] SEO nit ponovila `seo:check` nad probnim sajtom: bez 5xx, bez lanaca, bez neočekivanog 404.
 - [ ] `scripts/bezbednost-provera.sh https://loglasi-custom.alphasoft.dev` prolazi.
 - [ ] Rezervna kopija baze i `storage/app/public` probnog sajta (ovo postaje produkciona baza).
 - [ ] Rezervna kopija celog WordPress-a na loglasi.rs (fajlovi + baza), da povratak bude moguć.
@@ -39,7 +39,7 @@ Posle izmene: `php artisan config:cache`.
 - [ ] `public/.htaccess`: ukloniti blok `X-Robots-Tag: noindex` sa vrha (dodat samo na probnom sajtu); ostatak je iz repozitorijuma.
 - [ ] Domen loglasi.rs pokazuje na `laravel/public` novog sajta; www → bez www (301); http → https (301).
 - [ ] Cron `schedule:run` svakog minuta (kao na probnom sajtu).
-- [ ] `php artisan migrate --force`, `seo:preusmerenja`, `search:rebuild`, `config:cache`, `route:cache`, `view:cache`, `event:cache`.
+- [ ] `php artisan migrate --force`, `seo:redirects`, `search:rebuild`, `config:cache`, `route:cache`, `view:cache`, `event:cache`.
 - [ ] `/robots.txt` više nema `Disallow: /`, `/sitemap.xml` vraća adrese sa https://loglasi.rs.
 - [ ] Admin → Podešavanja: isključiti „Test režim plaćanja”; „Plaćanje za privatna lica” ostaje isključeno.
 
@@ -52,7 +52,7 @@ Posle izmene: `php artisan config:cache`.
 
 ## 4. Odmah posle prelaska
 
-- [ ] `scripts/bezbednost-provera.sh https://loglasi.rs` i `seo:provera` nad loglasi.rs.
+- [ ] `scripts/bezbednost-provera.sh https://loglasi.rs` i `seo:check` nad loglasi.rs.
 - [ ] Prijava, postavljanje oglasa sa slikom, poruka, reset lozinke (Srdjan lično).
 - [ ] Google Search Console: poslati `https://loglasi.rs/sitemap.xml`.
 - [ ] Aplikacije: produkciona verzija koristi `https://loglasi.rs/api/v1/` (debug ostaje na probnom).
