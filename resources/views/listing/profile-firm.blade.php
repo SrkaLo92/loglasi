@@ -123,7 +123,7 @@
 							@if ($website !== '' && preg_match('#^https?://#i', $website))
 								<li>{{ Icons::profile('globe', 18) }}<a href="{{ $website }}" target="_blank" rel="noopener nofollow"><span class="lgp-sr">Sajt: </span>{{ $prettyUrl($website) }}</a></li>
 							@endif
-							@unless ($isOwner)
+							@unless ($isOwner || $messageUrl === null)
 								<li>{{ Icons::profile('message', 18) }}<a href="{{ $messageUrl }}" rel="nofollow">Pošaljite poruku preko sajta</a></li>
 							@endunless
 						</ul>
@@ -206,7 +206,7 @@
 	@if ($hasSticky)
 		<div class="lgp-sticky" role="region" aria-label="Brzi kontakt">
 			<a class="lgp-btn lgp-btn--call" href="{{ $links['tel'] }}">{{ Icons::profile('phone') }}<span class="lgp-btn__text">Pozovi firmu</span></a>
-			@unless ($isOwner)
+			@unless ($isOwner || $messageUrl === null)
 				<a class="lgp-btn lgp-btn--line lgp-btn--icon lgp-btn--msg" href="{{ $messageUrl }}" rel="nofollow" aria-label="Pošaljite poruku firmi">{{ Icons::profile('message', 22) }}</a>
 			@endunless
 			@if ($firm->messengerEnabled('whatsapp', $phone))

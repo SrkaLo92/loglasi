@@ -14,6 +14,7 @@ use App\Services\Messages\MessageRejected;
 use App\Services\Messages\Messenger;
 use App\Services\Ratings\SellerRatings;
 use App\Support\Listing\ReportReasons;
+use App\Support\Listing\Seller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -27,6 +28,11 @@ class ConversationController extends Controller
     /** /moj-nalog/poruke/novo/?oglas={id} */
     public function create(Request $request)
     {
+        // Old profile links (?korisnik={id}): a conversation is always about a listing, so use the newest active one.
+        if ($request->query('oglas') === null && $request->query('korisnik') !== null) {
+            return $this->fromProfile($request->query('korisnik'));
+        }
+
         $listing = $this->listing($request->query('oglas'));
         $user = $request->user();
 
@@ -179,6 +185,19 @@ class ConversationController extends Controller
         Report::fileOnce($user, $other, $data['reason'], 'Razgovor #'.$conversation->id.($details !== '' ? ': '.$details : ''));
 
         return redirect()->to(url_slash('moj-nalog/poruke/'.$conversation->id))->with('status', 'Hvala, prijava je poslata moderatorima.');
+    }
+
+    private function fromProfile(mixed $userId)
+    {
+        abort_unless(is_numeric($userId) && (int) $userId > 0, 404);
+        $listingId = Seller::latestListingId((int) $userId);
+
+        if ($listingId === null) {
+            return redirect()->to(url_slash('moj-nalog/poruke'))
+                ->with('status', 'Ovaj korisnik trenutno nema aktivnih oglasa, pa mu ne možete poslati poruku.');
+        }
+
+        return redirect()->to(url_slash('moj-nalog/poruke/novo').'?oglas='.$listingId);
     }
 
     private function listing(mixed $id): Listing

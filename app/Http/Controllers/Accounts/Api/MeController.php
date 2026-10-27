@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ListingImage;
 use App\Models\User;
 use App\Rules\PhoneNumber;
+use App\Rules\PublicName;
 use App\Support\Account\AccountMenu;
 use App\Support\Account\AccountOverview;
 use App\Support\ApiError;
@@ -38,7 +39,7 @@ class MeController extends Controller
         Gate::authorize('update', $user);
 
         $data = $request->validate([
-            'name' => ['sometimes', 'required', 'string', 'min:2', 'max:80'],
+            'name' => ['sometimes', 'required', 'string', 'min:2', 'max:80', new PublicName],
             'phone' => ['sometimes', 'nullable', 'string', 'max:40', new PhoneNumber],
             'location_id' => ['sometimes', 'nullable', 'integer', Rule::exists('locations', 'id')],
             'avatar_media_id' => ['sometimes', 'nullable', 'integer'],

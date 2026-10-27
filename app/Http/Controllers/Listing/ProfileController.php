@@ -83,7 +83,7 @@ class ProfileController extends Controller
             'canEdit' => $canEdit,
             'isOwner' => $viewer !== null && $viewer->id === $user->id,
             'editUrl' => url_slash($isFirm ? 'moj-nalog/firma' : (string) config('listing.profile_edit_path', 'moj-nalog')),
-            'messageUrl' => url_slash('moj-nalog/poruke/novo').'?korisnik='.$user->id,
+            'messageUrl' => $total > 0 ? Seller::profileMessageUrl($user->id) : null,
             'ratingSummary' => $ratings->summary($user->id),
             'ratingLatest' => $user->rating_count > 0 ? $ratings->latest($user->id) : collect(),
         ];

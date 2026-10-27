@@ -72,6 +72,21 @@ class Seller
         return url_slash('moj-nalog/poruke/novo').'?oglas='.$listing->id;
     }
 
+    /** The user's newest active listing, which a message from their profile is about; null when there is none. */
+    public static function latestListingId(int $userId): ?int
+    {
+        $id = Listing::query()->active()->where('user_id', $userId)->latest('bumped_at')->latest('id')->value('id');
+
+        return $id === null ? null : (int) $id;
+    }
+
+    public static function profileMessageUrl(int $userId): ?string
+    {
+        $id = self::latestListingId($userId);
+
+        return $id === null ? null : url_slash('moj-nalog/poruke/novo').'?oglas='.$id;
+    }
+
     public function hasPhone(): bool
     {
         return $this->phone !== '';

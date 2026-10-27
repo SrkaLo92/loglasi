@@ -14,7 +14,7 @@
 			<a class="lgp-btn lgp-btn--line lgp-btn--viber" href="{{ $links['viber'] }}" rel="nofollow">{{ Icons::profile('viber') }}<span class="lgp-btn__text">Viber</span></a>
 		@endif
 	@endif
-	@unless ($isOwner)
+	@unless ($isOwner || $messageUrl === null)
 		<a class="lgp-btn lgp-btn--line{{ $isFirm ? ' lgp-btn--msg' : '' }}" href="{{ $messageUrl }}" rel="nofollow">{{ Icons::profile('message') }}<span class="lgp-btn__text">Poruka</span></a>
 	@endunless
 </div>

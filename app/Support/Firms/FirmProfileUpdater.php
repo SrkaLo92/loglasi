@@ -4,6 +4,7 @@ namespace App\Support\Firms;
 
 use App\Models\Firm;
 use App\Rules\PhoneNumber;
+use App\Rules\PublicName;
 use App\Support\Phone;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -27,7 +28,7 @@ class FirmProfileUpdater
     public static function webRules(): array
     {
         return [
-            'name' => ['required', 'string', 'min:2', 'max:'.self::NAME_MAX],
+            'name' => ['required', 'string', 'min:2', 'max:'.self::NAME_MAX, new PublicName],
             'activity' => ['nullable', 'string', 'max:'.self::ACTIVITY_MAX],
             'description' => ['nullable', 'string', 'max:'.self::DESCRIPTION_MAX],
             'address' => ['nullable', 'string', 'max:'.self::ADDRESS_MAX],
@@ -121,7 +122,7 @@ class FirmProfileUpdater
     public static function apiRules(): array
     {
         return [
-            'name' => ['sometimes', 'required', 'string', 'min:2', 'max:'.self::NAME_MAX],
+            'name' => ['sometimes', 'required', 'string', 'min:2', 'max:'.self::NAME_MAX, new PublicName],
             'about' => ['sometimes', 'nullable', 'string', 'max:'.self::DESCRIPTION_MAX],
             'address' => ['sometimes', 'nullable', 'string', 'max:'.self::ADDRESS_MAX],
             'website' => ['sometimes', 'nullable', 'string', 'max:255'],

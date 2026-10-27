@@ -1,0 +1,83 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Models\Firm;
+use App\Models\Redirect;
+use App\Models\User;
+use App\Support\Accounts\PublicName;
+use App\Support\Auth\Accounts;
+use App\Support\PageCache;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
+/**
+ * Removes e-mail addresses and phone numbers from user and firm names (imported accounts often used
+ * the e-mail as the display name). A user whose name changes gets a new profile slug and a 301 from the old one.
+ */
+class CleanPublicNames extends Command
+{
+    protected $signature = 'users:clean-names {--dry-run : Only list, change nothing}';
+
+    protected $description = 'Remove e-mail addresses and phone numbers from public user and firm names';
+
+    public function handle(): int
+    {
+        $dry = (bool) $this->option('dry-run');
+        $rows = [];
+
+        User::withTrashed()->select(['id', 'name', 'slug'])->orderBy('id')->each(function (User $user) use ($dry, &$rows) {
+            if (! PublicName::hasContact((string) $user->name)) {
+                return;
+            }
+            $name = PublicName::clean((string) $user->name);
+            $slug = $this->newSlug($user, $name);
+            $rows[] = ['korisnik', $user->id, $user->name, $name, $user->slug.' → '.$slug];
+
+            if (! $dry) {
+                DB::transaction(function () use ($user, $name, $slug) {
+                    $old = $user->slug;
+                    $user->forceFill(['name' => $name, 'slug' => $slug])->save();
+                    if ($old !== $slug) {
+                        foreach (['', 'ocene/'] as $suffix) {
+                            Redirect::query()->updateOrCreate(
+                                ['from_path' => '/korisnik/'.$old.'/'.$suffix],
+                                ['to_path' => '/korisnik/'.$slug.'/'.$suffix, 'status_code' => 301],
+                            );
+                        }
+                    }
+                });
+            }
+        });
+
+        Firm::query()->select(['id', 'name'])->orderBy('id')->each(function (Firm $firm) use ($dry, &$rows) {
+            if (! PublicName::hasContact((string) $firm->name)) {
+                return;
+            }
+            $name = PublicName::clean((string) $firm->name);
+            $rows[] = ['firma', $firm->id, $firm->name, $name, ''];
+            if (! $dry) {
+                $firm->forceFill(['name' => $name])->save();
+            }
+        });
+
+        if ($rows !== []) {
+            $this->table(['Vrsta', 'ID', 'Staro ime', 'Novo ime', 'Adresa profila'], $rows);
+        }
+        if (! $dry && $rows !== []) {
+            PageCache::flush();
+        }
+        $this->info(($dry ? 'Za izmenu: ' : 'Izmenjeno: ').count($rows));
+
+        return self::SUCCESS;
+    }
+
+    /** Keeps the slug when the cleaned name gives the same one; otherwise a fresh unique slug. */
+    private function newSlug(User $user, string $name): string
+    {
+        $base = Str::limit(Str::slug($name, '-', 'sr') ?: 'korisnik', 60, '');
+
+        return preg_replace('/-\d+$/', '', (string) $user->slug) === $base ? (string) $user->slug : Accounts::uniqueSlug($name);
+    }
+}

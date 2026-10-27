@@ -7,6 +7,7 @@ use App\Enums\Role;
 use App\Enums\UserStatus;
 use App\Models\User;
 use App\Rules\PhoneNumber;
+use App\Rules\PublicName;
 use App\Support\Phone;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\DB;
@@ -29,7 +30,7 @@ class Accounts
     public static function registrationRules(bool $phoneRequired): array
     {
         return [
-            'name' => ['required', 'string', 'min:2', 'max:80'],
+            'name' => ['required', 'string', 'min:2', 'max:80', new PublicName],
             'email' => ['required', 'string', 'max:191', 'email:rfc'],
             'phone' => [$phoneRequired ? 'required' : 'nullable', 'string', 'max:40', new PhoneNumber],
             'password' => ['required', 'string', 'min:'.self::PASSWORD_MIN, 'max:'.self::PASSWORD_MAX],

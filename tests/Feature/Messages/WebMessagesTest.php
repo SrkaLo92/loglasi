@@ -299,4 +299,31 @@ class WebMessagesTest extends TestCase
             ->assertSee('poruka-'.$messages[1]->id, false)
             ->assertDontSee('poruka-'.$messages[3]->id, false);
     }
+
+    public function test_old_profile_link_goes_to_the_newest_active_listing(): void
+    {
+        $seller = User::factory()->create();
+        Listing::factory()->for($seller)->create(['bumped_at' => now()->subDays(3)]);
+        $newest = Listing::factory()->for($seller)->create(['bumped_at' => now()]);
+
+        $this->actingAs(User::factory()->create())->get('/moj-nalog/poruke/novo/?korisnik='.$seller->id)
+            ->assertRedirect(url_slash('moj-nalog/poruke/novo').'?oglas='.$newest->id);
+    }
+
+    public function test_profile_link_without_active_listings_explains_instead_of_404(): void
+    {
+        $seller = User::factory()->create();
+        Listing::factory()->for($seller)->create(['status' => ListingStatus::Expired]);
+
+        $this->actingAs(User::factory()->create())->get('/moj-nalog/poruke/novo/?korisnik='.$seller->id)
+            ->assertRedirect(url_slash('moj-nalog/poruke'))
+            ->assertSessionHas('status', 'Ovaj korisnik trenutno nema aktivnih oglasa, pa mu ne možete poslati poruku.');
+    }
+
+    public function test_profile_without_active_listings_has_no_message_button(): void
+    {
+        $seller = User::factory()->create();
+
+        $this->get('/korisnik/'.$seller->slug.'/')->assertOk()->assertDontSee('poruke/novo', false);
+    }
 }

@@ -37,7 +37,7 @@ class ProfilePageTest extends TestCase
             ->assertSee('Radno vreme')
             ->assertSee('primer.rs')
             ->assertSee('https://www.google.com/maps/search/?api=1&amp;query=', false)
-            ->assertSee('/moj-nalog/poruke/novo/?korisnik='.$user->id, false)
+            ->assertSee('/moj-nalog/poruke/novo/?oglas='.$listing->id, false)
             ->assertSee($listing->title)
             ->assertDontSee('noindex');
     }

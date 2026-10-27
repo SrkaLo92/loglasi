@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Accounts;
 use App\Http\Controllers\Controller;
 use App\Models\Location;
 use App\Rules\PhoneNumber;
+use App\Rules\PublicName;
 use App\Support\Account\AccountOverview;
 use App\Support\Auth\AccountDeletion;
 use App\Support\Auth\Accounts;
@@ -53,7 +54,7 @@ class MyAccountController extends Controller
         Gate::authorize('update', $user);
 
         $data = $request->validateWithBag('podaci', [
-            'name' => ['required', 'string', 'min:2', 'max:80'],
+            'name' => ['required', 'string', 'min:2', 'max:80', new PublicName],
             'phone' => ['required', 'string', 'max:40', new PhoneNumber],
             'location_id' => ['nullable', 'integer', Rule::exists('locations', 'id')],
         ]);
