@@ -10,6 +10,7 @@ use App\Enums\ReportStatus;
 use App\Filament\Resources\Listings\Pages\EditListing;
 use App\Filament\Resources\Listings\Pages\ListListings;
 use App\Filament\Resources\Users\UserResource;
+use App\Filament\Support\CsvExport;
 use App\Filament\Support\Options;
 use App\Filament\Support\StaffAccess;
 use App\Models\Field;
@@ -211,6 +212,23 @@ class ListingResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->paginationMode(PaginationMode::Simple)
             ->splitSearchTerms(false)
+            ->headerActions([
+                CsvExport::action('oglasi', [
+                    'Br.' => fn (Listing $l) => $l->id,
+                    'Naslov' => fn (Listing $l) => $l->title,
+                    'Kategorija' => fn (Listing $l) => $l->category?->name,
+                    'Mesto' => fn (Listing $l) => $l->location?->name,
+                    'Cena' => fn (Listing $l) => $l->price,
+                    'Valuta' => fn (Listing $l) => $l->currency,
+                    'Status' => fn (Listing $l) => $l->status,
+                    'Vlasnik' => fn (Listing $l) => $l->user?->name,
+                    'E-pošta vlasnika' => fn (Listing $l) => $l->user?->email,
+                    'Pregledi' => fn (Listing $l) => $l->views,
+                    'Postavljen' => fn (Listing $l) => $l->created_at,
+                    'Ističe' => fn (Listing $l) => $l->expires_at,
+                    'Link' => fn (Listing $l) => $l->url(),
+                ], ['user:id,name,email', 'category:id,name,slug,parent_id', 'location:id,name']),
+            ])
             ->columns([
                 TextColumn::make('id')->label('Br.')->sortable()->toggleable(),
                 TextColumn::make('title')

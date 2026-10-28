@@ -5,6 +5,7 @@ namespace App\Services\Admin;
 use App\Enums\ListingStatus;
 use App\Enums\OrderStatus;
 use App\Enums\ReportStatus;
+use App\Enums\UserStatus;
 use App\Models\Firm;
 use App\Models\Listing;
 use App\Models\Message;
@@ -79,7 +80,7 @@ class AdminStats
     /**
      * Listings per status right now, plus all users and firms (cached TTL seconds).
      *
-     * @return array{all: int, published: int, pending: int, rejected: int, expired: int, users: int, firms: int}
+     * @return array{all: int, published: int, pending: int, rejected: int, expired: int, users: int, blocked: int, app_users: int, firms: int, firms_paid: int}
      */
     public function counts(): array
     {
@@ -94,7 +95,10 @@ class AdminStats
                 'rejected' => $get(ListingStatus::Rejected),
                 'expired' => $get(ListingStatus::Expired),
                 'users' => User::query()->count(),
+                'blocked' => User::query()->where('status', UserStatus::Blocked)->count(),
+                'app_users' => User::query()->whereHas('devices')->count(),
                 'firms' => Firm::query()->count(),
+                'firms_paid' => Firm::query()->where('package_ends_at', '>', now())->count(),
             ];
         });
     }

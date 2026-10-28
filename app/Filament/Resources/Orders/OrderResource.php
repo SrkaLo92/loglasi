@@ -7,6 +7,7 @@ use App\Enums\OrderStatus;
 use App\Filament\Resources\Listings\ListingResource;
 use App\Filament\Resources\Orders\Pages\ListOrders;
 use App\Filament\Resources\Users\UserResource;
+use App\Filament\Support\CsvExport;
 use App\Filament\Support\Options;
 use App\Filament\Support\StaffAccess;
 use App\Models\Order;
@@ -131,6 +132,20 @@ class OrderResource extends Resource
     {
         return $table
             ->defaultSort('created_at', 'desc')
+            ->headerActions([
+                CsvExport::action('narudzbine', [
+                    'Poziv na broj' => fn (Order $o) => $o->reference,
+                    'Kupac' => fn (Order $o) => $o->user?->name,
+                    'E-pošta' => fn (Order $o) => $o->user?->email,
+                    'Usluga' => fn (Order $o) => $o->product?->name,
+                    'Oglas' => fn (Order $o) => $o->listing_id,
+                    'Iznos (din)' => fn (Order $o) => $o->amount_rsd,
+                    'Status' => fn (Order $o) => $o->status,
+                    'Test' => fn (Order $o) => (bool) $o->is_test,
+                    'Kreirana' => fn (Order $o) => $o->created_at,
+                    'Plaćena' => fn (Order $o) => $o->paid_at,
+                ], ['user', 'product']),
+            ])
             ->columns([
                 ...static::columns(),
                 ...static::paymentColumns(),

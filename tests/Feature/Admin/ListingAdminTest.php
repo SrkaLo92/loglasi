@@ -3,12 +3,14 @@
 namespace Tests\Feature\Admin;
 
 use App\Enums\ListingStatus;
+use App\Filament\Resources\Listings\ListingResource;
 use App\Filament\Resources\Listings\Pages\EditListing;
 use App\Filament\Resources\Listings\Pages\ListListings;
 use App\Mail\Admin\ListingStatusMail;
 use App\Models\AuditLog;
 use App\Models\Field;
 use App\Models\Listing;
+use App\Services\Admin\AdminStats;
 use App\Services\Admin\ListingModeration;
 use App\Services\Catalog;
 use App\Support\Settings;
@@ -236,8 +238,8 @@ class ListingAdminTest extends TestCase
         Listing::factory()->pending()->create();
         $this->signIn($this->admin());
 
-        $this->assertSame(['all' => 3, 'published' => 2, 'pending' => 1], array_intersect_key(app(\App\Services\Admin\AdminStats::class)->counts(), array_flip(['all', 'published', 'pending'])));
+        $this->assertSame(['all' => 3, 'published' => 2, 'pending' => 1], array_intersect_key(app(AdminStats::class)->counts(), array_flip(['all', 'published', 'pending'])));
         $this->get('/admin')->assertOk()->assertSee('Na sajtu')->assertSee('Aktivnih oglasa');
-        $this->get(\App\Filament\Resources\Listings\ListingResource::getUrl('edit', ['record' => Listing::query()->first()]))->assertSee('Oglas br. ');
+        $this->get(ListingResource::getUrl('edit', ['record' => Listing::query()->first()]))->assertSee('Oglas br. ');
     }
 }

@@ -2,12 +2,13 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Resources\Firms\FirmResource;
 use App\Filament\Resources\Listings\ListingResource;
 use App\Filament\Resources\Users\UserResource;
 use App\Services\Admin\AdminStats;
 use Filament\Widgets\Widget;
 
-/** "Na sajtu": how many listings there are now (per status), users and firms. */
+/** "Na sajtu": listings per status, users, app users, firms and paying firms right now. */
 class ListingTotals extends Widget
 {
     protected string $view = 'admin.widgets.queue';
@@ -30,6 +31,10 @@ class ListingTotals extends Widget
             ['label' => 'Odbijenih', 'count' => $c['rejected'], 'url' => $listings('rejected')],
             ['label' => 'Svih oglasa', 'count' => $c['all'], 'url' => $listings('all')],
             ['label' => 'Korisnika', 'count' => $c['users'], 'url' => UserResource::getUrl('index')],
+            ['label' => 'Koristi aplikaciju', 'count' => $c['app_users'], 'url' => UserResource::getUrl('index', ['tableFilters' => ['has_app' => ['value' => '1']]])],
+            ['label' => 'Blokiranih', 'count' => $c['blocked'], 'url' => UserResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'blocked']]])],
+            ['label' => 'Firmi', 'count' => $c['firms'], 'url' => FirmResource::getUrl('index')],
+            ['label' => 'Firmi sa paketom', 'count' => $c['firms_paid'], 'url' => FirmResource::getUrl('index', ['tableFilters' => ['active_package' => ['value' => '1']]])],
         ]];
     }
 }

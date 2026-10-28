@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Firm extends Model
 {
@@ -44,6 +45,12 @@ class Firm extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
+    }
+
+    /** The owner's listings (a firm posts through its user account). */
+    public function listings(): HasMany
+    {
+        return $this->hasMany(Listing::class, 'user_id', 'user_id');
     }
 
     /** Active Business package or free first year (App\Support\Firms\FirmPackage). */

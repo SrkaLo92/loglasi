@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users;
 
 use App\Enums\AccountType;
+use App\Enums\ListingStatus;
 use App\Enums\Role;
 use App\Enums\UserStatus;
 use App\Filament\Resources\Firms\FirmResource;
@@ -11,6 +12,7 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\RelationManagers\ListingsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\OrdersRelationManager;
+use App\Filament\Support\CsvExport;
 use App\Filament\Support\Options;
 use App\Models\User;
 use App\Rules\PhoneNumber;
@@ -180,7 +182,26 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->withCount('listings')->with('firm'))
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                ->withCount(['listings', 'listings as active_listings_count' => fn ($q) => $q->where('status', ListingStatus::Published), 'devices'])
+                ->with('firm'))
+            ->headerActions([
+                CsvExport::action('korisnici', [
+                    'ID' => fn (User $u) => $u->id,
+                    'Ime' => fn (User $u) => $u->name,
+                    'E-pošta' => fn (User $u) => $u->email,
+                    'Telefon' => fn (User $u) => $u->phone,
+                    'Telefon potvrđen' => fn (User $u) => $u->phone_verified_at !== null,
+                    'Vrsta' => fn (User $u) => $u->account_type,
+                    'Uloga' => fn (User $u) => $u->role,
+                    'Status' => fn (User $u) => $u->status,
+                    'Oglasa' => fn (User $u) => $u->listings_count,
+                    'Aktivnih oglasa' => fn (User $u) => $u->active_listings_count,
+                    'Aplikacija' => fn (User $u) => $u->devices_count > 0,
+                    'Registrovan' => fn (User $u) => $u->created_at,
+                    'Poslednja prijava' => fn (User $u) => $u->last_login_at,
+                ]),
+            ])
             // "065 541 5128" is one phone number, not three words.
             ->splitSearchTerms(false)
             ->defaultSort('created_at', 'desc')
@@ -221,8 +242,17 @@ class UserResource extends Resource
                     ->badge()
                     ->formatStateUsing(fn (UserStatus $state) => $state->label())
                     ->color(fn (UserStatus $state) => $state === UserStatus::Blocked ? 'danger' : 'success'),
-                TextColumn::make('listings_count')->label('Oglasi')->sortable(),
+                TextColumn::make('listings_count')->label('Oglasi')->sortable()
+                    ->description(fn (User $record) => $record->active_listings_count.' aktivnih'),
+                IconColumn::make('has_app')
+                    ->label('Aplikacija')
+                    ->state(fn (User $record) => $record->devices_count > 0)
+                    ->boolean()
+                    ->trueIcon(Heroicon::OutlinedDevicePhoneMobile)
+                    ->falseIcon(Heroicon::OutlinedMinus)
+                    ->toggleable(),
                 TextColumn::make('created_at')->label('Registrovan')->date('j. n. Y.')->sortable(),
+                TextColumn::make('last_login_at')->label('Poslednja prijava')->since()->dateTimeTooltip('j. n. Y. H:i')->sortable()->placeholder('nikad')->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('account_type')->label('Vrsta naloga')->options(Options::enum(AccountType::class)),
@@ -231,6 +261,35 @@ class UserResource extends Resource
                     ->query(fn (Builder $query) => LikelyFirm::scope($query)),
                 SelectFilter::make('role')->label('Uloga')->options(Options::enum(Role::class)),
                 SelectFilter::make('status')->label('Status')->options(Options::enum(UserStatus::class)),
+                SelectFilter::make('registered')
+                    ->label('Registrovan')
+                    ->options(['1' => 'danas', '7' => 'poslednjih 7 dana', '30' => 'poslednjih 30 dana'])
+                    ->query(fn (Builder $query, array $data) => filled($data['value'] ?? null)
+                        ? $query->where('created_at', '>=', now()->subDays((int) $data['value'] - 1)->startOfDay()) : $query),
+                SelectFilter::make('inactive')
+                    ->label('Nije se prijavio')
+                    ->options(['30' => 'više od 30 dana', '90' => 'više od 90 dana', 'never' => 'nikad'])
+                    ->query(fn (Builder $query, array $data) => match ($data['value'] ?? null) {
+                        'never' => $query->whereNull('last_login_at'),
+                        '30', '90' => $query->where(fn ($q) => $q->whereNull('last_login_at')->orWhere('last_login_at', '<', now()->subDays((int) $data['value']))),
+                        default => $query,
+                    }),
+                TernaryFilter::make('has_app')
+                    ->label('Aplikacija')
+                    ->trueLabel('Koristi aplikaciju')
+                    ->falseLabel('Ne koristi')
+                    ->queries(
+                        true: fn (Builder $query) => $query->whereHas('devices'),
+                        false: fn (Builder $query) => $query->whereDoesntHave('devices'),
+                    ),
+                TernaryFilter::make('has_active')
+                    ->label('Aktivni oglasi')
+                    ->trueLabel('Ima aktivnih')
+                    ->falseLabel('Nema aktivnih')
+                    ->queries(
+                        true: fn (Builder $query) => $query->whereHas('listings', fn ($q) => $q->where('status', ListingStatus::Published)),
+                        false: fn (Builder $query) => $query->whereDoesntHave('listings', fn ($q) => $q->where('status', ListingStatus::Published)),
+                    ),
                 TernaryFilter::make('phone_verified')
                     ->label('Telefon')
                     ->trueLabel('Potvrđen')

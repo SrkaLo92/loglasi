@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\Firms;
 
+use App\Enums\ListingStatus;
 use App\Filament\Resources\Firms\Pages\EditFirm;
 use App\Filament\Resources\Firms\Pages\ListFirms;
 use App\Filament\Resources\Users\UserResource;
+use App\Filament\Support\CsvExport;
 use App\Filament\Support\Options;
 use App\Filament\Support\StaffAccess;
 use App\Models\Firm;
@@ -145,8 +147,24 @@ class FirmResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['user', 'location']))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['user', 'location'])
+                ->withCount(['listings as active_listings_count' => fn ($q) => $q->where('listings.status', ListingStatus::Published)]))
             ->defaultSort('created_at', 'desc')
+            ->headerActions([
+                CsvExport::action('firme', [
+                    'ID' => fn (Firm $f) => $f->id,
+                    'Naziv' => fn (Firm $f) => $f->name,
+                    'Mesto' => fn (Firm $f) => $f->location?->name,
+                    'E-pošta naloga' => fn (Firm $f) => $f->user?->email,
+                    'Telefon' => fn (Firm $f) => $f->phone ?: $f->user?->phone,
+                    'Paket' => fn (Firm $f) => FirmPackage::label($f),
+                    'Važi do' => fn (Firm $f) => $f->package_ends_at,
+                    'Aktivnih oglasa' => fn (Firm $f) => $f->active_listings_count,
+                    'Prvih 30' => fn (Firm $f) => (bool) $f->founding_free,
+                    'Proverena' => fn (Firm $f) => $f->verified_at !== null,
+                    'Dodata' => fn (Firm $f) => $f->created_at,
+                ], ['user', 'location']),
+            ])
             ->columns([
                 ImageColumn::make('logo_path')->label('Logo')->disk('public')->circular()->imageSize(40),
                 TextColumn::make('name')->label('Naziv')->searchable()->sortable()->description(fn (Firm $r) => $r->location?->name),
@@ -163,8 +181,11 @@ class FirmResource extends Resource
                 TextColumn::make('package_ends_at')
                     ->label('Važi do')
                     ->date('j. n. Y.')
+                    ->description(fn (Firm $r) => $r->package_ends_at && $r->package_ends_at->isFuture()
+                        ? 'još '.(int) now()->startOfDay()->diffInDays($r->package_ends_at->copy()->startOfDay()).' d.' : null)
                     ->placeholder('—')
                     ->sortable(),
+                TextColumn::make('active_listings_count')->label('Aktivnih oglasa')->sortable()->toggleable(),
                 IconColumn::make('founding_free')->label('Prvih 30')->boolean(),
                 IconColumn::make('verified_at')->label('Proverena')->state(fn (Firm $r) => $r->verified_at !== null)->boolean(),
                 TextColumn::make('created_at')->label('Dodata')->date('j. n. Y.')->sortable(),
@@ -180,6 +201,20 @@ class FirmResource extends Resource
                     ),
                 SelectFilter::make('package')->label('Vrsta paketa')->options(FirmActions::packageOptions()),
                 TernaryFilter::make('founding_free')->label('Prvih 30 firmi'),
+                SelectFilter::make('ends_within')
+                    ->label('Paket ističe')
+                    ->options(['7' => 'za 7 dana', '14' => 'za 14 dana', '30' => 'za 30 dana', 'expired' => 'već istekao'])
+                    ->query(fn (Builder $query, array $data) => match ($data['value'] ?? null) {
+                        'expired' => $query->whereNotNull('package_ends_at')->where('package_ends_at', '<=', now()),
+                        '7', '14', '30' => $query->whereBetween('package_ends_at', [now(), now()->addDays((int) $data['value'])]),
+                        default => $query,
+                    }),
+                TernaryFilter::make('verified')
+                    ->label('Proverena')
+                    ->queries(
+                        true: fn (Builder $query) => $query->whereNotNull('verified_at'),
+                        false: fn (Builder $query) => $query->whereNull('verified_at'),
+                    ),
             ])
             ->recordActions([EditAction::make(), ActionGroup::make(FirmActions::all())]);
     }
