@@ -21,6 +21,12 @@ class EditListing extends EditRecord
 {
     protected static string $resource = ListingResource::class;
 
+    /** The listing number, as in the table and in "Pretraži" (search by number). */
+    public function getSubheading(): ?string
+    {
+        return 'Oglas br. '.$this->getRecord()->getKey();
+    }
+
     protected function getHeaderActions(): array
     {
         return [

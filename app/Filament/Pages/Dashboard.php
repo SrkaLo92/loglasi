@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Widgets\DailyChart;
+use App\Filament\Widgets\ListingTotals;
 use App\Filament\Widgets\PeriodStats;
 use App\Filament\Widgets\QueueCounters;
 use App\Filament\Widgets\TopCategories;
@@ -18,6 +19,7 @@ class Dashboard extends BaseDashboard
     {
         return [
             QueueCounters::class,
+            ListingTotals::class,
             PeriodStats::class,
             DailyChart::class,
             TopCategories::class,

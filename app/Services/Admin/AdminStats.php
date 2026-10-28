@@ -76,6 +76,29 @@ class AdminStats
      *
      * @return array{listings: int, users: int, firms: int, views: int, reveals: int, orders: int, revenue: int}
      */
+    /**
+     * Listings per status right now, plus all users and firms (cached TTL seconds).
+     *
+     * @return array{all: int, published: int, pending: int, rejected: int, expired: int, users: int, firms: int}
+     */
+    public function counts(): array
+    {
+        return Cache::remember('admin.stats.counts', self::TTL, function () {
+            $byStatus = Listing::query()->toBase()->selectRaw('status, COUNT(*) AS n')->groupBy('status')->pluck('n', 'status');
+            $get = fn (ListingStatus $s) => (int) ($byStatus[$s->value] ?? 0);
+
+            return [
+                'all' => (int) $byStatus->sum(),
+                'published' => $get(ListingStatus::Published),
+                'pending' => $get(ListingStatus::Pending),
+                'rejected' => $get(ListingStatus::Rejected),
+                'expired' => $get(ListingStatus::Expired),
+                'users' => User::query()->count(),
+                'firms' => Firm::query()->count(),
+            ];
+        });
+    }
+
     public function totals(string $period): array
     {
         return Cache::remember('admin.stats.totals.'.$period, self::TTL, function () use ($period) {

@@ -229,4 +229,15 @@ class ListingAdminTest extends TestCase
 
         $this->assertSame([['naziv' => 'Duplikat', 'tekst' => 'Isti oglas već postoji.']], ListingModeration::rejectionReasons());
     }
+
+    public function test_dashboard_and_tabs_show_listing_counts(): void
+    {
+        Listing::factory()->count(2)->create();
+        Listing::factory()->pending()->create();
+        $this->signIn($this->admin());
+
+        $this->assertSame(['all' => 3, 'published' => 2, 'pending' => 1], array_intersect_key(app(\App\Services\Admin\AdminStats::class)->counts(), array_flip(['all', 'published', 'pending'])));
+        $this->get('/admin')->assertOk()->assertSee('Na sajtu')->assertSee('Aktivnih oglasa');
+        $this->get(\App\Filament\Resources\Listings\ListingResource::getUrl('edit', ['record' => Listing::query()->first()]))->assertSee('Oglas br. ');
+    }
 }

@@ -212,7 +212,7 @@ class ListingResource extends Resource
             ->paginationMode(PaginationMode::Simple)
             ->splitSearchTerms(false)
             ->columns([
-                TextColumn::make('id')->label('ID')->sortable()->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('id')->label('Br.')->sortable()->toggleable(),
                 TextColumn::make('title')
                     ->label('Naslov')
                     ->searchable(query: fn (Builder $query, string $search) => static::search($query, $search))
