@@ -46,4 +46,16 @@ class GoogleTagTest extends TestCase
         Settings::set('google_site_verification', 'abc123XYZ');
         $this->get('/')->assertSee('<meta name="google-site-verification" content="abc123XYZ">', false);
     }
+
+    public function test_no_tag_and_no_referrer_on_pages_with_a_secret_in_the_address(): void
+    {
+        $this->app['env'] = 'production';
+
+        $this->get('/nova-lozinka/'.str_repeat('a', 64).'/?email=ana%40gmail.com')->assertOk()
+            ->assertDontSee('googletagmanager.com', false)
+            ->assertHeader('Referrer-Policy', 'no-referrer');
+
+        $this->get('/')->assertSee('googletagmanager.com', false)
+            ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\SecretUrl;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Vite;
@@ -25,7 +26,7 @@ class SecurityHeaders
 
         $headers->set('X-Content-Type-Options', 'nosniff');
         $headers->set('X-Frame-Options', 'SAMEORIGIN');
-        $headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        $headers->set('Referrer-Policy', SecretUrl::is($request) ? 'no-referrer' : 'strict-origin-when-cross-origin');
         $headers->set('Permissions-Policy', 'camera=(), microphone=(), payment=(), usb=(), interest-cohort=()');
         $headers->set('Cross-Origin-Opener-Policy', 'same-origin');
         $headers->remove('X-Powered-By');

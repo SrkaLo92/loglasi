@@ -1,10 +1,12 @@
-{{-- Google: Search Console verification (when set in the admin) and the Google tag, only in production.
+{{-- Google: Search Console verification (when set in the admin) and the Google tag, only in production
+     and never on pages with a secret in the address (SecretUrl).
      The tag starts with every consent denied; the visitor's choice in the cookie bar updates it. --}}
 @use('App\Support\Settings')
+@use('App\Support\SecretUrl')
 @php
 	$lgVerify = trim((string) Settings::get('google_site_verification'));
 	$lgTag = trim((string) Settings::get('google_tag_id'));
-	$lgTagOn = app()->environment('production') && preg_match('/^(GT|G|AW)-[A-Z0-9]{4,20}$/', $lgTag) === 1;
+	$lgTagOn = app()->environment('production') && ! SecretUrl::is() && preg_match('/^(GT|G|AW)-[A-Z0-9]{4,20}$/', $lgTag) === 1;
 @endphp
 @if ($lgVerify !== '')
 <meta name="google-site-verification" content="{{ $lgVerify }}">
