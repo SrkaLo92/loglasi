@@ -19,6 +19,7 @@ use App\Rules\PhoneNumber;
 use App\Rules\PublicName;
 use App\Support\Firms\FirmPackage;
 use App\Support\LikelyFirm;
+use App\Support\ListingLimits;
 use App\Support\Phone;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -195,6 +196,14 @@ class UserResource extends Resource
                         ->formatStateUsing(fn (string $state) => '/korisnik/'.$state.'/'),
                     TextEntry::make('created_at')->label('Registrovan')->dateTime('j. n. Y. H:i'),
                     TextEntry::make('last_login_at')->label('Poslednja prijava')->dateTime('j. n. Y. H:i')->placeholder('—'),
+                    TextEntry::make('listing_limit_info')
+                        ->label('Aktivnih oglasa / limit')
+                        ->state(function (User $record) {
+                            $limit = ListingLimits::monthlyLimit($record);
+
+                            return ListingLimits::activeCount($record).' / '.($limit ?? 'bez ograničenja')
+                                .($record->listing_limit !== null ? ' (lični limit)' : '');
+                        }),
                     TextEntry::make('email_verified_at')->label('E-pošta potvrđena')->dateTime('j. n. Y.')->placeholder('Nije potvrđena'),
                 ]),
             Section::make('Firma')

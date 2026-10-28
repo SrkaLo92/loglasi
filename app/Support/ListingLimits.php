@@ -18,6 +18,7 @@ use Carbon\CarbonImmutable;
  * A firm without an active package has the private limit. Extra listings bought for 30 days
  * (ListingSlots, payments module) are added to the private limit. Plus prodavac (PlusSeller) raises it
  * to 100, except for listings in services and jobs (pass the category).
+ * An admin can give one account a personal limit (users.listing_limit); it applies when it is higher.
  * A slot frees when a listing expires, is sold, rejected or deleted.
  * The API keeps the contract names (monthly_limit, used_this_month, resets_at).
  */
@@ -53,6 +54,15 @@ class ListingLimits
 
     /** null = no limit. */
     public static function monthlyLimit(User $user, ?Category $category = null): ?int
+    {
+        $limit = static::standardLimit($user, $category);
+        $personal = $user->listing_limit;
+
+        return $limit === null || $personal === null ? $limit : max($limit, (int) $personal);
+    }
+
+    /** The limit from settings and packages, without the admin's personal limit. */
+    public static function standardLimit(User $user, ?Category $category = null): ?int
     {
         if ($user->isFirm()) {
             $firm = $user->firm;

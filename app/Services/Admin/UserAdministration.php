@@ -137,6 +137,14 @@ class UserAdministration
         return $applied;
     }
 
+    /** Personal active-listing limit; null returns the account to the normal limit. */
+    public function setListingLimit(User $user, ?int $limit): void
+    {
+        $old = $user->listing_limit;
+        $user->forceFill(['listing_limit' => $limit])->save();
+        AuditLog::record('user.listing_limit', $user, ['old' => $old, 'new' => $limit]);
+    }
+
     /** Running packages given by an admin (Plus prodavac terms and extra listings without an order). */
     public static function runningGifts(User $user): array
     {

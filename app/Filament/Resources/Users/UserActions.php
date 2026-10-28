@@ -9,6 +9,7 @@ use App\Filament\Support\Notify;
 use App\Filament\Support\Options;
 use App\Models\User;
 use App\Services\Admin\UserAdministration;
+use App\Support\ListingLimits;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -168,6 +169,30 @@ class UserActions
             ->action(fn (User $record) => Notify::run(fn () => self::service()->endGifts($record), 'Dodeljeni paketi su prekinuti.'));
     }
 
+    /** Permanent personal limit, e.g. for a long-time seller with many listings. */
+    public static function listingLimit(): Action
+    {
+        return Action::make('listingLimit')
+            ->label('Limit oglasa')
+            ->icon(Heroicon::OutlinedAdjustmentsHorizontal)
+            ->color('gray')
+            ->visible(fn () => self::isAdmin())
+            ->fillForm(fn (User $record) => ['limit' => $record->listing_limit])
+            ->schema([
+                TextInput::make('limit')
+                    ->label('Lični limit aktivnih oglasa')
+                    ->integer()->minValue(1)->maxValue(10000)
+                    ->helperText('Prazno = kao svi ostali. Važi trajno, dok ga ne obrišete.'),
+            ])
+            ->modalDescription(fn (User $record) => 'Sada: '.ListingLimits::activeCount($record).' aktivnih, standardni limit '
+                .(ListingLimits::standardLimit($record) ?? 'bez ograničenja').'. Lični limit važi samo ako je veći od standardnog.')
+            ->modalSubmitActionLabel('Sačuvaj')
+            ->action(fn (User $record, array $data) => Notify::run(
+                fn () => self::service()->setListingLimit($record, filled($data['limit'] ?? null) ? (int) $data['limit'] : null),
+                'Limit oglasa je sačuvan.',
+            ));
+    }
+
     private static function giftsText(User $record): string
     {
         $gifts = UserAdministration::runningGifts($record);
@@ -190,6 +215,7 @@ class UserActions
             self::firmPackage(),
             self::giftPackage(),
             self::endGifts(),
+            self::listingLimit(),
             self::changeRole(),
             self::block(),
             self::unblock(),
