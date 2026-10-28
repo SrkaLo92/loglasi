@@ -13,7 +13,8 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
 
 /**
- * Push copy of a bell notification (listing approved/rejected, listing saved) for the apps.
+ * Push copy of a bell notification for the apps (every bell type except rating and saved_search,
+ * which have their own push in NewRatingNotification and SavedSearchDigestNotification).
  * data: type (same as the bell item), notification_id, listing_id.
  */
 class InAppPushNotification extends Notification implements ShouldQueue
@@ -27,6 +28,10 @@ class InAppPushNotification extends Notification implements ShouldQueue
         InAppNotifications::LISTING_APPROVED => 'listing_status',
         InAppNotifications::LISTING_REJECTED => 'listing_status',
         InAppNotifications::FAVORITE => 'messages',
+        InAppNotifications::LISTING_EXPIRING => 'expiring',
+        InAppNotifications::LISTING_EXPIRED => 'expiring',
+        InAppNotifications::ORDER_PAID => 'payments',
+        InAppNotifications::PACKAGE_EXPIRING => 'payments',
     ];
 
     public function __construct(public UserNotification $item)

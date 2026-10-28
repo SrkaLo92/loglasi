@@ -10,6 +10,7 @@ use App\Models\Firm;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Notifications\InAppNotifications;
 use App\Services\Payments\BumpCredits;
 use App\Services\Payments\Effects;
 use App\Services\Payments\FiscalReceiptIssuer;
@@ -129,6 +130,7 @@ class OrderFulfillment
 
         if ($activated && $order->user) {
             Mail::to($order->user)->queue(new OrderPaid($order));
+            app(InAppNotifications::class)->orderPaid((int) $order->user_id, (string) $order->product?->name, $order->listing_id ? (int) $order->listing_id : null);
         }
 
         return $activated;

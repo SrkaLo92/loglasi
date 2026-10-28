@@ -7,6 +7,7 @@ use App\Mail\ListingExpired;
 use App\Mail\ListingExpiringSoon;
 use App\Models\Listing;
 use App\Services\Catalog;
+use App\Services\Notifications\InAppNotifications;
 use App\Services\Posting;
 use App\Services\SearchIndex;
 use App\Support\Seo\Sitemap;
@@ -71,6 +72,7 @@ class ExpireListings extends Command
                     $user = $listing->user;
                     if ($user && $user->email && ! $user->isBlocked() && $user->notificationSettings()['expiring']) {
                         Mail::to($user)->queue(new ListingExpired($listing));
+                        app(InAppNotifications::class)->expired($listing);
                         $count++;
                     }
                 });
@@ -94,6 +96,7 @@ class ExpireListings extends Command
                     $user = $listing->user;
                     if ($user && $user->email && ! $user->isBlocked() && $user->notificationSettings()['expiring']) {
                         Mail::to($user)->queue(new ListingExpiringSoon($listing));
+                        app(InAppNotifications::class)->expiring($listing);
                         $count++;
                     }
                     Listing::query()->whereKey($listing->id)->update(['expiry_notified_at' => now()]);

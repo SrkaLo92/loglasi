@@ -2,11 +2,13 @@
 
 namespace Tests\Feature\Notifications;
 
+use App\Enums\Role;
 use App\Mail\Admin\ListingStatusMail;
 use App\Models\Device;
 use App\Models\Listing;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Notifications\AdminQueuePushNotification;
 use App\Notifications\InAppPushNotification;
 use App\Services\Admin\ListingModeration;
 use App\Services\Notifications\InAppNotifications;
@@ -85,5 +87,44 @@ class InAppPushTest extends TestCase
         app(ListingModeration::class)->approve($listing);
 
         Notification::assertNotSentTo($owner, InAppPushNotification::class);
+    }
+
+    public function test_expiring_expired_and_package_pushes_use_their_types(): void
+    {
+        Notification::fake();
+        $owner = $this->ownerWithPhone();
+        $listing = Listing::factory()->for($owner)->create(['title' => 'Bicikl']);
+        $inApp = app(InAppNotifications::class);
+
+        $inApp->expiring($listing);
+        $inApp->expired($listing);
+        $inApp->packageExpiring($owner->id, 3);
+        $inApp->orderPaid($owner->id, 'Istaknut oglas', $listing->id);
+
+        $types = [];
+        Notification::assertSentTo($owner, InAppPushNotification::class, function (InAppPushNotification $n) use ($owner, &$types) {
+            $types[] = $n->toPush($owner)->stringData()['type'];
+
+            return true;
+        });
+        sort($types);
+        $this->assertSame(['listing_expired', 'listing_expiring', 'order_paid', 'package_expiring'], $types);
+    }
+
+    public function test_pending_listing_pushes_to_staff_with_a_phone(): void
+    {
+        Notification::fake();
+        $admin = $this->ownerWithPhone(['role' => Role::Admin]);
+        $adminWithoutPhone = User::factory()->create(['role' => Role::Admin]);
+        $listing = Listing::factory()->pending()->create();
+
+        app(InAppNotifications::class)->pendingForReview($listing);
+
+        Notification::assertSentTo($admin, AdminQueuePushNotification::class, function ($n) use ($admin, $listing) {
+            $data = $n->toPush($admin)->stringData();
+
+            return $n->via($admin) !== [] && $data['type'] === 'listing_pending' && $data['listing_id'] === (string) $listing->id;
+        });
+        Notification::assertNotSentTo($adminWithoutPhone, AdminQueuePushNotification::class);
     }
 }

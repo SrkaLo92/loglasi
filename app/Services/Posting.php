@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Listing;
 use App\Models\ListingImage;
 use App\Models\User;
+use App\Services\Notifications\InAppNotifications;
 use App\Support\Listing\Text;
 use App\Support\ListingLimits;
 use App\Support\Phone;
@@ -407,6 +408,7 @@ class Posting
                 $listing->status = ListingStatus::Pending;
                 $listing->expires_at = now()->addDays($this->durationDays());
                 $listing->save();
+                app(InAppNotifications::class)->pendingForReview($listing);
             } else {
                 $this->activate($listing);
             }
@@ -485,6 +487,7 @@ class Posting
         if (! $actor->isStaff() && $owner && $this->needsReview($owner)) {
             $listing->status = ListingStatus::Pending;
             $listing->save();
+            app(InAppNotifications::class)->pendingForReview($listing);
         }
     }
 

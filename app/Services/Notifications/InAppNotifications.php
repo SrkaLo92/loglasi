@@ -2,12 +2,15 @@
 
 namespace App\Services\Notifications;
 
+use App\Enums\Role;
+use App\Enums\UserStatus;
 use App\Http\Api\ListingFormatter;
 use App\Models\Listing;
 use App\Models\SavedSearch;
 use App\Models\SellerRating;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Notifications\AdminQueuePushNotification;
 use App\Notifications\InAppPushNotification;
 use App\Support\Pages\Pricing;
 use Illuminate\Support\Collection;
@@ -34,6 +37,17 @@ class InAppNotifications
     public const LISTING_REJECTED = 'listing_rejected';
 
     public const SAVED_SEARCH = 'saved_search';
+
+    public const LISTING_EXPIRING = 'listing_expiring';
+
+    public const LISTING_EXPIRED = 'listing_expired';
+
+    public const ORDER_PAID = 'order_paid';
+
+    public const PACKAGE_EXPIRING = 'package_expiring';
+
+    /** Push-only type for staff (no bell item): a listing waits for approval. */
+    public const LISTING_PENDING = 'listing_pending';
 
     public const PER_PAGE = 30;
 
@@ -74,6 +88,43 @@ class InAppNotifications
 
         // Sent right away: the owner is usually waiting for this one.
         $this->push($item, now: true);
+    }
+
+    /** The listing expires in a few days (ExpireListings), with the same push. */
+    public function expiring(Listing $listing): void
+    {
+        $this->push($this->add((int) $listing->user_id, self::LISTING_EXPIRING, ['listing_id' => $listing->id], ['title' => $listing->title]));
+    }
+
+    public function expired(Listing $listing): void
+    {
+        $this->push($this->add((int) $listing->user_id, self::LISTING_EXPIRED, ['listing_id' => $listing->id], ['title' => $listing->title]));
+    }
+
+    /** The paid service is switched on. */
+    public function orderPaid(int $userId, string $product, ?int $listingId = null): void
+    {
+        $this->push($this->add($userId, self::ORDER_PAID, ['listing_id' => $listingId], ['product' => $product]));
+    }
+
+    public function packageExpiring(int $userId, int $daysLeft): void
+    {
+        $this->push($this->add($userId, self::PACKAGE_EXPIRING, [], ['days' => $daysLeft]));
+    }
+
+    /** Push to active staff with a phone and the "admin_queue" app setting on. */
+    public function pendingForReview(Listing $listing): void
+    {
+        $staff = User::query()->whereIn('role', [Role::Admin, Role::Moderator])->where('status', UserStatus::Active)
+            ->whereKeyNot($listing->user_id)->whereHas('devices')->get();
+
+        foreach ($staff as $user) {
+            try {
+                $user->notify(new AdminQueuePushNotification($listing));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
     }
 
     /** New listings for a saved search (from the matcher's digest), one notification per search and run. */
@@ -149,6 +200,10 @@ class InAppNotifications
                 isset($d['title']) ? 'Oglas „'.$d['title'].'”' : null, $n->user ? url_slash('korisnik/'.$n->user->slug.'/ocene') : url_slash('moj-nalog')],
             self::LISTING_APPROVED => ['check', 'green', 'Vaš oglas je objavljen', '„'.$title.'”', $listingUrl],
             self::LISTING_REJECTED => ['alert', 'orange', 'Vaš oglas nije odobren', '„'.$title.'”'.(isset($d['reason']) ? ' · '.$d['reason'] : ''), url_slash('moj-nalog/oglasi').'?status=odbijeni'],
+            self::LISTING_EXPIRING => ['clock', 'amber', 'Vaš oglas uskoro ističe', '„'.$title.'” · obnovite ga besplatno', url_slash('moj-nalog/oglasi')],
+            self::LISTING_EXPIRED => ['clock', 'orange', 'Vaš oglas je istekao', '„'.$title.'” · obnovite ga besplatno', url_slash('moj-nalog/oglasi').'?status=istekli'],
+            self::ORDER_PAID => ['check', 'green', 'Usluga je uključena', $d['product'] ?? null, url_slash('moj-nalog/narudzbine')],
+            self::PACKAGE_EXPIRING => ['clock', 'amber', 'Paket firme uskoro ističe', 'Još '.($d['days'] ?? 0).' '.Pricing::plural((int) ($d['days'] ?? 0), 'dan', 'dana', 'dana').'. Produžite ga da profil ostane istaknut.', url_slash('moj-nalog/narudzbine')],
             self::SAVED_SEARCH => ['bookmark', 'blue', ($d['count'] ?? 0).' '.Pricing::plural((int) ($d['count'] ?? 0), 'novi oglas', 'nova oglasa', 'novih oglasa').' za vašu pretragu',
                 '„'.($d['name'] ?? 'Sačuvana pretraga').'”', $n->savedSearch?->url() ?? url_slash('moj-nalog/pretrage')],
             default => ['bell', 'gray', 'Obaveštenje', null, url_slash('moj-nalog')],

@@ -7,6 +7,7 @@ use App\Enums\UserStatus;
 use App\Mail\Firms\PackageExpiringSoon;
 use App\Models\Firm;
 use App\Services\FirmBenefits;
+use App\Services\Notifications\InAppNotifications;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
@@ -54,6 +55,7 @@ class SendPackageReminders extends Command
                     }
 
                     Mail::to($firm->user->email, $firm->name)->queue(new PackageExpiringSoon($firm, $left));
+                    app(InAppNotifications::class)->packageExpiring((int) $firm->user_id, $left);
                     $firm->forceFill(['package_reminder_days' => $due, 'package_reminder_for' => $firm->package_ends_at])->saveQuietly();
                     $sent++;
                 }
