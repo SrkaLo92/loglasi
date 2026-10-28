@@ -22,6 +22,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 /** Bank transfer orders. No form; every write is an action that goes through the payments module. */
@@ -46,6 +47,33 @@ class OrderResource extends Resource
     protected static ?string $navigationLabel = 'Narudžbine i uplate';
 
     protected static ?string $recordTitleAttribute = 'reference';
+
+    /** Reference ("poziv na broj"), buyer name or the user's email. */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['reference', 'buyer_name', 'user.email'];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with(['user', 'product']);
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Usluga' => $record->product?->name,
+            'Iznos' => number_format((int) $record->amount_rsd, 0, ',', '.')."\u{00A0}RSD",
+            'Status' => $record->status?->label(),
+            'Korisnik' => $record->user?->name,
+        ];
+    }
+
+    /** Orders have no own page: open the list filtered to this reference. */
+    public static function getGlobalSearchResultUrl(Model $record): ?string
+    {
+        return static::getUrl('index', ['search' => $record->reference]);
+    }
 
     public static function getNavigationBadge(): ?string
     {

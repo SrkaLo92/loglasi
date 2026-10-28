@@ -20,6 +20,7 @@ use App\Rules\PhoneNumber;
 use App\Services\Catalog;
 use App\Support\Phone;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -68,8 +69,11 @@ class ListingResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
-    /** LIKE on 200k titles is too slow for the global search box; the table search uses FULLTEXT. */
-    protected static bool $isGloballySearchable = false;
+    /** The global search box uses the same ID / FULLTEXT search as the table (LIKE on 200k titles is too slow). */
+    protected static function applyGlobalSearchAttributeConstraints(Builder $query, string $search): void
+    {
+        static::search($query, ltrim(trim($search), '#'));
+    }
 
     public static function getNavigationBadge(): ?string
     {
@@ -366,7 +370,14 @@ class ListingResource extends Resource
 
     public static function getGlobalSearchResultDetails(Model $record): array
     {
-        return ['Status' => $record->status?->label(), 'Korisnik' => $record->user?->name];
+        return ['Br.' => (string) $record->getKey(), 'Status' => $record->status?->label(), 'Korisnik' => $record->user?->name];
+    }
+
+    public static function getGlobalSearchResultActions(Model $record): array
+    {
+        return $record->status === ListingStatus::Published
+            ? [Action::make('site')->label('Na sajtu')->url($record->url(), shouldOpenInNewTab: true)]
+            : [];
     }
 
     public static function getPages(): array

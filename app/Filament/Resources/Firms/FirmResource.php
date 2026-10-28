@@ -62,6 +62,16 @@ class FirmResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'pib', 'mb', 'user.email'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return array_filter(['PIB' => $record->pib, 'Paket' => $record->package ? ucfirst($record->package) : null, 'Vlasnik' => $record->user?->email]);
+    }
+
     public static function canCreate(): bool
     {
         return false;

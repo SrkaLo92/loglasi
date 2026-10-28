@@ -21,6 +21,7 @@ use App\Support\Firms\FirmPackage;
 use App\Support\LikelyFirm;
 use App\Support\Phone;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -79,6 +80,43 @@ class UserResource extends Resource
     public static function getGloballySearchableAttributes(): array
     {
         return ['name', 'email', 'phone'];
+    }
+
+    /** Short number = user ID, longer number = phone in any spelling (064 123 4567, +381...), else name or email. */
+    protected static function applyGlobalSearchAttributeConstraints(Builder $query, string $search): void
+    {
+        $search = trim($search);
+        $digits = (string) preg_replace('/\D+/', '', $search);
+
+        if (preg_match('/^#?\d{1,6}$/', $search)) {
+            $query->whereKey((int) $digits);
+        } elseif (strlen($digits) >= 6 && preg_match('/^[\d\s+\/().-]+$/', $search)) {
+            $query->where('phone', 'like', '%'.substr($digits, -8).'%');
+        } else {
+            $like = '%'.addcslashes($search, '%_\\').'%';
+            $query->where(fn (Builder $q) => $q->where('name', 'like', $like)->orWhere('email', 'like', $like));
+        }
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()
+            ->withCount(['listings as active_listings_count' => fn (Builder $q) => $q->where('status', ListingStatus::Published)]);
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return array_filter([
+            'Br.' => (string) $record->getKey(),
+            'Mejl' => $record->email,
+            'Telefon' => $record->phone ? Phone::display($record->phone, true) : null,
+            'Aktivnih oglasa' => (string) $record->active_listings_count,
+        ]);
+    }
+
+    public static function getGlobalSearchResultActions(Model $record): array
+    {
+        return [Action::make('site')->label('Profil na sajtu')->url($record->profileUrl(), shouldOpenInNewTab: true)];
     }
 
     public static function getNavigationBadge(): ?string

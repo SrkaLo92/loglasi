@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Enums\OrderStatus;
+use App\Filament\Resources\Orders\OrderResource;
 use App\Filament\Resources\Orders\Pages\ListOrders;
 use App\Models\AuditLog;
 use App\Models\Order;
@@ -31,6 +32,16 @@ class OrderAdminTest extends PaymentsTestCase
         $seller = $this->seller();
 
         return $this->order($seller, $code, $this->listingOf($seller, ['featured_until' => null]), $this->firmBuyer());
+    }
+
+    public function test_global_search_finds_order_by_reference(): void
+    {
+        $order = $this->featuredOrder();
+        $this->signIn($this->admin());
+
+        $result = OrderResource::getGlobalSearchResults($order->reference)->sole();
+        $this->assertStringContainsString('search='.urlencode($order->reference), $result->url);
+        $this->get($result->url)->assertOk()->assertSee($order->reference);
     }
 
     public function test_mark_paid_from_panel_records_receipt_and_activates(): void
