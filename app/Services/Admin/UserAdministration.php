@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\ListingParking;
 use App\Services\Payments\Effects;
 use App\Services\Payments\ProductCatalog;
+use App\Support\Auth\AccountDeletion;
 use App\Support\ListingLimits;
 use DomainException;
 use Illuminate\Support\Carbon;
@@ -54,6 +55,16 @@ class UserAdministration
         AuditLog::record('user.block', $user);
 
         return $user;
+    }
+
+    /** Deletes the account the same way as the owner's own request (AccountDeletion); the reason goes to the audit log. */
+    public function deleteAccount(User $user, string $reason): void
+    {
+        if ($user->isStaff()) {
+            throw new DomainException('Nalog administratora ili moderatora ne može da se obriše. Prvo mu promenite ulogu.');
+        }
+        AuditLog::record('user.delete', $user, ['name' => $user->name, 'email' => $user->email, 'reason' => $reason]);
+        AccountDeletion::delete($user);
     }
 
     public function unblock(User $user): User

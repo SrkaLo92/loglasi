@@ -72,6 +72,32 @@ class UserActions
             ->action(fn (User $record) => Notify::run(fn () => self::service()->block($record), 'Nalog je blokiran.'));
     }
 
+    /** For good: listings, messages, favourites and personal data go; orders stay for bookkeeping. Admin only. */
+    public static function deleteAccount(): Action
+    {
+        return Action::make('deleteAccount')
+            ->label('Obriši nalog')
+            ->icon(Heroicon::OutlinedTrash)
+            ->color('danger')
+            ->visible(fn (User $record) => self::isAdmin() && ! $record->isStaff() && Gate::allows('delete', $record))
+            ->modalHeading('Trajno obrisati nalog?')
+            ->modalDescription(fn (User $record) => 'Brišu se svi oglasi ('.$record->listings()->count().'), poruke, omiljeni, sačuvane pretrage, ocene, profil firme i lični podaci (ime, mejl, telefon). Narudžbine i računi ostaju zbog knjigovodstva. Ovo ne može da se vrati. Ako samo želite da ga sprečite, koristite „Blokiraj”.')
+            ->schema([
+                TextInput::make('reason')->label('Razlog (vidi se samo u dnevniku izmena)')->required()->maxLength(255),
+                TextInput::make('confirm_email')
+                    ->label(fn (User $record) => 'Za potvrdu upišite mejl korisnika: '.$record->email)
+                    ->required()
+                    ->rule(fn (User $record) => fn (string $attribute, $value, \Closure $fail) => mb_strtolower(trim((string) $value)) === mb_strtolower($record->email)
+                        ? null : $fail('Mejl se ne poklapa.')),
+            ])
+            ->modalSubmitActionLabel('Obriši trajno')
+            ->action(function (User $record, array $data, Action $action) {
+                if (Notify::run(fn () => self::service()->deleteAccount($record, $data['reason']), 'Nalog je obrisan.')) {
+                    $action->redirect(UserResource::getUrl('index'));
+                }
+            });
+    }
+
     public static function unblock(): Action
     {
         return Action::make('unblock')
@@ -279,6 +305,7 @@ class UserActions
             self::changeRole(),
             self::block(),
             self::unblock(),
+            self::deleteAccount(),
         ];
     }
 }
