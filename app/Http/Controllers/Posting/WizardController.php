@@ -56,7 +56,7 @@ class WizardController extends Controller
             $limitMessage = $e->getMessage();
         }
 
-        $drafts = Listing::query()->where('user_id', $user->id)->where('status', ListingStatus::Draft)
+        $drafts = Listing::query()->where('user_id', $user->id)->where('status', ListingStatus::Draft)->whereNull('parked_at')
             ->with('category')->latest('updated_at')->limit(Posting::MAX_DRAFTS)->get();
 
         $this->seo('Postavite oglas');

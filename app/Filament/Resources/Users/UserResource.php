@@ -17,6 +17,7 @@ use App\Filament\Support\Options;
 use App\Models\User;
 use App\Rules\PhoneNumber;
 use App\Rules\PublicName;
+use App\Services\ListingParking;
 use App\Support\Firms\FirmPackage;
 use App\Support\LikelyFirm;
 use App\Support\ListingLimits;
@@ -201,8 +202,11 @@ class UserResource extends Resource
                         ->state(function (User $record) {
                             $limit = ListingLimits::monthlyLimit($record);
 
-                            return ListingLimits::activeCount($record).' / '.($limit ?? 'bez ograničenja')
-                                .($record->listing_limit !== null ? ' (lični limit)' : '');
+                            $parked = app(ListingParking::class)->parkedCount($record);
+
+                            return ListingLimits::activeCount($record).' / '.($limit ?? 'bez limita')
+                                .($record->listing_unlimited ? ' (dogovor bez limita)' : ($record->listing_limit !== null ? ' (lični limit)' : ''))
+                                .($parked > 0 ? ', '.$parked.' u nacrtima zbog limita' : '');
                         }),
                     TextEntry::make('email_verified_at')->label('E-pošta potvrđena')->dateTime('j. n. Y.')->placeholder('Nije potvrđena'),
                 ]),

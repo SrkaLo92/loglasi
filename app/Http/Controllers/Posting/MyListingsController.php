@@ -6,6 +6,7 @@ use App\Enums\ListingStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Listing;
 use App\Services\Posting;
+use App\Services\PostingRefused;
 use App\Support\ListingLimits;
 use App\Support\Posting\Wizard;
 use App\Support\Seo;
@@ -93,7 +94,11 @@ class MyListingsController extends Controller
     public function renew(Listing $listing): RedirectResponse
     {
         $this->authorize('renew', $listing);
-        $renewed = $this->posting->renew($listing);
+        try {
+            $renewed = $this->posting->renew($listing);
+        } catch (PostingRefused $e) {
+            return redirect(url_slash('moj-nalog/oglasi').'?status=istekli')->with('status', $e->getMessage());
+        }
 
         return redirect(url_slash('moj-nalog/oglasi').'?status=aktivni')->with('status', $renewed
             ? 'Oglas je obnovljen do '.$this->posting->expiresLabel($listing->expires_at).'.'

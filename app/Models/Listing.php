@@ -36,6 +36,7 @@ class Listing extends Model
             'bumped_at' => 'datetime',
             'published_at' => 'datetime',
             'expires_at' => 'datetime',
+            'parked_at' => 'datetime',
             'lat' => 'float',
             'lng' => 'float',
         ];

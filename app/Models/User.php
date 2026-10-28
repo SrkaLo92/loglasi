@@ -45,6 +45,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             'two_factor_confirmed_at' => 'datetime',
             'last_login_at' => 'datetime',
             'listing_limit' => 'integer',
+            'listing_unlimited' => 'boolean',
             'password' => 'hashed',
             'two_factor_secret' => 'encrypted',
             'two_factor_recovery_codes' => 'encrypted:array',

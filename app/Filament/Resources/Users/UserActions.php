@@ -9,10 +9,15 @@ use App\Filament\Support\Notify;
 use App\Filament\Support\Options;
 use App\Models\User;
 use App\Services\Admin\UserAdministration;
+use App\Services\ListingParking;
 use App\Support\ListingLimits;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Text;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Gate;
 
@@ -169,7 +174,10 @@ class UserActions
             ->action(fn (User $record) => Notify::run(fn () => self::service()->endGifts($record), 'Dodeljeni paketi su prekinuti.'));
     }
 
-    /** Permanent personal limit, e.g. for a long-time seller with many listings. */
+    /**
+     * Normal limit, a personal number or no limit (a private deal, never shown publicly). Active listings
+     * over a lower limit go to drafts and come back with "Vrati oglase iz nacrta".
+     */
     public static function listingLimit(): Action
     {
         return Action::make('listingLimit')
@@ -177,20 +185,71 @@ class UserActions
             ->icon(Heroicon::OutlinedAdjustmentsHorizontal)
             ->color('gray')
             ->visible(fn () => self::isAdmin())
-            ->fillForm(fn (User $record) => ['limit' => $record->listing_limit])
-            ->schema([
-                TextInput::make('limit')
-                    ->label('Lični limit aktivnih oglasa')
-                    ->integer()->minValue(1)->maxValue(10000)
-                    ->helperText('Prazno = kao svi ostali. Važi trajno, dok ga ne obrišete.'),
+            ->fillForm(fn (User $record) => [
+                'mode' => $record->listing_unlimited ? UserAdministration::LIMIT_UNLIMITED
+                    : ($record->listing_limit !== null ? UserAdministration::LIMIT_NUMBER : UserAdministration::LIMIT_STANDARD),
+                'limit' => $record->listing_limit,
             ])
-            ->modalDescription(fn (User $record) => 'Sada: '.ListingLimits::activeCount($record).' aktivnih, standardni limit '
-                .(ListingLimits::standardLimit($record) ?? 'bez ograničenja').'. Lični limit važi samo ako je veći od standardnog.')
+            ->schema([
+                Radio::make('mode')
+                    ->label('Limit aktivnih oglasa')
+                    ->options(fn (User $record) => [
+                        UserAdministration::LIMIT_STANDARD => 'Kao svi ostali ('.(ListingLimits::standardLimit($record) ?? 'bez ograničenja').')',
+                        UserAdministration::LIMIT_NUMBER => 'Lični broj',
+                        UserAdministration::LIMIT_UNLIMITED => 'Bez limita',
+                    ])
+                    ->required()->live(),
+                TextInput::make('limit')
+                    ->label('Broj aktivnih oglasa')
+                    ->integer()->minValue(1)->maxValue(10000)->live(debounce: 500)
+                    ->visible(fn (Get $get) => $get('mode') === UserAdministration::LIMIT_NUMBER)
+                    ->required(fn (Get $get) => $get('mode') === UserAdministration::LIMIT_NUMBER),
+                Text::make(fn (User $record, Get $get) => self::limitWarning($record, (string) $get('mode'), $get('limit'))),
+            ])
+            ->modalDescription(fn (User $record) => 'Sada ima '.ListingLimits::activeCount($record).' aktivnih oglasa. Važi trajno, dok ne promenite. Nigde se ne prikazuje javno.')
             ->modalSubmitActionLabel('Sačuvaj')
-            ->action(fn (User $record, array $data) => Notify::run(
-                fn () => self::service()->setListingLimit($record, filled($data['limit'] ?? null) ? (int) $data['limit'] : null),
-                'Limit oglasa je sačuvan.',
-            ));
+            ->action(function (User $record, array $data) {
+                $parked = 0;
+                $limit = filled($data['limit'] ?? null) ? (int) $data['limit'] : null;
+                Notify::run(function () use ($record, $data, $limit, &$parked) {
+                    $parked = self::service()->setListingLimit($record, $data['mode'], $limit);
+                }, 'Limit oglasa je sačuvan.');
+                if ($parked > 0) {
+                    Notification::make()->title($parked.' oglasa je prebačeno u nacrte.')->warning()->send();
+                }
+            });
+    }
+
+    private static function limitWarning(User $record, string $mode, mixed $limit): string
+    {
+        $over = UserAdministration::limitPreview($record, $mode, filled($limit) ? (int) $limit : null);
+
+        return $over > 0
+            ? 'Pažnja: '.$over.' najstarijih aktivnih oglasa preći će u nacrte. Vraćaju se dugmetom „Vrati oglase iz nacrta” kad bude mesta.'
+            : 'Nijedan oglas neće preći u nacrte.';
+    }
+
+    public static function restoreParked(): Action
+    {
+        return Action::make('restoreParked')
+            ->label('Vrati oglase iz nacrta')
+            ->icon(Heroicon::OutlinedArrowUturnLeft)
+            ->color('success')
+            ->visible(fn (User $record) => self::isAdmin() && app(ListingParking::class)->parkedCount($record) > 0)
+            ->requiresConfirmation()
+            ->modalDescription(function (User $record) {
+                $limit = ListingLimits::monthlyLimit($record);
+                $room = $limit === null ? 'bez limita' : max(0, $limit - ListingLimits::activeCount($record)).' slobodnih mesta';
+
+                return 'U nacrtima čeka '.app(ListingParking::class)->parkedCount($record).' oglasa (sklonjeni zbog limita). Sada ima '.$room
+                    .'. Vraća se koliko staje, bez nove provere, na pun rok trajanja.';
+            })
+            ->action(function (User $record) {
+                $restored = self::service()->restoreParked($record);
+                $restored > 0
+                    ? Notification::make()->title('Vraćeno je '.$restored.' oglasa.')->success()->send()
+                    : Notification::make()->title('Nema slobodnih mesta. Prvo podignite limit.')->warning()->send();
+            });
     }
 
     private static function giftsText(User $record): string
@@ -216,6 +275,7 @@ class UserActions
             self::giftPackage(),
             self::endGifts(),
             self::listingLimit(),
+            self::restoreParked(),
             self::changeRole(),
             self::block(),
             self::unblock(),

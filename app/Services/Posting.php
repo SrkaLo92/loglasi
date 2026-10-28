@@ -120,7 +120,7 @@ class Posting
         }
         $this->ensureCanCreate($user, $category);
 
-        $drafts = Listing::query()->where('user_id', $user->id)->where('status', ListingStatus::Draft)->count();
+        $drafts = Listing::query()->where('user_id', $user->id)->where('status', ListingStatus::Draft)->whereNull('parked_at')->count();
         if ($limitDrafts && $drafts >= self::MAX_DRAFTS) {
             throw new PostingRefused('too_many_drafts', 'Imate '.$drafts.' nezavršenih oglasa. Završite ili obrišite neki od njih u delu „Moji oglasi”, pa započnite novi.', field: 'category_id');
         }
@@ -392,6 +392,13 @@ class Posting
         if ($isDraft) {
             $this->ensureCanCreate($owner, $listing->category);
         }
+        // Moved to drafts by a lower limit (ListingParking): back with its address, no new review.
+        if ($isDraft && $listing->parked_at !== null) {
+            $listing->parked_at = null;
+            $this->activate($listing);
+
+            return $listing;
+        }
         $this->ensureNotDuplicate($listing);
 
         return DB::transaction(function () use ($listing, $owner, $actor, $isDraft) {
@@ -509,11 +516,19 @@ class Posting
             && ($listing->expires_at === null || $listing->expires_at->lte(now()->addDays(self::RENEW_WINDOW_DAYS)));
     }
 
-    /** Free renewal: active again for listing_duration_days days (counted from the old expiry when it has not passed). */
+    /**
+     * Free renewal: active again for listing_duration_days days (counted from the old expiry when it has not passed).
+     * An expired or sold listing takes a slot again, so the limit applies.
+     *
+     * @throws PostingRefused
+     */
     public function renew(Listing $listing): bool
     {
         if (! $this->canRenew($listing)) {
             return false;
+        }
+        if ($listing->status !== ListingStatus::Published || $listing->expires_at?->isPast()) {
+            $this->ensureCanCreate($listing->user ?? User::query()->findOrFail($listing->user_id), $listing->category);
         }
 
         $from = $listing->status === ListingStatus::Published && $listing->expires_at?->isFuture()
@@ -570,7 +585,7 @@ class Posting
     public function pruneDrafts(): int
     {
         $count = 0;
-        Listing::query()->where('status', ListingStatus::Draft)
+        Listing::query()->where('status', ListingStatus::Draft)->whereNull('parked_at')
             ->where('updated_at', '<', now()->subDays(self::DRAFT_LIFETIME_DAYS))
             ->chunkById(100, function ($drafts) use (&$count) {
                 foreach ($drafts as $draft) {

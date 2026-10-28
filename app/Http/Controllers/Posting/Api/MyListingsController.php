@@ -171,7 +171,12 @@ class MyListingsController extends Controller
     public function renew(Request $request, Listing $listing): Response
     {
         $this->authorize('renew', $listing);
-        if (! $this->posting->renew($listing)) {
+        try {
+            $renewed = $this->posting->renew($listing);
+        } catch (PostingRefused $e) {
+            throw new ApiError('limit_reached', $e->getMessage(), 403);
+        }
+        if (! $renewed) {
             throw new ApiError('not_renewable', 'Oglas je aktivan do '.$this->posting->expiresLabel($listing->expires_at).' i još ne može da se obnovi.', 409);
         }
 

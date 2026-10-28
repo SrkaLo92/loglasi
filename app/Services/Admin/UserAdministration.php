@@ -9,8 +9,10 @@ use App\Models\AuditLog;
 use App\Models\Firm;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\ListingParking;
 use App\Services\Payments\Effects;
 use App\Services\Payments\ProductCatalog;
+use App\Support\ListingLimits;
 use DomainException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -137,12 +139,55 @@ class UserAdministration
         return $applied;
     }
 
-    /** Personal active-listing limit; null returns the account to the normal limit. */
-    public function setListingLimit(User $user, ?int $limit): void
+    public const LIMIT_STANDARD = 'standard';
+
+    public const LIMIT_NUMBER = 'number';
+
+    public const LIMIT_UNLIMITED = 'unlimited';
+
+    /** @return array{listing_limit: ?int, listing_unlimited: bool} */
+    public static function limitAttributes(string $mode, ?int $limit): array
     {
-        $old = $user->listing_limit;
-        $user->forceFill(['listing_limit' => $limit])->save();
-        AuditLog::record('user.listing_limit', $user, ['old' => $old, 'new' => $limit]);
+        return match ($mode) {
+            self::LIMIT_UNLIMITED => ['listing_limit' => null, 'listing_unlimited' => true],
+            self::LIMIT_NUMBER => ['listing_limit' => max(1, (int) $limit), 'listing_unlimited' => false],
+            default => ['listing_limit' => null, 'listing_unlimited' => false],
+        };
+    }
+
+    /** How many active listings would go to drafts with this setting (shown before saving). */
+    public static function limitPreview(User $user, string $mode, ?int $limit): int
+    {
+        $copy = (clone $user)->forceFill(self::limitAttributes($mode, $limit));
+
+        return app(ListingParking::class)->excess($user, ListingLimits::monthlyLimit($copy));
+    }
+
+    /**
+     * Personal limit or no limit (a private deal with the account). Active listings over the new limit go to
+     * drafts (ListingParking). Returns how many were moved.
+     */
+    public function setListingLimit(User $user, string $mode, ?int $limit = null): int
+    {
+        $old = ['limit' => $user->listing_limit, 'unlimited' => (bool) $user->listing_unlimited];
+
+        return DB::transaction(function () use ($user, $mode, $limit, $old) {
+            $user->forceFill(self::limitAttributes($mode, $limit))->save();
+            $parked = app(ListingParking::class)->parkExcess($user);
+            AuditLog::record('user.listing_limit', $user, [
+                'old' => $old, 'new' => ['limit' => $user->listing_limit, 'unlimited' => $user->listing_unlimited], 'parked' => $parked,
+            ]);
+
+            return $parked;
+        });
+    }
+
+    public function restoreParked(User $user): int
+    {
+        $restored = app(ListingParking::class)->restore($user);
+        AuditLog::record('user.restore_parked', $user, ['restored' => $restored]);
+
+        return $restored;
     }
 
     /** Running packages given by an admin (Plus prodavac terms and extra listings without an order). */

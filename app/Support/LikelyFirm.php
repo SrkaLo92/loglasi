@@ -34,7 +34,7 @@ final class LikelyFirm
         $active = self::active()->where('user_id', $user->id);
 
         $count = (clone $active)->count();
-        if ($count > self::MAX_ACTIVE && $user->listing_limit === null) {
+        if ($count > self::MAX_ACTIVE && $user->listing_limit === null && ! $user->listing_unlimited) {
             $reasons[] = $count.' aktivnih oglasa';
         }
         $same = (clone $active)->selectRaw('LOWER(TRIM(title)) AS t, COUNT(*) AS n')->groupBy('t')
@@ -56,7 +56,7 @@ final class LikelyFirm
         $services = self::serviceCategoryIds();
 
         return $users->where('account_type', AccountType::Private->value)->where(function (Builder $q) use ($services) {
-            $q->where(fn (Builder $big) => $big->whereNull('listing_limit')->whereRaw('(SELECT COUNT(*) FROM listings l WHERE l.user_id = users.id AND l.deleted_at IS NULL AND l.status IN (?, ?) AND (l.expires_at IS NULL OR l.expires_at > ?)) > ?', [
+            $q->where(fn (Builder $big) => $big->whereNull('listing_limit')->where('listing_unlimited', false)->whereRaw('(SELECT COUNT(*) FROM listings l WHERE l.user_id = users.id AND l.deleted_at IS NULL AND l.status IN (?, ?) AND (l.expires_at IS NULL OR l.expires_at > ?)) > ?', [
                 ListingStatus::Pending->value, ListingStatus::Published->value, now(), self::MAX_ACTIVE,
             ]))->orWhereExists(fn (QueryBuilder $sub) => self::activeRaw($sub)
                 ->selectRaw('1')->groupByRaw('LOWER(TRIM(l.title))')->havingRaw('COUNT(*) >= ?', [self::SAME_TITLE]));
