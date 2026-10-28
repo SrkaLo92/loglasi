@@ -10,6 +10,7 @@ use App\Models\Listing;
 use App\Models\ListingImage;
 use App\Models\User;
 use App\Services\Notifications\InAppNotifications;
+use App\Services\Notifications\StaffAlerts;
 use App\Support\Listing\Text;
 use App\Support\ListingLimits;
 use App\Support\Phone;
@@ -401,7 +402,7 @@ class Posting
         }
         $this->ensureNotDuplicate($listing);
 
-        return DB::transaction(function () use ($listing, $owner, $actor, $isDraft) {
+        $listing = DB::transaction(function () use ($listing, $owner, $actor, $isDraft) {
             if ($isDraft) {
                 // the monthly limit counts from the moment of submitting
                 $listing->created_at = now();
@@ -422,6 +423,13 @@ class Posting
 
             return $listing;
         });
+
+        // Staff posting for someone else already looked at it.
+        if (! ($actor->isStaff() && $actor->id !== $owner->id)) {
+            app(StaffAlerts::class)->newListing($listing);
+        }
+
+        return $listing;
     }
 
     /** @throws PostingRefused */

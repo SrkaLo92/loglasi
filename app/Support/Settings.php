@@ -30,6 +30,7 @@ class Settings
         'contact_phone' => '+381655415128',     // footer and FAQ, E.164
         'contact_address' => '15300 Loznica, Srbija',
         'new_condition_firms_only' => true,
+        'admin_new_listing_mail' => true,  // mail to admins for every new listing (StaffAlerts)
         // Google: tag (gtag.js, production only, after cookie consent) and Search Console meta tag.
         'google_tag_id' => 'GT-MKTJD4NV',         // Google tag, destination GA4 G-EKVEVJTR90
         'ga4_measurement_id' => 'G-EKVEVJTR90',

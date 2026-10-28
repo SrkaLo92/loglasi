@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Enums\ListingStatus;
+use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Models\Listing;
 use App\Models\User;
@@ -70,6 +71,8 @@ class ListingLimitTest extends TestCase
             ->assertActionMounted('listingLimit')->assertSchemaStateSet(['mode' => 'standard'], 'mountedActionSchema0');
         $this->setLimit($user, 'unlimited');
         $this->assertTrue(ListingLimits::for($user)['unlimited']);
+        Livewire::test(ListUsers::class)->filterTable('limit_deal', 'unlimited')->assertCanSeeTableRecords([$user])
+            ->assertCanNotSeeTableRecords([$this->admin()]);
         $this->assertTrue(ListingLimits::canCreate($user));
         $this->assertSame([], LikelyFirm::reasons($user));
 

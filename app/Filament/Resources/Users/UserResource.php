@@ -333,6 +333,15 @@ class UserResource extends Resource
                         true: fn (Builder $query) => $query->whereHas('devices'),
                         false: fn (Builder $query) => $query->whereDoesntHave('devices'),
                     ),
+                SelectFilter::make('limit_deal')
+                    ->label('Limit oglasa')
+                    ->options(['unlimited' => 'Bez limita', 'personal' => 'Lični broj', 'parked' => 'Ima oglase u nacrtima zbog limita'])
+                    ->query(fn (Builder $query, array $data) => match ($data['value'] ?? null) {
+                        'unlimited' => $query->where('listing_unlimited', true),
+                        'personal' => $query->whereNotNull('listing_limit'),
+                        'parked' => $query->whereHas('listings', fn (Builder $q) => $q->whereNotNull('parked_at')->where('status', ListingStatus::Draft)),
+                        default => $query,
+                    }),
                 TernaryFilter::make('has_active')
                     ->label('Aktivni oglasi')
                     ->trueLabel('Ima aktivnih')
