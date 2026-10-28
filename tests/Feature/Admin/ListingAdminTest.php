@@ -40,7 +40,7 @@ class ListingAdminTest extends TestCase
         $this->assertNotNull($listing->published_at);
         $this->assertNotNull($listing->bumped_at);
         $this->assertTrue($listing->expires_at->between(now()->addDays(29), now()->addDays(31)));
-        Mail::assertQueued(ListingStatusMail::class, fn ($m) => $m->approved && $m->hasTo($listing->user->email));
+        Mail::assertSent(ListingStatusMail::class, fn ($m) => $m->approved && $m->hasTo($listing->user->email));
         $this->assertDatabaseHas('audit_logs', ['action' => 'listing.approve', 'subject_id' => $listing->id, 'user_id' => $mod->id]);
     }
 
@@ -60,7 +60,7 @@ class ListingAdminTest extends TestCase
         $listing->refresh();
         $this->assertSame(ListingStatus::Rejected, $listing->status);
         $this->assertSame('Fotografije nisu vaše.', $listing->rejection_reason);
-        Mail::assertQueued(ListingStatusMail::class, fn ($m) => ! $m->approved && $m->reason === 'Fotografije nisu vaše.');
+        Mail::assertSent(ListingStatusMail::class, fn ($m) => ! $m->approved && $m->reason === 'Fotografije nisu vaše.');
         $this->assertSame(['status' => ['pending', 'rejected'], 'reason' => 'Fotografije nisu vaše.'], AuditLog::where('action', 'listing.reject')->first()->changes);
     }
 
@@ -142,7 +142,7 @@ class ListingAdminTest extends TestCase
         $this->assertSame(2, AuditLog::where('action', 'listing.approve')->count());
         $this->assertSame(2, AuditLog::where('action', 'listing.reject')->count());
         $this->assertSame(2, AuditLog::where('action', 'listing.delete')->count());
-        Mail::assertQueued(ListingStatusMail::class, 4);
+        Mail::assertSent(ListingStatusMail::class, 4);
     }
 
     public function test_edit_all_fields_and_extra_fields(): void

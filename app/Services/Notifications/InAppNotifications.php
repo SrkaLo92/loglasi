@@ -8,14 +8,16 @@ use App\Models\SavedSearch;
 use App\Models\SellerRating;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Notifications\InAppPushNotification;
 use App\Support\Pages\Pricing;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 /**
  * "Obaveštenja": what happened to the user's listings and searches, shown under the bell on the site
- * and in the apps. Writing one never sends anything outside the site (mail and push have their own
- * notifications and the pre-launch hold). Messages are not here: they have their own unread badge.
+ * and in the apps. Approved/rejected listings and saves also go to the phone as a push
+ * (InAppPushNotification); ratings and saved searches have their own push. Messages are not here:
+ * they have their own unread badge.
  *
  *   $inApp->favorited($listing, $saver);            // once per person and listing
  *   $inApp->unread($user);                          // badge, at most 99 counted
@@ -49,7 +51,7 @@ class InAppNotifications
             ->where('type', self::FAVORITE)->where('listing_id', $listing->id)->where('actor_id', $saver->id)
             ->exists();
         if (! $exists) {
-            $this->add((int) $listing->user_id, self::FAVORITE, ['actor_id' => $saver->id, 'listing_id' => $listing->id], ['title' => $listing->title]);
+            $this->push($this->add((int) $listing->user_id, self::FAVORITE, ['actor_id' => $saver->id, 'listing_id' => $listing->id], ['title' => $listing->title]));
         }
     }
 
@@ -65,10 +67,13 @@ class InAppNotifications
 
     public function moderated(Listing $listing, bool $approved, ?string $reason = null): void
     {
-        $this->add((int) $listing->user_id, $approved ? self::LISTING_APPROVED : self::LISTING_REJECTED, ['listing_id' => $listing->id], array_filter([
+        $item = $this->add((int) $listing->user_id, $approved ? self::LISTING_APPROVED : self::LISTING_REJECTED, ['listing_id' => $listing->id], array_filter([
             'title' => $listing->title,
             'reason' => $approved ? null : Str::limit((string) $reason, 300),
         ], fn ($v) => $v !== null && $v !== ''));
+
+        // Sent right away: the owner is usually waiting for this one.
+        $this->push($item, now: true);
     }
 
     /** New listings for a saved search (from the matcher's digest), one notification per search and run. */
@@ -179,12 +184,27 @@ class InAppNotifications
     }
 
     /** @param  array<string, int|null>  $refs */
-    private function add(int $userId, string $type, array $refs, array $data): void
+    private function add(int $userId, string $type, array $refs, array $data): ?UserNotification
     {
         if ($userId <= 0) {
+            return null;
+        }
+
+        return UserNotification::query()->create(['user_id' => $userId, 'type' => $type, 'data' => $data, 'created_at' => now()] + $refs);
+    }
+
+    /** Push to the owner's phones; a push failure never breaks the action that caused it. */
+    private function push(?UserNotification $item, bool $now = false): void
+    {
+        $user = $item?->user;
+        if ($user === null || $user->trashed()) {
             return;
         }
 
-        UserNotification::query()->create(['user_id' => $userId, 'type' => $type, 'data' => $data, 'created_at' => now()] + $refs);
+        try {
+            $now ? $user->notifyNow(new InAppPushNotification($item)) : $user->notify(new InAppPushNotification($item));
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 }

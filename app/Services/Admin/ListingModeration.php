@@ -175,7 +175,14 @@ class ListingModeration
             return;
         }
 
-        Mail::to($email)->queue(new ListingStatusMail($listing, $approved, $reason));
+        // Sent during the request so the owner gets it at once; the queue is the fallback when SMTP fails.
+        $mail = new ListingStatusMail($listing, $approved, $reason);
+        try {
+            Mail::to($email)->sendNow($mail);
+        } catch (\Throwable $e) {
+            report($e);
+            Mail::to($email)->queue($mail);
+        }
     }
 
     /** @return list<array{naziv: string, tekst: string}> */
