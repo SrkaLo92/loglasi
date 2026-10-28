@@ -9,7 +9,9 @@ use App\Mail\Admin\ListingStatusMail;
 use App\Models\AuditLog;
 use App\Models\Field;
 use App\Models\Listing;
+use App\Services\Admin\ListingModeration;
 use App\Services\Catalog;
+use App\Support\Settings;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
@@ -200,5 +202,31 @@ class ListingAdminTest extends TestCase
         Livewire::withQueryParams(['tab' => 'pending'])->test(ListListings::class)
             ->assertCanSeeTableRecords([$pending])
             ->assertCanNotSeeTableRecords([$published]);
+    }
+
+    public function test_ready_made_reason_fills_the_editable_reason(): void
+    {
+        $listing = Listing::factory()->pending()->create();
+        $this->signIn($this->admin());
+
+        Livewire::test(ListListings::class)
+            ->mountTableAction('reject', $listing)
+            ->setTableActionData(['preset' => '0'])
+            ->assertTableActionDataSet(['reason' => 'Vaš oglas nije odobren jer loglasi.rs objavljuje samo oglase iz Loznice i okoline.'])
+            ->setTableActionData(['reason' => 'Vaš oglas nije odobren jer nije iz Loznice.'])
+            ->callMountedTableAction()
+            ->assertHasNoTableActionErrors();
+
+        $this->assertSame('Vaš oglas nije odobren jer nije iz Loznice.', $listing->fresh()->rejection_reason);
+    }
+
+    public function test_ready_made_reasons_come_from_settings(): void
+    {
+        Settings::set(ListingModeration::REASONS_SETTING, [
+            ['naziv' => 'Duplikat', 'tekst' => 'Isti oglas već postoji.'],
+            ['naziv' => '', 'tekst' => 'prazan naziv se preskače'],
+        ]);
+
+        $this->assertSame([['naziv' => 'Duplikat', 'tekst' => 'Isti oglas već postoji.']], ListingModeration::rejectionReasons());
     }
 }

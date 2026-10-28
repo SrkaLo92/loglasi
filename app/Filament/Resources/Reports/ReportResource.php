@@ -175,7 +175,7 @@ class ReportResource extends Resource
             ->icon(Heroicon::OutlinedXCircle)
             ->color('danger')
             ->visible(fn (Report $record) => $record->reportable instanceof Listing && ! $record->reportable->trashed())
-            ->schema([ListingActions::reasonField()])
+            ->schema(ListingActions::reasonFields())
             ->modalDescription('Oglas se skida sa sajta, vlasnik dobija razlog mejlom, a sve otvorene prijave za oglas se zatvaraju.')
             ->action(fn (Report $record, array $data) => Notify::run(function () use ($record, $data) {
                 app(ListingModeration::class)->reject($record->reportable, $data['reason']);

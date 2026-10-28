@@ -16,6 +16,13 @@ class ListingModeration
 {
     public const REASON_MAX = 255;
 
+    public const REASONS_SETTING = 'rejection_reasons';
+
+    /** Ready-made rejection reasons; the admin edits them in Podešavanja → Pravila. */
+    public const REASONS_DEFAULT = [
+        ['naziv' => 'Oglas nije iz Loznice i okoline', 'tekst' => 'Vaš oglas nije odobren jer loglasi.rs objavljuje samo oglase iz Loznice i okoline.'],
+    ];
+
     /** Publishes a listing and tells the owner. */
     public function approve(Listing $listing, bool $notify = true): Listing
     {
@@ -169,5 +176,16 @@ class ListingModeration
         }
 
         Mail::to($email)->queue(new ListingStatusMail($listing, $approved, $reason));
+    }
+
+    /** @return list<array{naziv: string, tekst: string}> */
+    public static function rejectionReasons(): array
+    {
+        $rows = Settings::get(self::REASONS_SETTING, self::REASONS_DEFAULT);
+
+        return array_values(array_filter(array_map(
+            fn ($row) => ['naziv' => trim((string) ($row['naziv'] ?? '')), 'tekst' => trim((string) ($row['tekst'] ?? ''))],
+            is_array($rows) ? array_filter($rows, 'is_array') : [],
+        ), fn ($row) => $row['naziv'] !== '' && $row['tekst'] !== ''));
     }
 }

@@ -11,6 +11,7 @@ use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -43,7 +44,7 @@ class ListingActions
             ->icon(Heroicon::OutlinedXCircle)
             ->color('danger')
             ->visible(fn (Listing $record) => ! $record->trashed() && $record->status !== ListingStatus::Rejected)
-            ->schema([self::reasonField()])
+            ->schema(self::reasonFields())
             ->modalHeading('Odbiti oglas?')
             ->modalDescription('Razlog se prikazuje vlasniku oglasa i šalje mu se mejlom.')
             ->modalSubmitActionLabel('Odbij')
@@ -145,7 +146,7 @@ class ListingActions
             ->label('Odbij izabrane')
             ->icon(Heroicon::OutlinedXCircle)
             ->color('danger')
-            ->schema([self::reasonField()])
+            ->schema(self::reasonFields())
             ->deselectRecordsAfterCompletion()
             ->action(function (Collection $records, array $data) {
                 $done = 0;
@@ -157,6 +158,27 @@ class ListingActions
                 }
                 Notify::run(fn () => null, 'Odbijeno oglasa: '.$done.'.');
             });
+    }
+
+    /** @return list<mixed> optional ready-made reason (Podešavanja → Pravila) that fills the editable reason */
+    public static function reasonFields(): array
+    {
+        $presets = ListingModeration::rejectionReasons();
+        if ($presets === []) {
+            return [self::reasonField()];
+        }
+
+        return [
+            Select::make('preset')
+                ->label('Gotov razlog')
+                ->placeholder('Napišite svoj razlog')
+                ->options(array_combine(array_keys($presets), array_column($presets, 'naziv')))
+                ->native(false)
+                ->live()
+                ->dehydrated(false)
+                ->afterStateUpdated(fn (?string $state, Set $set) => $set('reason', $state === null ? '' : ($presets[(int) $state]['tekst'] ?? ''))),
+            self::reasonField()->helperText('Tekst gotovog razloga možete da izmenite pre slanja.'),
+        ];
     }
 
     public static function reasonField(): Textarea
