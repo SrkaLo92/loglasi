@@ -8,6 +8,7 @@ use App\Events\MessageSent;
 use App\Http\Middleware\SavePendingSearch;
 use App\Notifications\Listeners\HoldOutgoingMail;
 use App\Notifications\Listeners\NotifyMessageRecipient;
+use App\Services\Admin\SystemHealth;
 use App\Support\ApiError;
 use App\Support\Scheduling\InProcess;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -15,6 +16,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -47,6 +49,8 @@ class NotificationsServiceProvider extends ServiceProvider
             InProcess::command($schedule, PruneInAppNotifications::class)->dailyAt('04:30')->withoutOverlapping();
             // Queued mail and notifications: Hostinger has no long-running worker, so the queue is emptied each minute.
             InProcess::command($schedule, 'queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()->withoutOverlapping(5);
+            // Lets the admin "Stanje sistema" page tell whether the cron still runs.
+            $schedule->call(fn () => Cache::forever(SystemHealth::HEARTBEAT, time()))->everyMinute()->name('heartbeat');
         });
     }
 }

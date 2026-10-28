@@ -215,3 +215,9 @@
 .lg-top-list li { display: list-item; }
 .lg-top-list li > span:first-child { margin-right: .75rem; }
 .lg-top-list .lg-num { float: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.lg-ok { color: rgb(21 128 61); }
+.lg-bad { color: rgb(185 28 28); }
+.dark .lg-ok { color: rgb(74 222 128); }
+.dark .lg-bad { color: rgb(248 113 113); }
+.lg-period td.lg-msg { white-space: normal; text-align: left; word-break: break-word; min-width: 16rem; }
+.lg-row-actions { display: flex; gap: .5rem; justify-content: flex-end; }
