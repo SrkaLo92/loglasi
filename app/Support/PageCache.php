@@ -54,7 +54,8 @@ class PageCache
         if (! is_array($entry) || $entry['at'] < (float) Cache::get(self::FLUSHED_KEY, 0)) {
             return null;
         }
-        $body = gzdecode($entry['body']);
+        $raw = base64_decode((string) $entry['body'], true);
+        $body = $raw === false ? false : gzdecode($raw);
 
         return $body === false ? null : ['body' => $body] + $entry;
     }
@@ -62,13 +63,19 @@ class PageCache
     /** @param  list<array{0: string, 1: int}>  $hits */
     public static function put(Request $request, int $status, array $headers, string $body, array $hits): void
     {
-        Cache::put(self::key($request), [
-            'at' => microtime(true),
-            'status' => $status,
-            'headers' => $headers,
-            'body' => gzencode($body, 6),
-            'hits' => $hits,
-        ], (int) config('page_cache.ttl', 120));
+        // Base64: the database cache store keeps values in a text column, which rejects raw gzip bytes.
+        // A failed write only means the next visitor renders the page again.
+        try {
+            Cache::put(self::key($request), [
+                'at' => microtime(true),
+                'status' => $status,
+                'headers' => $headers,
+                'body' => base64_encode((string) gzencode($body, 6)),
+                'hits' => $hits,
+            ], (int) config('page_cache.ttl', 120));
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     /** Counts the views of a cached page for this visitor: once per session, no bots, no database. */

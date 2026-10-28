@@ -88,4 +88,14 @@ class GuestPageCacheTest extends TestCase
         $this->get('/')->assertOk()->assertHeader('X-Page-Cache', 'miss');
         $this->get('/')->assertOk()->assertHeader('X-Page-Cache', 'hit');
     }
+
+    public function test_works_with_the_database_cache_store(): void
+    {
+        config(['cache.default' => 'database']);
+        $listing = Listing::factory()->create(['title' => 'Stan u centru']);
+
+        $this->get($this->url($listing))->assertOk()->assertHeader('X-Page-Cache', 'miss');
+        $this->withSession(['_token' => 'treci-posetilac-token-1234567890abcdefghijk'])
+            ->get($this->url($listing))->assertOk()->assertHeader('X-Page-Cache', 'hit')->assertSee('Stan u centru');
+    }
 }
