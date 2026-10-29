@@ -6,6 +6,7 @@
 @include('partials.seo-head')
 <link rel="preload" href="{{ asset('fonts/manrope-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{{ asset('fonts/manrope-latin-ext.woff2') }}" as="font" type="font/woff2" crossorigin>
+@include('partials.scroll-restore')
 <link rel="stylesheet" href="{{ asset_v('css/base.css') }}">
 <link rel="stylesheet" href="{{ asset_v('css/pick.css') }}">
 <meta name="theme-color" content="#ffffff">
@@ -54,7 +55,6 @@
 @include('partials.bottom-nav')
 @endif
 @include('partials.cookie-bar')
-<script src="{{ asset_v('js/scroll.js') }}" defer></script>
 <script src="{{ asset_v('js/pick.js') }}" defer></script>
 <script src="{{ asset_v('js/accordion.js') }}" defer></script>
 <script src="{{ asset_v('js/recent.js') }}" defer></script>

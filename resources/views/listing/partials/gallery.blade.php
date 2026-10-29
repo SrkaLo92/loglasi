@@ -15,6 +15,8 @@
 							'alt' => $image->alt ?: $listing->title.($count > 1 ? ', fotografija '.($i + 1) : ''),
 							'sizes' => '(max-width: 767px) 100vw, (max-width: 1240px) 60vw, 800px',
 							'eager' => $i === 0,
+							// The small photo the list card already loaded shows at once, the sharp one replaces it.
+							'placeholder' => $i === 0 ? \App\Support\Search\ImageUrls::url($image, 'thumb') : null,
 							'class' => 'lgo-gallery__img',
 						])
 					</a>

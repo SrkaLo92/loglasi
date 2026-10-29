@@ -61,6 +61,10 @@
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 /* Safety net: a too-wide element is cut off instead of letting the whole page slide sideways on a phone (clip keeps position: sticky working). */
 html, body { overflow-x: clip; }
+/* Opening a page fades over from the previous one instead of a blank flash (Safari 18.2+, Chrome). */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .12s; }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
 
 body {
 	margin: 0;
