@@ -794,6 +794,17 @@
 	margin: 0 8px;
 }
 
+/* Narrow phones: one fact per line, so a "·" never starts a line. */
+@media (max-width: 479px) {
+	.lgp-private__meta {
+		flex-direction: column;
+	}
+
+	.lgp-private__meta li + li::before {
+		content: none;
+	}
+}
+
 .lgp-actions--compact {
 	display: flex;
 	flex-wrap: wrap;

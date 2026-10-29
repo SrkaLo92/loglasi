@@ -705,18 +705,42 @@
 	color: var(--lgo-text);
 }
 
-/* Phones: one line, the title is truncated (the full one is the H1 below). */
+/* Phones: one line. Categories shrink to an ellipsis before the line grows,
+   the title goes first (the full one is the H1 below); if even that is not
+   enough the line scrolls sideways instead of widening the page. */
 @media (max-width: 767px) {
 	.lgo-crumbs__list {
 		flex-wrap: nowrap;
+		overflow-x: auto;
+		scrollbar-width: none;
+	}
+
+	.lgo-crumbs__list::-webkit-scrollbar {
+		display: none;
 	}
 
 	.lgo-crumbs__item {
-		flex: 0 0 auto;
+		flex: 0 1 auto;
+		min-width: 0;
 	}
 
-	.lgo-crumbs__item:last-child {
-		flex: 1 1 auto;
+	.lgo-crumbs__item:nth-child(-n + 2) {
+		flex-shrink: 0;
+	}
+
+	/* The listing title is the H1 right below; on a phone it only steals room. */
+	.lgo-crumbs__item:last-child:has([aria-current]):not(:first-child) {
+		display: none;
+	}
+
+	.lgo-crumbs a {
+		min-width: 0;
+	}
+
+	.lgo-crumbs a span {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 }
 
@@ -1419,7 +1443,7 @@ button.lgo-bar__btn--tel {
 	border: 1px solid #c9d1cc;
 	border-radius: 10px;
 	font: inherit;
-	font-size: 15px;
+	font-size: 16px; /* under 16 px iOS Safari zooms the page on focus */
 	resize: vertical;
 }
 
@@ -1523,7 +1547,7 @@ button.lgo-bar__btn--tel {
 	border: 1px solid #c9d1cc;
 	border-radius: 10px;
 	font: inherit;
-	font-size: 15px;
+	font-size: 16px; /* under 16 px iOS Safari zooms the page on focus */
 }
 
 .lgo-calc__row input:focus-visible {
@@ -1823,3 +1847,11 @@ button.lgo-bar__btn--tel {
 
 /* Seller rating on the seller card */
 .lgo-seller__star { display: inline-grid; place-items: center; width: 20px; color: #d08a00; font-size: 18px; line-height: 1; }
+.lgo-contact__top .lgo-contact__title { overflow-wrap: break-word; hyphens: auto; }
+
+/* Narrow phones: the heart alone (the label stays for screen readers), so a long title keeps its words whole. */
+@media (max-width: 419px) {
+	.lgo-fav__btn,
+	.lgo-fav__btn:visited { justify-content: center; width: 44px; min-height: 44px; padding: 0; }
+	.lgo-fav__btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}

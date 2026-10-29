@@ -42,7 +42,7 @@
 					@if ($loop->first)<span class="pst-photo__badge">Naslovna</span>@endif
 					<div class="pst-photo__tools">
 						@unless ($loop->first)
-							<form method="post" action="{{ Wizard::url($listing, 'images') }}{{ $image->id }}/naslovna/">@csrf<button class="pst-tool" type="submit">Naslovna</button></form>
+							<form method="post" action="{{ Wizard::url($listing, 'images') }}{{ $image->id }}/naslovna/">@csrf<button class="pst-tool pst-tool--cover" type="submit" aria-label="Postavi sliku {{ $loop->iteration }} kao naslovnu">Naslovna</button></form>
 							<form method="post" action="{{ Wizard::url($listing, 'images') }}{{ $image->id }}/pomeri/">@csrf<input type="hidden" name="direction" value="up"><button class="pst-tool" type="submit" aria-label="Pomeri sliku {{ $loop->iteration }} levo">‹</button></form>
 						@endunless
 						@unless ($loop->last)

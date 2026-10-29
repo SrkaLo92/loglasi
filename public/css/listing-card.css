@@ -326,6 +326,28 @@
 		left: 76px;
 		right: auto;
 	}
+
+	/* Two cards per row leave ~150 px: the place and the time each get their own line instead of both ending in "…". */
+	.lc:not(.lc--list):not(.lc--wide) .lc__meta {
+		flex-wrap: wrap;
+		row-gap: 0;
+	}
+
+	.lc:not(.lc--list):not(.lc--wide) .lc__sep {
+		display: none;
+	}
+
+	.lc:not(.lc--list):not(.lc--wide) .lc__place {
+		flex: 1 1 0;
+	}
+
+	.lc:not(.lc--list):not(.lc--wide) .lc__meta time {
+		flex-basis: 100%;
+	}
+
+	.lc:not(.lc--list):not(.lc--wide) .lc__sep + time {
+		padding-left: 18px;
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
