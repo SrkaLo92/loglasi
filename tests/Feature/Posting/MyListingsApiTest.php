@@ -160,10 +160,22 @@ class MyListingsApiTest extends PostingTestCase
         $this->getJson('/api/v1/me/listings?status=expired')->assertJsonPath('total', 1)->assertJsonPath('items.0.title', 'Istekao');
         $this->getJson('/api/v1/me/listings?status=sold')->assertJsonPath('items.0.status', 'sold');
         $this->getJson('/api/v1/me/listings?status=pending')->assertJsonPath('items.0.title', 'Čeka');
-        $this->getJson('/api/v1/me/listings?status=draft')->assertStatus(400)->assertJsonPath('code', 'invalid_param');
+        $this->getJson('/api/v1/me/listings?status=draft')->assertJsonPath('total', 1)->assertJsonPath('items.0.status', 'draft');
+        $this->getJson('/api/v1/me/listings?status=nacrti')->assertStatus(400)->assertJsonPath('code', 'invalid_param');
         $this->getJson('/api/v1/me/listings?page=2')->assertJsonPath('items', []);
 
         $this->getJson('/api/v1/me/listings/'.$active->id)->assertOk()->assertJsonPath('id', $active->id)->assertJsonPath('is_mine', true)->assertJsonStructure(['description', 'images', 'fields', 'seller', 'expires_at', 'reject_reason']);
+    }
+
+    public function test_saving_a_draft_in_the_app_submits_it(): void
+    {
+        $user = $this->as();
+        $draft = $this->draft($user);
+
+        $this->getJson('/api/v1/me/listings/'.$draft->id)->assertOk()->assertJsonPath('status', 'draft');
+        $this->patchJson('/api/v1/me/listings/'.$draft->id, ['title' => 'Krečenje stanova, kuća i lokala'])
+            ->assertOk()->assertJsonPath('status', fn ($status) => in_array($status, ['pending', 'active'], true));
+        $this->assertNotSame(ListingStatus::Draft, $draft->fresh()->status);
     }
 
     public function test_other_users_listing_is_forbidden(): void

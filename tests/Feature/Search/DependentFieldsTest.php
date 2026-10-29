@@ -140,7 +140,7 @@ class DependentFieldsTest extends SearchTestCase
 
         // The button counts before the search is sent.
         $this->getJson('/oglasi/automobili/?f[marka_automobila]=audi', ['X-Lg-Count' => '1'])
-            ->assertOk()->assertExactJson(['count' => 1])->assertHeader('Cache-Control', 'no-store, private');
+            ->assertOk()->assertExactJson(['count' => 1])->assertHeader('Cache-Control', 'no-cache, private');
         $this->get('/oglasi/automobili/?f[marka_automobila]=audi')->assertSee('Prikaži 1 oglas<', false);
     }
 

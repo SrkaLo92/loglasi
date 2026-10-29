@@ -283,4 +283,39 @@ class MeApiTest extends TestCase
 
         $this->withToken($token)->patchJson('/api/v1/me', ['name' => 'Previše'])->assertStatus(429)->assertJsonPath('code', 'too_many_requests');
     }
+
+    public function test_password_change_keeps_this_device_and_logs_out_others(): void
+    {
+        $user = User::factory()->create(['password' => bcrypt('stara-lozinka-1')]);
+        $other = $this->tokenFor($user);
+
+        $this->withToken($this->tokenFor($user))->postJson('/api/v1/me/password', [
+            'current_password' => 'pogresna',
+            'password' => 'nova-lozinka-22',
+            'password_confirmation' => 'nova-lozinka-22',
+        ])->assertStatus(422)->assertJsonPath('fields.current_password', 'Trenutna lozinka nije tačna.');
+
+        $response = $this->withToken($this->tokenFor($user))->postJson('/api/v1/me/password', [
+            'current_password' => 'stara-lozinka-1',
+            'password' => 'nova-lozinka-22',
+            'password_confirmation' => 'nova-lozinka-22',
+        ])->assertOk()->assertJsonStructure(['access_token', 'refresh_token', 'user' => ['id']]);
+
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('nova-lozinka-22', $user->fresh()->password));
+        $this->app['auth']->forgetGuards();
+        $this->withToken($other)->getJson('/api/v1/me')->assertUnauthorized();
+        $this->app['auth']->forgetGuards();
+        $this->withToken($response->json('access_token'))->getJson('/api/v1/me')->assertOk();
+    }
+
+    public function test_password_change_validation(): void
+    {
+        $user = User::factory()->create(['password' => bcrypt('stara-lozinka-1')]);
+
+        $this->withToken($this->tokenFor($user))->postJson('/api/v1/me/password', [
+            'current_password' => 'stara-lozinka-1',
+            'password' => 'nova-lozinka-22',
+            'password_confirmation' => 'druga',
+        ])->assertStatus(422)->assertJsonPath('fields.password', fn ($m) => is_string($m) && $m !== '');
+    }
 }

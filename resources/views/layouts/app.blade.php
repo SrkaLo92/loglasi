@@ -61,5 +61,9 @@
 <script src="{{ asset_v('js/fav.js') }}" defer></script>
 <script src="{{ asset_v('js/password.js') }}" defer></script>
 @stack('scripts')
+{{-- A listing starts loading the moment a finger or the mouse button goes down on it, so it opens faster.
+     Only on that touch ("conservative"): prefetched pages are almost always opened, so views stay honest,
+     and the shared server gets no extra requests for links nobody taps. No prerender (scroll-restore). --}}
+<script type="speculationrules" nonce="{{ Vite::cspNonce() }}">{"prefetch":[{"where":{"href_matches":"/oglas/*"},"eagerness":"conservative"}]}</script>
 </body>
 </html>

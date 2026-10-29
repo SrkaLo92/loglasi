@@ -55,7 +55,7 @@ final class AccountOverview
             $tasks[] = $task('pending', $byStatus['pending'], 'info', 'clock', self::plural($byStatus['pending'], 'oglas čeka', 'oglasa čekaju', 'oglasa čeka').' proveru. Obično traje kratko.', 'Pogledaj', url_slash('moj-nalog/oglasi').'?status=na-cekanju');
         }
         if ($this->user->location_id === null) {
-            $tasks[] = $task('missing_location', 1, 'info', 'pin', 'Dodajte svoje mesto, da bi kupci znali odakle ste.', 'Dodaj', url_slash('moj-nalog/podesavanja'));
+            $tasks[] = $task('missing_location', 1, 'info', 'pin', 'Dodajte svoje mesto, da bi kupci znali odakle ste.', 'Dodaj', url_slash('moj-nalog/podesavanja').'#mesto');
         }
 
         return $tasks;

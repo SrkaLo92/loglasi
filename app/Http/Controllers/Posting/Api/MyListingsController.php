@@ -34,7 +34,7 @@ class MyListingsController extends Controller
 
     public const PER_PAGE = 20;
 
-    private const STATUSES = ['pending', 'active', 'rejected', 'expired', 'sold'];
+    private const STATUSES = ['pending', 'active', 'rejected', 'expired', 'sold', 'draft'];
 
     public function __construct(
         private readonly Posting $posting,
@@ -62,7 +62,7 @@ class MyListingsController extends Controller
             ->forPage($page, self::PER_PAGE)->get();
 
         return ApiResponse::json($request, [
-            'items' => $items->map(fn (Listing $l) => ListingFormatter::card($l))->values()->all(),
+            'items' => $items->map(fn (Listing $l) => self::withDraft($l, ListingFormatter::card($l)))->values()->all(),
             'page' => $page,
             'total' => $total,
         ], ApiResponse::CACHE_PRIVATE);
@@ -72,7 +72,7 @@ class MyListingsController extends Controller
     {
         $this->authorize('manage', $listing);
 
-        return ApiResponse::json($request, ListingFormatter::detail($listing, $request->user()), ApiResponse::CACHE_PRIVATE);
+        return ApiResponse::json($request, self::withDraft($listing, ListingFormatter::detail($listing, $request->user())), ApiResponse::CACHE_PRIVATE);
     }
 
     public function store(Request $request): Response
@@ -152,12 +152,15 @@ class MyListingsController extends Controller
         $listing->save();
         $this->posting->afterEdit($listing, $user, $imagesChanged || $before !== [$listing->title, $listing->description]);
 
-        if ($listing->status === ListingStatus::Rejected) {
-            // a rejected listing goes back to review once it is changed
+        if (in_array($listing->status, [ListingStatus::Rejected, ListingStatus::Draft], true)) {
+            // a rejected listing goes back to review once it is changed; a draft (unfinished on the site,
+            // or parked by a lower limit) is submitted the same way when it is saved in the app
             $this->refusalToValidation(fn () => $this->posting->submit($listing, $user));
         }
 
-        return ApiResponse::json($request, ListingFormatter::detail($listing->fresh(), $user), ApiResponse::CACHE_PRIVATE);
+        $listing = $listing->fresh();
+
+        return ApiResponse::json($request, self::withDraft($listing, ListingFormatter::detail($listing, $user)), ApiResponse::CACHE_PRIVATE);
     }
 
     public function destroy(Listing $listing): Response
@@ -340,8 +343,25 @@ class MyListingsController extends Controller
         }
     }
 
+    /**
+     * Drafts show as "draft" only on the owner's own routes; everywhere else the contract keeps them
+     * as pending, so older app versions that do not know the value never see it.
+     */
+    private static function withDraft(Listing $listing, array $data): array
+    {
+        if ($listing->status === ListingStatus::Draft) {
+            $data['status'] = 'draft';
+        }
+
+        return $data;
+    }
+
     private function statusQuery(int $userId, ?string $status): Builder
     {
+        if ($status === 'draft') {
+            return Listing::query()->where('user_id', $userId)->where('status', ListingStatus::Draft);
+        }
+
         $query = Listing::query()->where('user_id', $userId)->where('status', '!=', ListingStatus::Draft);
         $now = now();
 

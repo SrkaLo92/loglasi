@@ -98,7 +98,7 @@ class ListingController extends Controller
                 'tel' => $links['tel'],
                 'whatsapp' => $links['whatsapp'].'?text='.rawurlencode(static::whatsappText($listing)),
                 'viber' => $links['viber'],
-            ] : ['phone' => null], 200, ['Cache-Control' => 'no-store']);
+            ] : ['phone' => null], 200, ['Cache-Control' => 'private, no-cache']);
         }
 
         $anchor = in_array($request->input('next'), ['tel', 'whatsapp', 'viber'], true) ? $request->input('next') : 'kontakt';

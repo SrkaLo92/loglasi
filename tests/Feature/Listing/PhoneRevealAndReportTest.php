@@ -20,7 +20,7 @@ class PhoneRevealAndReportTest extends TestCase
 
         $this->postJson('/oglas/'.$listing->slug.'/telefon/')
             ->assertOk()
-            ->assertHeader('Cache-Control', 'no-store, private')
+            ->assertHeader('Cache-Control', 'no-cache, private')
             ->assertJson(['phone' => '+381641234567', 'tel' => 'tel:+381641234567', 'viber' => 'viber://chat?number=%2B381641234567'])
             ->assertJsonPath('display', fn ($v) => str_contains($v, '64'));
         $this->postJson('/oglas/'.$listing->slug.'/telefon/')->assertOk();

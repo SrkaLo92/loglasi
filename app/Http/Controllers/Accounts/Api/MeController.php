@@ -11,12 +11,15 @@ use App\Support\Account\AccountMenu;
 use App\Support\Account\AccountOverview;
 use App\Support\ApiError;
 use App\Support\Auth\AccountDeletion;
+use App\Support\Auth\Accounts;
+use App\Support\Auth\ApiTokens;
 use App\Support\Auth\Avatar;
 use App\Support\ListingLimits;
 use App\Support\Phone;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -72,6 +75,37 @@ class MeController extends Controller
         return response()->json(MePresenter::me($user->fresh()));
     }
 
+    /**
+     * POST /me/password: same rules as the site settings. Every other device (site and app) is logged out;
+     * this device gets a new token pair in the login shape, so it stays logged in.
+     */
+    public function password(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        Gate::authorize('update', $user);
+
+        $data = $request->validate([
+            'current_password' => ['required', 'string', 'max:'.Accounts::PASSWORD_MAX],
+            'password' => ['required', 'string', 'min:'.Accounts::PASSWORD_MIN, 'max:'.Accounts::PASSWORD_MAX, 'confirmed', 'different:current_password'],
+            'device_name' => ['nullable', 'string', 'max:120'],
+        ], [
+            'password.different' => 'Nova lozinka mora biti drugačija od trenutne.',
+        ]);
+
+        if (! Hash::check($data['current_password'], $user->getAuthPassword())) {
+            return ApiError::response('invalid_credentials', 'Trenutna lozinka nije tačna.', 422, ['current_password' => 'Trenutna lozinka nije tačna.']);
+        }
+
+        $user->forceFill(['password' => Hash::make($data['password'])])->save();
+
+        ApiTokens::revokeAll($user);
+        DB::table('sessions')->where('user_id', $user->id)->delete();
+        $tokens = ApiTokens::issue($user, $data['device_name'] ?? null);
+
+        return response()->json($tokens + ['user' => MePresenter::me($user->fresh())]);
+    }
+
     public function destroy(Request $request): Response|JsonResponse
     {
         /** @var User $user */
@@ -114,7 +148,7 @@ class MeController extends Controller
                     'missing_location' => ['screen' => 'profile'],
                     'expiring' => ['screen' => 'my_listings', 'status' => 'active'],
                     'rejected' => ['screen' => 'my_listings', 'status' => 'rejected'],
-                    'drafts' => ['screen' => 'drafts'],
+                    'drafts' => ['screen' => 'my_listings', 'status' => 'draft'],
                     default => ['screen' => 'my_listings', 'status' => 'pending'],
                 },
             ], $overview->tasks()),

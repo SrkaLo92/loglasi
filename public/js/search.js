@@ -319,7 +319,9 @@
 		button.classList.add('is-counting');
 		fetch(form.action + (params.toString() ? '?' + params.toString() : ''), {
 			headers: { 'X-Lg-Count': '1', 'Accept': 'application/json' },
-			credentials: 'same-origin'
+			credentials: 'same-origin',
+			// Kept out of the HTTP cache here, not with a no-store reply, which would keep the list out of the back/forward cache.
+			cache: 'no-store'
 		}).then(function (r) { return r.ok ? r.json() : null; }).then(function (data) {
 			if (mine !== asked || !data || typeof data.count !== 'number') { return; }
 			button.textContent = data.count ? 'Prikaži ' + data.count.toLocaleString('de-DE') + ' ' + word(data.count) : 'Nema oglasa za ovaj izbor';

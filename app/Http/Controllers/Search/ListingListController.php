@@ -80,7 +80,7 @@ class ListingListController extends Controller
         if ($request->headers->get('X-Lg-Count') === '1') {
             // "Prikaži 123 oglasa" on the filter button while the filters change.
             return response()->json(['count' => $results->total()])
-                ->header('Cache-Control', 'no-store')
+                ->header('Cache-Control', 'private, no-cache')
                 ->header('Vary', 'X-Lg-Count');
         }
         if ($page > 1 && $page > $results->lastPage()) {

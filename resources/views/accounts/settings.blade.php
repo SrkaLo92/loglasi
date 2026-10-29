@@ -68,7 +68,7 @@
 						@if ($detailsErrors->has('name')) aria-invalid="true" aria-describedby="nalog-name-greska" @endif>
 					@include('accounts.partials.error', ['field' => 'name', 'bag' => 'podaci', 'prefix' => 'nalog-'])
 				</div>
-				<div class="lgn-field">
+				<div class="lgn-field" id="mesto">
 					<label for="nalog-mesto">Mesto</label>
 					<select id="nalog-mesto" name="location_id" data-pick>
 						<option value="">Izaberite mesto</option>

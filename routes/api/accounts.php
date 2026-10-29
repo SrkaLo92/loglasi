@@ -16,6 +16,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/me', [MeController::class, 'show']);
     Route::patch('/me', [MeController::class, 'update'])->middleware('throttle:accounts-account');
+    Route::post('/me/password', [MeController::class, 'password'])->middleware('throttle:accounts-account');
     Route::delete('/me', [MeController::class, 'destroy'])->middleware('throttle:accounts-account');
     Route::get('/me/limits', [MeController::class, 'limits']);
     Route::get('/me/overview', [MeController::class, 'overview']);

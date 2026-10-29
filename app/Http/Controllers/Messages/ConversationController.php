@@ -143,7 +143,7 @@ class ConversationController extends Controller
             ])->render())->implode(''),
             'last_id' => (int) ($messages->last()?->id ?? $after),
             'read_until' => $otherReadAt?->toIso8601String(),
-        ], 200, ['Cache-Control' => 'private, no-store']);
+        ], 200, ['Cache-Control' => 'private, no-cache']);
     }
 
     /** Block the other participant (POST) or lift the block (DELETE). */
