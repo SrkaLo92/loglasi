@@ -12,6 +12,7 @@ use App\Filament\Support\Options;
 use App\Filament\Support\StaffAccess;
 use App\Models\Order;
 use App\Models\Product;
+use App\Services\Admin\AdminStats;
 use BackedEnum;
 use Filament\Actions\ActionGroup;
 use Filament\Resources\Resource;
@@ -77,7 +78,7 @@ class OrderResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $count = Order::query()->where('status', OrderStatus::Pending)->count();
+        $count = app(AdminStats::class)->queue()['orders'];
 
         return $count > 0 ? (string) $count : null;
     }

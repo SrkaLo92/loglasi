@@ -17,6 +17,7 @@ use App\Filament\Support\Options;
 use App\Models\User;
 use App\Rules\PhoneNumber;
 use App\Rules\PublicName;
+use App\Services\Admin\AdminStats;
 use App\Services\ListingParking;
 use App\Support\Firms\FirmPackage;
 use App\Support\LikelyFirm;
@@ -103,7 +104,7 @@ class UserResource extends Resource
     public static function getGlobalSearchEloquentQuery(): Builder
     {
         return parent::getGlobalSearchEloquentQuery()
-            ->withCount(['listings as active_listings_count' => fn (Builder $q) => $q->where('status', ListingStatus::Published)]);
+            ->withCount(['listings as active_listings_count' => fn (Builder $q) => $q->active()]);
     }
 
     public static function getGlobalSearchResultDetails(Model $record): array
@@ -123,7 +124,7 @@ class UserResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $count = User::query()->whereNotNull('phone')->where('phone', '!=', '')->whereNull('phone_verified_at')->count();
+        $count = app(AdminStats::class)->queue()['phones'];
 
         return $count > 0 ? (string) $count : null;
     }
@@ -234,7 +235,7 @@ class UserResource extends Resource
     {
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query
-                ->withCount(['listings', 'listings as active_listings_count' => fn ($q) => $q->where('status', ListingStatus::Published), 'devices'])
+                ->withCount(['listings', 'listings as active_listings_count' => fn ($q) => $q->active(), 'devices'])
                 ->with('firm'))
             ->headerActions([
                 CsvExport::action('korisnici', [
@@ -347,8 +348,8 @@ class UserResource extends Resource
                     ->trueLabel('Ima aktivnih')
                     ->falseLabel('Nema aktivnih')
                     ->queries(
-                        true: fn (Builder $query) => $query->whereHas('listings', fn ($q) => $q->where('status', ListingStatus::Published)),
-                        false: fn (Builder $query) => $query->whereDoesntHave('listings', fn ($q) => $q->where('status', ListingStatus::Published)),
+                        true: fn (Builder $query) => $query->whereHas('listings', fn ($q) => $q->active()),
+                        false: fn (Builder $query) => $query->whereDoesntHave('listings', fn ($q) => $q->active()),
                     ),
                 TernaryFilter::make('phone_verified')
                     ->label('Telefon')

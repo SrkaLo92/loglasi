@@ -29,11 +29,12 @@ class ListingTotals extends Widget
             ['label' => 'Na čekanju', 'count' => $c['pending'], 'url' => $listings('pending')],
             ['label' => 'Isteklih', 'count' => $c['expired'], 'url' => $listings('expired')],
             ['label' => 'Odbijenih', 'count' => $c['rejected'], 'url' => $listings('rejected')],
+            ['label' => 'Prodatih', 'count' => $c['sold'], 'url' => $listings('sold')],
             ['label' => 'Svih oglasa', 'count' => $c['all'], 'url' => $listings('all')],
             ['label' => 'Korisnika', 'count' => $c['users'], 'url' => UserResource::getUrl('index')],
             ['label' => 'Koristi aplikaciju', 'count' => $c['app_users'], 'url' => UserResource::getUrl('index', ['tableFilters' => ['has_app' => ['value' => '1']]])],
             ['label' => 'Blokiranih', 'count' => $c['blocked'], 'url' => UserResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'blocked']]])],
-            ['label' => 'Firmi', 'count' => $c['firms'], 'url' => FirmResource::getUrl('index')],
+            ['label' => 'Firmi (nalozi)', 'count' => $c['firms'], 'url' => FirmResource::getUrl('index')],
             ['label' => 'Firmi sa paketom', 'count' => $c['firms_paid'], 'url' => FirmResource::getUrl('index', ['tableFilters' => ['active_package' => ['value' => '1']]])],
         ]];
     }

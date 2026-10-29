@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin;
 
+use App\Enums\AccountType;
 use App\Enums\ListingStatus;
 use App\Enums\OrderStatus;
 use App\Enums\ReportStatus;
@@ -27,6 +28,8 @@ class AdminStats
 
     private const QUEUE_KEY = 'admin.stats.queue';
 
+    private const COUNTS_KEY = 'admin.stats.counts';
+
     public function __construct(private readonly Catalog $catalog) {}
 
     /**
@@ -45,9 +48,17 @@ class AdminStats
         ]);
     }
 
+    /** Every write to listings, users, firms or devices (AdminServiceProvider) and every admin action clear both. */
     public static function forgetQueue(): void
     {
         Cache::forget(self::QUEUE_KEY);
+        Cache::forget(self::COUNTS_KEY);
+        foreach (array_keys(self::PERIODS) as $period) {
+            Cache::forget('admin.stats.totals.'.$period);
+        }
+        foreach ([7, 14, 30] as $days) {
+            Cache::forget('admin.stats.daily.'.$days);
+        }
     }
 
     /** Real (non-test) orders whose money arrived; revenue is net of refunds. */
@@ -73,36 +84,57 @@ class AdminStats
     }
 
     /**
-     * Totals for one period.
+     * Listings right now with the same meaning as on the site and in the list tabs (ListListings):
+     * active = published and not past its expiry, expired = expired or published past its expiry
+     * (the hourly job has not switched it yet), all = everything except unfinished drafts.
+     * all = published + pending + expired + rejected + sold. Plus users and firm accounts.
      *
-     * @return array{listings: int, users: int, firms: int, views: int, reveals: int, orders: int, revenue: int}
-     */
-    /**
-     * Listings per status right now, plus all users and firms (cached TTL seconds).
-     *
-     * @return array{all: int, published: int, pending: int, rejected: int, expired: int, users: int, blocked: int, app_users: int, firms: int, firms_paid: int}
+     * @return array{all: int, published: int, pending: int, rejected: int, expired: int, sold: int, drafts: int, users: int, blocked: int, app_users: int, firms: int, firms_paid: int}
      */
     public function counts(): array
     {
-        return Cache::remember('admin.stats.counts', self::TTL, function () {
-            $byStatus = Listing::query()->toBase()->selectRaw('status, COUNT(*) AS n')->groupBy('status')->pluck('n', 'status');
-            $get = fn (ListingStatus $s) => (int) ($byStatus[$s->value] ?? 0);
+        return Cache::remember(self::COUNTS_KEY, self::TTL, function () {
+            $now = now();
+            $row = Listing::query()->toBase()->selectRaw(
+                'COALESCE(SUM(status = ? AND (expires_at IS NULL OR expires_at > ?)), 0) AS published,
+                 COALESCE(SUM(status = ? AND expires_at <= ?), 0) AS published_past,
+                 COALESCE(SUM(status = ?), 0) AS pending, COALESCE(SUM(status = ?), 0) AS rejected,
+                 COALESCE(SUM(status = ?), 0) AS expired, COALESCE(SUM(status = ?), 0) AS sold, COALESCE(SUM(status = ?), 0) AS drafts',
+                [ListingStatus::Published->value, $now, ListingStatus::Published->value, $now, ListingStatus::Pending->value,
+                    ListingStatus::Rejected->value, ListingStatus::Expired->value, ListingStatus::Sold->value, ListingStatus::Draft->value],
+            )->first();
+            $n = fn (string $key) => (int) $row->{$key};
+            $expired = $n('expired') + $n('published_past');
 
             return [
-                'all' => (int) $byStatus->sum(),
-                'published' => $get(ListingStatus::Published),
-                'pending' => $get(ListingStatus::Pending),
-                'rejected' => $get(ListingStatus::Rejected),
-                'expired' => $get(ListingStatus::Expired),
+                'all' => $n('published') + $n('pending') + $n('rejected') + $expired + $n('sold'),
+                'published' => $n('published'),
+                'pending' => $n('pending'),
+                'rejected' => $n('rejected'),
+                'expired' => $expired,
+                'sold' => $n('sold'),
+                'drafts' => $n('drafts'),
                 'users' => User::query()->count(),
                 'blocked' => User::query()->where('status', UserStatus::Blocked)->count(),
                 'app_users' => User::query()->whereHas('devices')->count(),
-                'firms' => Firm::query()->count(),
-                'firms_paid' => Firm::query()->where('package_ends_at', '>', now())->count(),
+                'firms' => User::query()->where('account_type', AccountType::Firm)->count(),
+                'firms_paid' => Firm::query()->where('package_ends_at', '>', $now)
+                    ->whereHas('user', fn ($q) => $q->where('account_type', AccountType::Firm))->count(),
             ];
         });
     }
 
+    /** Submitted listings (not unfinished drafts), deleted ones included: "new listings" in a period. */
+    private function submittedListings()
+    {
+        return Listing::withTrashed()->where('status', '!=', ListingStatus::Draft);
+    }
+
+    /**
+     * Totals for one period.
+     *
+     * @return array{listings: int, users: int, firms: int, views: int, reveals: int, orders: int, revenue: int}
+     */
     public function totals(string $period): array
     {
         return Cache::remember('admin.stats.totals.'.$period, self::TTL, function () use ($period) {
@@ -113,7 +145,7 @@ class AdminStats
                 ->first();
 
             return [
-                'listings' => Listing::withTrashed()->where('created_at', '>=', $since)->count(),
+                'listings' => $this->submittedListings()->where('created_at', '>=', $since)->count(),
                 'users' => User::withTrashed()->where('created_at', '>=', $since)->count(),
                 'firms' => Firm::query()->where('created_at', '>=', $since)->count(),
                 'views' => (int) $stats->views,
@@ -134,7 +166,7 @@ class AdminStats
         return Cache::remember('admin.stats.daily.'.$days, self::TTL, function () use ($days) {
             $since = CarbonImmutable::now(config('app.timezone'))->startOfDay()->subDays($days - 1);
 
-            $listings = $this->perDay(Listing::withTrashed()->toBase(), $since);
+            $listings = $this->perDay($this->submittedListings()->toBase(), $since);
             $users = $this->perDay(User::withTrashed()->toBase(), $since);
             $views = DB::table('listing_daily_stats')
                 ->where('date', '>=', $since->toDateString())
@@ -248,8 +280,7 @@ class AdminStats
         return [
             'pending_listings' => Listing::query()->where('status', ListingStatus::Pending)->count(),
             'avg_approval_minutes' => (int) round((float) $avg),
-            'active_listings' => Listing::query()->where('status', ListingStatus::Published)
-                ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))->count(),
+            'active_listings' => Listing::query()->active()->count(),
             'new_listings' => $totals['listings'],
             'new_users' => $totals['users'],
             'new_firms' => $totals['firms'],

@@ -8,7 +8,13 @@ use App\Filament\Support\AuditHooks;
 use App\Http\Middleware\Admin\EnsureAdminLogin;
 use App\Http\Middleware\Admin\SetAdminLocale;
 use App\Models\AuditLog;
+use App\Models\Device;
+use App\Models\Firm;
+use App\Models\Listing;
+use App\Models\Order;
+use App\Models\Report;
 use App\Models\Setting;
+use App\Models\User;
 use App\Services\Admin\AdminStats;
 use App\Support\Settings;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
@@ -44,6 +50,12 @@ class AdminPanelProvider extends PanelProvider
         Setting::deleted(fn () => Settings::flush());
         // Every admin write is audit-logged, so a new entry means the dashboard counters may have moved.
         AuditLog::created(fn () => AdminStats::forgetQueue());
+        // So do the site's own writes (a new listing, a registration, a device), so tiles and tab badges agree.
+        foreach ([Listing::class, User::class, Firm::class, Device::class, Order::class, Report::class] as $model) {
+            $model::saved(fn () => AdminStats::forgetQueue());
+            $model::deleted(fn () => AdminStats::forgetQueue());
+        }
+        Listing::restored(fn () => AdminStats::forgetQueue());
 
         RateLimiter::for('admin-api', fn (Request $request) => Limit::perMinute(120)->by('admin-api:'.($request->user()?->id ?? $request->ip())));
     }

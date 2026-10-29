@@ -17,6 +17,7 @@ use App\Models\Field;
 use App\Models\Listing;
 use App\Models\User;
 use App\Rules\PhoneNumber;
+use App\Services\Admin\AdminStats;
 use App\Services\Catalog;
 use App\Support\Phone;
 use BackedEnum;
@@ -77,7 +78,7 @@ class ListingResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $count = Listing::query()->where('status', ListingStatus::Pending)->count();
+        $count = app(AdminStats::class)->queue()['listings'];
 
         return $count > 0 ? (string) $count : null;
     }

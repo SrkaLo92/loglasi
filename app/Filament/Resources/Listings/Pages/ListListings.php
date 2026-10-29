@@ -19,15 +19,22 @@ class ListListings extends ListRecords
         $status = fn (ListingStatus $s) => fn (Builder $query) => $query->where('status', $s);
         $counts = app(AdminStats::class)->counts();
 
+        // Same meaning as the "Na sajtu" tiles (AdminStats::counts).
+        $pastExpiry = fn (Builder $q) => $q->where('status', ListingStatus::Published)->where('expires_at', '<=', now());
+
         return [
-            'all' => Tab::make('Svi')->badge($counts['all']),
+            'all' => Tab::make('Svi')->modifyQueryUsing(fn (Builder $query) => $query->where('status', '!=', ListingStatus::Draft))->badge($counts['all']),
             'pending' => Tab::make('Na čekanju')
                 ->modifyQueryUsing($status(ListingStatus::Pending))
-                ->badge(fn () => ListingResource::getNavigationBadge())
+                ->badge($counts['pending'] ?: null)
                 ->badgeColor('warning'),
-            'published' => Tab::make('Aktivni')->modifyQueryUsing($status(ListingStatus::Published))->badge($counts['published']),
+            'published' => Tab::make('Aktivni')->modifyQueryUsing(fn (Builder $query) => $query->active())->badge($counts['published']),
             'rejected' => Tab::make('Odbijeni')->modifyQueryUsing($status(ListingStatus::Rejected))->badge($counts['rejected']),
-            'expired' => Tab::make('Istekli')->modifyQueryUsing($status(ListingStatus::Expired))->badge($counts['expired']),
+            'expired' => Tab::make('Istekli')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where(fn (Builder $q) => $q->where('status', ListingStatus::Expired)->orWhere($pastExpiry)))
+                ->badge($counts['expired']),
+            'sold' => Tab::make('Prodati')->modifyQueryUsing($status(ListingStatus::Sold))->badge($counts['sold']),
+            'drafts' => Tab::make('Nezavršeni')->modifyQueryUsing($status(ListingStatus::Draft))->badge($counts['drafts'])->badgeColor('gray'),
             'reported' => Tab::make('Prijavljeni')
                 ->modifyQueryUsing(fn (Builder $query) => $query->whereHas('reports', fn ($r) => $r->where('status', ReportStatus::Open))),
             'featured' => Tab::make('Istaknuti')->modifyQueryUsing(fn (Builder $query) => $query->where('featured_until', '>', now())),

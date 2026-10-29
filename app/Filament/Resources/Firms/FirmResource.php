@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Firms;
 
-use App\Enums\ListingStatus;
 use App\Filament\Resources\Firms\Pages\EditFirm;
 use App\Filament\Resources\Firms\Pages\ListFirms;
 use App\Filament\Resources\Users\UserResource;
@@ -158,7 +157,7 @@ class FirmResource extends Resource
     {
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->with(['user', 'location'])
-                ->withCount(['listings as active_listings_count' => fn ($q) => $q->where('listings.status', ListingStatus::Published)]))
+                ->withCount(['listings as active_listings_count' => fn ($q) => $q->active()]))
             ->defaultSort('created_at', 'desc')
             ->headerActions([
                 CsvExport::action('firme', [

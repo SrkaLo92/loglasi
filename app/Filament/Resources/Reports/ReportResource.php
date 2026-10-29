@@ -13,6 +13,7 @@ use App\Filament\Support\StaffAccess;
 use App\Models\Listing;
 use App\Models\Report;
 use App\Models\User;
+use App\Services\Admin\AdminStats;
 use App\Services\Admin\ListingModeration;
 use App\Services\Admin\ReportHandling;
 use App\Services\Admin\UserAdministration;
@@ -52,7 +53,7 @@ class ReportResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $count = Report::query()->where('status', ReportStatus::Open)->count();
+        $count = app(AdminStats::class)->queue()['reports'];
 
         return $count > 0 ? (string) $count : null;
     }
