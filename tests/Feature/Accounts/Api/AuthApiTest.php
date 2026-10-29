@@ -7,6 +7,7 @@ use App\Enums\UserStatus;
 use App\Models\PersonalAccessToken;
 use App\Models\RefreshToken;
 use App\Models\User;
+use App\Support\Auth\ApiTokens;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Notification;
@@ -99,7 +100,7 @@ class AuthApiTest extends TestCase
 
     public function test_register_rate_limit(): void
     {
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 20; $i++) {
             $this->postJson('/api/v1/auth/register', ['name' => 'A', 'email' => "x{$i}@example.com", 'password' => 'lozinka123', 'accept_terms' => true]);
         }
 
@@ -233,10 +234,58 @@ class AuthApiTest extends TestCase
         User::factory()->create(['email' => 'ana@example.com']);
         $phone = $this->login();
         $tablet = $this->login();
-        $this->postJson('/api/v1/auth/refresh', ['refresh_token' => $phone['refresh_token']]);
+        $next = $this->postJson('/api/v1/auth/refresh', ['refresh_token' => $phone['refresh_token']])->json();
+        $this->app['auth']->forgetGuards();
+        $this->withToken($next['access_token'])->getJson('/api/v1/me')->assertOk(); // the new pair is in use
         $this->postJson('/api/v1/auth/refresh', ['refresh_token' => $phone['refresh_token']])->assertUnauthorized();
 
         $this->postJson('/api/v1/auth/refresh', ['refresh_token' => $tablet['refresh_token']])->assertOk();
+    }
+
+    public function test_retried_refresh_after_a_lost_answer_keeps_the_user_signed_in(): void
+    {
+        User::factory()->create(['email' => 'ana@example.com']);
+        $first = $this->login();
+
+        // The answer to this refresh never reached the phone (firewall, network cut).
+        $lost = $this->postJson('/api/v1/auth/refresh', ['refresh_token' => $first['refresh_token']])->assertOk()->json();
+        $this->travel(40)->minutes();
+
+        // The phone retries with the old token and gets a working pair.
+        $retry = $this->postJson('/api/v1/auth/refresh', ['refresh_token' => $first['refresh_token']])->assertOk()->json();
+        $this->app['auth']->forgetGuards();
+        $this->withToken($retry['access_token'])->getJson('/api/v1/me')->assertOk();
+        $this->postJson('/api/v1/auth/refresh', ['refresh_token' => $retry['refresh_token']])->assertOk();
+
+        // The pair that never arrived is dead.
+        $this->postJson('/api/v1/auth/refresh', ['refresh_token' => $lost['refresh_token']])->assertUnauthorized();
+        $this->app['auth']->forgetGuards();
+        $this->withToken($lost['access_token'])->getJson('/api/v1/me')->assertUnauthorized();
+    }
+
+    public function test_retry_window_is_limited(): void
+    {
+        User::factory()->create(['email' => 'ana@example.com']);
+        $first = $this->login();
+        $this->postJson('/api/v1/auth/refresh', ['refresh_token' => $first['refresh_token']])->assertOk();
+
+        $this->travel(ApiTokens::RETRY_HOURS + 1)->hours();
+
+        $this->postJson('/api/v1/auth/refresh', ['refresh_token' => $first['refresh_token']])->assertUnauthorized();
+    }
+
+    public function test_refresh_limit_counts_per_token_not_per_shared_ip(): void
+    {
+        $phones = array_map(function (int $i) {
+            User::factory()->create(['email' => "korisnik{$i}@example.com"]);
+
+            return $this->login("korisnik{$i}@example.com");
+        }, range(1, 12));
+
+        // Twelve phones behind one mobile-network IP all refresh at once.
+        foreach ($phones as $phone) {
+            $this->postJson('/api/v1/auth/refresh', ['refresh_token' => $phone['refresh_token']])->assertOk();
+        }
     }
 
     public function test_refresh_token_expires_after_30_days(): void

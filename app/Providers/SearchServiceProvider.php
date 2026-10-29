@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\ListingSearch;
 use App\Services\SearchIndex;
 use App\Support\Home\HomeSections;
+use App\Support\RateKey;
 use App\Support\Scheduling\InProcess;
 use App\Support\Search\Favorites;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -59,7 +60,7 @@ class SearchServiceProvider extends ServiceProvider
         }
         Listing::restored($flush);
 
-        RateLimiter::for('search', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
+        RateLimiter::for('search', fn (Request $request) => Limit::perMinute(120)->by('search:'.RateKey::client($request)));
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             InProcess::command($schedule, 'search:refresh')->everyMinute()->withoutOverlapping();

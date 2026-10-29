@@ -124,7 +124,7 @@ class RegistrationTest extends TestCase
 
     public function test_registration_is_rate_limited(): void
     {
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 20; $i++) {
             $this->post('/registracija/', $this->data(['email' => "r{$i}@example.com"]));
             $this->post('/odjava/');
         }

@@ -11,12 +11,17 @@ use Illuminate\Support\Str;
 /**
  * Mobile app tokens: access token (Sanctum, 15 minutes) and refresh token (30 days).
  * The refresh token is stored only as a SHA-256 hash and changes on every refresh.
+ * A refresh whose answer never reached the phone (network cut, firewall) is retried with the old token:
+ * while the new pair is still unused, that retry gets a fresh pair instead of a logout.
  */
 class ApiTokens
 {
     public const ACCESS_MINUTES = 15;
 
     public const REFRESH_DAYS = 30;
+
+    /** How long after a swap the old refresh token may be retried while the new pair is unused. */
+    public const RETRY_HOURS = 24;
 
     /**
      * New token pair for a device.
@@ -34,7 +39,9 @@ class ApiTokens
 
     /**
      * Swaps a refresh token for a new pair. Returns null if the token is not valid.
-     * If an already swapped token is used (possible theft), the whole chain of that device is revoked.
+     * If an already swapped token is used (possible theft), the whole chain of that device is revoked,
+     * unless the pair it was swapped for was never used (the phone did not get the answer: retry).
+     * Retries are accepted for RETRY_HOURS after the swap.
      *
      * @return array{user:User, tokens:array{access_token:string, refresh_token:string, expires_in:int}}|null
      */
@@ -47,9 +54,13 @@ class ApiTokens
             }
 
             if ($token->replaced_by_id !== null) {
-                static::revokeChain($token);
+                $retry = static::retriedSwap($token);
+                if ($retry === null) {
+                    static::revokeChain($token);
 
-                return null;
+                    return null;
+                }
+                $token = $retry;
             }
 
             $user = User::find($token->user_id);
@@ -64,6 +75,27 @@ class ApiTokens
 
             return ['user' => $user, 'tokens' => static::pair($user, $next, $nextPlain)];
         });
+    }
+
+    /**
+     * The old token of a swap whose new pair was never used: the unused pair is dropped and the old token
+     * can be swapped again. Null when it looks like reuse by someone else.
+     */
+    private static function retriedSwap(RefreshToken $token): ?RefreshToken
+    {
+        $next = RefreshToken::query()->lockForUpdate()->find($token->replaced_by_id);
+        $swappedAt = $token->last_used_at ?? $token->revoked_at;
+        $unused = $next !== null && $next->replaced_by_id === null && $next->revoked_at === null && $next->last_used_at === null
+            && ! PersonalAccessToken::where('refresh_token_id', $next->id)->whereNotNull('last_used_at')->exists();
+        if (! $unused || $swappedAt === null || $swappedAt->lt(now()->subHours(self::RETRY_HOURS)) || $token->expires_at?->isPast()) {
+            return null;
+        }
+
+        $next->forceFill(['revoked_at' => now()])->save();
+        PersonalAccessToken::where('refresh_token_id', $next->id)->delete();
+        $token->forceFill(['revoked_at' => null, 'replaced_by_id' => null]);
+
+        return $token;
     }
 
     /** Logs out one device: the refresh token from the request and/or the one the current access token is tied to. */

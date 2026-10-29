@@ -62,11 +62,12 @@ class AccountsServiceProvider extends ServiceProvider
 
         RateLimiter::for('accounts-login', fn (Request $request) => [
             Limit::perMinute(5)->by('login:'.$email($request).'|'.$request->ip())->response($this->tooMany(...)),
-            Limit::perMinute(30)->by('login-ip:'.$request->ip())->response($this->tooMany(...)),
+            // Many phones share one mobile-network IP: the per-email limit stops guessing, this one only floods.
+            Limit::perMinute(60)->by('login-ip:'.$request->ip())->response($this->tooMany(...)),
         ]);
 
         RateLimiter::for('accounts-register', fn (Request $request) => [
-            Limit::perHour(5)->by('register:'.$request->ip())->response($this->tooMany(...)),
+            Limit::perHour(20)->by('register:'.$request->ip())->response($this->tooMany(...)),
         ]);
 
         RateLimiter::for('accounts-password', fn (Request $request) => [
@@ -75,7 +76,8 @@ class AccountsServiceProvider extends ServiceProvider
         ]);
 
         RateLimiter::for('accounts-refresh', fn (Request $request) => [
-            Limit::perMinute(30)->by('refresh:'.$request->ip())->response($this->tooMany(...)),
+            Limit::perMinute(10)->by('refresh-token:'.sha1((string) $request->input('refresh_token')))->response($this->tooMany(...)),
+            Limit::perMinute(120)->by('refresh:'.$request->ip())->response($this->tooMany(...)),
         ]);
 
         RateLimiter::for('accounts-account', fn (Request $request) => [

@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Http\Api\ApiResponse;
 use App\Models\Listing;
 use App\Support\Listing\Seller;
+use App\Support\RateKey;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -32,7 +33,7 @@ class ListingServiceProvider extends ServiceProvider
 
         // Public reads in the API (detail, similar, firm).
         RateLimiter::for('listing-api', fn (Request $request) => [
-            Limit::perMinute(120)->by('listing-api:'.$request->ip())->response($this->tooMany(...)),
+            Limit::perMinute(120)->by('listing-api:'.RateKey::client($request))->response($this->tooMany(...)),
         ]);
 
         // The active listings count in the seller card follows status changes.

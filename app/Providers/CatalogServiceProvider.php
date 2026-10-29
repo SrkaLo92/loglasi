@@ -9,6 +9,7 @@ use App\Models\Location;
 use App\Models\Product;
 use App\Services\Catalog;
 use App\Services\ListingFields;
+use App\Support\RateKey;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -48,6 +49,6 @@ class CatalogServiceProvider extends ServiceProvider
             }
         });
 
-        RateLimiter::for('catalog', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
+        RateLimiter::for('catalog', fn (Request $request) => Limit::perMinute(120)->by('catalog:'.RateKey::client($request)));
     }
 }
