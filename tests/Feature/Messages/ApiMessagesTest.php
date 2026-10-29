@@ -167,6 +167,41 @@ class ApiMessagesTest extends TestCase
         $this->getJson('/api/v1/conversations/'.$conversation->id.'/messages')->assertJsonPath('2.mine', true)->assertJsonPath('2.read', true);
     }
 
+    public function test_polling_an_open_chat_gets_304_until_something_changes(): void
+    {
+        $conversation = Conversation::factory()->create(['seller_unread' => 1]);
+        $message = Message::factory()->for($conversation)->create(['sender_id' => $conversation->buyer_id]);
+        $conversation->forceFill(['last_message_at' => $message->created_at])->save();
+        $this->travel(1)->seconds();
+        $url = '/api/v1/conversations/'.$conversation->id.'/messages';
+
+        Sanctum::actingAs($conversation->seller);
+        $etag = $this->getJson($url)->assertOk()->headers->get('ETag');
+        $readAt = $conversation->fresh()->seller_read_at;
+        $this->travel(5)->seconds();
+
+        $this->getJson($url, ['If-None-Match' => $etag])->assertStatus(304)->assertHeader('ETag', $etag);
+        $this->assertEquals($readAt, $conversation->fresh()->seller_read_at); // nothing new: no write
+
+        // The buyer answers: a new ETag and the new message.
+        Sanctum::actingAs($conversation->buyer);
+        $this->travel(1)->seconds();
+        app(Messenger::class)->reply($conversation->buyer, $conversation->fresh(), 'Još je dostupno?');
+
+        Sanctum::actingAs($conversation->seller);
+        $this->getJson($url, ['If-None-Match' => $etag])->assertOk()->assertJsonCount(2);
+
+        // The seller's own message turns "read" when the buyer opens the chat: the seller's ETag changes.
+        $this->travel(1)->seconds();
+        app(Messenger::class)->reply($conversation->seller, $conversation->fresh(), 'Jeste.');
+        $mine = $this->getJson($url)->assertJsonPath('2.read', false)->headers->get('ETag');
+        $this->travel(1)->seconds();
+        Sanctum::actingAs($conversation->buyer);
+        $this->getJson($url)->assertOk();
+        Sanctum::actingAs($conversation->seller);
+        $this->getJson($url, ['If-None-Match' => $mine])->assertOk()->assertJsonPath('2.read', true);
+    }
+
     public function test_reply_and_access(): void
     {
         $listing = Listing::factory()->create();

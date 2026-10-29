@@ -106,6 +106,11 @@ class Messenger
         $unread = $buyer ? 'buyer_unread' : 'seller_unread';
 
         $hadUnread = $conversation->{$unread} > 0;
+        // Polling an open chat must not write the row each time when everything is already read.
+        $read = $conversation->{$readAt};
+        if (! $hadUnread && $read !== null && ($conversation->last_message_at === null || $read->greaterThan($conversation->last_message_at))) {
+            return;
+        }
         $now = now();
 
         Conversation::query()->whereKey($conversation->id)->update([$readAt => $now, $unread => 0]);

@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Messages\SendMessageRequest;
 use App\Models\Conversation;
 use App\Models\Listing;
+use App\Models\User;
 use App\Services\Messages\MessageRejected;
 use App\Services\Messages\Messenger;
 use Illuminate\Http\Request;
@@ -67,12 +68,20 @@ class ConversationApiController extends Controller
         $query = $this->query($request, ['before' => ['nullable', 'integer', 'min:1']], ['before' => 'Mora biti pozitivan ceo broj.']);
 
         $user = $request->user();
-        $page = $this->messenger->messages($conversation, isset($query['before']) ? (int) $query['before'] : null, (int) config('messages.messages_per_page'));
+        $before = isset($query['before']) ? (int) $query['before'] : null;
         $this->messenger->markRead($user, $conversation);
 
+        // The app polls this while a chat is open: answer 304 from the conversation row alone,
+        // without loading the messages, when nothing new was sent or read.
+        $etag = self::messagesEtag($conversation, $user, $before);
+        if (ApiResponse::matches((string) $request->headers->get('If-None-Match'), $etag)) {
+            return response('', 304, ['ETag' => $etag, 'Cache-Control' => ApiResponse::CACHE_PRIVATE]);
+        }
+
+        $page = $this->messenger->messages($conversation, $before, (int) config('messages.messages_per_page'));
         $data = $page['items']->map(fn ($m) => MessagesPresenter::message($m, $conversation, $user))->values();
 
-        return ApiResponse::json($request, $data, ApiResponse::CACHE_PRIVATE);
+        return ApiResponse::json($request, $data, ApiResponse::CACHE_PRIVATE, 200, ['ETag' => $etag]);
     }
 
     public function reply(SendMessageRequest $request, Conversation $conversation)
@@ -82,6 +91,21 @@ class ConversationApiController extends Controller
         $message = $this->send(fn () => $this->messenger->reply($request->user(), $conversation, $request->body()));
 
         return ApiResponse::json($request, MessagesPresenter::message($message, $message->conversation, $request->user()), null, 201);
+    }
+
+    /**
+     * Changes when a message is sent or the other side reads one of the viewer's messages
+     * (the "read" flags); after markRead every incoming message is read.
+     */
+    private static function messagesEtag(Conversation $conversation, User $viewer, ?int $before): string
+    {
+        $last = $conversation->last_message_at;
+        $otherRead = $conversation->otherReadAt($viewer);
+        $readState = $otherRead === null ? '-' : ($last !== null && $otherRead->greaterThan($last) ? 'all' : $otherRead->getTimestamp());
+
+        return 'W/"m'.md5(implode('|', [
+            $conversation->id, $viewer->id, $before ?? 0, (int) config('messages.messages_per_page'), $last?->getTimestamp() ?? 0, $readState,
+        ])).'"';
     }
 
     private function send(callable $action)
