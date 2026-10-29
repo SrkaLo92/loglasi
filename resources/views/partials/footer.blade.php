@@ -1,5 +1,6 @@
 {{-- Site footer, structured like the old live site: news line, contact, useful links, categories, newest listings and social. --}}
 @use('App\Support\Home\FooterSections')
+@use('App\Support\Pages\Company')
 @use('App\Support\Phone')
 @use('App\Support\Settings')
 @use('App\Support\Pages\SiteIcons')
@@ -108,6 +109,12 @@
 		</div>
 	</div>
 
+	@if (Company::line() !== '')
+		{{-- Impresum (Zakon o elektronskoj trgovini, čl. 6) --}}
+		<div class="lg-wrap lg-footer__legal">
+			<p>{{ Company::line() }}@if (Company::email() !== '') Kontakt: <a href="mailto:{{ Company::email() }}">{{ Company::email() }}</a>@if (Company::phone() !== ''), {{ Company::phone() }}@endif.@endif</p>
+		</div>
+	@endif
 	<div class="lg-wrap lg-footer__bottom">
 		<p>© {{ now()->year }} loglasi.rs · Vaš lokalni portal za kupovinu, prodaju i razmenu. Sva prava zadržana.</p>
 		<button type="button" class="lg-footer__cookies" data-cookies-change hidden>Podešavanje kolačića</button>

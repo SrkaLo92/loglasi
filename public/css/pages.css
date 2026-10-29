@@ -1725,3 +1725,24 @@ main:focus { outline: none; }
 		padding: 22px;
 	}
 }
+
+/* Impresum box on Uslovi korišćenja and Politika privatnosti */
+.lgx-impresum {
+	max-width: 760px;
+	margin-bottom: 20px;
+	padding: 20px 24px;
+	border: 1px solid var(--lgx-border);
+	border-radius: var(--lgx-radius);
+	background: #fff;
+	font-size: 15px;
+	line-height: 1.5;
+}
+.lgx .lgx-impresum__title { margin: 0 0 10px; font-size: 17px; font-weight: 800; }
+.lgx-impresum__list { display: grid; gap: 6px; margin: 0; }
+.lgx-impresum__list > div { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 12px; }
+.lgx-impresum__list dt { color: #64748b; }
+.lgx-impresum__list dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 767.98px) {
+	.lgx-impresum { padding: 16px; }
+	.lgx-impresum__list > div { grid-template-columns: 1fr; gap: 0; }
+}

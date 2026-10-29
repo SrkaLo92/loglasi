@@ -6,9 +6,9 @@ use App\Support\Phone;
 use App\Support\Settings;
 
 /**
- * Seller identity for the legal pages and the withdrawal form, read only from admin settings
- * (payment_recipient, payment_pib, payment_mb, payment_account, contact_*). Nothing is made up:
- * an empty setting is left out.
+ * Seller identity for the legal pages and the withdrawal form, read only from admin settings:
+ * the impresum (Company: company_*) first, then payment_recipient, payment_pib, payment_mb,
+ * payment_account and contact_*. Nothing is made up: an empty setting is left out.
  */
 class SellerIdentity
 {
@@ -21,17 +21,17 @@ class SellerIdentity
             array_map('trim', preg_split('/\R/', trim((string) Settings::get('payment_recipient', ''))) ?: []),
             'strlen',
         ));
-        $name = $recipient[0] ?? '';
-        $address = count($recipient) > 1
+        $name = Company::name() ?: ($recipient[0] ?? '');
+        $address = Company::address() ?: (count($recipient) > 1
             ? implode(', ', array_slice($recipient, 1))
-            : trim((string) Settings::get('contact_address'));
+            : trim((string) Settings::get('contact_address')));
         $phone = trim((string) Settings::get('contact_phone'));
 
         $rows = [
             'Naziv' => $name,
             'Adresa' => $address,
-            'PIB' => trim((string) Settings::get('payment_pib', '')),
-            'Matični broj' => trim((string) Settings::get('payment_mb', '')),
+            'PIB' => Company::pib() ?: trim((string) Settings::get('payment_pib', '')),
+            'Matični broj' => Company::mb() ?: trim((string) Settings::get('payment_mb', '')),
             'Tekući račun' => trim((string) Settings::get('payment_account', '')),
             'E-pošta' => trim((string) Settings::get('contact_email')),
             'Telefon' => $phone !== '' ? Phone::display($phone) : '',

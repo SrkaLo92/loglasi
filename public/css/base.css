@@ -881,3 +881,9 @@ details[name][open]::details-content {
 .lg-tone--sky { --tone: #0369a1; --tone-bg: #e4f4fc; --tone-line: #bfe3f5; }
 .lg-tone--amber { --tone: #9a5b00; --tone-bg: #fdf4e0; --tone-line: #f0d9a8; }
 .lg-tone--gray { --tone: #3f4a45; --tone-bg: #f1f4f2; --tone-line: #dde3df; }
+
+/* Impresum line above the copyright (Zakon o elektronskoj trgovini, čl. 6) */
+.lg-footer__legal { padding-top: 16px; border-top: 1px solid var(--lg-footer-line); font-size: 13px; line-height: 1.55; opacity: .85; }
+.lg-footer__legal p { margin: 0; }
+.lg-footer__legal a { color: inherit; }
+.lg-footer__legal + .lg-footer__bottom { border-top: 0; padding-top: 10px; }

@@ -8,6 +8,7 @@ use App\Services\ListingImages;
 use App\Services\Payments\FiscalDriver;
 use App\Services\Payments\PlusSeller;
 use App\Support\Home\HomeSettings;
+use App\Support\Pages\Company;
 use App\Support\Pages\PageText;
 use App\Support\Pages\Pricing;
 use App\Support\Payments\PaymentDetails;
@@ -38,6 +39,11 @@ class SettingsSchema
             'image_max_mb' => ['label' => 'Najveća slika (MB)', 'type' => 'decimal', 'default' => ListingImages::DEFAULT_MAX_MB],
             'moderation' => ['label' => 'Odobravanje oglasa', 'type' => 'select', 'options' => self::MODERATION, 'default' => Settings::DEFAULTS['moderation']],
             'new_condition_firms_only' => ['label' => 'Stanje „Novo” samo za firme', 'type' => 'boolean', 'help' => 'Privatna lica ne mogu da označe predmet kao nov.', 'default' => Settings::DEFAULTS['new_condition_firms_only']],
+            'company_name' => ['label' => 'Impresum: naziv radnje (iz APR-a)', 'type' => 'text', 'help' => 'Prikazuje se u podnožju sajta, u Uslovima korišćenja i Politici privatnosti (Zakon o elektronskoj trgovini, čl. 6).', 'default' => Company::DEFAULTS['company_name']],
+            'company_address' => ['label' => 'Impresum: adresa sedišta', 'type' => 'text', 'default' => Company::DEFAULTS['company_address']],
+            'company_mb' => ['label' => 'Impresum: matični broj', 'type' => 'text', 'default' => Company::DEFAULTS['company_mb']],
+            'company_pib' => ['label' => 'Impresum: PIB', 'type' => 'text', 'default' => Company::DEFAULTS['company_pib']],
+            'company_register' => ['label' => 'Impresum: registar', 'type' => 'text', 'default' => Company::DEFAULTS['company_register']],
             'admin_new_listing_mail' => ['label' => 'Mejl adminima za svaki novi oglas', 'type' => 'boolean', 'help' => 'Svaki administrator dobija mejl kad stigne nov oglas (i kad čeka odobrenje i kad je odmah objavljen), sa linkom ka adminu.', 'default' => Settings::DEFAULTS['admin_new_listing_mail']],
             'founding_firms_total' => ['label' => 'Broj mesta u akciji „Prvih 30 firmi”', 'type' => 'integer', 'help' => 'Brojač na stranama Cenovnik i Za firme.', 'default' => Settings::DEFAULTS['founding_firms_total']],
             'eur_rate' => ['label' => 'Kurs evra (1 € = … din)', 'type' => 'decimal', 'help' => 'Za sortiranje i filter po ceni (oglasi u dinarima se preračunavaju u evre).', 'default' => Settings::DEFAULTS['eur_rate']],

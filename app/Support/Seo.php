@@ -10,6 +10,7 @@ use App\Models\Location;
 use App\Models\User;
 use App\Services\Catalog;
 use App\Services\ListingFields;
+use App\Support\Pages\Company;
 use App\Support\Pages\PageText;
 use App\Support\Seo\Url;
 use Illuminate\Database\Eloquent\Model;
@@ -676,6 +677,8 @@ class Seo
             '@type' => 'Organization',
             '@id' => $base.'/#organization',
             'name' => config('seo.site_name'),
+            'legalName' => Company::name() ?: null,
+            'taxID' => Company::pib() ?: null,
             'url' => $base.'/',
             'logo' => $logo ? ['@type' => 'ImageObject', '@id' => $base.'/#logo', 'url' => $logo, 'contentUrl' => $logo] : null,
             'image' => $logo ? ['@id' => $base.'/#logo'] : null,

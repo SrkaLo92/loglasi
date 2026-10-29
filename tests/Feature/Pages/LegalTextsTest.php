@@ -69,10 +69,8 @@ class LegalTextsTest extends TestCase
 
     public function test_privacy_names_the_controller_cookies_and_processors(): void
     {
-        Settings::set('payment_recipient', "SRĐAN MARINKOVIĆ PR ALPHASOFT DEV\nMarka Kulića 57G, Klupci, 15300 Loznica");
-
         $this->get('/politika-privatnosti/')->assertOk()
-            ->assertSee('Rukovalac podacima je SRĐAN MARINKOVIĆ PR ALPHASOFT DEV, Marka Kulića 57G, Klupci, 15300 Loznica')
+            ->assertSee('Rukovalac podacima je SRĐAN MARINKOVIĆ PR VEB PORTALI ALPHASOFT DEV KLUPCI, Marka Kulića 57G, Klupci, 15300 Loznica')
             ->assertSee('Ne, hvala')
             ->assertSee('Ko još obrađuje podatke')
             ->assertSee('Poverenik', false);
@@ -104,12 +102,16 @@ class LegalTextsTest extends TestCase
     public function test_seller_block_comes_from_settings(): void
     {
         $this->get('/uslovi-placanja/')->assertOk()
-            ->assertDontSee('PIB:')
+            ->assertSee('<li><strong>PIB:</strong> 115879910</li>', false)
+            ->assertSee('<li><strong>Adresa:</strong> Marka Kulića 57G, Klupci, 15300 Loznica</li>', false)
             ->assertSee('<li><strong>E-pošta:</strong> <a href="mailto:kontakt@loglasi.rs">kontakt@loglasi.rs</a></li>', false)
             ->assertSee('<li><strong>Telefon:</strong> +381 65 541 5128</li>', false)
-            ->assertSee('<li><strong>Adresa:</strong> 15300 Loznica, Srbija</li>', false)
             ->assertSee('pozovite <a href="tel:+381655415128">', false);
 
+        // Empty impresum settings fall back to the payment recipient.
+        foreach (['company_name', 'company_address', 'company_pib', 'company_mb'] as $key) {
+            Settings::set($key, '');
+        }
         Settings::set('payment_recipient', "PRIMALAC PR TEST\nGlavna 1, Loznica");
         Settings::set('payment_pib', '100002887');
         Settings::set('payment_mb', '12345678');
@@ -128,7 +130,7 @@ class LegalTextsTest extends TestCase
 
     public function test_seller_values_are_not_markdown(): void
     {
-        Settings::set('payment_recipient', '[Klik](/kontakt/) *masno* <b>x</b>');
+        Settings::set('company_name', '[Klik](/kontakt/) *masno* <b>x</b>');
 
         $this->get('/uslovi-placanja/')->assertOk()
             ->assertDontSee('>Klik</a>', false)
