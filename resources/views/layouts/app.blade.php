@@ -54,6 +54,7 @@
 @include('partials.bottom-nav')
 @endif
 @include('partials.cookie-bar')
+<script src="{{ asset_v('js/scroll.js') }}" defer></script>
 <script src="{{ asset_v('js/pick.js') }}" defer></script>
 <script src="{{ asset_v('js/accordion.js') }}" defer></script>
 <script src="{{ asset_v('js/recent.js') }}" defer></script>
