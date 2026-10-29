@@ -59,6 +59,8 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* Safety net: a too-wide element is cut off instead of letting the whole page slide sideways on a phone (clip keeps position: sticky working). */
+html, body { overflow-x: clip; }
 
 body {
 	margin: 0;
