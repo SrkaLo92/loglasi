@@ -232,8 +232,12 @@ fieldset.pst-field > legend { margin-bottom: 6px; }
 .pst-review__desc { font-size: 15px; line-height: 1.6; overflow-wrap: anywhere; }
 .pst-review__edit { display: flex; flex-wrap: wrap; gap: 0 16px; margin: 12px 0 0; font-size: 14px; }
 .pst-review__edit a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
-.pst-submit { display: grid; gap: 12px; }
-.pst-submit .pst-help { text-align: right; }
+.pst-submit {
+	position: sticky; bottom: 0; z-index: 30; display: grid; gap: 12px;
+	padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px));
+	background: var(--lg-bg); border-top: 1px solid var(--lg-border);
+}
+.pst-submit__note { margin: 16px 0 0; text-align: right; }
 
 /* My listings */
 
@@ -332,7 +336,9 @@ fieldset.pst-field > legend { margin-bottom: 6px; }
 	.pst-actions { justify-content: stretch; }
 	.pst-actions > * { flex: 1 1 auto; }
 	.pst-review { grid-template-columns: minmax(0, 1fr); gap: 16px; }
-	.pst-submit .pst-help { text-align: left; }
+	.pst-submit__note { text-align: left; }
+	/* Above the site bottom navigation; its middle button sticks out ~20 px, hence the larger bottom padding. */
+	body.lg-has-mnav .pst-submit { bottom: calc(var(--lg-mnav-h) + env(safe-area-inset-bottom, 0px)); padding-bottom: 28px; }
 	.pst-photos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	.pst-mine__item { grid-template-columns: 104px minmax(0, 1fr); gap: 12px; padding: 12px; }
 	/* Buttons take the full card width under the photo, in one row. */

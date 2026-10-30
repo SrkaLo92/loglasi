@@ -104,7 +104,7 @@
 		control.refreshSub();
 		render();
 		window.clearTimeout(sheet.hideTimer);
-		sheet.root.classList.remove('is-closing', 'is-open', 'is-pop');
+		sheet.root.classList.remove('is-closing', 'is-open', 'is-pop', 'is-nosearch');
 		sheet.panel.removeAttribute('style');
 		// The dropdown class goes on before the sheet is shown, so the opening transition never starts
 		// from the centred dialog (the panel used to fly in from the middle of the screen).
@@ -113,13 +113,17 @@
 		sheet.root.hidden = false;
 		// A short list on a phone: the sheet is only as tall as its options.
 		sheet.root.classList.toggle('is-short', control.count() <= 8);
-		if (pop) { place(control.trigger); }
+		if (pop) { place(control.trigger, control.count()); }
 		else { document.documentElement.classList.add('lp-lock'); }
 		void sheet.panel.offsetHeight; // start the opening transition from the closed state
 		window.requestAnimationFrame(function () {
 			sheet.root.classList.add('is-open');
 			// The keyboard on a phone would cover half the list, so focus the search there only for long lists.
-			if (window.matchMedia('(min-width: 720px)').matches || control.count() > 12) { sheet.input.focus(); }
+			// A short dropdown has no search (see place), so the chosen option takes the focus there.
+			if (pop && control.count() <= 8) {
+				var first = sheet.body.querySelector('.lp-opt[aria-selected="true"]') || sheet.body.querySelector('.lp-opt');
+				if (first) { first.focus(); }
+			} else if (window.matchMedia('(min-width: 720px)').matches || control.count() > 12) { sheet.input.focus(); }
 			else { sheet.root.querySelector('.lp-x').focus(); }
 			var chosen = sheet.body.querySelector('.lp-list:not(.lp-list--chips) .lp-opt[aria-selected="true"]');
 			if (chosen) { chosen.scrollIntoView({ block: 'center' }); }
@@ -127,22 +131,31 @@
 	};
 
 	/* On a computer the list opens as a dropdown under its field (below, or above when there is no room). */
-	var place = function (trigger) {
+	var place = function (trigger, count) {
 		var rect = trigger.getBoundingClientRect();
 		var gap = 6;
 		var edge = 16;
-		var width = Math.min(Math.max(rect.width, 340), 440, window.innerWidth - edge * 2);
-		var left = Math.max(edge, Math.min(rect.left, window.innerWidth - width - edge));
+		// A short list (EUR / RSD) is as wide as its field and has no search; a long one gets room to search.
+		var short = count <= 8;
+		var width = Math.min(Math.max(rect.width, short ? 160 : 340), 440, window.innerWidth - edge * 2);
+		// Under its field, right-aligned with it when the field is narrower than the list (no overlap to the right).
+		var left = rect.left + width > window.innerWidth - edge ? rect.right - width : rect.left;
+		left = Math.max(edge, Math.min(left, window.innerWidth - width - edge));
 		var below = window.innerHeight - rect.bottom - gap - edge;
 		var above = rect.top - gap - edge;
+		var needed = Math.min(320, count * 40 + (short ? 12 : 70));
 		var style = sheet.panel.style;
 		sheet.root.classList.add('is-pop');
+		sheet.root.classList.toggle('is-nosearch', short);
 		style.left = left + 'px';
 		style.width = width + 'px';
-		if (below >= 320 || below >= above) {
+		if (below >= needed || below >= above) {
 			style.top = (rect.bottom + gap) + 'px';
+			style.bottom = 'auto';
 			style.maxHeight = Math.min(520, below) + 'px';
 		} else {
+			// top must be cleared: the centred dialog's top: 50% would otherwise stretch the list down to the middle.
+			style.top = 'auto';
 			style.bottom = (window.innerHeight - rect.top + gap) + 'px';
 			style.maxHeight = Math.min(520, above) + 'px';
 		}

@@ -2,6 +2,9 @@
 @push('head')
 <link rel="stylesheet" href="{{ asset_v('css/firms.css') }}">
 @endpush
+@push('scripts')
+<script src="{{ asset_v('js/firm-account.js') }}" defer></script>
+@endpush
 @php
 	$title = 'Profil firme | loglasi.rs';
 	$robots = 'noindex, follow';
@@ -27,7 +30,12 @@
 	@endif
 	@if ($errors->any())
 		<div class="lgf-alert lgf-alert--err" role="alert">
-			<p>Podaci nisu sačuvani. Proverite označena polja.</p>
+			<p>Podaci nisu sačuvani:</p>
+			<ul>
+				@foreach (array_unique($errors->all()) as $message)
+					<li>{{ $message }}</li>
+				@endforeach
+			</ul>
 		</div>
 	@endif
 

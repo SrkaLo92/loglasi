@@ -651,6 +651,14 @@
 		padding: 10px 10px 6px;
 	}
 
+	.lp-sheet.is-pop.is-nosearch .lp-find {
+		display: none;
+	}
+
+	.lp-sheet.is-pop.is-nosearch .lp-body {
+		padding-top: 6px;
+	}
+
 	.lp-sheet.is-pop .lp-find__icon {
 		top: 22px;
 		left: 22px;

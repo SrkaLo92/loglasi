@@ -62,15 +62,16 @@
 </article>
 
 @if ($canSubmit)
+	<p class="pst-help pst-submit__note">
+		@if ($needsReview)
+			Oglas će biti vidljiv kad ga pregledamo i odobrimo. Status pratite u „Mojim oglasima”, na kartici „Na čekanju”.
+		@else
+			Oglas će odmah biti vidljiv na sajtu i aktivan {{ app(\App\Services\Posting::class)->durationDays() }} dana. Obnova je besplatna.
+		@endif
+	</p>
+	{{-- Stays on screen at the bottom while the preview scrolls, so a long description never hides the button. --}}
 	<form class="pst-submit" method="post" action="{{ url_slash('postavi-oglas/'.$listing->id.'/objavi') }}">
 		@csrf
-		<p class="pst-help">
-			@if ($needsReview)
-				Oglas će biti vidljiv kad ga pregledamo i odobrimo. Status pratite u „Mojim oglasima”, na kartici „Na čekanju”.
-			@else
-				Oglas će odmah biti vidljiv na sajtu i aktivan {{ app(\App\Services\Posting::class)->durationDays() }} dana. Obnova je besplatna.
-			@endif
-		</p>
 		<div class="pst-actions">
 			<a class="pst-btn pst-btn--line" href="{{ Wizard::url($listing, 'contact') }}">Nazad</a>
 			<button class="pst-btn pst-btn--orange" type="submit" @disabled($missing !== [])>{{ $listing->status === ListingStatus::Rejected ? 'Pošalji ponovo na proveru' : 'Objavi oglas' }}</button>
