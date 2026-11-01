@@ -14,6 +14,8 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -62,11 +64,16 @@ class InfoBusinessResource extends Resource
             TextInput::make('website')->label('Sajt')->url()->maxLength(255),
             TextInput::make('facebook')->label('Facebook')->url()->maxLength(255),
             TextInput::make('instagram')->label('Instagram')->url()->maxLength(255),
+            TextInput::make('viber')->label('Viber broj')->tel()->maxLength(40),
+            Textarea::make('opening_hours')->label('Radno vreme (svaki red posebno, npr. Pon–Pet 08–20)')->rows(3),
             Textarea::make('description')->label('Opis')->rows(3)->columnSpanFull(),
             Select::make('firm_id')->label('Povezan nalog firme na loglasi.rs')
                 ->options(fn () => Firm::query()->orderBy('name')->pluck('name', 'id'))->searchable()->placeholder('—'),
             Select::make('status')->label('Status')->options(['listed' => 'Prikazana', 'hidden' => 'Skrivena'])->default('listed')->required(),
-            Toggle::make('featured')->label('Istaknuta (plaćeno ili partner)'),
+            Toggle::make('featured')->label('Istaknuta trajno (partner)'),
+            DateTimePicker::make('featured_until')->label('Istaknuta do (plaćeno)')->seconds(false),
+            FileUpload::make('gallery')->label('Galerija (do 6 slika)')->image()->multiple()->maxFiles(6)->reorderable()
+                ->disk('public')->directory('info-firme')->maxSize(4096)->columnSpanFull(),
             TextInput::make('source')->label('Izvor podataka')->maxLength(255),
         ])->columns(['default' => 1, 'md' => 2]);
     }
@@ -82,7 +89,7 @@ class InfoBusinessResource extends Resource
                 TextColumn::make('phone')->label('Telefon')->placeholder('—')->toggleable(),
                 TextColumn::make('email')->label('Mejl')->placeholder('—')->toggleable(),
                 IconColumn::make('firm_id')->label('Ima nalog')->boolean()->getStateUsing(fn (InfoBusiness $r) => $r->firm_id !== null),
-                IconColumn::make('featured')->label('Istaknuta')->boolean(),
+                IconColumn::make('featured')->label('Istaknuta')->boolean()->getStateUsing(fn (InfoBusiness $r) => $r->isFeatured()),
                 TextColumn::make('invited_at')->label('Pozvana')->date('j. n. Y.')->placeholder('—')->sortable(),
                 TextColumn::make('status')->label('Status')->badge()->formatStateUsing(fn (string $state) => $state === 'listed' ? 'Prikazana' : 'Skrivena')
                     ->color(fn (string $state) => $state === 'listed' ? 'success' : 'gray'),

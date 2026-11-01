@@ -2,7 +2,10 @@
 
 namespace Tests\Feature\Info;
 
+use App\Filament\Resources\Info\Pages\ManageInfoAds;
 use App\Filament\Resources\Info\Pages\ManageInfoPosts;
+use App\Models\InfoAd;
+use App\Models\InfoAdInquiry;
 use App\Models\InfoBusiness;
 use App\Models\InfoPost;
 use Livewire\Livewire;
@@ -21,10 +24,12 @@ class InfoAdminTest extends TestCase
 
         $this->signIn($this->admin());
 
-        foreach (['info-posts', 'info-service-notices', 'info-pharmacy-duties', 'info-sources', 'info-businesses', 'info-business-requests'] as $page) {
+        foreach (['info-posts', 'info-service-notices', 'info-pharmacy-duties', 'info-sources', 'info-businesses', 'info-business-requests', 'info-ads', 'info-ad-inquiries'] as $page) {
             $this->get('/admin/info/'.$page)->assertOk();
         }
         $this->get('/admin/info/info-posts')->assertSee('Vest na čekanju');
+        InfoAdInquiry::query()->create(['company' => 'Auto servis Drina', 'phone' => '064 111 222', 'interest' => 'banner']);
+        $this->get('/admin/info/info-ad-inquiries')->assertSee('Auto servis Drina');
     }
 
     public function test_editor_publishes_a_pending_post(): void
@@ -39,5 +44,16 @@ class InfoAdminTest extends TestCase
         $this->assertSame('published', $post->status);
         $this->assertSame($admin->id, $post->reviewed_by);
         $this->assertNotNull($post->published_at);
+    }
+
+    public function test_admin_creates_an_ad(): void
+    {
+        $this->signIn($this->admin());
+
+        Livewire::test(ManageInfoAds::class)
+            ->callAction('create', ['slot' => 'home_middle', 'title' => 'Akcija u pekari', 'starts_on' => now()->toDateString(), 'active' => true])
+            ->assertHasNoActionErrors();
+
+        $this->assertSame('Akcija u pekari', InfoAd::query()->sole()->title);
     }
 }
