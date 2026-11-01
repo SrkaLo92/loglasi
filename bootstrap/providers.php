@@ -5,6 +5,7 @@ use App\Providers\AppServiceProvider;
 use App\Providers\CatalogServiceProvider;
 use App\Providers\Filament\AdminPanelProvider;
 use App\Providers\FirmsServiceProvider;
+use App\Providers\InfoServiceProvider;
 use App\Providers\ListingServiceProvider;
 use App\Providers\MessagesServiceProvider;
 use App\Providers\NotificationsServiceProvider;
@@ -26,4 +27,5 @@ return [
     SearchServiceProvider::class,
     SeoServiceProvider::class,
     FirmsServiceProvider::class,
+    InfoServiceProvider::class,
 ];

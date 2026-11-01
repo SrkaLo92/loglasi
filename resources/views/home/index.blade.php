@@ -77,6 +77,11 @@
 		</nav>
 	@endif
 
+	{{-- Info portal: today in Loznica (only once info.loglasi.rs is switched on) --}}
+	@if (config('info.enabled'))
+		@include('info.partials.home-block')
+	@endif
+
 	{{-- 2a. Popular: categories chosen in the admin (home.popular_categories), round icons (same list as the apps) --}}
 	@if ($hmPopular)
 		<section class="hm-sec hm-pop" aria-labelledby="hm-pop-title">

@@ -85,7 +85,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->font('Manrope', url: fn () => asset_v('css/admin.css'), provider: LocalFontProvider::class)
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => new HtmlString('<meta name="robots" content="noindex, nofollow">'))
-            ->navigationGroups(['Moderacija', 'Prodaja', 'Katalog', 'SEO', 'Sistem'])
+            ->navigationGroups(['Moderacija', 'Info', 'Prodaja', 'Katalog', 'SEO', 'Sistem'])
             ->sidebarCollapsibleOnDesktop()
             ->unsavedChangesAlerts()
             ->databaseNotifications(false)

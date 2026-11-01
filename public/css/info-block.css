@@ -1,0 +1,9 @@
+/* "Danas u Loznici" block on the classifieds home page (links to info.loglasi.rs). */
+.inb { background: #fff; border: 2px solid var(--lg-brand); border-radius: var(--lg-radius); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.inb__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.inb__title { margin: 0; font-size: 18px; font-weight: 800; }
+.inb__weather { font-size: 14px; font-weight: 700; color: var(--lg-text-2); }
+.inb__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 15px; }
+.inb__list a { color: var(--lg-text); text-decoration: none; }
+.inb__list a:hover { color: var(--lg-green); }
+.inb__more { align-self: flex-start; background: var(--lg-mint); color: var(--lg-green-dark); font-weight: 700; padding: 11px 14px; border-radius: var(--lg-radius-sm); text-decoration: none; }
