@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Info;
 use App\Http\Controllers\Controller;
 use App\Models\InfoBusiness;
 use App\Models\InfoBusinessRequest;
+use App\Support\Info\InfoAds;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -21,13 +22,15 @@ class BusinessController extends Controller
             ->when($q !== '', fn ($query) => $query->where(fn ($w) => $w->where('name', 'like', '%'.addcslashes($q, '%_\\').'%')
                 ->orWhere('category', 'like', '%'.addcslashes($q, '%_\\').'%')))
             ->when($category !== '', fn ($query) => $query->where('category', $category))
-            ->orderByDesc('featured')->orderByRaw('firm_id is null')->orderBy('name')
+            ->with('firm')->directoryOrder()
             ->paginate(30)->withQueryString();
 
         $categories = InfoBusiness::query()->listed()->whereNotNull('category')
             ->selectRaw('category, count(*) as total')->groupBy('category')->orderByDesc('total')->limit(40)->pluck('total', 'category');
 
         return view('info.businesses', compact('businesses', 'categories', 'q', 'category') + [
+            'total' => InfoBusiness::query()->listed()->count(),
+            'categoryAd' => $category !== '' ? InfoAds::for('category_top', $category) : null,
             'noindex' => $request->query() !== [],
         ]);
     }

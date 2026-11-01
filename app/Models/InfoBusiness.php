@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Support\Firms\FirmPackage;
 use App\Support\Info\InfoUrl;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -21,6 +24,8 @@ class InfoBusiness extends Model
     {
         return [
             'featured' => 'boolean',
+            'featured_until' => 'datetime',
+            'gallery' => 'array',
             'invited_at' => 'datetime',
         ];
     }
@@ -52,6 +57,80 @@ class InfoBusiness extends Model
     public function scopeListed(Builder $query): Builder
     {
         return $query->where('status', 'listed');
+    }
+
+    /** Featured first (paid period or the flag), then entries linked to a firm account, then by name. */
+    public function scopeDirectoryOrder(Builder $query): Builder
+    {
+        return $query->orderByRaw('(featured = 1 or (featured_until is not null and featured_until > ?)) desc', [now()])
+            ->orderByRaw('firm_id is null')->orderBy('name');
+    }
+
+    /** "Istaknuta firma": the flag, a paid period, or a Pro/Max package on loglasi.rs (included there). */
+    public function isFeatured(): bool
+    {
+        if ($this->featured || ($this->featured_until && $this->featured_until->isFuture())) {
+            return true;
+        }
+
+        return $this->firm_id && in_array(FirmPackage::code($this->firm), ['pro', 'max'], true);
+    }
+
+    public function initials(): string
+    {
+        $words = array_values(array_filter(preg_split('/\s+/u', $this->name) ?: [], fn ($w) => preg_match('/^\p{Lu}/u', $w)));
+
+        return mb_strtoupper(implode('', array_map(fn ($w) => mb_substr($w, 0, 1), array_slice($words, 0, 2))) ?: mb_substr($this->name, 0, 2));
+    }
+
+    /** @return list<string> gallery photos, then the linked firm's cover */
+    public function photoUrls(): array
+    {
+        $urls = array_map(fn ($path) => Storage::disk('public')->url($path), array_values($this->gallery ?? []));
+        if ($cover = $this->firm?->coverUrl()) {
+            $urls[] = $cover;
+        }
+
+        return array_slice($urls, 0, 6);
+    }
+
+    /** @return list<string> opening hours, one line per entry ("Pon–pet 08–17") */
+    public function hoursLines(): array
+    {
+        return array_values(array_filter(array_map('trim', preg_split('/\R/', (string) $this->opening_hours) ?: [])));
+    }
+
+    public function viberNumber(): ?string
+    {
+        $raw = $this->viber ?: ($this->phones()[0] ?? null);
+        $digits = preg_replace('/\D+/', '', (string) $raw);
+        if ($digits === '') {
+            return null;
+        }
+
+        return str_starts_with($digits, '381') ? $digits : '381'.ltrim($digits, '0');
+    }
+
+    public function mapsUrl(): ?string
+    {
+        $query = trim(($this->address ?? '').' '.($this->place && ! str_contains((string) $this->address, (string) $this->place) ? $this->place : ''));
+
+        return $query !== '' ? 'https://www.google.com/maps/search/?api=1&query='.rawurlencode($query.', Srbija') : null;
+    }
+
+    /** The linked firm's active listings on loglasi.rs. */
+    public function listings(int $limit = 6): Collection
+    {
+        if (! $this->firm_id || ! $this->firm) {
+            return collect();
+        }
+
+        return $this->firm->listings()->active()->with('coverImage')->latest('published_at')->limit($limit)->get();
+    }
+
+    public function listingsCount(): int
+    {
+        return $this->firm_id && $this->firm ? $this->firm->listings()->active()->count() : 0;
     }
 
     public function url(): string

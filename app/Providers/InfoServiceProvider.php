@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\InfoAd;
 use App\Models\InfoBusiness;
 use App\Models\InfoPharmacyDuty;
 use App\Models\InfoPost;
 use App\Models\InfoServiceNotice;
+use App\Support\Info\InfoAds;
 use App\Support\Info\InfoToday;
 use App\Support\PageCache;
 use App\Support\Scheduling\InProcess;
@@ -23,9 +25,10 @@ class InfoServiceProvider extends ServiceProvider
         // Published content changes what guests see on cached pages.
         $changed = function () {
             InfoToday::forget();
+            InfoAds::forget();
             PageCache::flush();
         };
-        foreach ([InfoPost::class, InfoServiceNotice::class, InfoPharmacyDuty::class, InfoBusiness::class] as $model) {
+        foreach ([InfoPost::class, InfoServiceNotice::class, InfoPharmacyDuty::class, InfoBusiness::class, InfoAd::class] as $model) {
             $model::saved($changed);
             $model::deleted($changed);
         }

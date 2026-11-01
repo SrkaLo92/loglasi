@@ -40,6 +40,25 @@ return [
     // HTTP calls from the scheduler: short, so a slow source never holds a shared-hosting process.
     'http_timeout' => 6,
 
+    // Advertising price list (RSD) shown on /oglasavanje/. Any value can be overridden from the admin
+    // with a setting named info_price_<key> (e.g. info_price_featured_month).
+    'pricing' => [
+        'featured_month' => 490,
+        'featured_year' => 4900,
+        'today_sponsor' => 2990,
+        'article_bottom' => 1990,
+        'home_middle' => 1490,
+        'category_top' => 990,
+        'banner_design' => 990,
+        'event' => 990,
+        'promo_own' => 1990,
+        'promo_written' => 2990,
+        'promo_video' => 5990,
+        'package_neighbour' => 2490,
+        'package_local' => 6990,
+        'package_partner' => 14990,
+    ],
+
     'topics' => [
         'drustvo' => 'Društvo',
         'sport' => 'Sport',

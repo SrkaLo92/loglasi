@@ -1,52 +1,58 @@
 @extends('info.layout', ['section' => 'firme', 'title' => 'Firme iz Loznice i okoline', 'description' => 'Imenik firmi, radnji i majstora iz Loznice, Banje Koviljače, Lešnice i okoline: adrese, telefoni i ponuda.', 'canonical' => \App\Support\Info\InfoUrl::to('firme'), 'noindex' => $noindex])
 @use('App\Support\Info\InfoUrl')
 @section('content')
-<div class="inf-band">
-	<div class="inf-wrap">
+<section class="inf-dirhero">
+	<div class="inf-wrap inf-dirhero__in">
 		<h1>Firme iz Loznice i okoline</h1>
-		<p>Radnje, servisi, majstori i firme, sa adresom i telefonom</p>
+		<p>Majstori, servisi, prodavnice i usluge iz kraja, sa telefonom i adresom na jednom mestu.</p>
+		<form class="inf-dirsearch" role="search" method="get" action="{{ InfoUrl::to('firme') }}">
+			<label class="inf-visually-hidden" for="inf-fq">Šta tražite</label>
+			<input id="inf-fq" type="search" name="q" value="{{ $q }}" placeholder="Vulkanizer, pekara, stolar…" maxlength="80">
+			<label class="inf-visually-hidden" for="inf-fk">Delatnost</label>
+			<select id="inf-fk" name="kategorija">
+				<option value="">Sve delatnosti</option>
+				@foreach ($categories as $name => $count)<option value="{{ $name }}" @selected($category === $name)>{{ $name }}</option>@endforeach
+			</select>
+			<button class="inf-btn inf-btn--warm" type="submit">Traži</button>
+		</form>
 	</div>
-</div>
-<div class="inf-wrap inf-stack">
-	<form class="inf-search" method="get" action="{{ InfoUrl::to('firme') }}" role="search">
-		<label class="inf-visually-hidden" for="inf-q">Šta tražite?</label>
-		<input id="inf-q" type="search" name="q" value="{{ $q }}" placeholder="npr. vulkanizer, frizer, auto plac" maxlength="80" autocomplete="off">
-		<button class="inf-btn" type="submit">Traži</button>
-	</form>
-	@if ($categories->isNotEmpty())
-		<nav class="inf-chips inf-chips--wrap" aria-label="Delatnosti">
-			<a href="{{ InfoUrl::to('firme') }}" @if ($category === '' && $q === '') aria-current="page" @endif>Sve</a>
-			@foreach ($categories as $name => $total)
-				<a href="{{ InfoUrl::to('firme') }}?kategorija={{ rawurlencode($name) }}" @if ($category === $name) aria-current="page" @endif>{{ $name }} <span class="inf-meta">{{ $total }}</span></a>
+</section>
+<div class="inf-wrap inf-dir">
+	<aside class="inf-dir__side" aria-labelledby="inf-kat">
+		<h2 id="inf-kat">Delatnosti</h2>
+		<nav class="inf-cats">
+			<a href="{{ InfoUrl::to('firme') }}" @if ($category === '' && $q === '') aria-current="true" @endif>Sve firme <span>{{ $total }}</span></a>
+			@foreach ($categories as $name => $count)
+				<a href="{{ InfoUrl::to('firme') }}?kategorija={{ rawurlencode($name) }}" @if ($category === $name) aria-current="true" @endif>{{ $name }} <span>{{ $count }}</span></a>
 			@endforeach
 		</nav>
-	@endif
-
-	@if ($businesses->isEmpty())
-		<p class="inf-empty">Nema firmi za ovu pretragu.</p>
-	@else
-		<div class="inf-firms">
-			@foreach ($businesses as $b)
-				<a @class(['inf-firm', 'inf-firm--featured' => $b->featured]) href="{{ $b->url() }}">
-					<strong>{{ $b->name }}</strong>
-					@if ($b->category)<span class="inf-label">{{ $b->category }}</span>@endif
-					<span class="inf-meta">{{ $b->address ?: $b->place }}</span>
-					@if ($b->firm_id)<span class="inf-badge">Ima oglase na loglasi.rs</span>@endif
-				</a>
-			@endforeach
-		</div>
-		@if ($businesses->hasPages())
-			<nav class="inf-pager" aria-label="Strane">
-				@if ($businesses->previousPageUrl())<a href="{{ $businesses->previousPageUrl() }}">← Prethodna</a>@endif
-				@if ($businesses->nextPageUrl())<a href="{{ $businesses->nextPageUrl() }}">Sledeća →</a>@endif
-			</nav>
+		<a class="inf-addfirm" href="{{ InfoUrl::to('oglasavanje') }}">
+			<strong>Vaše firme nema na spisku?</strong>
+			<span>Upis je besplatan. Za prvo mesto u delatnosti pogledajte Istaknutu firmu.</span>
+			<b>Dodajte firmu</b>
+		</a>
+	</aside>
+	<div class="inf-dir__main">
+		<div class="inf-head2"><h2 class="inf-h-sm">{{ $q !== '' ? 'Rezultati za „'.$q.'“' : ($category !== '' ? $category : 'Sve firme') }}</h2><span class="inf-meta">{{ $businesses->total() }} {{ $businesses->total() % 10 === 1 && $businesses->total() % 100 !== 11 ? 'firma' : 'firmi' }}</span></div>
+		@if ($categoryAd)
+			@include('info.partials.ad', ['ad' => $categoryAd, 'slim' => true])
 		@endif
-	@endif
-
-	<div class="inf-card inf-card--green inf-stack-sm">
-		<h2 class="inf-card__title">Vaša firma nije na listi?</h2>
-		<p>Upis je besplatan. Sa besplatnim nalogom za firme na loglasi.rs dobijate i svoju stranu sa oglasima, logom i radnim vremenom.</p>
-		<a class="inf-btn inf-btn--light" href="{{ InfoUrl::main('za-firme') }}">Upišite firmu besplatno</a>
+		@if ($businesses->isEmpty())
+			<p class="inf-empty">Nema firmi za ovu pretragu.</p>
+		@else
+			<div class="inf-dirlist">
+				@foreach ($businesses as $b)
+					@include('info.partials.firm-card', ['b' => $b])
+				@endforeach
+			</div>
+			@if ($businesses->hasPages())
+				<nav class="inf-pager" aria-label="Strane">
+					@if ($businesses->previousPageUrl())<a href="{{ $businesses->previousPageUrl() }}">Prethodna</a>@endif
+					<span aria-current="page">{{ $businesses->currentPage() }} / {{ $businesses->lastPage() }}</span>
+					@if ($businesses->nextPageUrl())<a href="{{ $businesses->nextPageUrl() }}">Sledeća</a>@endif
+				</nav>
+			@endif
+		@endif
 	</div>
 </div>
 @endsection

@@ -19,6 +19,6 @@ return [
         'pages.pricing', 'pages.for-firms', 'pages.about', 'pages.faq', 'pages.terms', 'pages.privacy', 'pages.rules',
         'pages.payment-terms', 'pages.withdrawal', 'pages.complaints', 'pages.data-deletion',
         'info.home', 'info.services', 'info.events', 'info.news', 'info.stories', 'info.guides', 'info.post',
-        'info.businesses', 'info.business',
+        'info.businesses', 'info.business', 'info.advertising',
     ],
 ];

@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Info\AdvertisingController;
 use App\Http\Controllers\Info\BusinessController;
 use App\Http\Controllers\Info\InfoController;
+use App\Http\Controllers\Info\SearchController;
 use App\Http\Controllers\Info\SubmitController;
 use App\Http\Middleware\InfoEnabled;
 use App\Support\Info\InfoUrl;
@@ -29,6 +31,11 @@ Route::domain(config('info.domain'))->middleware(InfoEnabled::class)->name('info
     Route::get('/firme/{slug}', [BusinessController::class, 'show'])->where('slug', '[a-z0-9-]+')->name('business');
     Route::post('/firme/{slug}/zahtev', [BusinessController::class, 'request'])->where('slug', '[a-z0-9-]+')
         ->middleware('throttle:info-submit')->name('business.request');
+
+    Route::get('/oglasavanje', [AdvertisingController::class, 'show'])->name('advertising');
+    Route::post('/oglasavanje', [AdvertisingController::class, 'store'])->middleware('throttle:info-submit')->name('advertising.store');
+    Route::get('/klik/{id}', [AdvertisingController::class, 'click'])->whereNumber('id')->name('click');
+    Route::get('/pretraga', SearchController::class)->name('search');
 
     Route::get('/posalji-vest', [SubmitController::class, 'form'])->name('submit');
     Route::post('/posalji-vest', [SubmitController::class, 'store'])->middleware('throttle:info-submit')->name('submit.store');

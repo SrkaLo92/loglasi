@@ -7,6 +7,7 @@ use App\Models\InfoBusiness;
 use App\Models\InfoPharmacyDuty;
 use App\Models\InfoPost;
 use App\Models\InfoServiceNotice;
+use App\Support\Info\InfoAds;
 use App\Support\Info\InfoToday;
 use App\Support\Info\InfoUrl;
 use App\Support\Info\Weather;
@@ -26,19 +27,25 @@ class InfoController extends Controller
 
     public function home(): View
     {
-        $latest = InfoPost::query()->published()->whereIn('type', ['news', 'notice', 'story', 'guide'])
-            ->latest('published_at')->limit(9)->get();
-        $featured = InfoPost::query()->published()->where('featured', true)->latest('published_at')->first()
-            ?? $latest->first();
+        $latest = InfoPost::query()->published()->whereIn('type', ['news', 'notice', 'guide'])
+            ->latest('published_at')->limit(12)->get();
+        $featured = InfoPost::query()->published()->where('featured', true)->whereIn('type', ['news', 'notice', 'guide', 'story'])
+            ->latest('published_at')->first() ?? $latest->first();
+        $rest = $latest->reject(fn (InfoPost $p) => $featured && $p->is($featured))->values();
+        $withImage = $rest->filter(fn (InfoPost $p) => $p->imageUrl())->take(3)->values();
 
         return view('info.home', [
             'today' => InfoToday::get(),
             'featured' => $featured,
-            'latest' => $latest->reject(fn (InfoPost $p) => $p->is($featured))->take(6),
+            'newest' => $rest->take(5),
+            'cards' => $withImage->count() === 3 ? $withImage : ($rest->count() >= 8 ? $rest->slice(5, 3)->values() : $rest->take(3)),
+            'story' => InfoPost::query()->published()->where('type', 'story')->latest('published_at')->first(),
             'events' => InfoPost::query()->upcomingEvents()->orderBy('event_starts_at')->limit(4)->get(),
             'listings' => InfoToday::latestListings(4),
-            'businesses' => InfoBusiness::query()->listed()->where('featured', true)->inRandomOrder()->limit(6)->get(),
-            'businessCount' => InfoBusiness::query()->listed()->count(),
+            'businesses' => InfoBusiness::query()->listed()->with('firm')->directoryOrder()->limit(3)->get(),
+            'categories' => InfoBusiness::query()->listed()->whereNotNull('category')
+                ->selectRaw('category, count(*) as total')->groupBy('category')->orderByDesc('total')->limit(7)->pluck('category'),
+            'homeAd' => InfoAds::for('home_middle'),
         ]);
     }
 
@@ -59,23 +66,40 @@ class InfoController extends Controller
 
     public function events(Request $request): View
     {
-        $events = InfoPost::query()->upcomingEvents()->orderBy('event_starts_at')->limit(60)->get()
-            ->groupBy(fn (InfoPost $e) => $e->event_starts_at?->toDateString());
+        $topic = $request->query('tema');
+        $topic = is_string($topic) && isset(config('info.topics')[$topic]) ? $topic : null;
+        $upcoming = InfoPost::query()->upcomingEvents()->orderBy('event_starts_at')->limit(80)->get();
+        $topics = collect(config('info.topics'))->only($upcoming->pluck('topic')->filter()->unique()->all());
+        $list = $topic ? $upcoming->where('topic', $topic)->values() : $upcoming;
 
-        return view('info.events', ['days' => $events, 'noindex' => $request->query() !== []]);
+        return view('info.events', [
+            'featured' => $upcoming->firstWhere('featured', true) ?? $upcoming->first(fn (InfoPost $e) => $e->imageUrl()),
+            'events' => $list,
+            'topics' => $topics,
+            'topic' => $topic,
+            'noindex' => $request->query() !== [],
+        ]);
     }
 
-    public function services(): View
+    public function services(Request $request): View
     {
-        $notices = InfoServiceNotice::query()->current()->orderBy('starts_at')->limit(100)->get()->groupBy('kind');
+        $notices = InfoServiceNotice::query()->current()->orderBy('starts_at')->limit(150)->get()->groupBy('kind');
+        $power = $notices->get('power', collect());
+        $day = min(2, max(0, (int) $request->query('dan', 0)));
+        $date = now('Europe/Belgrade')->startOfDay()->addDays($day);
 
         return view('info.services', [
             'weather' => Weather::current(),
             'pharmacy' => InfoPharmacyDuty::today(),
-            'power' => $notices->get('power', collect()),
+            'day' => $day,
+            'dayDate' => $date,
+            'powerDay' => $power->filter(fn (InfoServiceNotice $n) => $n->starts_at->timezone('Europe/Belgrade')->isSameDay($date))->values(),
+            'powerCounts' => collect([0, 1, 2])->map(fn ($d) => $power->filter(fn (InfoServiceNotice $n) => $n->starts_at->timezone('Europe/Belgrade')
+                ->isSameDay(now('Europe/Belgrade')->startOfDay()->addDays($d)))->count())->all(),
             'water' => $notices->get('water', collect()),
             'roads' => $notices->get('road', collect())->merge($notices->get('other', collect())),
-            'lastWater' => InfoServiceNotice::query()->where('kind', 'water')->where('published', true)->latest('starts_at')->first(),
+            'sponsor' => InfoAds::for('today_sponsor'),
+            'noindex' => $request->query() !== [],
         ]);
     }
 
@@ -91,7 +115,11 @@ class InfoController extends Controller
         return view('info.post', [
             'post' => $post,
             'more' => $more,
-            'listings' => InfoToday::latestListings(2),
+            'today' => InfoToday::get(),
+            'newest' => InfoPost::query()->published()->whereKeyNot($post->id)->whereIn('type', ['news', 'notice'])
+                ->latest('published_at')->limit(4)->get(),
+            'nextEvent' => InfoPost::query()->upcomingEvents()->orderBy('event_starts_at')->first(),
+            'ad' => InfoAds::for('article_bottom'),
             'noindex' => $post->isSourceSummary(),
         ]);
     }
@@ -109,7 +137,7 @@ class InfoController extends Controller
     {
         $xml = Cache::remember('info.sitemap', 3600, function () {
             $urls = [InfoUrl::to('/'), InfoUrl::to('vesti'), InfoUrl::to('desavanja'), InfoUrl::to('servisne-informacije'),
-                InfoUrl::to('price'), InfoUrl::to('vodici'), InfoUrl::to('firme')];
+                InfoUrl::to('price'), InfoUrl::to('vodici'), InfoUrl::to('firme'), InfoUrl::to('oglasavanje')];
             InfoPost::query()->published()->whereIn('type', ['event', 'story', 'guide', 'news', 'notice'])
                 ->latest('published_at')->limit(5000)->get()
                 ->reject(fn (InfoPost $p) => $p->isSourceSummary())

@@ -2,16 +2,15 @@
 @use('App\Support\Info\InfoUrl')
 @use('App\Support\Search\ImageUrls')
 @if ($listings->isNotEmpty())
-<section class="inf-block" aria-label="Novi oglasi iz Loznice">
-	<div class="inf-block__head"><h2>{{ $heading ?? 'Najnoviji oglasi iz Loznice' }}</h2><a class="inf-more inf-more--warm" href="{{ InfoUrl::main('oglasi') }}">Svi oglasi <span aria-hidden="true">→</span></a></div>
-	<div class="inf-ads">
+<section aria-labelledby="inf-oglasi">
+	<div class="inf-head2"><h2 id="inf-oglasi">{{ $heading ?? 'Novo na loglasi.rs' }}</h2><a class="inf-link" href="{{ InfoUrl::main('oglasi') }}">Svi oglasi</a></div>
+	<div class="inf-grid4">
 		@foreach ($listings as $l)
-			<a class="inf-ad" href="{{ InfoUrl::main('oglas/'.$l->slug) }}">
-				<span class="inf-ad__media">@if ($l->coverImage)<img src="{{ ImageUrls::url($l->coverImage, 'thumb') }}" alt="" loading="lazy" decoding="async" width="400" height="300">@endif</span>
-				<span class="inf-ad__body"><strong>{{ $l->title }}</strong><span class="inf-ad__price">{{ $l->priceLabel() }}</span><span class="inf-meta">{{ $l->location?->name }}</span></span>
+			<a class="inf-listing" href="{{ InfoUrl::main('oglas/'.$l->slug) }}">
+				@if ($l->coverImage)<img src="{{ ImageUrls::url($l->coverImage, 'thumb') }}" alt="" loading="lazy" decoding="async" width="400" height="300">@endif
+				<span class="inf-listing__body"><span class="inf-meta">{{ $l->location?->name }}</span><strong>{{ $l->title }}</strong><span class="inf-listing__price">{{ $l->priceLabel() }}</span></span>
 			</a>
 		@endforeach
 	</div>
-	<a class="inf-btn inf-btn--warm" href="{{ InfoUrl::main('postavi-oglas') }}">+ Postavite oglas besplatno</a>
 </section>
 @endif
