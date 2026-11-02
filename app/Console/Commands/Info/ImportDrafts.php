@@ -44,6 +44,7 @@ class ImportDrafts extends Command
                 'place' => ['nullable', 'string', 'max:80'],
                 'source_name' => ['required', 'string', 'max:120'],
                 'source_url' => ['required', 'url', 'max:700'],
+                'video_url' => ['nullable', 'url', 'max:500'],
                 'published_at' => ['nullable', 'date'],
                 'event_starts_at' => ['nullable', 'date'],
                 'event_ends_at' => ['nullable', 'date'],
@@ -119,6 +120,7 @@ class ImportDrafts extends Command
             'event_starts_at' => $at($data['event_starts_at'] ?? null),
             'event_ends_at' => $at($data['event_ends_at'] ?? null),
             'event_venue' => $data['event_venue'] ?? null,
+            'video_url' => $data['video_url'] ?? null,
         ]);
 
         return 'created';

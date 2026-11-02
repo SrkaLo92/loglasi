@@ -47,8 +47,14 @@
 				</div>
 			@endif
 
-			@if ($post->imageUrl())
+			@if ($post->youtubeId())
+				<figure @class(['inf-video', 'inf-video--tall' => str_contains((string) $post->video_url, '/shorts/')])><iframe src="https://www.youtube-nocookie.com/embed/{{ $post->youtubeId() }}?rel=0" title="{{ $post->title }}" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+			@elseif ($post->imageUrl())
 				<figure class="inf-figure"><img src="{{ $post->imageUrl() }}" alt="" width="960" height="540">@if (! $post->hasOwnImage())<figcaption>{{ 'Ilustracija'.($post->themeImageCredit() ? ', foto: '.$post->themeImageCredit() : '') }}</figcaption>@elseif ($post->image_credit)<figcaption>Foto: {{ $post->image_credit }}</figcaption>@endif</figure>
+			@endif
+
+			@if ($post->video_url && ! $post->youtubeId())
+				<a class="inf-btn inf-btn--warm inf-videobtn" href="{{ $post->video_url }}" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>{{ ['Instagram' => 'Pogledajte video na Instagramu', 'Facebook' => 'Pogledajte video na Facebooku', 'TikTok' => 'Pogledajte video na TikToku', 'YouTube' => 'Pogledajte video na YouTube-u'][$post->videoPlatform()] ?? 'Pogledajte video' }}</a>
 			@endif
 
 			<div class="inf-prose">

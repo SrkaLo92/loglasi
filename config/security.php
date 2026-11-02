@@ -16,7 +16,7 @@ return [
         'img-src' => ["'self'", 'data:', 'blob:', 'https:'],
         'font-src' => ["'self'", 'data:'],
         'connect-src' => ["'self'", 'https://*.google-analytics.com', 'https://*.analytics.google.com', 'https://*.googletagmanager.com'],
-        'frame-src' => ["'self'", 'https://www.googletagmanager.com'],
+        'frame-src' => ["'self'", 'https://www.googletagmanager.com', 'https://www.youtube-nocookie.com'],
         'frame-ancestors' => ["'self'"],
         'form-action' => ["'self'"],
         'base-uri' => ["'self'"],

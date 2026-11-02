@@ -91,6 +91,8 @@ class InfoPostResource extends Resource
                     TextInput::make('event_venue')->label('Mesto održavanja')->maxLength(160),
                 ]),
             Section::make('Slika')->columns(['default' => 1, 'md' => 2])->schema([
+                TextInput::make('video_url')->label('Naš video (YouTube, Instagram, Facebook ili TikTok link)')->url()->maxLength(500)
+                    ->helperText('YouTube se pušta na stranici, ostali dobijaju dugme. Video se ne čuva na našem serveru.'),
                 FileUpload::make('image_path')->label('Slika (samo naša ili sa dozvolom)')->image()->disk('public')
                     ->directory('info')->visibility('public')->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                     ->maxSize(5120)->imageEditor(false),

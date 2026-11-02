@@ -127,6 +127,33 @@ class InfoPost extends Model
         return ListingImage::urlFor($this->image_path) ?? self::themeImageUrl($this->topic, $this->type);
     }
 
+    /** YouTube video id of our clip (watch, shorts, youtu.be or embed links), so the page can play it. */
+    public function youtubeId(): ?string
+    {
+        if (blank($this->video_url)) {
+            return null;
+        }
+
+        return preg_match('~(?:youtube\.com/(?:watch\?(?:.*&)?v=|shorts/|embed/|live/)|youtu\.be/)([A-Za-z0-9_-]{11})~', $this->video_url, $m) ? $m[1] : null;
+    }
+
+    /** Where the clip lives when it is not on YouTube: "Instagram", "Facebook", "TikTok" or "video". */
+    public function videoPlatform(): ?string
+    {
+        if (blank($this->video_url)) {
+            return null;
+        }
+        $host = (string) parse_url($this->video_url, PHP_URL_HOST);
+
+        return match (true) {
+            str_contains($host, 'instagram.') => 'Instagram',
+            str_contains($host, 'facebook.') || str_contains($host, 'fb.watch') => 'Facebook',
+            str_contains($host, 'tiktok.') => 'TikTok',
+            str_contains($host, 'youtu') => 'YouTube',
+            default => 'video',
+        };
+    }
+
     public function hasOwnImage(): bool
     {
         return filled($this->image_path);

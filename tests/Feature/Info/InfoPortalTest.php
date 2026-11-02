@@ -118,4 +118,17 @@ class InfoPortalTest extends TestCase
         $this->assertStringContainsString('http://'.config('info.domain').'/css/info.css', $html);
         $this->assertStringNotContainsString('https://loglasi.example/css/info.css', $html);
     }
+
+    public function test_post_plays_our_youtube_clip_and_links_other_platforms(): void
+    {
+        config(['info.enabled' => true]);
+        $yt = InfoPost::query()->create(['type' => 'story', 'status' => 'published', 'topic' => 'kultura', 'title' => 'Vuk Karadžić i Tršić',
+            'summary' => 'Naš kratki film o Tršiću.', 'video_url' => 'https://youtube.com/shorts/AbCdEfGhIjK']);
+        $ig = InfoPost::query()->create(['type' => 'story', 'status' => 'published', 'topic' => 'kultura', 'title' => 'Jesen u Banji',
+            'summary' => 'Klip sa Instagrama.', 'video_url' => 'https://www.instagram.com/reel/xyz/']);
+
+        $this->assertSame('AbCdEfGhIjK', $yt->youtubeId());
+        $this->get($yt->url())->assertOk()->assertSee('youtube-nocookie.com/embed/AbCdEfGhIjK', false)->assertSee('inf-video--tall', false);
+        $this->get($ig->url())->assertOk()->assertSee('Pogledajte video na Instagramu')->assertDontSee('youtube-nocookie', false);
+    }
 }
