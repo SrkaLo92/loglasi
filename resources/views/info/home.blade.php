@@ -12,21 +12,35 @@
 @section('content')
 <div class="inf-wrap inf-stack">
 	<h1 class="inf-visually-hidden">loglasi Info: vesti, dešavanja i servisne informacije za Loznicu i okolinu</h1>
-	@include('info.partials.today', ['soon' => $events])
+	@include('info.partials.today')
 
 	@if ($featured)
-		<section aria-label="Glavne vesti" class="inf-lead">
-			<article class="inf-lead__main">
-				<a class="inf-media inf-media--wide @if (! $featured->imageUrl()) inf-media--empty @endif" href="{{ $featured->url() }}" @if (! $featured->imageUrl()) aria-hidden="true" tabindex="-1" @endif>
-					@if ($featured->imageUrl())<img src="{{ $featured->imageUrl() }}" alt="" width="960" height="540" fetchpriority="high">@else loglasi Info @endif
-				</a>
-				<div class="inf-metaline">
-					<span class="inf-pill">{{ $featured->topicLabel() ?? $featured->typeLabel() }}</span>
-					<span>{{ $featured->published_at?->diffForHumans() }}@if ($featured->source_name) · izvor: {{ $featured->source_name }}@endif</span>
-				</div>
-				<h2 class="inf-title-xl"><a href="{{ $featured->url() }}">{{ $featured->title }}</a></h2>
-				<p class="inf-lede">{{ Str::limit($featured->summary, 220) }}</p>
-			</article>
+		<section aria-label="Vesti" class="inf-front">
+			<div class="inf-front__main">
+				<article class="inf-hero">
+					<a class="inf-media" href="{{ $featured->url() }}" tabindex="-1" aria-hidden="true"><img src="{{ $featured->imageUrl() }}" alt="" width="640" height="480" fetchpriority="high"></a>
+					<div class="inf-hero__body">
+						<div class="inf-metaline">
+							<span class="inf-pill">{{ $featured->topicLabel() ?? $featured->typeLabel() }}</span>
+							<span>{{ $featured->published_at?->diffForHumans() }}@if ($featured->source_name) · izvor: {{ $featured->source_name }}@endif</span>
+						</div>
+						<h2 class="inf-title-xl"><a href="{{ $featured->url() }}">{{ $featured->title }}</a></h2>
+						<p class="inf-lede">{{ Str::limit($featured->summary, 200) }}</p>
+					</div>
+				</article>
+				@if ($cards->isNotEmpty())
+					<div class="inf-cards">
+						@foreach ($cards as $post)
+							<article class="inf-card">
+								<a class="inf-media inf-media--card" href="{{ $post->url() }}" tabindex="-1" aria-hidden="true"><img src="{{ $post->imageUrl() }}" alt="" loading="lazy" decoding="async" width="400" height="250"></a>
+								<span class="inf-kicker">{{ $post->topicLabel() ?? $post->typeLabel() }}</span>
+								<h3 class="inf-title"><a href="{{ $post->url() }}">{{ $post->title }}</a></h3>
+								<span class="inf-meta">{{ $post->published_at?->diffForHumans() }}</span>
+							</article>
+						@endforeach
+					</div>
+				@endif
+			</div>
 			<aside class="inf-box" aria-labelledby="inf-najnovije">
 				<h2 id="inf-najnovije">Najnovije</h2>
 				@forelse ($newest as $post)
@@ -41,35 +55,20 @@
 		<p class="inf-empty">Prve vesti stižu uskoro. Imate vest iz vašeg mesta? <a href="{{ InfoUrl::to('posalji-vest') }}">Pošaljite nam.</a></p>
 	@endif
 
-	@if ($cards->isNotEmpty())
-		<section aria-label="Iz rubrika" class="inf-grid3">
-			@foreach ($cards as $post)
-				<article class="inf-card">
-					<a class="inf-media inf-media--card @if (! $post->imageUrl()) inf-media--empty @endif" href="{{ $post->url() }}" tabindex="-1" aria-hidden="true">@if ($post->imageUrl())<img src="{{ $post->imageUrl() }}" alt="" loading="lazy" decoding="async" width="400" height="300">@else {{ $post->topicLabel() ?? 'Vesti' }} @endif</a>
-					<span class="inf-kicker">{{ $post->topicLabel() ?? $post->typeLabel() }}</span>
-					<h3 class="inf-title"><a href="{{ $post->url() }}">{{ $post->title }}</a></h3>
-					<span class="inf-meta">{{ $post->published_at?->diffForHumans() }}</span>
-				</article>
-			@endforeach
-		</section>
-	@endif
-
 	@if ($homeAd)
 		@include('info.partials.ad', ['ad' => $homeAd])
 	@endif
 
-	<section aria-labelledby="inf-vikend">
-		<div class="inf-head2"><h2 id="inf-vikend">Uskoro u Loznici</h2><a class="inf-link" href="{{ InfoUrl::to('desavanja') }}">Kalendar dešavanja</a></div>
-		@if ($events->isNotEmpty())
+	@if ($events->isNotEmpty())
+		<section aria-labelledby="inf-vikend">
+			<div class="inf-head2"><h2 id="inf-vikend">Uskoro u Loznici</h2><a class="inf-link" href="{{ InfoUrl::to('desavanja') }}">Kalendar dešavanja</a></div>
 			<div class="inf-grid4">
 				@foreach ($events as $event)
 					@include('info.partials.event-card', ['event' => $event])
 				@endforeach
 			</div>
-		@else
-			<p class="inf-empty">Kalendar se puni. Organizujete koncert, sajam ili utakmicu? <a href="{{ InfoUrl::to('posalji-vest') }}">Dodajte događaj besplatno.</a></p>
-		@endif
-	</section>
+		</section>
+	@endif
 
 	@if ($story)
 		<section aria-label="Priča iz kraja" class="inf-story">

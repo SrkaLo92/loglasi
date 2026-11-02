@@ -32,13 +32,12 @@ class InfoController extends Controller
         $featured = InfoPost::query()->published()->where('featured', true)->whereIn('type', ['news', 'notice', 'guide', 'story'])
             ->latest('published_at')->first() ?? $latest->first();
         $rest = $latest->reject(fn (InfoPost $p) => $featured && $p->is($featured))->values();
-        $withImage = $rest->filter(fn (InfoPost $p) => $p->hasOwnImage())->take(3)->values();
 
         return view('info.home', [
             'today' => InfoToday::get(),
             'featured' => $featured,
-            'newest' => $rest->take(5),
-            'cards' => $withImage->count() === 3 ? $withImage : ($rest->count() >= 8 ? $rest->slice(5, 3)->values() : $rest->take(3)),
+            'cards' => $rest->take(3),
+            'newest' => $rest->slice(3, 7)->values(),
             'story' => InfoPost::query()->published()->where('type', 'story')->latest('published_at')->first(),
             'events' => InfoPost::query()->upcomingEvents()->orderBy('event_starts_at')->limit(4)->get(),
             'listings' => InfoToday::latestListings(4),
