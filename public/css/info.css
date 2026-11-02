@@ -216,7 +216,7 @@
 .inf-dirhero__in { padding-block: 40px; display: flex; flex-direction: column; gap: 16px; }
 .inf-dirhero h1 { margin: 0; font-size: 44px; line-height: 1.1; font-weight: 800; letter-spacing: -0.025em; }
 .inf-dirhero p { margin: 0; font-size: 18px; color: var(--lg-mint); max-width: 60ch; }
-.inf-dirsearch { display: flex; gap: 10px; flex-wrap: wrap; max-width: 760px; }
+.inf-dirsearch { display: flex; gap: 10px; flex-wrap: wrap; max-width: 980px; }
 .inf-dirsearch input, .inf-dirsearch select { font: inherit; font-size: 16px; min-height: 52px; padding: 0 14px; border: 1px solid var(--lg-input); border-radius: 10px; color: var(--lg-text); background: #fff; }
 .inf-dirsearch input { flex: 1 1 260px; min-width: 0; }
 .inf-dirsearch select, .inf-dirsearch .lp-trigger { flex: 0 1 240px; width: auto; min-width: 0; }

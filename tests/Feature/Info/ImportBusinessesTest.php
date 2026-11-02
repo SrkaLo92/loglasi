@@ -28,4 +28,21 @@ class ImportBusinessesTest extends TestCase
 
         unlink($file);
     }
+
+    public function test_municipality_sets_city_and_filters_the_directory(): void
+    {
+        config(['info.enabled' => true]);
+        $file = tempnam(sys_get_temp_dir(), 'firme');
+        file_put_contents($file, "Naziv,Kategorija,Adresa,Mesto,Opština,Izvor\n"
+            ."Kafe Drina,Ugostiteljstvo,Glavna 2,Mali Zvornik,Mali Zvornik,APR\n"
+            ."Pekara Sava,Pekare,Masarikova 3,Šabac,Šabac,APR\n");
+        $this->artisan('info:import-businesses', ['file' => $file])->assertSuccessful();
+        unlink($file);
+
+        $this->assertSame('loznica', InfoBusiness::query()->where('name', 'Kafe Drina')->sole()->city);
+        $this->assertSame('sabac', InfoBusiness::query()->where('name', 'Pekara Sava')->sole()->city);
+
+        $this->get('http://'.config('info.domain').'/firme/?opstina='.rawurlencode('Šabac'))
+            ->assertOk()->assertSee('Pekara Sava')->assertDontSee('Kafe Drina')->assertSee('Sve opštine');
+    }
 }

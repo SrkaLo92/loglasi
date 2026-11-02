@@ -13,6 +13,13 @@
 				<option value="">Sve delatnosti</option>
 				@foreach ($categories as $name => $count)<option value="{{ $name }}" @selected($category === $name)>{{ $name }}</option>@endforeach
 			</select>
+			@if ($municipalities->count() > 1)
+				<label class="inf-visually-hidden" for="inf-fo">Opština</label>
+				<select id="inf-fo" name="opstina" data-pick>
+					<option value="">Sve opštine</option>
+					@foreach ($municipalities as $name => $count)<option value="{{ $name }}" @selected($municipality === $name)>{{ $name }}</option>@endforeach
+				</select>
+			@endif
 			<button class="inf-btn inf-btn--warm" type="submit">Traži</button>
 		</form>
 	</div>
@@ -23,7 +30,7 @@
 		<nav class="inf-cats">
 			<a href="{{ InfoUrl::to('firme') }}" @if ($category === '' && $q === '') aria-current="true" @endif>Sve firme <span>{{ $total }}</span></a>
 			@foreach ($categories as $name => $count)
-				<a href="{{ InfoUrl::to('firme') }}?kategorija={{ rawurlencode($name) }}" @if ($category === $name) aria-current="true" @endif>{{ $name }} <span>{{ $count }}</span></a>
+				<a href="{{ InfoUrl::to('firme') }}?kategorija={{ rawurlencode($name) }}@if ($municipality !== '')&amp;opstina={{ rawurlencode($municipality) }}@endif" @if ($category === $name) aria-current="true" @endif>{{ $name }} <span>{{ $count }}</span></a>
 			@endforeach
 		</nav>
 		<a class="inf-addfirm" href="{{ InfoUrl::to('oglasavanje') }}">

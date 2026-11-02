@@ -4,10 +4,11 @@ namespace App\Console\Commands\Info;
 
 use App\Models\InfoBusiness;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 /**
  * Adds businesses to the info directory from a CSV with a header row. Recognised columns (any order):
- * Naziv/name, Kategorija/category, Adresa/address, Mesto/place, Telefon/phone, Email, Web/website, Izvor/source.
+ * Naziv/name, Kategorija/category, Adresa/address, Mesto/place, Opština/municipality, Telefon/phone, Email, Web/website, Izvor/source.
  * A business with the same name and address is skipped, so the import can be run again.
  */
 class ImportBusinesses extends Command
@@ -21,6 +22,7 @@ class ImportBusinesses extends Command
         'category' => ['kategorija', 'category', 'delatnost'],
         'address' => ['adresa', 'address', 'adresa / mesto'],
         'place' => ['mesto', 'place', 'grad'],
+        'municipality' => ['opština', 'opstina', 'municipality'],
         'phone' => ['telefon', 'phone', 'telefon (javni, poslovni)'],
         'email' => ['email', 'e-mail', 'mejl'],
         'website' => ['web', 'website', 'sajt', 'web / profil'],
@@ -70,6 +72,10 @@ class ImportBusinesses extends Command
                 $data['email'] = null;
             }
             $data['place'] ??= $this->placeFrom($data['address'] ?? null);
+            $data['municipality'] ??= $data['place'];
+            if ($data['municipality']) {
+                $data['city'] = self::cityFor($data['municipality']);
+            }
 
             $exists = InfoBusiness::query()->where('name', $data['name'])
                 ->where(fn ($q) => isset($data['address']) ? $q->where('address', $data['address']) : $q->whereNull('address'))
@@ -100,5 +106,19 @@ class ImportBusinesses extends Command
         $last = trim((string) preg_replace('/\(.*\)/', '', (string) last(explode(',', $address))));
 
         return $last !== '' && mb_strlen($last) <= 40 ? $last : null;
+    }
+
+    /** City key for a later city switch: the configured city that covers the municipality, else its slug. */
+    public static function cityFor(string $municipality): string
+    {
+        foreach ((array) config('info.cities') as $key => $city) {
+            foreach ((array) ($city['municipalities'] ?? []) as $name) {
+                if (Str::lower($name) === Str::lower($municipality)) {
+                    return $key;
+                }
+            }
+        }
+
+        return Str::slug($municipality);
     }
 }

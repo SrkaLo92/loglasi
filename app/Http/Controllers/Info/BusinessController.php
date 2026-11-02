@@ -17,18 +17,23 @@ class BusinessController extends Controller
     {
         $q = trim((string) $request->query('q', ''));
         $category = trim((string) $request->query('kategorija', ''));
+        $municipality = trim((string) $request->query('opstina', ''));
 
         $businesses = InfoBusiness::query()->listed()
             ->when($q !== '', fn ($query) => $query->where(fn ($w) => $w->where('name', 'like', '%'.addcslashes($q, '%_\\').'%')
                 ->orWhere('category', 'like', '%'.addcslashes($q, '%_\\').'%')))
             ->when($category !== '', fn ($query) => $query->where('category', $category))
+            ->when($municipality !== '', fn ($query) => $query->where('municipality', $municipality))
             ->with('firm')->directoryOrder()
             ->paginate(30)->withQueryString();
 
         $categories = InfoBusiness::query()->listed()->whereNotNull('category')
             ->selectRaw('category, count(*) as total')->groupBy('category')->orderByDesc('total')->limit(40)->pluck('total', 'category');
 
-        return view('info.businesses', compact('businesses', 'categories', 'q', 'category') + [
+        $municipalities = InfoBusiness::query()->listed()->whereNotNull('municipality')
+            ->selectRaw('municipality, count(*) as total')->groupBy('municipality')->orderByDesc('total')->pluck('total', 'municipality');
+
+        return view('info.businesses', compact('businesses', 'categories', 'q', 'category', 'municipality', 'municipalities') + [
             'total' => InfoBusiness::query()->listed()->count(),
             'categoryAd' => $category !== '' ? InfoAds::for('category_top', $category) : null,
             'noindex' => $request->query() !== [],
