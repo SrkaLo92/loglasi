@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToInfoCity;
 use App\Support\Firms\FirmPackage;
 use App\Support\Info\InfoUrl;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,6 +19,8 @@ use Illuminate\Support\Str;
  */
 class InfoBusiness extends Model
 {
+    use BelongsToInfoCity;
+
     protected $guarded = ['id'];
 
     protected function casts(): array

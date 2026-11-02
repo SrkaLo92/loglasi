@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToInfoCity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /** A planned outage or other service notice (power, water, roads) for Loznica and the places around it. */
 class InfoServiceNotice extends Model
 {
+    use BelongsToInfoCity;
+
     public const KINDS = [
         'power' => 'Struja',
         'water' => 'Voda',

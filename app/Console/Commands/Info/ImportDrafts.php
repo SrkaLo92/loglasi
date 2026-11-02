@@ -5,6 +5,7 @@ namespace App\Console\Commands\Info;
 use App\Models\InfoPharmacyDuty;
 use App\Models\InfoPost;
 use App\Models\InfoServiceNotice;
+use App\Support\Info\InfoCity;
 use App\Support\Info\InfoToday;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
@@ -53,6 +54,7 @@ class ImportDrafts extends Command
                 'address' => ['nullable', 'string', 'max:160'],
                 'phone' => ['nullable', 'string', 'max:60'],
                 'hours' => ['nullable', 'string', 'max:60'],
+                'city' => ['nullable', 'in:'.implode(',', array_keys((array) config('info.cities')))],
             ]);
             if ($v->fails()) {
                 $counts['invalid']++;
@@ -73,14 +75,15 @@ class ImportDrafts extends Command
     private function store(array $data, bool $publish): string
     {
         $kind = $data['kind'] ?? 'post';
+        $city = $data['city'] ?? InfoCity::current();
         $at = fn (?string $value) => $value ? Carbon::parse($value, 'Europe/Belgrade') : null;
 
         if ($kind === 'pharmacy') {
             $date = Carbon::parse($data['date'])->toDateString();
-            if (InfoPharmacyDuty::query()->whereDate('date', $date)->exists()) {
+            if (InfoPharmacyDuty::query()->inCity($city)->whereDate('date', $date)->exists()) {
                 return 'duplicate';
             }
-            InfoPharmacyDuty::query()->create(['date' => $date, 'name' => $data['title'], 'address' => $data['address'] ?? null,
+            InfoPharmacyDuty::query()->create(['city' => $city, 'date' => $date, 'name' => $data['title'], 'address' => $data['address'] ?? null,
                 'phone' => $data['phone'] ?? null, 'hours' => $data['hours'] ?? null]);
 
             return 'created';
@@ -89,7 +92,7 @@ class ImportDrafts extends Command
         if ($kind === 'water' || $kind === 'road') {
             $hash = sha1($kind.'|'.InfoPost::normalizeUrl($data['source_url']).'|'.$data['starts_at']);
             $notice = InfoServiceNotice::query()->firstOrCreate(['external_hash' => $hash], [
-                'kind' => $kind, 'place' => $data['place'] ?? null, 'area' => $data['summary'],
+                'city' => $city, 'kind' => $kind, 'place' => $data['place'] ?? null, 'area' => $data['summary'],
                 'starts_at' => $at($data['starts_at']), 'ends_at' => $at($data['ends_at'] ?? null),
                 'source_name' => $data['source_name'], 'source_url' => $data['source_url'], 'published' => $publish,
             ]);
@@ -102,6 +105,7 @@ class ImportDrafts extends Command
         }
         $publishedAt = $at($data['published_at'] ?? null);
         InfoPost::query()->create([
+            'city' => $city,
             'type' => $data['type'] ?? 'news',
             'status' => $publish ? 'published' : 'pending',
             'published_at' => $publish ? ($publishedAt && $publishedAt->isPast() ? $publishedAt : now()) : null,

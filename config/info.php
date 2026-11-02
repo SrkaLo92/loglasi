@@ -22,6 +22,16 @@ return [
     // Empty = the endpoint is closed.
     'drafts_token' => env('INFO_DRAFTS_TOKEN', ''),
 
+    // Cities the portal covers. Every post, notice, pharmacy duty, firm and ad carries a city key, so the
+    // portal can later get a city switch (Loznica, Šabac, ...) and show only that city's data. With one
+    // city the filter stays off; INFO_CITY is the city new content gets by default.
+    'city' => env('INFO_CITY', 'loznica'),
+    'cities' => [
+        'loznica' => ['name' => 'Loznica', 'latitude' => 44.5338, 'longitude' => 19.2258,
+            'municipalities' => ['Loznica', 'Mali Zvornik', 'Krupanj', 'Ljubovija']],
+        // 'sabac' => ['name' => 'Šabac', 'latitude' => 44.7489, 'longitude' => 19.6908, 'municipalities' => ['Šabac']],
+    ],
+
     'weather' => [
         'latitude' => 44.5338,
         'longitude' => 19.2258,

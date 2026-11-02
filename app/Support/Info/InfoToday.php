@@ -19,14 +19,16 @@ final class InfoToday
 
     public static function forget(): void
     {
-        Cache::forget(self::KEY);
+        foreach (array_keys((array) config('info.cities')) as $city) {
+            Cache::forget(self::KEY.'.'.$city);
+        }
         Cache::forget(self::KEY.'.listings');
     }
 
     /** @return array{weather: ?array, pharmacy: ?array, power_today: int, power_next: ?string, water_today: int, next_event: ?array} */
     public static function get(): array
     {
-        return Cache::remember(self::KEY, 300, function () {
+        return Cache::remember(self::KEY.'.'.InfoCity::current(), 300, function () {
             $pharmacy = InfoPharmacyDuty::today();
             $power = InfoServiceNotice::query()->current()->where('kind', 'power')->orderBy('starts_at')->get();
             $today = $power->filter(fn (InfoServiceNotice $n) => $n->starts_at->isToday());

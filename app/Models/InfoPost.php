@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToInfoCity;
 use App\Support\Info\InfoUrl;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,8 @@ use Illuminate\Support\Str;
  */
 class InfoPost extends Model
 {
+    use BelongsToInfoCity;
+
     public const TYPES = [
         'news' => 'Vest',
         'event' => 'Događaj',
@@ -118,9 +121,27 @@ class InfoPost extends Model
         return $this->topic ? (config('info.topics')[$this->topic] ?? null) : null;
     }
 
-    public function imageUrl(): ?string
+    /** Own photo, or our theme picture for the topic or type (never another outlet's photo). */
+    public function imageUrl(): string
     {
-        return ListingImage::urlFor($this->image_path);
+        return ListingImage::urlFor($this->image_path) ?? self::themeImageUrl($this->topic, $this->type);
+    }
+
+    public function hasOwnImage(): bool
+    {
+        return filled($this->image_path);
+    }
+
+    /** One picture per topic, made once for the portal (public/img/info/teme), reused everywhere. */
+    public static function themeImageUrl(?string $topic, ?string $type = null): string
+    {
+        foreach ([$topic, $type, 'default'] as $name) {
+            if ($name && is_file(public_path('img/info/teme/'.$name.'.webp'))) {
+                return asset_v('img/info/teme/'.$name.'.webp');
+            }
+        }
+
+        return asset_v('img/info/teme/default.webp');
     }
 
     /** A summary of another outlet's article: its full text lives at the source, so the page is not indexed. */

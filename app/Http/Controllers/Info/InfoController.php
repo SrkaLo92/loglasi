@@ -32,7 +32,7 @@ class InfoController extends Controller
         $featured = InfoPost::query()->published()->where('featured', true)->whereIn('type', ['news', 'notice', 'guide', 'story'])
             ->latest('published_at')->first() ?? $latest->first();
         $rest = $latest->reject(fn (InfoPost $p) => $featured && $p->is($featured))->values();
-        $withImage = $rest->filter(fn (InfoPost $p) => $p->imageUrl())->take(3)->values();
+        $withImage = $rest->filter(fn (InfoPost $p) => $p->hasOwnImage())->take(3)->values();
 
         return view('info.home', [
             'today' => InfoToday::get(),
@@ -73,7 +73,7 @@ class InfoController extends Controller
         $list = $topic ? $upcoming->where('topic', $topic)->values() : $upcoming;
 
         return view('info.events', [
-            'featured' => $upcoming->firstWhere('featured', true) ?? $upcoming->first(fn (InfoPost $e) => $e->imageUrl()),
+            'featured' => $upcoming->firstWhere('featured', true) ?? $upcoming->first(fn (InfoPost $e) => $e->hasOwnImage()),
             'events' => $list,
             'topics' => $topics,
             'topic' => $topic,

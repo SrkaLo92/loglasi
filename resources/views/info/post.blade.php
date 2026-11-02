@@ -48,7 +48,7 @@
 			@endif
 
 			@if ($post->imageUrl())
-				<figure class="inf-figure"><img src="{{ $post->imageUrl() }}" alt="" width="960" height="540">@if ($post->image_credit)<figcaption>Foto: {{ $post->image_credit }}</figcaption>@endif</figure>
+				<figure class="inf-figure"><img src="{{ $post->imageUrl() }}" alt="" width="960" height="540">@if (! $post->hasOwnImage())<figcaption>Ilustracija</figcaption>@elseif ($post->image_credit)<figcaption>Foto: {{ $post->image_credit }}</figcaption>@endif</figure>
 			@endif
 
 			<div class="inf-prose">

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToInfoCity;
 use App\Support\Info\InfoUrl;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\Storage;
 /** A paid ad on the info portal. One firm per slot at a time (no rotation); clicks are counted on the way out. */
 class InfoAd extends Model
 {
+    use BelongsToInfoCity;
+
     public const SLOTS = [
         'today_sponsor' => 'Sponzor „Danas u Loznici“',
         'article_bottom' => 'Baner ispod teksta vesti',
