@@ -110,12 +110,14 @@
 	@if ($more->isNotEmpty())
 		<section aria-labelledby="inf-jos">
 			<div class="inf-head2"><h2 id="inf-jos">{{ $isEvent ? 'Još dešavanja' : 'Još iz Loznice' }}</h2></div>
-			<div class="inf-grid3">
+			<div class="inf-list inf-list--3">
 				@foreach ($more as $m)
-					<article class="inf-card">
-						@include('info.partials.thumb', ['post' => $m, 'class' => 'inf-media--card'])
-						<span class="inf-kicker">{{ $m->topicLabel() ?? $m->typeLabel() }}</span>
-						<h3 class="inf-title"><a href="{{ $m->url() }}">{{ $m->title }}</a></h3>
+					<article class="inf-li">
+						@include('info.partials.thumb', ['post' => $m, 'class' => 'inf-li__media'])
+						<div>
+							<span class="inf-kicker">{{ $m->topicLabel() ?? $m->typeLabel() }}</span>
+							<h3 class="inf-li__title"><a href="{{ $m->url() }}">{{ $m->title }}</a></h3>
+						</div>
 					</article>
 				@endforeach
 			</div>
