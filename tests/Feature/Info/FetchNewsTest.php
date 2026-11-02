@@ -4,6 +4,7 @@ namespace Tests\Feature\Info;
 
 use App\Models\InfoPost;
 use App\Models\InfoSource;
+use App\Support\Info\NewsRewriter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -64,6 +65,14 @@ class FetchNewsTest extends TestCase
         Http::fake(['portal.test/feed' => Http::response($this->feed()), '*' => Http::response('', 500)]);
         $this->artisan('info:fetch-news')->assertSuccessful();
         $this->assertSame(1, InfoPost::query()->count());
+    }
+
+    public function test_word_list_matches_word_starts_only(): void
+    {
+        $this->assertTrue(NewsRewriter::blocked('Uhapšen muškarac'));
+        $this->assertTrue(NewsRewriter::blocked('Lokalni izbori u nedelju'));
+        $this->assertFalse(NewsRewriter::blocked('Čudesan koncert i umnožavanje knjiga'));
+        $this->assertFalse(NewsRewriter::blocked('Bogat izbor programa za decu'));
     }
 
     public function test_without_api_key_nothing_happens(): void

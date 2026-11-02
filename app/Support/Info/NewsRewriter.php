@@ -21,7 +21,7 @@ class NewsRewriter
     {
         $text = mb_strtolower($text);
         foreach ((array) config('info.news.blocked_words') as $word) {
-            if ($word !== '' && str_contains($text, mb_strtolower($word))) {
+            if ($word !== '' && preg_match('/(?<!\\p{L})'.preg_quote(mb_strtolower($word), '/').'/u', $text)) {
                 return true;
             }
         }

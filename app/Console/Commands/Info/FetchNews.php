@@ -54,7 +54,10 @@ class FetchNews extends Command
                 $data = NewsRewriter::rewrite((string) $source->name, $item['title'], Str::limit($text, 4000));
                 if ($data === null) {
                     unset($seen[$hash]); // try again next hour
-                    $counts['failed']++;
+                    if (++$counts['failed'] >= 3) {
+                        $this->warn('API keeps failing, stopping until the next run.');
+                        break 2;
+                    }
 
                     continue;
                 }
