@@ -53,32 +53,62 @@ class NewsRewriter
         Ako allowed=false, ostala polja mogu biti null.
         TXT;
 
+        self::$lastError = null;
+        $prompt = self::utf8($prompt);
+
         try {
             $response = Http::timeout(60)->withHeaders([
                 'x-api-key' => (string) config('info.news.api_key'),
                 'anthropic-version' => '2023-06-01',
             ])->post('https://api.anthropic.com/v1/messages', [
                 'model' => (string) config('info.news.model'),
-                'max_tokens' => 800,
+                'max_tokens' => 1500,
                 'messages' => [['role' => 'user', 'content' => $prompt]],
             ]);
         } catch (\Throwable $e) {
-            Log::warning('info:fetch-news API call failed: '.$e->getMessage());
-
-            return null;
+            return self::fail('request failed: '.get_class($e).': '.$e->getMessage());
         }
         if (! $response->successful()) {
-            Log::warning('info:fetch-news API status '.$response->status());
-
-            return null;
+            return self::fail('status '.$response->status().': '.mb_substr($response->body(), 0, 300));
         }
 
-        $out = (string) $response->json('content.0.text');
+        // Newer models can put other blocks (e.g. thinking) first: use the first text block.
+        $blocks = (array) $response->json('content');
+        $out = '';
+        foreach ($blocks as $block) {
+            if (($block['type'] ?? null) === 'text') {
+                $out = (string) ($block['text'] ?? '');
+                break;
+            }
+        }
+        $stop = (string) $response->json('stop_reason');
+        $types = implode(',', array_map(fn ($b) => (string) ($b['type'] ?? '?'), $blocks));
+        $out = preg_replace('/^```(?:json)?\s*|\s*```$/m', '', trim($out)) ?? $out;
         if (! preg_match('/\{.*\}/s', $out, $m)) {
-            return null;
+            return self::fail("no JSON (stop_reason {$stop}, blocks {$types}): ".mb_substr($out, 0, 200));
         }
         $data = json_decode($m[0], true);
+        if (! is_array($data) || ! array_key_exists('allowed', $data)) {
+            return self::fail("bad JSON (stop_reason {$stop}, ".json_last_error_msg().'): '.mb_substr($m[0], 0, 200));
+        }
 
-        return is_array($data) && array_key_exists('allowed', $data) ? $data : null;
+        return $data;
+    }
+
+    /** Why the last rewrite() returned null (never contains the key). */
+    public static ?string $lastError = null;
+
+    private static function fail(string $reason): null
+    {
+        self::$lastError = $reason;
+        Log::error('info:fetch-news: '.$reason);
+
+        return null;
+    }
+
+    /** Drops invalid UTF-8 (pages in other encodings) so the JSON body can always be encoded. */
+    private static function utf8(string $text): string
+    {
+        return mb_check_encoding($text, 'UTF-8') ? $text : (string) mb_convert_encoding($text, 'UTF-8', 'UTF-8');
     }
 }

@@ -41,6 +41,31 @@ class FetchNewsTest extends TestCase
         XML;
     }
 
+    public function test_reads_the_first_text_block_and_tolerates_code_fences(): void
+    {
+        Http::fake([
+            'api.anthropic.com/*' => Http::response(['stop_reason' => 'end_turn', 'content' => [
+                ['type' => 'thinking', 'thinking' => '...'],
+                ['type' => 'text', 'text' => "```json\n{\"allowed\":true,\"title\":\"Sajam meda\",\"summary\":\"Sajam je u subotu.\"}\n```"],
+            ]]),
+        ]);
+
+        $data = NewsRewriter::rewrite('Portal', 'Sajam', "Tekst \xC3\x28 sa lo\xC5im bajtom");
+
+        $this->assertTrue($data['allowed']);
+        $this->assertSame('Sajam meda', $data['title']);
+    }
+
+    public function test_failure_reason_is_kept_without_the_key(): void
+    {
+        config(['info.news.api_key' => 'sk-secret-test']);
+        Http::fake(['api.anthropic.com/*' => Http::response(['stop_reason' => 'max_tokens', 'content' => [['type' => 'text', 'text' => '{"allowed":true,"title":"Pre']]])]);
+
+        $this->assertNull(NewsRewriter::rewrite('Portal', 'Naslov', 'Tekst'));
+        $this->assertStringContainsString('max_tokens', (string) NewsRewriter::$lastError);
+        $this->assertStringNotContainsString('sk-secret', (string) NewsRewriter::$lastError);
+    }
+
     public function test_culture_goes_pending_and_politics_or_crime_never_reach_the_api(): void
     {
         Http::fake([
