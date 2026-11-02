@@ -30,6 +30,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 use UnitEnum;
 
 /** Info portal posts. Drafts from the automation and from citizens wait in "Na čekanju" until an editor publishes them. */
@@ -118,10 +119,12 @@ class InfoPostResource extends Resource
             ->columns([
                 TextColumn::make('status')->label('Status')->badge()
                     ->formatStateUsing(fn (string $state) => InfoPost::STATUSES[$state] ?? $state)
-                    ->color(fn (string $state) => match ($state) { 'pending' => 'warning', 'published' => 'success', default => 'gray' }),
+                    ->color(fn (string $state) => match ($state) {
+                        'pending' => 'warning', 'published' => 'success', default => 'gray'
+                    }),
                 TextColumn::make('type')->label('Vrsta')->formatStateUsing(fn (string $state) => InfoPost::TYPES[$state] ?? $state),
                 TextColumn::make('title')->label('Naslov')->searchable()->wrap()->limit(90)
-                    ->description(fn (InfoPost $record) => \Illuminate\Support\Str::limit($record->summary, 140)),
+                    ->description(fn (InfoPost $record) => Str::limit($record->summary, 140)),
                 IconColumn::make('needs_check')->label('Proveriti')->boolean()->trueColor('danger')->toggleable(),
                 TextColumn::make('origin')->label('Od')->formatStateUsing(fn (string $state) => InfoPost::ORIGINS[$state] ?? $state),
                 TextColumn::make('source_name')->label('Izvor')->placeholder('—')->url(fn (InfoPost $record) => $record->source_url, true),

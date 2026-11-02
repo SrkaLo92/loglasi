@@ -9,7 +9,7 @@
 			<label class="inf-visually-hidden" for="inf-fq">Šta tražite</label>
 			<input id="inf-fq" type="search" name="q" value="{{ $q }}" placeholder="Vulkanizer, pekara, stolar…" maxlength="80">
 			<label class="inf-visually-hidden" for="inf-fk">Delatnost</label>
-			<select id="inf-fk" name="kategorija">
+			<select id="inf-fk" name="kategorija" data-pick>
 				<option value="">Sve delatnosti</option>
 				@foreach ($categories as $name => $count)<option value="{{ $name }}" @selected($category === $name)>{{ $name }}</option>@endforeach
 			</select>

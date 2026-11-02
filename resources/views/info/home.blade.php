@@ -12,7 +12,7 @@
 @section('content')
 <div class="inf-wrap inf-stack">
 	<h1 class="inf-visually-hidden">loglasi Info: vesti, dešavanja i servisne informacije za Loznicu i okolinu</h1>
-	@include('info.partials.today')
+	@include('info.partials.today', ['soon' => $events])
 
 	@if ($featured)
 		<section aria-label="Glavne vesti" class="inf-lead">

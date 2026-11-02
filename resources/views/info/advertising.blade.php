@@ -109,7 +109,7 @@
 				<label>Telefon<input type="tel" name="phone" value="{{ old('phone') }}" maxlength="40" placeholder="06x xxx xxxx" autocomplete="tel"></label>
 				<label>Mejl<input type="email" name="email" value="{{ old('email') }}" maxlength="190" placeholder="ime@firma.rs" autocomplete="email"></label>
 			</div>
-			<label>Šta vas zanima<select name="interest">@foreach (InfoAdInquiry::INTERESTS as $key => $label)<option value="{{ $key }}" @selected(old('interest', 'package') === $key)>{{ $label }}</option>@endforeach</select></label>
+			<label>Šta vas zanima<select name="interest" data-pick>@foreach (InfoAdInquiry::INTERESTS as $key => $label)<option value="{{ $key }}" @selected(old('interest', 'package') === $key)>{{ $label }}</option>@endforeach</select></label>
 			<label>Poruka (nije obavezno)<textarea name="message" rows="3" maxlength="2000">{{ old('message') }}</textarea></label>
 			@if ($errors->any())<p class="inf-error" role="alert">{{ $errors->first() }}</p>@endif
 			<button class="inf-btn" type="submit">Pošalji upit</button>

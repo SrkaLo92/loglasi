@@ -8,6 +8,8 @@ use App\Models\InfoPharmacyDuty;
 use App\Models\InfoPost;
 use App\Models\InfoServiceNotice;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 /** Sample posts, events, notices and one ad for a local preview of the info portal. Never on production. */
 class DemoContent extends Command
@@ -29,6 +31,9 @@ class DemoContent extends Command
         InfoPost::query()->where('slug', 'like', 'primer-%')->delete();
         InfoServiceNotice::query()->where('source_name', self::MARK)->delete();
         InfoAd::query()->where('text', 'like', '%(primer)%')->delete();
+        InfoPharmacyDuty::query()->where('name', 'like', '%(primer)%')->delete();
+        InfoBusiness::query()->whereNotNull('featured_until')->where('opening_hours', 'like', 'Pon–pet 08–17%')
+            ->update(['featured_until' => null, 'opening_hours' => null, 'gallery' => null]);
         if ($this->option('remove')) {
             $this->info('Sample content removed.');
 
@@ -99,16 +104,16 @@ class DemoContent extends Command
             return null;
         }
         $path = 'info-primer/'.$seed.'.jpg';
-        if (! \Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+        if (! Storage::disk('public')->exists($path)) {
             try {
-                $response = \Illuminate\Support\Facades\Http::timeout(15)->get('https://picsum.photos/seed/loglasi-'.$seed.'/1200/800');
+                $response = Http::timeout(15)->get('https://picsum.photos/seed/loglasi-'.$seed.'/1200/800');
             } catch (\Throwable) {
                 return null;
             }
             if (! $response->successful()) {
                 return null;
             }
-            \Illuminate\Support\Facades\Storage::disk('public')->put($path, $response->body());
+            Storage::disk('public')->put($path, $response->body());
         }
 
         return $path;

@@ -41,6 +41,7 @@
 <link rel="preload" href="{{ asset('fonts/manrope-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{{ asset('fonts/manrope-latin-ext.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ asset_v('css/base.css') }}">
+<link rel="stylesheet" href="{{ asset_v('css/pick.css') }}">
 <link rel="stylesheet" href="{{ asset_v('css/info.css') }}">
 <meta name="theme-color" content="#1f5b4a">
 <link rel="icon" href="{{ asset_v('img/brand/icon.svg') }}" type="image/svg+xml">
@@ -117,5 +118,6 @@
 		</div>
 	</div>
 </footer>
+<script src="{{ asset_v('js/pick.js') }}" defer></script>
 </body>
 </html>
