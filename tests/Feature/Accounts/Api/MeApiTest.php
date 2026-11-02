@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Support\Settings;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -301,7 +302,7 @@ class MeApiTest extends TestCase
             'password_confirmation' => 'nova-lozinka-22',
         ])->assertOk()->assertJsonStructure(['access_token', 'refresh_token', 'user' => ['id']]);
 
-        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('nova-lozinka-22', $user->fresh()->password));
+        $this->assertTrue(Hash::check('nova-lozinka-22', $user->fresh()->password));
         $this->app['auth']->forgetGuards();
         $this->withToken($other)->getJson('/api/v1/me')->assertUnauthorized();
         $this->app['auth']->forgetGuards();
