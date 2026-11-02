@@ -42,6 +42,7 @@ class InfoServiceProvider extends ServiceProvider
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             InProcess::command($schedule, 'info:weather')->hourlyAt(7)->withoutOverlapping(10);
             InProcess::command($schedule, 'info:power-outages')->cron('20 6,12,18 * * *')->withoutOverlapping(10)->onOneServer();
+            InProcess::command($schedule, 'info:fetch-news')->hourlyAt(25)->withoutOverlapping(30)->onOneServer();
         });
     }
 }

@@ -72,6 +72,23 @@ return [
         'package_partner' => 14990,
     ],
 
+    // Hourly news: RSS of active sources -> retold in our words by Claude -> "Na čekanju" for an editor.
+    // Only life in town gets through (Srdjan 2026-11-02): curiosities, service info, culture, events. No politics.
+    'news' => [
+        'api_key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('INFO_NEWS_MODEL', 'claude-haiku-5-5'),
+        'max_per_run' => (int) env('INFO_NEWS_MAX_PER_RUN', 8),
+        'max_age_days' => 3,
+        // Dropped before any API call (lower case, matched inside words).
+        'blocked_words' => [
+            'sns', 'srpska napredna', 'opozicij', 'izbor', 'glasanj', 'skupštin', 'odborni', 'poslanik', 'stranka', 'stranke',
+            'gradonačelni', 'vučić', 'vlada srbije', 'ministar', 'protest', 'blokad', 'studenti u blokadi',
+            'litijum', 'jadar', 'rio tinto', 'rudnik litijuma',
+            'ubist', 'ubio', 'uhapšen', 'uhapsi', 'pritvor', 'krivičn', 'policij', 'pucnjav', 'nož', 'droga', 'silovan', 'pljačk', 'kradj', 'krađ',
+            'poginu', 'nesreć', 'udes', 'preminu', 'čitulj', 'sahran', 'umro', 'umrla', 'in memoriam', 'samoubist',
+        ],
+    ],
+
     'topics' => [
         'drustvo' => 'Društvo',
         'sport' => 'Sport',
