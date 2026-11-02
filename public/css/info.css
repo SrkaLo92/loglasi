@@ -50,10 +50,10 @@
 .inf-svc__kicker { margin: 0; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #cfe8df; }
 .inf-svc__kicker--dark { color: var(--lg-green-dark); }
 .inf-svc__title { margin: 6px 0 0; font-size: 30px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; color: #fff; }
-.inf-svc__tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.inf-svc__tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
 :where(.inf) a.inf-svc__tile { background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .14); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 6px; color: #fff; transition: background-color .15s; }
 :where(.inf) a.inf-svc__tile:hover { background: rgba(255, 255, 255, .18); color: #fff; }
-.inf-svc__tile strong { font-size: 18px; font-weight: 800; }
+.inf-svc__tile strong { font-size: 17px; font-weight: 800; }
 .inf-svc__tile span { font-size: 15px; line-height: 1.4; color: #e3f1ec; }
 .inf-svc__ico { color: #fff; }
 :where(.inf) a.inf-svc__tile--warn, :where(.inf) a.inf-svc__tile--warn:hover { background: var(--lg-orange); border-color: var(--lg-orange); }
@@ -69,7 +69,8 @@
 .inf-svc__date small { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--lg-orange); }
 .inf-svc__date b { font-size: 22px; font-weight: 800; line-height: 1.1; }
 .inf-svc__soon .inf-link { margin-top: auto; }
-@media (max-width: 1100px) { .inf-svc { grid-template-columns: minmax(0, 1fr); } .inf-svc__tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 1100px) { .inf-svc { grid-template-columns: minmax(0, 1fr); } .inf-svc__tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 720px) { .inf-svc__tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .inf-svc__tiles > :last-child { grid-column: span 2; } }
 @media (max-width: 560px) { .inf-svc__panel { padding: 20px 16px; } .inf-svc__title { font-size: 24px; } .inf-svc__tiles { gap: 8px; } :where(.inf) a.inf-svc__tile { padding: 12px; } .inf-svc__tile strong { font-size: 16px; } .inf-svc__tile span { font-size: 14px; } .inf-svc__soon { padding: 18px; } }
 .inf-head2 { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .inf-head2 h2 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }

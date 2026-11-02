@@ -79,16 +79,18 @@
 		@endif
 	</section>
 
-	@if ($roads->isNotEmpty())
-		<section class="inf-svsec" aria-labelledby="inf-putevi">
-			<div class="inf-svhead"><h2 id="inf-putevi">Putevi i radovi</h2></div>
+	<section class="inf-svsec" id="putevi" aria-labelledby="inf-putevi">
+		<div class="inf-svhead"><h2 id="inf-putevi">Putevi i radovi</h2></div>
+		@if ($roads->isNotEmpty())
 			<div class="inf-table">
 				@foreach ($roads as $n)
 					<div class="inf-trow"><strong>{{ $n->place ?: 'Loznica' }}</strong><span>{{ $n->area }}</span><b>{{ $n->whenLabel() }}</b></div>
 				@endforeach
 			</div>
-		</section>
-	@endif
+		@else
+			<div class="inf-note"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2b7a64" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21 9 3M20 21 15 3M12 6v2M12 11v2M12 16v2"/></svg><p><strong>Nema najavljenih radova i zatvaranja puteva.</strong> <span>Obaveštenja o radovima i izmenama saobraćaja objavljujemo čim stignu.</span></p></div>
+		@endif
+	</section>
 
 	@if ($sponsor)
 		<p class="inf-sponsor">Servisne informacije uz podršku <a href="{{ $sponsor->clickUrl() }}" rel="sponsored noopener">{{ $sponsor->title }}</a></p>

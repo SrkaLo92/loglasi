@@ -25,7 +25,7 @@ final class InfoToday
         Cache::forget(self::KEY.'.listings');
     }
 
-    /** @return array{weather: ?array, pharmacy: ?array, power_today: int, power_next: ?string, water_today: int, next_event: ?array} */
+    /** @return array{weather: ?array, pharmacy: ?array, power_today: int, power_next: ?string, water_today: int, roads_now: int, next_event: ?array} */
     public static function get(): array
     {
         return Cache::remember(self::KEY.'.'.InfoCity::current(), 300, function () {
@@ -34,6 +34,8 @@ final class InfoToday
             $today = $power->filter(fn (InfoServiceNotice $n) => $n->starts_at->isToday());
             $water = InfoServiceNotice::query()->current()->where('kind', 'water')
                 ->whereDate('starts_at', today())->count();
+            $roads = InfoServiceNotice::query()->current()->where('kind', 'road')
+                ->where('starts_at', '<=', now()->endOfDay())->count();
             $event = InfoPost::query()->upcomingEvents()->orderBy('event_starts_at')->first();
 
             return [
@@ -42,6 +44,7 @@ final class InfoToday
                 'power_today' => $today->count(),
                 'power_next' => $power->first()?->whenLabel(),
                 'water_today' => $water,
+                'roads_now' => $roads,
                 'next_event' => $event ? [
                     'title' => $event->title,
                     'when' => $event->event_starts_at?->isToday() ? 'Danas '.$event->event_starts_at->format('H:i') : $event->event_starts_at?->translatedFormat('D j. n. H:i'),

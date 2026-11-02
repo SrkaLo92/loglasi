@@ -33,6 +33,11 @@
 				<strong>Voda</strong>
 				<span>{{ $today['water_today'] > 0 ? 'Najavljen prekid danas' : 'Bez najavljenih prekida' }}</span>
 			</a>
+			<a @class(['inf-svc__tile', 'inf-svc__tile--warn' => ($today['roads_now'] ?? 0) > 0]) href="{{ $tdServices }}#putevi">
+				<svg class="inf-svc__ico" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21 9 3M20 21 15 3M12 6v2M12 11v2M12 16v2"/></svg>
+				<strong>Putevi</strong>
+				<span>{{ ($today['roads_now'] ?? 0) > 0 ? 'Radovi ili izmene saobraćaja danas' : 'Bez najavljenih radova' }}</span>
+			</a>
 			<a class="inf-svc__tile" href="{{ $tdServices }}#apoteka">
 				<svg class="inf-svc__ico" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>
 				<strong>Dežurna apoteka</strong>

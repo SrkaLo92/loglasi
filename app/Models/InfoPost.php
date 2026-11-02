@@ -132,6 +132,16 @@ class InfoPost extends Model
         return filled($this->image_path);
     }
 
+    /** Author of the theme picture this post shows (img/info/teme/credits.json: {"default": "Stalex"}). */
+    public function themeImageCredit(): ?string
+    {
+        static $credits = null;
+        $credits ??= json_decode((string) @file_get_contents(public_path('img/info/teme/credits.json')), true) ?: [];
+        $file = basename((string) parse_url($this->imageUrl(), PHP_URL_PATH), '.webp');
+
+        return $credits[$file] ?? null;
+    }
+
     /** One picture per topic, made once for the portal (public/img/info/teme), reused everywhere. */
     public static function themeImageUrl(?string $topic, ?string $type = null): string
     {
