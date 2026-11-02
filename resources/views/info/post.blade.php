@@ -49,8 +49,8 @@
 
 			@if ($post->youtubeId())
 				<figure @class(['inf-video', 'inf-video--tall' => str_contains((string) $post->video_url, '/shorts/')])><iframe src="https://www.youtube-nocookie.com/embed/{{ $post->youtubeId() }}?rel=0" title="{{ $post->title }}" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-			@elseif ($post->imageUrl())
-				<figure class="inf-figure"><img src="{{ $post->imageUrl() }}" alt="" width="960" height="540">@if (! $post->hasOwnImage())<figcaption>{{ 'Ilustracija'.($post->themeImageCredit() ? ', foto: '.$post->themeImageCredit() : '') }}</figcaption>@elseif ($post->image_credit)<figcaption>Foto: {{ $post->image_credit }}</figcaption>@endif</figure>
+			@elseif ($post->hasOwnImage())
+				<figure class="inf-figure"><img src="{{ $post->imageUrl() }}" alt="" width="960" height="540">@if ($post->image_credit)<figcaption>Foto: {{ $post->image_credit }}</figcaption>@endif</figure>
 			@endif
 
 			@if ($post->video_url && ! $post->youtubeId())
@@ -113,7 +113,7 @@
 			<div class="inf-grid3">
 				@foreach ($more as $m)
 					<article class="inf-card">
-						<a class="inf-media inf-media--card @if (! $m->imageUrl()) inf-media--empty @endif" href="{{ $m->url() }}" tabindex="-1" aria-hidden="true">@if ($m->imageUrl())<img src="{{ $m->imageUrl() }}" alt="" loading="lazy" decoding="async">@else {{ $m->topicLabel() ?? 'Vesti' }} @endif</a>
+						@include('info.partials.thumb', ['post' => $m, 'class' => 'inf-media--card'])
 						<span class="inf-kicker">{{ $m->topicLabel() ?? $m->typeLabel() }}</span>
 						<h3 class="inf-title"><a href="{{ $m->url() }}">{{ $m->title }}</a></h3>
 					</article>

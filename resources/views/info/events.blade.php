@@ -14,7 +14,7 @@
 	@if ($featured && ! $topic)
 		@php($fw = $evWhen($featured))
 		<article class="inf-evfeat">
-			@if ($featured->imageUrl())<img src="{{ $featured->imageUrl() }}" alt="" width="720" height="480">@else<span class="inf-media inf-media--empty" aria-hidden="true">Dešavanja</span>@endif
+			@if ($featured->hasOwnImage())<img src="{{ $featured->imageUrl() }}" alt="" width="720" height="480">@else<span class="inf-media inf-media--empty" aria-hidden="true">Dešavanja</span>@endif
 			<div class="inf-evfeat__body">
 				<span class="inf-evfeat__kicker">Izdvajamo</span>
 				<h2><a href="{{ $featured->url() }}">{{ $featured->title }}</a></h2>

@@ -28,7 +28,7 @@ class InfoController extends Controller
     public function home(): View
     {
         $latest = InfoPost::query()->published()->whereIn('type', ['news', 'notice', 'guide'])
-            ->latest('published_at')->limit(12)->get();
+            ->latest('published_at')->limit(10)->get();
         $featured = InfoPost::query()->published()->where('featured', true)->whereIn('type', ['news', 'notice', 'guide', 'story'])
             ->latest('published_at')->first() ?? $latest->first();
         $rest = $latest->reject(fn (InfoPost $p) => $featured && $p->is($featured))->values();
@@ -36,12 +36,11 @@ class InfoController extends Controller
         return view('info.home', [
             'today' => InfoToday::get(),
             'featured' => $featured,
-            'cards' => $rest->take(3),
-            'newest' => $rest->slice(3, 7)->values(),
+            'newest' => $rest->take(9),
             'story' => InfoPost::query()->published()->where('type', 'story')->latest('published_at')->first(),
             'events' => InfoPost::query()->upcomingEvents()->orderBy('event_starts_at')->limit(4)->get(),
             'listings' => InfoToday::latestListings(4),
-            'businesses' => InfoBusiness::query()->listed()->with('firm')->directoryOrder()->limit(3)->get(),
+            'businesses' => InfoBusiness::query()->listed()->with('firm')->directoryOrder()->limit(4)->get(),
             'categories' => InfoBusiness::query()->listed()->whereNotNull('category')
                 ->selectRaw('category, count(*) as total')->groupBy('category')->orderByDesc('total')->limit(7)->pluck('category'),
             'homeAd' => InfoAds::for('home_middle'),

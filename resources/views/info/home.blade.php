@@ -7,18 +7,33 @@
 		'inLanguage' => 'sr-Latn', 'publisher' => ['@type' => 'Organization', 'name' => 'loglasi.rs', 'url' => InfoUrl::main('/')],
 		'potentialAction' => ['@type' => 'SearchAction', 'target' => InfoUrl::to('pretraga').'?q={q}', 'query-input' => 'required name=q'],
 	]];
-	$hmTime = fn ($post) => $post->published_at?->isToday() ? $post->published_at->timezone('Europe/Belgrade')->format('H:i') : $post->published_at?->timezone('Europe/Belgrade')->format('j. n.');
+	$hmTime = fn ($post) => ($at = $post->published_at?->copy()->timezone('Europe/Belgrade')) ? ($at->isSameDay(now('Europe/Belgrade')) ? $at->format('H:i') : $at->format('j. n.')) : '';
 @endphp
 @section('content')
 <div class="inf-wrap inf-stack">
 	<h1 class="inf-visually-hidden">loglasi Info: vesti, dešavanja i servisne informacije za Loznicu i okolinu</h1>
 	@include('info.partials.today')
 
+	<form class="inf-findfirm" method="get" action="{{ InfoUrl::to('firme') }}" role="search">
+		<label for="inf-ff"><strong>Tražite majstora, servis ili prodavnicu?</strong></label>
+		<div class="inf-findfirm__row">
+			<input id="inf-ff" type="search" name="q" placeholder="npr. vodoinstalater, auto servis, frizer" maxlength="80">
+			<button class="inf-btn" type="submit">Nađi firmu</button>
+		</div>
+		@if ($categories->isNotEmpty())
+			<div class="inf-findfirm__cats">
+				@foreach ($categories as $cat)
+					<a class="inf-chip" href="{{ InfoUrl::to('firme') }}?kategorija={{ rawurlencode($cat) }}">{{ $cat }}</a>
+				@endforeach
+			</div>
+		@endif
+	</form>
+
 	@if ($featured)
-		<section aria-label="Vesti" class="inf-front">
-			<div class="inf-front__main">
+		<div class="inf-front">
+			<section class="inf-front__main" aria-label="Vesti">
 				<article class="inf-hero">
-					<a class="inf-media" href="{{ $featured->url() }}" tabindex="-1" aria-hidden="true"><img src="{{ $featured->imageUrl() }}" alt="" width="640" height="480" fetchpriority="high"></a>
+					@include('info.partials.thumb', ['post' => $featured, 'class' => 'inf-hero__media', 'eager' => true])
 					<div class="inf-hero__body">
 						<div class="inf-metaline">
 							<span class="inf-pill">{{ $featured->topicLabel() ?? $featured->typeLabel() }}</span>
@@ -28,35 +43,45 @@
 						<p class="inf-lede">{{ Str::limit($featured->summary, 200) }}</p>
 					</div>
 				</article>
-				@if ($cards->isNotEmpty())
-					<div class="inf-cards">
-						@foreach ($cards as $post)
-							<article class="inf-card">
-								<a class="inf-media inf-media--card" href="{{ $post->url() }}" tabindex="-1" aria-hidden="true"><img src="{{ $post->imageUrl() }}" alt="" loading="lazy" decoding="async" width="400" height="250"></a>
-								<span class="inf-kicker">{{ $post->topicLabel() ?? $post->typeLabel() }}</span>
-								<h3 class="inf-title"><a href="{{ $post->url() }}">{{ $post->title }}</a></h3>
-								<span class="inf-meta">{{ $post->published_at?->diffForHumans() }}</span>
-							</article>
+				<h2 class="inf-visually-hidden">Najnovije vesti</h2>
+				<div class="inf-list">
+					@foreach ($newest as $post)
+						<article class="inf-li">
+							@include('info.partials.thumb', ['post' => $post, 'class' => 'inf-li__media'])
+							<div>
+								<span class="inf-kicker">{{ $post->topicLabel() ?? $post->typeLabel() }}<time datetime="{{ $post->published_at?->toIso8601String() }}"> · {{ $hmTime($post) }}</time></span>
+								<h3 class="inf-li__title"><a href="{{ $post->url() }}">{{ $post->title }}</a></h3>
+							</div>
+						</article>
+					@endforeach
+				</div>
+				<a class="inf-btn inf-btn--soft inf-front__more" href="{{ InfoUrl::to('vesti') }}">Sve vesti</a>
+			</section>
+			<aside class="inf-front__side" aria-label="Firme i oglasi">
+				@if ($homeAd)
+					@include('info.partials.ad', ['ad' => $homeAd, 'slim' => true])
+				@endif
+				@if ($businesses->isNotEmpty())
+					<div class="inf-box">
+						<h2>Firme iz kraja</h2>
+						@foreach ($businesses as $b)
+							<a class="inf-sidefirm" href="{{ $b->url() }}">
+								<span class="inf-initials" aria-hidden="true">{{ $b->initials() }}</span>
+								<span><strong>{{ $b->name }}</strong><small>{{ trim($b->category.' · '.($b->place ?: 'Loznica'), ' ·') }}</small></span>
+							</a>
 						@endforeach
+						<a class="inf-btn inf-btn--soft" href="{{ InfoUrl::to('firme') }}">Ceo imenik</a>
 					</div>
 				@endif
-			</div>
-			<aside class="inf-box" aria-labelledby="inf-najnovije">
-				<h2 id="inf-najnovije">Najnovije</h2>
-				@forelse ($newest as $post)
-					<a class="inf-newest" href="{{ $post->url() }}"><time datetime="{{ $post->published_at?->toIso8601String() }}">{{ $hmTime($post) }}</time><span>{{ $post->title }}</span></a>
-				@empty
-					<p class="inf-meta">Nove vesti stižu tokom dana.</p>
-				@endforelse
-				<a class="inf-btn inf-btn--soft" href="{{ InfoUrl::to('vesti') }}">Sve vesti</a>
+				<a class="inf-cta-line inf-cta-line--side" href="{{ InfoUrl::to('oglasavanje') }}">
+					<strong>Imate firmu u Loznici?</strong>
+					<span>Osnovni upis u imenik je besplatan.</span>
+					<b>Dodajte svoju firmu</b>
+				</a>
 			</aside>
-		</section>
+		</div>
 	@else
 		<p class="inf-empty">Prve vesti stižu uskoro. Imate vest iz vašeg mesta? <a href="{{ InfoUrl::to('posalji-vest') }}">Pošaljite nam.</a></p>
-	@endif
-
-	@if ($homeAd)
-		@include('info.partials.ad', ['ad' => $homeAd])
 	@endif
 
 	@if ($events->isNotEmpty())
@@ -72,7 +97,7 @@
 
 	@if ($story)
 		<section aria-label="Priča iz kraja" class="inf-story">
-			@if ($story->imageUrl())<img src="{{ $story->imageUrl() }}" alt="" loading="lazy" decoding="async">@else<span class="inf-media inf-media--empty" aria-hidden="true">Priče iz kraja</span>@endif
+			@include('info.partials.thumb', ['post' => $story, 'class' => 'inf-story__media'])
 			<div class="inf-story__body">
 				<span class="inf-story__kicker">Priče iz kraja</span>
 				<h2><a href="{{ $story->url() }}">{{ $story->title }}</a></h2>
@@ -81,33 +106,6 @@
 			</div>
 		</section>
 	@endif
-
-	<section aria-labelledby="inf-firme">
-		<div class="inf-head2">
-			<h2 id="inf-firme">Firme iz kraja</h2>
-			<span class="inf-meta">Majstori, servisi, prodavnice i usluge iz Loznice i okoline</span>
-			<a class="inf-link" href="{{ InfoUrl::to('firme') }}">Ceo imenik</a>
-		</div>
-		@if ($categories->isNotEmpty())
-			<div class="inf-chips inf-chips--gap">
-				@foreach ($categories as $cat)
-					<a class="inf-chip" href="{{ InfoUrl::to('firme') }}?kategorija={{ rawurlencode($cat) }}">{{ $cat }}</a>
-				@endforeach
-			</div>
-		@endif
-		@if ($businesses->isNotEmpty())
-			<div class="inf-grid3">
-				@foreach ($businesses as $b)
-					@include('info.partials.firm-card', ['b' => $b, 'photo' => true])
-				@endforeach
-			</div>
-		@endif
-		<a class="inf-cta-line" href="{{ InfoUrl::to('oglasavanje') }}">
-			<strong>Imate firmu u Loznici ili okolini?</strong>
-			<span>Osnovni upis u imenik je besplatan.</span>
-			<b>Dodajte svoju firmu</b>
-		</a>
-	</section>
 
 	@include('info.partials.listings', ['listings' => $listings])
 </div>

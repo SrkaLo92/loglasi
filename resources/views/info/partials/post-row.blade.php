@@ -1,10 +1,9 @@
 {{-- One post in a list (sections, search). --}}
 @php
 	/** @var \App\Models\InfoPost $post */
-	$prImage = $post->imageUrl();
 @endphp
 <a class="inf-row" href="{{ $post->url() }}">
-	<span class="inf-row__media">@if ($prImage)<img src="{{ $prImage }}" alt="" loading="lazy" decoding="async" width="200" height="150">@endif</span>
+	@include('info.partials.thumb', ['post' => $post, 'class' => 'inf-row__media', 'tag' => 'span'])
 	<span class="inf-row__body">
 		<span class="inf-kicker">{{ $post->sponsored ? 'Promo' : ($post->topicLabel() ?? $post->typeLabel()) }}@if ($post->place) · {{ $post->place }}@endif</span>
 		<strong>{{ $post->title }}</strong>

@@ -74,18 +74,21 @@
 				<img src="{{ asset_v('img/brand/logo.svg') }}" alt="" width="91" height="34">
 				<span class="inf-logo__tag">Info</span>
 			</a>
-			<form class="inf-search" role="search" method="get" action="{{ InfoUrl::to('pretraga') }}">
-				<label class="inf-visually-hidden" for="inf-q">Pretraga</label>
-				<input id="inf-q" type="search" name="q" value="{{ request()->routeIs('info.search') ? request('q') : '' }}" placeholder="Pretražite vesti, događaje i firme" maxlength="80">
-				<button type="submit" aria-label="Traži"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
-			</form>
-			<a class="inf-send" href="{{ InfoUrl::to('posalji-vest') }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Pošalji vest</a>
+			<nav class="inf-nav" aria-label="Rubrike">
+				@foreach ($infMenu as $path => $label)
+					<a href="{{ InfoUrl::to($path) }}" @if ($infSection === $path) aria-current="page" @endif>{{ $label }}</a>
+				@endforeach
+			</nav>
+			<details class="inf-sbox" @if (request()->routeIs('info.search')) open @endif>
+				<summary aria-label="Pretraga"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></summary>
+				<form class="inf-search" role="search" method="get" action="{{ InfoUrl::to('pretraga') }}">
+					<label class="inf-visually-hidden" for="inf-q">Pretraga</label>
+					<input id="inf-q" type="search" name="q" value="{{ request()->routeIs('info.search') ? request('q') : '' }}" placeholder="Pretražite vesti, događaje i firme" maxlength="80">
+					<button type="submit" aria-label="Traži"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+				</form>
+			</details>
+			<a class="inf-send" href="{{ InfoUrl::to('posalji-vest') }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Pošalji vest</span></a>
 		</div>
-		<nav class="inf-wrap inf-nav" aria-label="Rubrike">
-			@foreach ($infMenu as $path => $label)
-				<a href="{{ InfoUrl::to($path) }}" @if ($infSection === $path) aria-current="page" @endif>{{ $label }}</a>
-			@endforeach
-		</nav>
 	</div>
 </header>
 <main id="sadrzaj" tabindex="-1" class="inf-main">
