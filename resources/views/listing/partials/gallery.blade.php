@@ -1,10 +1,11 @@
 @use('App\Support\Listing\Icons')
+@use('App\Support\Search\CategoryIcons')
 @php
 	$count = $listing->images->count();
 @endphp
 <section class="lgo lgo-gallery lgo-o1" aria-label="Fotografije oglasa" data-lgo-gallery>
 	@if ($count === 0)
-		<div class="lgo-gallery__empty">{{ Icons::listing('image', 48) }}<span>Oglas nema fotografija</span></div>
+		<div class="lgo-gallery__empty">{{ CategoryIcons::forCategory($listing->category, 48) }}@if ($listing->category)<strong>{{ $listing->category->name }}</strong>@endif<span>Oglas nema fotografija</span></div>
 	@else
 		<div class="lgo-gallery__track" tabindex="0" aria-label="Fotografije, {{ $count }} ukupno" data-lgo-track>
 			@foreach ($listing->images as $i => $image)

@@ -54,7 +54,8 @@
 					<div class="inf-grid3">
 						@foreach ($bpListings as $l)
 							<a class="inf-listing" href="{{ InfoUrl::main('oglas/'.$l->slug) }}">
-								@if ($l->coverImage)<img src="{{ \App\Support\Search\ImageUrls::url($l->coverImage, 'thumb') }}" alt="" loading="lazy" decoding="async">@endif
+								@if ($l->coverImage)<img src="{{ \App\Support\Search\ImageUrls::url($l->coverImage, 'thumb') }}" alt="" loading="lazy" decoding="async">
+								@else<span class="inf-listing__ph" aria-hidden="true">{{ \App\Support\Search\CategoryIcons::forCategory($l->category, 32) }}<span>{{ $l->category?->name ?? 'Bez fotografije' }}</span></span>@endif
 								<span class="inf-listing__body"><strong>{{ $l->title }}</strong><span class="inf-listing__price">{{ $l->priceLabel() }}</span></span>
 							</a>
 						@endforeach

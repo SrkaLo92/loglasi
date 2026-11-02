@@ -61,7 +61,7 @@ final class InfoToday
         $ids = Cache::remember(self::KEY.'.listings', 300, fn () => Listing::query()->active()
             ->latest('published_at')->limit($count)->pluck('id')->all());
 
-        return Listing::query()->whereIn('id', $ids)->with(['coverImage', 'location'])
+        return Listing::query()->whereIn('id', $ids)->with(['coverImage', 'location', 'category'])
             ->get()->sortBy(fn (Listing $l) => array_search($l->id, $ids, true))->values();
     }
 }

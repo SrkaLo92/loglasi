@@ -207,6 +207,10 @@
 .inf-listing { background: #fff; border: 1px solid var(--lg-border); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; transition: border-color .15s; }
 .inf-listing:hover { border-color: var(--lg-green); }
 .inf-listing img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: var(--lg-border); }
+.inf-listing__ph { width: 100%; aspect-ratio: 4 / 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: var(--lg-mint); color: #5f9585; }
+.inf-listing:nth-child(4n + 2) .inf-listing__ph { background: #f1eee6; color: #8a7c58; }
+.inf-listing:nth-child(4n + 3) .inf-listing__ph { background: #eceff3; color: #6f7886; }
+.inf-listing__ph > span { font-size: 13px; color: var(--lg-muted); padding: 0 8px; text-align: center; }
 .inf-listing__body { padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
 .inf-listing__body strong { font-size: 16px; line-height: 1.3; }
 .inf-listing__price { font-size: 17px; font-weight: 800; color: var(--lg-green-dark); }

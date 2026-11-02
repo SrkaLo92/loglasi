@@ -128,7 +128,7 @@ class InfoBusiness extends Model
             return collect();
         }
 
-        return $this->firm->listings()->active()->with('coverImage')->latest('published_at')->limit($limit)->get();
+        return $this->firm->listings()->active()->with(['coverImage', 'category'])->latest('published_at')->limit($limit)->get();
     }
 
     public function listingsCount(): int
