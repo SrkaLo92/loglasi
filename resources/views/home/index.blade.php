@@ -77,8 +77,8 @@
 		</nav>
 	@endif
 
-	{{-- Info portal: today in Loznica (only once info.loglasi.rs is switched on) --}}
-	@if (config('info.enabled'))
+	{{-- Info portal: today in Loznica (portal on and the home block switched on: INFO_HOME_BLOCK) --}}
+	@if (config('info.enabled') && config('info.home_block'))
 		@include('info.partials.home-block')
 	@endif
 

@@ -22,6 +22,15 @@ class InfoPortalTest extends TestCase
         $this->get('/')->assertOk()->assertDontSee('info-block.css', false);
     }
 
+    public function test_home_page_block_shows_only_when_switched_on(): void
+    {
+        config(['info.enabled' => true, 'info.home_block' => false]);
+        $this->get('/')->assertOk()->assertDontSee('Danas u Loznici');
+
+        config(['info.home_block' => true]);
+        $this->get('/')->assertOk()->assertSee('Danas u Loznici');
+    }
+
     public function test_home_and_sections_render_when_enabled(): void
     {
         config(['info.enabled' => true]);

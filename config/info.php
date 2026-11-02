@@ -9,6 +9,9 @@ $mainHost = parse_url($mainUrl, PHP_URL_HOST) ?: 'localhost';
 return [
     'enabled' => (bool) env('INFO_ENABLED', false),
 
+    // "Danas u Loznici" block on the classifieds home page; off until the portal is promoted there.
+    'home_block' => (bool) env('INFO_HOME_BLOCK', false),
+
     // Host of the portal, e.g. info.loglasi.rs. Every other host keeps the classifieds site.
     'domain' => env('INFO_DOMAIN') ?: 'info.'.$mainHost,
 
