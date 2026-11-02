@@ -4,6 +4,7 @@ namespace Tests\Feature\Info;
 
 use App\Models\InfoBusiness;
 use App\Models\InfoPost;
+use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class InfoPortalTest extends TestCase
@@ -105,5 +106,16 @@ class InfoPortalTest extends TestCase
         ])->assertRedirect();
 
         $this->assertSame('claim', $business->requests()->sole()->kind);
+    }
+
+    public function test_assets_come_from_the_portal_host_even_with_a_forced_root_url(): void
+    {
+        config(['info.enabled' => true]);
+        URL::forceRootUrl('https://loglasi.example');
+
+        $html = $this->get($this->info('/'))->assertOk()->getContent();
+
+        $this->assertStringContainsString('http://'.config('info.domain').'/css/info.css', $html);
+        $this->assertStringNotContainsString('https://loglasi.example/css/info.css', $html);
     }
 }

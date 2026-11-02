@@ -2,13 +2,20 @@
 
 namespace App\Support\Info;
 
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
-/** Weather in Loznica from Open-Meteo (free, no key). Fetched by the scheduler; pages only read the cache. */
+/**
+ * Weather in Loznica from Open-Meteo (free, no key). Fetched by the scheduler and kept in a small file
+ * (not the cache, so cache:clear on a deploy does not empty the weather until the next fetch).
+ */
 final class Weather
 {
-    public const CACHE_KEY = 'info.weather';
+    private static ?array $loaded = null;
+
+    public static function file(): string
+    {
+        return storage_path('app/info-weather.json');
+    }
 
     /** Open-Meteo WMO weather codes to short Serbian labels. */
     private const LABELS = [
@@ -30,7 +37,7 @@ final class Weather
     /** @return array{temp: int, label: string, today_min: int, today_max: int, tomorrow: string, at: int}|null */
     public static function current(): ?array
     {
-        $data = Cache::get(self::CACHE_KEY);
+        $data = self::$loaded ??= (is_file(self::file()) ? json_decode((string) file_get_contents(self::file()), true) : null) ?: [];
 
         // Older than 6 hours: better nothing than a stale forecast.
         return is_array($data) && ($data['at'] ?? 0) > time() - 6 * 3600 ? $data : null;
@@ -54,14 +61,15 @@ final class Weather
             return false;
         }
 
-        Cache::forever(self::CACHE_KEY, [
+        self::$loaded = [
             'temp' => (int) round($json['current']['temperature_2m']),
             'label' => self::label((int) ($json['current']['weather_code'] ?? -1)),
             'today_min' => (int) round($json['daily']['temperature_2m_min'][0]),
             'today_max' => (int) round($json['daily']['temperature_2m_max'][0]),
             'tomorrow' => self::label((int) ($json['daily']['weather_code'][1] ?? -1)),
             'at' => time(),
-        ]);
+        ];
+        file_put_contents(self::file(), json_encode(self::$loaded), LOCK_EX);
 
         return true;
     }
