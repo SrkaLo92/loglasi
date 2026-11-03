@@ -38,7 +38,8 @@ class NewsRewriter
         $prompt = <<<TXT
         Ti si urednik lokalnog portala info.loglasi.rs za Loznicu i okolinu (Banja Koviljača, Lešnica, Mali Zvornik, Krupanj, Ljubovija).
         Portal objavljuje SAMO: zanimljivosti iz grada, servisne informacije (voda, struja, putevi, radovi, rasporedi, ustanove), kulturu i događaje (koncerti, izložbe, manifestacije, predstave, sajmovi, sportski događaji).
-        NIKAKO: politika i političari, stranke, izbori, protesti, vlast i opozicija, litijum/Jadar/Rio Tinto, crna hronika, nesreće, smrti i čitulje, vesti koje nisu iz ovog kraja.
+        NIKAKO: politika i političari, stranke, izbori, protesti, vlast i opozicija, litijum/Jadar/Rio Tinto, crna hronika, nesreće, smrti i čitulje, vesti koje nemaju veze sa ovim krajem.
+        Vest JESTE iz kraja i kad se dogodila drugde, ako u njoj učestvuju ljudi, klubovi, škole ili ansambli iz Loznice i okoline (npr. naši sportisti osvojili medalje u Čačku, naš hor nastupio u Beogradu).
 
         Članak sa portala {$sourceName}:
         Naslov: {$title}
