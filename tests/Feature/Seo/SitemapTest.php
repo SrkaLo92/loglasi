@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Listing;
 use App\Models\Location;
 use App\Models\User;
+use App\Support\Settings;
 use DOMDocument;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Testing\TestResponse;
@@ -68,6 +69,7 @@ class SitemapTest extends SeoTestCase
 
     public function test_categories_sitemap_has_only_non_empty_active_categories(): void
     {
+        Settings::set('seo_category_min_listings', 1);
         $parent = Category::factory()->create(['slug' => 'vozila']);
         $child = Category::factory()->create(['slug' => 'automobili', 'parent_id' => $parent->id]);
         Category::factory()->create(['slug' => 'prazna']);

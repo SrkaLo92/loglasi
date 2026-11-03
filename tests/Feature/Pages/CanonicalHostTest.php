@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Listing;
 use App\Models\Location;
 use App\Models\User;
+use App\Support\Settings;
 use Database\Seeders\ProductSeeder;
 use Tests\TestCase;
 
@@ -16,6 +17,7 @@ class CanonicalHostTest extends TestCase
     {
         $this->seed(ProductSeeder::class);
         config(['app.url' => 'http://loglasi-backend.test']);
+        Settings::set('seo_category_min_listings', 1);
         $category = Category::create(['name' => 'Automobili', 'slug' => 'automobili']);
         $user = User::factory()->create();
         $listing = Listing::factory()->create(['category_id' => $category->id, 'location_id' => Location::factory(), 'user_id' => $user->id]);

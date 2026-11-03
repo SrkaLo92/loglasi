@@ -48,6 +48,7 @@ class SettingsSchema
             'founding_firms_total' => ['label' => 'Broj mesta u akciji „Prvih 30 firmi”', 'type' => 'integer', 'help' => 'Brojač na stranama Cenovnik i Za firme.', 'default' => Settings::DEFAULTS['founding_firms_total']],
             'eur_rate' => ['label' => 'Kurs evra (1 € = … din)', 'type' => 'decimal', 'help' => 'Za sortiranje i filter po ceni (oglasi u dinarima se preračunavaju u evre).', 'default' => Settings::DEFAULTS['eur_rate']],
             ListingModeration::REASONS_SETTING => ['label' => 'Gotovi razlozi za odbijanje oglasa', 'type' => 'items', 'item_keys' => ['naziv', 'tekst'], 'help' => 'Biraju se u prozoru „Odbij”; tekst se šalje vlasniku (najviše '.ListingModeration::REASON_MAX.' znakova).', 'default' => ListingModeration::REASONS_DEFAULT],
+            'seo_category_min_listings' => ['label' => 'Najmanje oglasa za stranu kategorije u pretrazi', 'type' => 'integer', 'help' => 'Ispod ovog broja strana kategorije ima noindex,follow i nije u sitemapu.', 'default' => (int) config('seo.category_min_listings', 3)],
             'seo_place_min_listings' => ['label' => 'Najmanje oglasa za stranu „kategorija + mesto” u pretrazi', 'type' => 'integer', 'help' => 'Ispod ovog broja strana ima noindex i nije u sitemapu.', 'default' => (int) config('seo.place_min_listings', 3)],
         ];
     }

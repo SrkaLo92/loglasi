@@ -9,6 +9,7 @@ use App\Models\ListingImage;
 use App\Models\Location;
 use App\Models\User;
 use App\Support\Seo;
+use App\Support\Seo\CategoryPhrases;
 use App\Support\Settings;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Testing\TestResponse;
@@ -362,7 +363,8 @@ class SeoHeadTest extends SeoTestCase
         Listing::factory()->count(2)->for($category)->for($lesnica)->create();
 
         $response = $this->get('/oglasi/drva/lesnica/')
-            ->assertSee('<title>Drva Lešnica – oglasi | loglasi.rs</title>', false)
+            ->assertSee('<title>Drva Lešnica, oglasi | loglasi.rs</title>', false)
+            ->assertSee('<h1 class="sr-head__title">Drva Lešnica</h1>', false)
             ->assertSee('content="2 oglasa za drva u mestu Lešnica, opština Loznica."', false);
         $this->assertSame('noindex, follow', $this->robots($response));
 
@@ -372,6 +374,43 @@ class SeoHeadTest extends SeoTestCase
         $this->assertStringStartsWith('index', $this->robots($response));
         $this->assertSame('https://loglasi.rs/oglasi/drva/lesnica/', $this->canonical($response));
         $this->assertSame('Lešnica', last($this->schemaOf($response, 'BreadcrumbList')['itemListElement'])['name']);
+    }
+
+    public function test_search_phrase_drives_title_h1_intro_and_place_links(): void
+    {
+        $parent = Category::factory()->create(['name' => 'Nekretnine', 'slug' => 'nekretnine']);
+        $flats = Category::factory()->create(['name' => 'Stanovi – iznajmljivanje', 'slug' => 'stanovi-iznajmljivanje', 'parent_id' => $parent->id,
+            'seo_title' => 'Stanovi | iznajmljivanje Loznica']);
+        $this->assertSame(['stanovi-iznajmljivanje: Izdavanje stanova'], CategoryPhrases::apply());
+        $this->assertNull($flats->fresh()->seo_title);
+
+        $lesnica = Location::factory()->create(['name' => 'Lešnica', 'slug' => 'lesnica']);
+        $banja = Location::factory()->create(['name' => 'Banja Koviljača', 'slug' => 'banja-koviljaca']);
+        Listing::factory()->count(3)->for($flats)->for($lesnica)->create();
+        Listing::factory()->for($flats)->for($banja)->create();
+
+        $response = $this->get('/oglasi/stanovi-iznajmljivanje/')
+            ->assertSee('<title>Izdavanje stanova Loznica | loglasi.rs</title>', false)
+            ->assertSee('<h1 class="sr-head__title">Izdavanje stanova Loznica</h1>', false)
+            ->assertSee('Izdavanje stanova u Loznici i okolini: 4 oglasa')
+            ->assertSee('/oglasi/stanovi-iznajmljivanje/lesnica/">Lešnica<span>3</span></a>', false)
+            ->assertDontSee('/oglasi/stanovi-iznajmljivanje/banja-koviljaca/"', false);
+        $this->assertStringStartsWith('index', $this->robots($response));
+
+        $this->get('/oglasi/stanovi-iznajmljivanje/lesnica/')
+            ->assertSee('<title>Izdavanje stanova Lešnica, oglasi | loglasi.rs</title>', false)
+            ->assertSee('<h1 class="sr-head__title">Izdavanje stanova Lešnica</h1>', false)
+            ->assertSee('Izdavanje stanova u mestu Lešnica: 3 oglasa');
+    }
+
+    public function test_category_below_threshold_is_noindex_and_threshold_is_an_admin_setting(): void
+    {
+        $category = Category::factory()->create(['slug' => 'akvarijumi-i-oprema']);
+        Listing::factory()->count(2)->for($category)->create();
+        $this->assertSame('noindex, follow', $this->robots($this->get('/oglasi/akvarijumi-i-oprema/')));
+
+        Settings::set('seo_category_min_listings', 2);
+        $this->assertStringStartsWith('index', $this->robots($this->get('/oglasi/akvarijumi-i-oprema/')));
     }
 
     public function test_place_threshold_comes_from_admin_setting(): void
@@ -386,6 +425,7 @@ class SeoHeadTest extends SeoTestCase
 
     public function test_filtered_search_is_noindex_with_canonical_to_clean_page(): void
     {
+        Settings::set('seo_category_min_listings', 1);
         $category = Category::factory()->create(['slug' => 'automobili']);
         Listing::factory()->for($category)->create();
 

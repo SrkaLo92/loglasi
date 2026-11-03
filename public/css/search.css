@@ -572,6 +572,48 @@ a.sr-pages__step:hover {
 	margin-top: 32px;
 }
 
+.sr-places {
+	margin-top: 32px;
+}
+
+.sr-places__title {
+	margin: 0 0 12px;
+	font-size: 20px;
+	font-weight: 800;
+}
+
+.sr-places__list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.sr-places__list a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 0 16px;
+	border: 1px solid var(--lg-border);
+	border-radius: 999px;
+	background: #fff;
+	color: var(--lg-green-dark);
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.sr-places__list a:hover {
+	border-color: var(--lg-green);
+}
+
+.sr-places__list span {
+	margin-left: 6px;
+	color: var(--lg-muted);
+	font-size: 13px;
+}
+
 .sr-faq__title {
 	margin: 0 0 12px;
 	font-size: 20px;

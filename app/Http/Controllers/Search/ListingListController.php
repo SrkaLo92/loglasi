@@ -106,7 +106,28 @@ class ListingListController extends Controller
             'groupNav' => $this->groupNav($filters),
             'fieldFilters' => $filters->category ? $this->fields->filters($filters->category) : [],
             'locations' => $this->catalog->locations()->values(),
+            'intro' => $filters->category && $page === 1 && ! $filters->hasFilters() ? Seo::intro($filters->category, $filters->location, $total) : '',
+            'placeLinks' => $this->placeLinks($filters),
         ]);
+    }
+
+    /**
+     * Places of the category that have their own indexable page, as real links (the filter is a select).
+     *
+     * @return list<array{name: string, url: string, count: int}>
+     */
+    private function placeLinks(WebFilters $filters): array
+    {
+        if ($filters->category === null) {
+            return [];
+        }
+        $counts = Seo::placeCounts($filters->category);
+        $min = Seo::placeMinListings();
+
+        return $this->catalog->locations()
+            ->filter(fn (Location $l) => ($counts[$l->id] ?? 0) >= $min && $l->id !== $filters->location?->id)
+            ->map(fn (Location $l) => ['name' => $l->name, 'url' => (new WebFilters($filters->category, $l, 1))->url([], 1), 'count' => $counts[$l->id]])
+            ->values()->all();
     }
 
     private function findCategory(string $slug): Category

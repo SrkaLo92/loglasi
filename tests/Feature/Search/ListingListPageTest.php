@@ -6,6 +6,7 @@ use App\Enums\Currency;
 use App\Models\Category;
 use App\Models\User;
 use App\Services\Catalog;
+use App\Support\Settings;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\TestResponse;
 
@@ -49,6 +50,7 @@ class ListingListPageTest extends SearchTestCase
 
     public function test_category_page_includes_subcategories_and_is_indexable(): void
     {
+        Settings::set('seo_category_min_listings', 1);
         $this->listing(['title' => 'Golf 4']);
         $this->listing(['title' => 'Stan', 'category_id' => $this->homes->id]);
 

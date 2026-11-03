@@ -15,6 +15,7 @@ use App\Support\Pages\PageText;
 use App\Support\Seo\Url;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -402,20 +403,22 @@ class Seo
         if ($location) {
             $where = mb_strtolower($location->slug) === 'loznica' ? 'u Loznici' : 'u mestu '.$location->name.', opština Loznica';
 
-            $this->title(static::fitTitle($phrase.' '.$location->name.' – oglasi'))
-                ->h1($phrase.' – '.$location->name)
+            $this->title(static::fitTitle($phrase.' '.$location->name.', oglasi', $phrase.' '.$location->name))
+                ->h1($phrase.' '.$location->name)
                 ->description(static::countLabel($count).' '.static::about($accusative, $category).' '.$where.'.');
 
             $crumbs[] = [$location->name, $path];
             $indexable = $count >= static::placeMinListings();
         } else {
             $vars = ['{kategorija}' => static::categoryName($category), '{o_cemu}' => static::about($accusative, $category)];
+            // A search phrase („Prodaja stanova”) is the title and H1 as people type it: „Prodaja stanova Loznica”.
+            $own = trim((string) $category->seo_phrase);
 
-            $this->title($category->seo_title ?: static::withSuffix(static::text('category.title', $vars)))
-                ->h1($category->seo_h1 ?: static::text('category.h1', $vars))
+            $this->title($category->seo_title ?: ($own !== '' ? static::fitTitle($own.' Loznica') : static::withSuffix(static::text('category.title', $vars))))
+                ->h1($category->seo_h1 ?: ($own !== '' ? $own.' Loznica' : static::text('category.h1', $vars)))
                 ->description($category->seo_description ?: (static::clean((string) $category->description) ?: static::text('category.description', $vars)), (bool) $category->seo_description);
 
-            $indexable = $count > 0;
+            $indexable = $count >= static::categoryMinListings();
         }
 
         $this->canonical($path)->breadcrumbs($crumbs)->type('website')->pageType('CollectionPage');
@@ -896,6 +899,54 @@ class Seo
             ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()));
     }
 
+    /** Name of the category as people search it („Prodaja stanova”, „Polovni automobili”). */
+    public static function searchPhrase(Category $category): string
+    {
+        return static::phrase($category)[0];
+    }
+
+    public static function categoryMinListings(): int
+    {
+        return max(1, (int) Settings::get('seo_category_min_listings', config('seo.category_min_listings', 3)));
+    }
+
+    /**
+     * Intro under the H1 of a category page (its own text, or the template) or of a category + place page
+     * (the category's place text with {mesto}, or the template). Empty on later pages.
+     */
+    public static function intro(Category $category, ?Location $location, int $count): string
+    {
+        [$phrase] = static::phrase($category);
+        $where = $location ? (mb_strtolower($location->slug) === 'loznica' ? 'u Loznici' : 'u mestu '.$location->name) : 'u Loznici';
+        $vars = ['{kategorija}' => $phrase, '{broj}' => static::countLabel($count), '{u_mestu}' => $where, '{mesto}' => $location?->name ?? 'Loznica'];
+
+        if ($location === null) {
+            $own = static::clean((string) $category->seo_intro);
+
+            return $own !== '' ? $own : static::text('category.intro', $vars);
+        }
+
+        $own = static::clean((string) $category->seo_place_intro);
+
+        return $own !== '' ? static::clean(strtr($own, $vars)) : static::text('place.intro', $vars);
+    }
+
+    /**
+     * Active listings per place of a category (with its subcategories), for the place links of the list.
+     *
+     * @return array<int, int> location id => count
+     */
+    public static function placeCounts(Category $category): array
+    {
+        return Cache::remember('seo.place-counts.'.$category->id, 600, function () use ($category) {
+            $ids = Category::query()->where('parent_id', $category->id)->pluck('id')->push($category->id);
+
+            return static::activeListings()->whereIn('category_id', $ids)->whereNotNull('location_id')
+                ->selectRaw('location_id, COUNT(*) as total')->groupBy('location_id')
+                ->pluck('total', 'location_id')->map(fn ($n) => (int) $n)->all();
+        });
+    }
+
     public static function placeMinListings(): int
     {
         return max(1, (int) Settings::get('seo_place_min_listings', config('seo.place_min_listings', 3)));
@@ -957,8 +1008,12 @@ class Seo
     private static function phrase(Category $category): array
     {
         $map = config('seo.phrases.'.$category->slug);
+        $own = trim((string) $category->seo_phrase);
+        if ($own === '' && ! isset($map['naziv'])) {
+            $category->loadMissing('parent');
+        }
 
-        return [$map['naziv'] ?? $category->name, $map['za'] ?? null];
+        return [$own !== '' ? $own : ($map['naziv'] ?? static::categoryName($category)), $own !== '' ? null : ($map['za'] ?? null)];
     }
 
     private static function about(?string $accusative, Category $category): string

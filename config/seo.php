@@ -84,6 +84,10 @@ return [
     // (in the admin: the "seo_place_min_listings" setting).
     'place_min_listings' => 3,
 
+    // A category page goes into the index and sitemap only from this many active listings
+    // (in the admin: the "seo_category_min_listings" setting).
+    'category_min_listings' => 3,
+
     'sitemap' => [
         'per_file' => 1000,
         'cache_ttl' => 86400,

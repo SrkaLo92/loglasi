@@ -244,7 +244,8 @@ class Sitemap
 
     private function categoryRows(): array
     {
-        $counts = $this->counts(false);
+        $min = Seo::categoryMinListings();
+        $counts = array_filter($this->counts(false), fn ($c) => $c['count'] >= $min);
         $slugs = Category::query()->where('is_active', true)->whereIn('id', array_keys($counts))
             ->orderBy('sort')->orderBy('name')->pluck('slug', 'id');
 

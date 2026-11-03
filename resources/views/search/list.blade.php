@@ -54,9 +54,9 @@
 		<h1 class="sr-head__title">{{ Seo::get()->getH1() }}</h1>
 		<p class="sr-head__count" role="status">{{ TimeAgo::listings($total) }}</p>
 	</div>
-	@if ($category && ! $location && $results->currentPage() === 1 && trim((string) $category->seo_intro) !== '')
+	@if ($intro !== '')
 		<div class="sr-intro" data-sr-intro>
-			<p class="sr-intro__text" id="sr-intro-text">{{ trim(strip_tags((string) $category->seo_intro)) }}</p>
+			<p class="sr-intro__text" id="sr-intro-text">{{ $intro }}</p>
 			<button class="sr-intro__more" type="button" aria-expanded="false" aria-controls="sr-intro-text" hidden>Prikaži više</button>
 		</div>
 	@endif
@@ -237,6 +237,17 @@
 						</details>
 					@endforeach
 				</section>
+			@endif
+
+			@if ($placeLinks !== [])
+				<nav class="sr-places" aria-labelledby="sr-places-title">
+					<h2 class="sr-places__title" id="sr-places-title">{{ Seo::searchPhrase($category) }} po mestima</h2>
+					<ul class="sr-places__list">
+						@foreach ($placeLinks as $place)
+							<li><a href="{{ $place['url'] }}">{{ $place['name'] }}<span>{{ $place['count'] }}</span></a></li>
+						@endforeach
+					</ul>
+				</nav>
 			@endif
 
 			@if ($category && trim((string) $category->description) !== '' && ! $location && trim((string) $category->seo_intro) === '')
