@@ -57,3 +57,13 @@
 .lgo-item__time { font-size: 13px; color: var(--lg-muted); }
 .lgo-item__dot { flex: none; width: 10px; height: 10px; margin-top: 6px; border-radius: 50%; background: var(--lg-orange); }
 .lgo-more { margin-top: 16px; text-align: center; }
+
+/* Report thread (/moj-nalog/prijave/{id}/) */
+.lgr-msgs { display: flex; flex-direction: column; gap: 12px; margin: 0 0 20px; padding: 0; list-style: none; }
+.lgr-msg { max-width: 88%; padding: 12px 14px; border-radius: 14px; background: var(--lg-bg); overflow-wrap: anywhere; }
+.lgr-msg p { margin: 4px 0 0; line-height: 1.55; }
+.lgr-msg--mine { align-self: flex-end; background: var(--lg-mint); }
+.lgr-msg--staff { align-self: flex-start; border: 1px solid var(--lg-border); background: #fff; }
+.lgr-msg__who { font-size: 13px; color: var(--lg-muted); }
+.lgr-thread textarea { width: 100%; min-height: 110px; padding: 10px 14px; border: 1px solid #c9d1cc; border-radius: 10px; font: inherit; font-size: 16px; }
+.lgr-thread textarea[aria-invalid="true"] { border-color: var(--lg-orange); }

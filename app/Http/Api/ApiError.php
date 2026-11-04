@@ -42,6 +42,11 @@ class ApiError extends RuntimeException
         return new self('not_found', $message, 404);
     }
 
+    public static function unauthenticated(string $message = 'Prijavite se da biste nastavili.'): self
+    {
+        return new self('unauthenticated', $message, 401);
+    }
+
     public static function forbidden(string $message = 'Nemate pravo pristupa.'): self
     {
         return new self('forbidden', $message, 403);

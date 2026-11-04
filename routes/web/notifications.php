@@ -4,6 +4,7 @@ use App\Http\Controllers\Notifications\InAppController;
 use App\Http\Controllers\Notifications\SavedSearchController;
 use App\Http\Controllers\Notifications\SettingsController;
 use App\Http\Controllers\Notifications\UnsubscribeController;
+use App\Http\Controllers\Reports\MyReportController;
 use App\Support\Notifications\NotificationPreferences;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\Route;
@@ -41,3 +42,11 @@ Route::middleware(['signed', 'throttle:20,1'])
         Route::post('/moj-nalog/obavestenja/odjava/{user}/{category}', [UnsubscribeController::class, 'store'])
             ->withoutMiddleware(ValidateCsrfToken::class);
     });
+
+// The user's own report: questions from the admin and the answers (link from the bell, push and mail).
+Route::middleware('auth')->group(function () {
+    Route::get('/moj-nalog/prijave/{report}', [MyReportController::class, 'show'])
+        ->whereNumber('report')->name('reports.mine');
+    Route::post('/moj-nalog/prijave/{report}', [MyReportController::class, 'reply'])
+        ->whereNumber('report')->middleware('throttle:notifications-account')->name('reports.mine.reply');
+});

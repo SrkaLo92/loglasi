@@ -5,6 +5,7 @@ namespace Tests\Feature\Listing;
 use App\Models\Listing;
 use App\Models\Report;
 use App\Models\User;
+use App\Support\Auth\LoginPage;
 use Tests\TestCase;
 
 class PhoneRevealAndReportTest extends TestCase
@@ -100,21 +101,57 @@ class PhoneRevealAndReportTest extends TestCase
     {
         $listing = $this->listing();
 
-        $this->post('/oglas/'.$listing->slug.'/prijava/', ['reason' => 'nesto', 'details' => str_repeat('a', 1001)])
+        $this->actingAs(User::factory()->create())
+            ->post('/oglas/'.$listing->slug.'/prijava/', ['reason' => 'nesto', 'details' => str_repeat('a', 1001)])
             ->assertSessionHasErrorsIn('report', ['reason', 'details']);
         $this->assertDatabaseCount('reports', 0);
+    }
+
+    public function test_report_needs_a_description(): void
+    {
+        $listing = $this->listing();
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post('/oglas/'.$listing->slug.'/prijava/', ['reason' => 'prevara'])
+            ->assertSessionHasErrorsIn('report', ['details']);
+        $this->actingAs($user)->post('/oglas/'.$listing->slug.'/prijava/', ['reason' => 'prevara', 'details' => 'kratko'])
+            ->assertSessionHasErrorsIn('report', ['details']);
+        $this->assertDatabaseCount('reports', 0);
+    }
+
+    public function test_guest_cannot_report_and_is_sent_to_login(): void
+    {
+        $listing = $this->listing();
+
+        $this->post('/oglas/'.$listing->slug.'/prijava/', ['reason' => 'prevara', 'details' => 'Oglas je lažan, traži avans.'])
+            ->assertRedirect(LoginPage::url(back: '/oglas/'.$listing->slug.'/#prijava'));
+        $this->assertDatabaseCount('reports', 0);
+
+        $this->get('/oglas/'.$listing->slug.'/')->assertOk()
+            ->assertSee('Prijavite se da biste prijavili oglas')
+            ->assertDontSee('name="details"', false);
+    }
+
+    public function test_report_form_for_users_requires_a_description(): void
+    {
+        $listing = $this->listing();
+
+        $this->actingAs(User::factory()->create())->get('/oglas/'.$listing->slug.'/')->assertOk()
+            ->assertSee('Opišite šta nije u redu')
+            ->assertSee('name="details"', false);
     }
 
     public function test_report_honeypot_and_duplicates_save_nothing_new(): void
     {
         $listing = $this->listing();
         $reporter = User::factory()->create();
+        $details = 'Prodavac traži uplatu unapred.';
 
-        $this->post('/oglas/'.$listing->slug.'/prijava/', ['reason' => 'prevara', 'website' => 'http://spam'])->assertSessionHas('report_sent');
+        $this->actingAs($reporter)->post('/oglas/'.$listing->slug.'/prijava/', ['reason' => 'prevara', 'details' => $details, 'website' => 'http://spam'])->assertSessionHas('report_sent');
         $this->assertDatabaseCount('reports', 0);
 
-        $this->actingAs($reporter)->post('/oglas/'.$listing->slug.'/prijava/', ['reason' => 'prevara']);
-        $this->actingAs($reporter)->post('/oglas/'.$listing->slug.'/prijava/', ['reason' => 'duplikat']);
+        $this->actingAs($reporter)->post('/oglas/'.$listing->slug.'/prijava/', ['reason' => 'prevara', 'details' => $details]);
+        $this->actingAs($reporter)->post('/oglas/'.$listing->slug.'/prijava/', ['reason' => 'duplikat', 'details' => $details]);
         $this->assertSame(1, Report::count());
     }
 
@@ -128,13 +165,14 @@ class PhoneRevealAndReportTest extends TestCase
     public function test_report_is_rate_limited(): void
     {
         $listing = $this->listing();
+        $this->actingAs(User::factory()->create());
 
         for ($i = 0; $i < 5; $i++) {
-            $this->post('/oglas/'.$listing->slug.'/prijava/', ['reason' => 'drugo'])->assertRedirect();
+            $this->post('/oglas/'.$listing->slug.'/prijava/', ['reason' => 'drugo', 'details' => 'Opis problema broj '.$i])->assertRedirect();
         }
-        $this->post('/oglas/'.$listing->slug.'/prijava/', ['reason' => 'drugo'])
+        $this->post('/oglas/'.$listing->slug.'/prijava/', ['reason' => 'drugo', 'details' => 'Opis problema još jednom'])
             ->assertRedirect()
             ->assertSessionHas('listing_error');
-        $this->assertSame(5, Report::count());
+        $this->assertSame(1, Report::count());
     }
 }

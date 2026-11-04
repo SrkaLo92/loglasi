@@ -17,10 +17,13 @@ use App\Services\Admin\AdminStats;
 use App\Services\Admin\ListingModeration;
 use App\Services\Admin\ReportHandling;
 use App\Services\Admin\UserAdministration;
+use App\Services\Reports\ReportThread;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -67,6 +70,7 @@ class ReportResource extends Resource
     {
         return parent::getEloquentQuery()->with([
             'reporter',
+            'messages.user',
             'reportable' => fn (MorphTo $morph) => $morph->morphWith([Listing::class => ['user']]),
         ]);
     }
@@ -84,7 +88,20 @@ class ReportResource extends Resource
                     ->wrap(),
                 TextColumn::make('reason')->label('Razlog')->badge()->formatStateUsing(fn (?string $state) => ReportHandling::reasonLabel($state)),
                 TextColumn::make('details')->label('Napomena')->limit(80)->wrap()->placeholder('—'),
-                TextColumn::make('reporter.name')->label('Prijavio')->placeholder('Gost'),
+                TextColumn::make('reporter.name')
+                    ->label('Prijavio')
+                    ->placeholder('Gost')
+                    ->description(fn (Report $r) => $r->reporter?->email),
+                TextColumn::make('conversation')
+                    ->label('Prepiska')
+                    ->state(fn (Report $r) => match (true) {
+                        $r->staff_unread => 'Novi odgovor',
+                        $r->messages->isNotEmpty() => $r->messages->count().' '.($r->messages->count() === 1 ? 'poruka' : 'poruke'),
+                        default => null,
+                    })
+                    ->badge()
+                    ->color(fn (Report $r) => $r->staff_unread ? 'warning' : 'gray')
+                    ->placeholder('—'),
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
@@ -109,6 +126,7 @@ class ReportResource extends Resource
                     }),
             ])
             ->recordActions([
+                static::conversationAction(),
                 static::resolveAction(),
                 static::dismissAction(),
                 ActionGroup::make([
@@ -145,6 +163,38 @@ class ReportResource extends Resource
             $report->reportable instanceof Listing => $report->reportable->user,
             default => null,
         };
+    }
+
+    /** The thread with the reporter: read their answers and ask what exactly is wrong. */
+    public static function conversationAction(): Action
+    {
+        return Action::make('conversation')
+            ->label(fn (Report $record) => $record->staff_unread ? 'Novi odgovor' : 'Pitaj prijavioca')
+            ->icon(Heroicon::OutlinedChatBubbleLeftRight)
+            ->color(fn (Report $record) => $record->staff_unread ? 'warning' : 'info')
+            ->visible(fn (Report $record) => $record->reporter_id !== null && ($record->status === ReportStatus::Open || $record->messages->isNotEmpty()))
+            ->modalHeading(fn (Report $record) => 'Prepiska: '.static::targetLabel($record))
+            ->modalContent(fn (Report $record) => view('filament.reports.thread', ['report' => $record->load('messages.user', 'reporter')]))
+            ->mountUsing(function (Report $record, ?Schema $schema) {
+                app(ReportThread::class)->markRead($record);
+                $schema?->fill();
+            })
+            ->schema(fn (Report $record) => $record->status === ReportStatus::Open ? [
+                Textarea::make('body')
+                    ->label('Pitanje za prijavioca')
+                    ->placeholder('Na primer: Šta tačno nije u redu sa oglasom? Da li ste kontaktirali prodavca?')
+                    ->rows(4)
+                    ->required()
+                    ->minLength(ReportThread::MIN_LENGTH)
+                    ->maxLength(ReportThread::MAX_LENGTH),
+            ] : [])
+            ->modalSubmitActionLabel('Pošalji pitanje')
+            ->modalSubmitAction(fn (Report $record) => $record->status === ReportStatus::Open ? null : false)
+            ->modalCancelActionLabel('Zatvori')
+            ->action(fn (Report $record, array $data) => Notify::run(
+                fn () => app(ReportThread::class)->ask($record, auth()->user(), (string) ($data['body'] ?? '')),
+                'Pitanje je poslato prijaviocu (zvonce, push i mejl).',
+            ));
     }
 
     public static function resolveAction(): Action

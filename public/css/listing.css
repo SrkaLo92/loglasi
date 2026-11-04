@@ -1867,3 +1867,18 @@ button.lgo-bar__btn--tel {
 	.lgo-fav__btn:visited { justify-content: center; width: 44px; min-height: 44px; padding: 0; }
 	.lgo-fav__btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
+
+.lgo-report__help {
+	margin: -4px 0 0;
+	color: var(--lgo-muted, #5b6560);
+	font-size: 13px;
+}
+
+.lgo-report__form > p {
+	margin: 0;
+}
+
+.lgo-report a.lgo-btn--report {
+	color: #fff;
+	text-decoration: none;
+}

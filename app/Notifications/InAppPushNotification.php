@@ -32,6 +32,7 @@ class InAppPushNotification extends Notification implements ShouldQueue
         InAppNotifications::LISTING_EXPIRED => 'expiring',
         InAppNotifications::ORDER_PAID => 'payments',
         InAppNotifications::PACKAGE_EXPIRING => 'payments',
+        InAppNotifications::REPORT_QUESTION => 'messages',
     ];
 
     public function __construct(public UserNotification $item)
@@ -60,6 +61,7 @@ class InAppPushNotification extends Notification implements ShouldQueue
                 'type' => $this->item->type,
                 'notification_id' => $this->item->id,
                 'listing_id' => $this->item->listing_id,
+                'report_id' => $this->item->data['report_id'] ?? null,
             ], fn ($v) => $v !== null),
         );
     }

@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * POST /reports: report a listing or a user (requires login).
- * POST /listings/{id}/report: report a listing, guests too (as on the site).
+ * POST /listings/{id}/report: report a listing (requires login, a description is required).
  * GET /report-reasons: the reasons with their labels.
  */
 class ReportApiController extends Controller
@@ -30,28 +30,21 @@ class ReportApiController extends Controller
 
     public function listing(Request $request, int $id): Response
     {
-        $data = $request->validate([
-            'reason' => ['required', Rule::in(ReportReasons::keys())],
-            'details' => ['nullable', 'string', 'max:1000'],
-        ], [
-            'reason.required' => 'Izaberite razlog prijave.',
-            'reason.in' => 'Izaberite razlog prijave.',
-            'details.string' => 'Opis mora biti tekst.',
-            'details.max' => 'Opis može imati najviše 1.000 znakova.',
-        ]);
-
         $reporter = auth('sanctum')->user();
-        $reporter = $reporter instanceof User ? $reporter : null;
+        if (! $reporter instanceof User) {
+            throw ApiError::unauthenticated('Prijavite se da biste prijavili oglas.');
+        }
+        $data = $request->validate(ReportReasons::rules('details'), ReportReasons::messages('details'));
 
         $listing = Listing::query()->find($id);
         if ($listing === null || Gate::forUser($reporter)->denies('view', $listing)) {
             throw ApiError::notFound('Oglas ne postoji ili više nije aktivan.');
         }
-        if ($reporter !== null && $listing->user_id === $reporter->id) {
+        if ($listing->user_id === $reporter->id) {
             throw ValidationException::withMessages(['reason' => 'Ne možete prijaviti sopstveni oglas.']);
         }
 
-        Report::fileOnce($reporter, $listing, $data['reason'], $data['details'] ?? null);
+        Report::fileOnce($reporter, $listing, $data['reason'], $data['details']);
 
         return response()->noContent();
     }
@@ -61,24 +54,18 @@ class ReportApiController extends Controller
         $data = $request->validate([
             'target_type' => ['required', Rule::in(['listing', 'user'])],
             'target_id' => ['required', 'integer', 'min:1'],
-            'reason' => ['required', Rule::in(ReportReasons::keys())],
-            'note' => ['nullable', 'string', 'max:1000'],
-        ], [
+        ] + ReportReasons::rules('note'), [
             'target_type.required' => 'Obavezno polje.',
             'target_type.in' => 'Dozvoljene vrednosti su listing i user.',
             'target_id.required' => 'Obavezno polje.',
             'target_id.*' => 'Mora biti pozitivan ceo broj.',
-            'reason.required' => 'Obavezno polje.',
-            'reason.in' => 'Nepoznat razlog prijave.',
-            'note.max' => 'Napomena može imati najviše 1.000 znakova.',
-            'note.string' => 'Napomena mora biti tekst.',
-        ]);
+        ] + ReportReasons::messages('note'));
 
         /** @var User $reporter */
         $reporter = $request->user();
         $target = $this->target($data['target_type'], (int) $data['target_id'], $reporter);
 
-        Report::fileOnce($reporter, $target, $data['reason'], $data['note'] ?? null);
+        Report::fileOnce($reporter, $target, $data['reason'], $data['note']);
 
         return response()->noContent();
     }

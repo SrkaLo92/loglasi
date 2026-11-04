@@ -6,13 +6,16 @@ use App\Enums\Role;
 use App\Enums\UserStatus;
 use App\Http\Api\ListingFormatter;
 use App\Models\Listing;
+use App\Models\Report;
 use App\Models\SavedSearch;
 use App\Models\SellerRating;
 use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\AdminQueuePushNotification;
 use App\Notifications\InAppPushNotification;
+use App\Notifications\ReportReplyPushNotification;
 use App\Support\Pages\Pricing;
+use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -48,6 +51,12 @@ class InAppNotifications
 
     /** Push-only type for staff (no bell item): a listing waits for approval. */
     public const LISTING_PENDING = 'listing_pending';
+
+    /** Staff push only (no bell item): the reporter answered a question. */
+    public const REPORT_REPLY = 'report_reply';
+
+    /** The admin asks the person who reported a listing for details. data: report_id, title. */
+    public const REPORT_QUESTION = 'report_question';
 
     public const PER_PAGE = 30;
 
@@ -90,6 +99,15 @@ class InAppNotifications
         $this->push($item, now: true);
     }
 
+    /** A question from the admin about the user's report, sent right away with a push. */
+    public function reportQuestion(Report $report): void
+    {
+        $title = $report->reportable instanceof Listing ? $report->reportable->title : null;
+        $item = $this->add((int) $report->reporter_id, self::REPORT_QUESTION, [], array_filter(['report_id' => $report->id, 'title' => $title]));
+
+        $this->push($item, now: true);
+    }
+
     /** The listing expires in a few days (ExpireListings), with the same push. */
     public function expiring(Listing $listing): void
     {
@@ -115,12 +133,23 @@ class InAppNotifications
     /** Push to active staff with a phone and the "admin_queue" app setting on. */
     public function pendingForReview(Listing $listing): void
     {
+        $this->notifyStaff(new AdminQueuePushNotification($listing), $listing->user_id);
+    }
+
+    /** Push to staff: the reporter answered the question on a report. */
+    public function reportReplied(Report $report): void
+    {
+        $this->notifyStaff(new ReportReplyPushNotification($report), $report->reporter_id);
+    }
+
+    private function notifyStaff(Notification $notification, ?int $exceptUserId): void
+    {
         $staff = User::query()->whereIn('role', [Role::Admin, Role::Moderator])->where('status', UserStatus::Active)
-            ->whereKeyNot($listing->user_id)->whereHas('devices')->get();
+            ->when($exceptUserId, fn ($q) => $q->whereKeyNot($exceptUserId))->whereHas('devices')->get();
 
         foreach ($staff as $user) {
             try {
-                $user->notify(new AdminQueuePushNotification($listing));
+                $user->notify($notification);
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -204,6 +233,8 @@ class InAppNotifications
             self::LISTING_EXPIRED => ['clock', 'orange', 'Vaš oglas je istekao', '„'.$title.'” · obnovite ga besplatno', url_slash('moj-nalog/oglasi').'?status=istekli'],
             self::ORDER_PAID => ['check', 'green', 'Usluga je uključena', $d['product'] ?? null, url_slash('moj-nalog/narudzbine')],
             self::PACKAGE_EXPIRING => ['clock', 'amber', 'Paket firme uskoro ističe', 'Još '.($d['days'] ?? 0).' '.Pricing::plural((int) ($d['days'] ?? 0), 'dan', 'dana', 'dana').'. Produžite ga da profil ostane istaknut.', url_slash('moj-nalog/narudzbine')],
+            self::REPORT_QUESTION => ['flag', 'blue', 'Imamo pitanje o vašoj prijavi', isset($d['title']) ? 'Oglas „'.$d['title'].'”' : 'Odgovorite nam da bismo rešili prijavu.',
+                url_slash('moj-nalog/prijave/'.($d['report_id'] ?? 0))],
             self::SAVED_SEARCH => ['bookmark', 'blue', ($d['count'] ?? 0).' '.Pricing::plural((int) ($d['count'] ?? 0), 'novi oglas', 'nova oglasa', 'novih oglasa').' za vašu pretragu',
                 '„'.($d['name'] ?? 'Sačuvana pretraga').'”', $n->savedSearch?->url() ?? url_slash('moj-nalog/pretrage')],
             default => ['bell', 'gray', 'Obaveštenje', null, url_slash('moj-nalog')],
@@ -226,6 +257,7 @@ class InAppNotifications
             'url' => $p['url'],
             'listing_id' => $n->listing_id ? (int) $n->listing_id : null,
             'saved_search_id' => $n->saved_search_id ? (int) $n->saved_search_id : null,
+            'report_id' => isset($n->data['report_id']) ? (int) $n->data['report_id'] : null,
             'image' => $cover ? ListingFormatter::image($cover) : null,
             'read' => $n->read_at !== null,
             'created_at' => ListingFormatter::date($n->created_at),

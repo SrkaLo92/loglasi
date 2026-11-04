@@ -157,51 +157,60 @@ class ListingApiTest extends TestCase
     public function test_reports_api(): void
     {
         $listing = Listing::factory()->create();
-        $this->postJson('/api/v1/reports', ['target_type' => 'listing', 'target_id' => $listing->id, 'reason' => 'prevara'])->assertUnauthorized();
+        $note = 'Traži avans pre pregleda.';
+        $this->postJson('/api/v1/reports', ['target_type' => 'listing', 'target_id' => $listing->id, 'reason' => 'prevara', 'note' => $note])->assertUnauthorized();
 
         $reporter = User::factory()->create();
         Sanctum::actingAs($reporter);
 
-        $this->postJson('/api/v1/reports', ['target_type' => 'listing', 'target_id' => $listing->id, 'reason' => 'prevara', 'note' => 'Traži avans'])->assertNoContent();
-        $this->postJson('/api/v1/reports', ['target_type' => 'listing', 'target_id' => $listing->id, 'reason' => 'prevara'])->assertNoContent();
+        $this->postJson('/api/v1/reports', ['target_type' => 'listing', 'target_id' => $listing->id, 'reason' => 'prevara'])
+            ->assertStatus(422)->assertJsonStructure(['fields' => ['note']]);
+        $this->postJson('/api/v1/reports', ['target_type' => 'listing', 'target_id' => $listing->id, 'reason' => 'prevara', 'note' => $note])->assertNoContent();
+        $this->postJson('/api/v1/reports', ['target_type' => 'listing', 'target_id' => $listing->id, 'reason' => 'prevara', 'note' => $note])->assertNoContent();
         $this->assertDatabaseCount('reports', 1);
-        $this->assertDatabaseHas('reports', ['reporter_id' => $reporter->id, 'reportable_id' => $listing->id, 'details' => 'Traži avans']);
+        $this->assertDatabaseHas('reports', ['reporter_id' => $reporter->id, 'reportable_id' => $listing->id, 'details' => $note]);
 
-        $this->postJson('/api/v1/reports', ['target_type' => 'user', 'target_id' => $listing->user_id, 'reason' => 'drugo'])->assertNoContent();
+        $this->postJson('/api/v1/reports', ['target_type' => 'user', 'target_id' => $listing->user_id, 'reason' => 'drugo', 'note' => 'Šalje lažne oglase.'])->assertNoContent();
     }
 
-    public function test_report_reasons_and_listing_report_for_guests_and_users(): void
+    public function test_report_reasons_and_listing_report_needs_login_and_details(): void
     {
         $this->getJson('/api/v1/report-reasons')->assertOk()
             ->assertJsonPath('data.0.key', 'prevara')
             ->assertJsonStructure(['data' => [['key', 'label']]]);
 
         $listing = Listing::factory()->create();
-        $this->postJson('/api/v1/listings/'.$listing->id.'/report', ['reason' => 'prevara', 'details' => 'Traži avans'])->assertNoContent();
-        $this->assertDatabaseHas('reports', ['reporter_id' => null, 'reportable_id' => $listing->id, 'details' => 'Traži avans']);
-
-        $this->postJson('/api/v1/listings/'.$listing->id.'/report', ['reason' => 'x', 'details' => str_repeat('a', 1001)])
-            ->assertStatus(422)->assertJsonPath('code', 'validation_failed')->assertJsonStructure(['fields' => ['reason', 'details']]);
-        $this->postJson('/api/v1/listings/999999/report', ['reason' => 'drugo'])->assertNotFound();
+        $details = 'Traži avans pre pregleda.';
+        $this->postJson('/api/v1/listings/'.$listing->id.'/report', ['reason' => 'prevara', 'details' => $details])
+            ->assertUnauthorized()->assertJsonPath('code', 'unauthenticated');
+        $this->assertDatabaseCount('reports', 0);
 
         $reporter = User::factory()->create();
         Sanctum::actingAs($reporter);
-        $this->postJson('/api/v1/listings/'.$listing->id.'/report', ['reason' => 'duplikat'])->assertNoContent();
-        $this->postJson('/api/v1/listings/'.$listing->id.'/report', ['reason' => 'duplikat'])->assertNoContent();
+        $this->postJson('/api/v1/listings/'.$listing->id.'/report', ['reason' => 'x', 'details' => str_repeat('a', 1001)])
+            ->assertStatus(422)->assertJsonPath('code', 'validation_failed')->assertJsonStructure(['fields' => ['reason', 'details']]);
+        $this->postJson('/api/v1/listings/'.$listing->id.'/report', ['reason' => 'duplikat'])
+            ->assertStatus(422)->assertJsonStructure(['fields' => ['details']]);
+        $this->postJson('/api/v1/listings/999999/report', ['reason' => 'drugo', 'details' => $details])->assertNotFound();
+
+        $this->postJson('/api/v1/listings/'.$listing->id.'/report', ['reason' => 'duplikat', 'details' => $details])->assertNoContent();
+        $this->postJson('/api/v1/listings/'.$listing->id.'/report', ['reason' => 'duplikat', 'details' => $details])->assertNoContent();
         $this->assertSame(1, Report::query()->where('reporter_id', $reporter->id)->count());
+        $this->assertDatabaseHas('reports', ['reporter_id' => $reporter->id, 'details' => $details]);
 
         Sanctum::actingAs($listing->user);
-        $this->postJson('/api/v1/listings/'.$listing->id.'/report', ['reason' => 'drugo'])->assertStatus(422);
+        $this->postJson('/api/v1/listings/'.$listing->id.'/report', ['reason' => 'drugo', 'details' => $details])->assertStatus(422);
     }
 
     public function test_reports_api_rejects_invalid_self_and_missing_targets(): void
     {
         $reporter = User::factory()->create();
         Sanctum::actingAs($reporter);
+        $note = 'Nešto nije u redu ovde.';
 
         $this->postJson('/api/v1/reports', ['target_type' => 'oglas', 'target_id' => 1, 'reason' => 'x'])->assertStatus(422)->assertJsonPath('code', 'validation_failed');
-        $this->postJson('/api/v1/reports', ['target_type' => 'user', 'target_id' => $reporter->id, 'reason' => 'drugo'])->assertStatus(422);
-        $this->postJson('/api/v1/reports', ['target_type' => 'listing', 'target_id' => 999999, 'reason' => 'drugo'])->assertNotFound();
+        $this->postJson('/api/v1/reports', ['target_type' => 'user', 'target_id' => $reporter->id, 'reason' => 'drugo', 'note' => $note])->assertStatus(422);
+        $this->postJson('/api/v1/reports', ['target_type' => 'listing', 'target_id' => 999999, 'reason' => 'drugo', 'note' => $note])->assertNotFound();
     }
 
     public function test_reports_api_is_rate_limited(): void
@@ -210,9 +219,9 @@ class ListingApiTest extends TestCase
         $listing = Listing::factory()->create();
 
         for ($i = 0; $i < 5; $i++) {
-            $this->postJson('/api/v1/reports', ['target_type' => 'listing', 'target_id' => $listing->id, 'reason' => 'drugo']);
+            $this->postJson('/api/v1/reports', ['target_type' => 'listing', 'target_id' => $listing->id, 'reason' => 'drugo', 'note' => 'Opis problema.']);
         }
-        $this->postJson('/api/v1/reports', ['target_type' => 'listing', 'target_id' => $listing->id, 'reason' => 'drugo'])
+        $this->postJson('/api/v1/reports', ['target_type' => 'listing', 'target_id' => $listing->id, 'reason' => 'drugo', 'note' => 'Opis problema.'])
             ->assertStatus(429)->assertJsonPath('code', 'too_many_requests');
     }
 }

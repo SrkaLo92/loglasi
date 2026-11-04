@@ -8,6 +8,7 @@ use App\Models\Listing;
 use App\Models\Report;
 use App\Services\Catalog;
 use App\Services\ListingFields;
+use App\Support\Auth\LoginPage;
 use App\Support\Listing\LoanCalculator;
 use App\Support\Listing\ReportReasons;
 use App\Support\Listing\Seller;
@@ -19,7 +20,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -112,21 +112,21 @@ class ListingController extends Controller
         $listing = $this->find($request, $slug, 'report');
         $back = url_slash('oglas/'.$listing->slug).'#prijava';
 
+        // Only an account can report, so the admin knows who wrote and can ask for details.
+        if ($request->user() === null) {
+            return redirect()->to(LoginPage::url(back: '/oglas/'.$listing->slug.'/#prijava'));
+        }
         // Honeypot: bots get the success message, nothing is saved.
         if (filled($request->input('website'))) {
             return redirect()->to($back)->with('report_sent', true);
         }
+        if ($listing->user_id === $request->user()->id) {
+            return redirect()->to($back);
+        }
 
-        $data = $request->validateWithBag('report', [
-            'reason' => ['required', Rule::in(ReportReasons::keys())],
-            'details' => ['nullable', 'string', 'max:1000'],
-        ], [
-            'reason.required' => 'Izaberite razlog prijave.',
-            'reason.in' => 'Izaberite razlog prijave.',
-            'details.max' => 'Opis može imati najviše 1.000 znakova.',
-        ]);
+        $data = $request->validateWithBag('report', ReportReasons::rules('details'), ReportReasons::messages('details'));
 
-        Report::fileOnce($request->user(), $listing, $data['reason'], $data['details'] ?? null);
+        Report::fileOnce($request->user(), $listing, $data['reason'], $data['details']);
 
         return redirect()->to($back)->with('report_sent', true);
     }

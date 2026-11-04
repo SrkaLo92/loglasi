@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ReportStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Report extends Model
@@ -13,12 +14,18 @@ class Report extends Model
 
     protected function casts(): array
     {
-        return ['status' => ReportStatus::class, 'resolved_at' => 'datetime'];
+        return ['status' => ReportStatus::class, 'resolved_at' => 'datetime', 'staff_unread' => 'boolean'];
     }
 
     public function reportable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /** Questions from the staff and the reporter's answers, oldest first. */
+    public function messages(): HasMany
+    {
+        return $this->hasMany(ReportMessage::class)->orderBy('id');
     }
 
     /** Files a report; a repeat from the same user while the first one is still open is ignored. */
