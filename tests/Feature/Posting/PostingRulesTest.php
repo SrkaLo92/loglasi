@@ -175,7 +175,7 @@ class PostingRulesTest extends PostingTestCase
         $this->assertSame(ListingStatus::Pending, $listing->status);
         $this->assertNull($listing->published_at);
         $this->assertNotNull($listing->expires_at);
-        $this->assertSame('krecenje-stanova-i-kuca', $listing->slug);
+        $this->assertSame('krecenje-stanova-i-kuca-loznica', $listing->slug);
 
         // KP style: the admin's own listing waits too; submitting someone else's listing approves it.
         $admin = $this->user(['role' => 'admin']);
@@ -227,15 +227,22 @@ class PostingRulesTest extends PostingTestCase
         $this->assertLessThanOrEqual(ListingSlug::MAX_LENGTH, strlen(ListingSlug::base(str_repeat('dugacak naslov ', 30))));
     }
 
+    public function test_slug_adds_neighbourhood_and_place_the_title_does_not_have(): void
+    {
+        $this->assertSame('prodajem-stan-lagator-loznica', ListingSlug::withPlace('Prodajem stan', ['Lagator', 'Loznica']));
+        $this->assertSame('stan-u-loznici-loznica', ListingSlug::withPlace('Stan u Loznici', [null, 'Loznica']));
+        $this->assertSame('stan-banja-koviljaca', ListingSlug::withPlace('Stan Banja Koviljača', [null, 'Banja Koviljača']));
+    }
+
     public function test_slug_is_unique_including_deleted_listings(): void
     {
         $user = $this->user();
-        $this->published($user, ['slug' => 'krecenje-stanova-i-kuca', 'title' => 'x', 'category_id' => $this->cars->id]);
-        $deleted = $this->published($user, ['slug' => 'krecenje-stanova-i-kuca-2', 'title' => 'y', 'category_id' => $this->cars->id]);
+        $this->published($user, ['slug' => 'krecenje-stanova-i-kuca-loznica', 'title' => 'x', 'category_id' => $this->cars->id]);
+        $deleted = $this->published($user, ['slug' => 'krecenje-stanova-i-kuca-loznica-2', 'title' => 'y', 'category_id' => $this->cars->id]);
         $deleted->delete();
 
         $listing = $this->submit($this->draft($user));
-        $this->assertSame('krecenje-stanova-i-kuca-3', $listing->slug);
+        $this->assertSame('krecenje-stanova-i-kuca-loznica-3', $listing->slug);
     }
 
     public function test_slug_with_like_wildcards_is_handled(): void

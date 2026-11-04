@@ -55,7 +55,7 @@ class ListingSearch
     public static function cardRelations(): array
     {
         return [
-            'category:id,parent_id,name,slug',
+            'category:id,parent_id,name,slug,seo_phrase',
             'location:id,name,slug',
             'coverImage',
             'user:id,name,slug,account_type',

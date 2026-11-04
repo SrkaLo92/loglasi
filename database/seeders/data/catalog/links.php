@@ -43,15 +43,15 @@ return [
 
     // Real estate
     ['in' => ['stanovi-prodaja', 'stanovi-iznajmljivanje', 'apartmani-prodaja', 'apartmani-iznajmljivanje'], 'fields' => [
-        'velicina_nekretnine', 'sobe', 'kupatila', 'sprat', 'grejanje', 'namestenost', 'godina_izgradnje', 'uknjizeno', 'karakteristike_nekretnine',
+        'naselje', 'velicina_nekretnine', 'sobe', 'kupatila', 'sprat', 'grejanje', 'namestenost', 'godina_izgradnje', 'uknjizeno', 'karakteristike_nekretnine',
     ], 'required' => ['velicina_nekretnine']],
     ['in' => ['kuce-prodaja', 'kuce-iznajmljivanje'], 'fields' => [
-        'velicina_nekretnine', 'povrsina_placa', 'sobe', 'kupatila', 'spratnost', 'grejanje', 'namestenost', 'godina_izgradnje', 'uknjizeno', 'karakteristike_nekretnine',
+        'naselje', 'velicina_nekretnine', 'povrsina_placa', 'sobe', 'kupatila', 'spratnost', 'grejanje', 'namestenost', 'godina_izgradnje', 'uknjizeno', 'karakteristike_nekretnine',
     ], 'required' => ['velicina_nekretnine']],
     ['in' => ['poslovni-prostor-prodaja', 'poslovni-prostor-iznajmljivanje'], 'fields' => [
-        'velicina_nekretnine', 'sprat', 'grejanje', 'godina_izgradnje', 'uknjizeno', 'karakteristike_nekretnine',
+        'naselje', 'velicina_nekretnine', 'sprat', 'grejanje', 'godina_izgradnje', 'uknjizeno', 'karakteristike_nekretnine',
     ], 'required' => ['velicina_nekretnine']],
-    ['in' => ['zemljiste'], 'fields' => ['povrsina_placa', 'vrsta_zemljista', 'uknjizeno'], 'required' => ['povrsina_placa']],
+    ['in' => ['zemljiste'], 'fields' => ['naselje', 'povrsina_placa', 'vrsta_zemljista', 'uknjizeno'], 'required' => ['povrsina_placa']],
 
     // Jobs
     ['under' => 'poslovi', 'fields' => ['tip_ugovora', 'sati', 'nivo_posla', 'tip_regrutera']],

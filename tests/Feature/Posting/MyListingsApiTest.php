@@ -79,9 +79,9 @@ class MyListingsApiTest extends PostingTestCase
             ->assertJsonPath('image.id', $b->id)
             ->assertJsonPath('is_mine', true)
             ->assertJsonPath('category.id', $this->cars->id)
-            ->assertJsonPath('url', url_slash('oglas/golf-4-na-prodaju'));
+            ->assertJsonPath('url', url_slash('oglas/golf-4-na-prodaju-loznica'));
         $listing = Listing::findOrFail($response->json('id'));
-        $this->assertSame('golf-4-na-prodaju', $listing->slug);
+        $this->assertSame('golf-4-na-prodaju-loznica', $listing->slug);
         $this->assertStringStartsWith('oglasi/'.$listing->id.'/', $a->refresh()->path);
     }
 

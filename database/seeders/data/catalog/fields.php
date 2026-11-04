@@ -97,6 +97,7 @@ return [
     'duzina' => ['label' => 'Dužina', 'type' => 'number', 'filter' => 'range', 'unit' => 'm'],
 
     // ------------------------------------------------------------ real estate
+    'naselje' => ['label' => 'Naselje / ulica', 'type' => 'text'],
     'velicina_nekretnine' => ['label' => 'Kvadratura', 'type' => 'number', 'filter' => 'range', 'unit' => 'm²'],
     'povrsina_placa' => ['label' => 'Površina placa', 'type' => 'number', 'filter' => 'range', 'unit' => 'ar'],
     'sobe' => ['label' => 'Broj soba', 'type' => 'number', 'filter' => 'range'],

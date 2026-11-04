@@ -365,7 +365,7 @@ class SeoHeadTest extends SeoTestCase
         $response = $this->get('/oglasi/drva/lesnica/')
             ->assertSee('<title>Drva Lešnica, oglasi | loglasi.rs</title>', false)
             ->assertSee('<h1 class="sr-head__title">Drva Lešnica</h1>', false)
-            ->assertSee('content="2 oglasa za drva u mestu Lešnica, opština Loznica."', false);
+            ->assertSee('content="Drva Lešnica: 2 oglasa', false);
         $this->assertSame('noindex, follow', $this->robots($response));
 
         Listing::factory()->for($category)->for($lesnica)->create();

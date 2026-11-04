@@ -15,6 +15,7 @@ use App\Support\Listing\Text;
 use App\Support\ListingLimits;
 use App\Support\Phone;
 use App\Support\Posting\ListingSlug;
+use App\Support\Search\CardSpecs;
 use App\Support\Settings;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
@@ -406,7 +407,7 @@ class Posting
             if ($isDraft) {
                 // the monthly limit counts from the moment of submitting
                 $listing->created_at = now();
-                $listing->slug = ListingSlug::unique($listing->title, $listing->id);
+                $listing->slug = ListingSlug::unique($listing->title, $listing->id, $this->slugPlace($listing));
             }
             $listing->rejection_reason = null;
 
@@ -614,5 +615,18 @@ class Posting
     public function validateBasics(array $input, bool $partial = false): array
     {
         return Validator::make($input, $this->basicRules($partial), $this->basicMessages())->validate();
+    }
+
+    /**
+     * Neighbourhood (real estate) and place for the slug of a new listing.
+     *
+     * @return list<?string>
+     */
+    private function slugPlace(Listing $listing): array
+    {
+        $listing->loadMissing(['location', 'fieldValues']);
+        $hood = CardSpecs::for($listing)['neighbourhood'];
+
+        return [$hood, $listing->location?->name];
     }
 }

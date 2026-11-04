@@ -31,9 +31,28 @@ class ListingSlug
         return trim($slug, '-') !== '' ? trim($slug, '-') : 'oglas';
     }
 
-    public static function unique(string $title, ?int $ignoreId = null): string
+    /**
+     * Title plus the parts people search with that the title does not have yet, e.g. the neighbourhood and
+     * the place: „Prodajem stan” in Lagator, Loznica → prodajem-stan-lagator-loznica. Only for new listings.
+     *
+     * @param  list<?string>  $extras
+     */
+    public static function withPlace(string $title, array $extras): string
     {
-        $base = static::base($title);
+        $words = static::base($title);
+        foreach ($extras as $extra) {
+            $part = $extra === null ? '' : static::base($extra);
+            if ($part !== '' && $part !== 'oglas' && ! str_contains('-'.$words.'-', '-'.$part.'-')) {
+                $words .= '-'.$part;
+            }
+        }
+
+        return $words;
+    }
+
+    public static function unique(string $title, ?int $ignoreId = null, array $extras = []): string
+    {
+        $base = $extras === [] ? static::base($title) : static::base(static::withPlace($title, $extras));
 
         $taken = Listing::withTrashed()
             ->where(fn ($q) => $q->where('slug', $base)->orWhere('slug', 'like', str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $base).'-%'))

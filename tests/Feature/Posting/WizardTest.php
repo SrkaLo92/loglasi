@@ -112,7 +112,7 @@ class WizardTest extends PostingTestCase
 
         $listing->refresh();
         $this->assertSame(ListingStatus::Published, $listing->status);
-        $this->assertSame('golf-4-1-9-tdi-ocuvan', $listing->slug);
+        $this->assertSame('golf-4-1-9-tdi-ocuvan-loznica', $listing->slug);
         $this->assertSame(3450.0, (float) $listing->price);
         $this->assertSame(Currency::EUR, $listing->currency);
         $this->assertSame('+381655415128', $listing->contact_phone);

@@ -13,7 +13,6 @@
 @use('App\Support\Search\ImageUrls')
 @use('App\Support\Search\PremiumXl')
 @use('App\Support\Search\TimeAgo')
-@use('App\Services\ListingFields')
 @once
 	@push('head')
 		<link rel="stylesheet" href="{{ asset_v('css/listing-card.css') }}">
@@ -28,17 +27,10 @@
 	$lcFeatured = ! $lcXl && $listing->isFeatured();
 	$lcExcerpt = $lcXl ? PremiumXl::excerpt($listing->description) : '';
 	$lcTag = in_array($heading, ['h2', 'h3', 'h4'], true) ? $heading : 'h3';
-	$lcSpecs = [];
-	if ($listing->relationLoaded('fieldValues')) {
-		foreach (app(ListingFields::class)->values($listing) as $value) {
-			if ($value['display'] !== '' && $value['display'] !== 'Da') {
-				$lcSpecs[] = $value['display'];
-			}
-			if (count($lcSpecs) === 3) {
-				break;
-			}
-		}
-	}
+	['specs' => $lcSpecs, 'neighbourhood' => $lcHood] = \App\Support\Search\CardSpecs::for($listing);
+	$lcPlace = implode(', ', array_filter([$lcHood, $listing->location?->name]));
+	// Alt as people search: „Stan 60 m² – Prodaja stanova Lagator, Loznica”.
+	$lcAlt = trim($listing->title.($listing->category ? ' – '.(trim((string) $listing->category->seo_phrase) ?: str_replace(' | ', ' ', $listing->category->name)) : '').($lcPlace !== '' ? ' '.$lcPlace : ''));
 	$lcFav = auth()->check() ? app(Favorites::class)->has((int) $listing->id) : null;
 @endphp
 <article {{ $attributes->class(['lc', 'lc--featured' => $highlight && ! $lcXl, 'lc--xl' => $lcXl, 'lc--list' => $layout === 'list', 'lc--wide' => $wide && ! $lcXl]) }}>
@@ -55,7 +47,7 @@
 							<source type="image/webp" srcset="{{ ImageUrls::url($lcImage, 'thumb') }} 400w, {{ ImageUrls::url($lcImage, 'medium') }} 800w" sizes="(max-width: 767px) {{ $wide && ! $lcXl ? '100vw' : '34vw' }}, 300px">
 						@endif
 					@endif
-					<img class="lc__img" src="{{ $lcFallback ?? ImageUrls::url($lcImage, 'medium') }}" alt="{{ $listing->title }}" width="400" height="300" loading="{{ $eager ? 'eager' : 'lazy' }}" decoding="async" @if ($eager) fetchpriority="high" @endif>
+					<img class="lc__img" src="{{ $lcFallback ?? ImageUrls::url($lcImage, 'medium') }}" alt="{{ $lcAlt }}" width="400" height="300" loading="{{ $eager ? 'eager' : 'lazy' }}" decoding="async" @if ($eager) fetchpriority="high" @endif>
 				</picture>
 			@else
 				<span class="lc__ph" aria-hidden="true">
@@ -81,10 +73,10 @@
 				<p class="lc__excerpt">{{ $lcExcerpt }}</p>
 			@endif
 			<p class="lc__meta">
-				@if ($listing->location)
-					{{ CategoryIcons::svg('pin', 14) }}<span class="lg-visually-hidden">Mesto: </span><span class="lc__place">{{ $listing->location->name }}</span>
+				@if ($lcPlace !== '')
+					{{ CategoryIcons::svg('pin', 14) }}<span class="lg-visually-hidden">Mesto: </span><span class="lc__place">{{ $lcPlace }}</span>
 				@endif
-				@if ($listing->location && $lcTime)<span class="lc__sep" aria-hidden="true">·</span>@endif
+				@if ($lcPlace !== '' && $lcTime)<span class="lc__sep" aria-hidden="true">·</span>@endif
 				@if ($lcTime)<time datetime="{{ $lcTime->toIso8601String() }}">{{ TimeAgo::format($lcTime) }}</time>@endif
 			</p>
 			@if ($lcXl)
@@ -99,6 +91,10 @@
 		</form>
 	@else
 		{{-- A guest sees the heart too (as on kupujemprodajem); it leads to login. --}}
-		<div class="lc__fav"><a class="lc__fav-btn" href="{{ \App\Support\Auth\LoginPage::urlBack(request()) }}" rel="nofollow" aria-label="Prijavite se da biste sačuvali oglas: {{ $listing->title }}">{{ CategoryIcons::svg('heart', 20, '2') }}</a></div>
+		{{-- A form, not a link: lists do not hand search engines a login link per card. --}}
+		<form class="lc__fav" method="get" action="{{ \App\Support\Auth\LoginPage::url() }}">
+			<input type="hidden" name="{{ \App\Support\Auth\LoginPage::BACK }}" value="{{ request()->getRequestUri() }}">
+			<button class="lc__fav-btn" type="submit" aria-label="Prijavite se da biste sačuvali oglas: {{ $listing->title }}">{{ CategoryIcons::svg('heart', 20, '2') }}</button>
+		</form>
 	@endif
 </article>

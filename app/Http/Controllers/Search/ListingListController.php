@@ -8,6 +8,7 @@ use App\Models\Location;
 use App\Services\Catalog;
 use App\Services\ListingFields;
 use App\Services\ListingSearch;
+use App\Support\Search\ImageUrls;
 use App\Support\Search\WebFilters;
 use App\Support\Seo;
 use Illuminate\Http\Request;
@@ -93,6 +94,11 @@ class ListingListController extends Controller
 
         if ($filters->category && ! $filters->location && $page === 1 && ! $filters->hasFilters()) {
             Seo::get()->itemList($results->getCollection(), '/oglasi/'.$filters->category->slug.'/');
+        }
+        // A shared category or place page shows the photo of its first listing, not the generic picture.
+        $cover = $filters->category ? $results->getCollection()->first(fn ($l) => $l->coverImage)?->coverImage : null;
+        if ($cover) {
+            Seo::get()->image(ImageUrls::fallback($cover, 'large') ?? ImageUrls::url($cover, 'large'));
         }
 
         return view('search.list', [

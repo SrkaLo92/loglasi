@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Enums\Currency;
 use App\Enums\ListingStatus;
 use App\Models\Category;
 use App\Models\Firm;
@@ -12,6 +13,7 @@ use App\Services\Catalog;
 use App\Services\ListingFields;
 use App\Support\Pages\Company;
 use App\Support\Pages\PageText;
+use App\Support\Search\CardSpecs;
 use App\Support\Seo\Url;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -265,8 +267,13 @@ class Seo
 
     public function listing(Listing $listing): self
     {
-        $listing->loadMissing(['category.parent', 'location', 'user.firm', 'images']);
+        $listing->loadMissing(['category.parent', 'location', 'user.firm', 'images', 'fieldValues']);
         $place = $listing->location?->name ?: 'Loznica';
+        // Real estate names its neighbourhood too: „…, Nekretnine, Lagator, Loznica”.
+        $hood = CardSpecs::for($listing)['neighbourhood'];
+        if ($hood !== null && mb_stripos($place, $hood) === false) {
+            $place = $hood.', '.$place;
+        }
         $top = $listing->category ? static::topCategory($listing->category) : null;
         $topSlug = $top?->slug;
         $vars = [
@@ -405,7 +412,7 @@ class Seo
 
             $this->title(static::fitTitle($phrase.' '.$location->name.', oglasi', $phrase.' '.$location->name))
                 ->h1($phrase.' '.$location->name)
-                ->description(static::countLabel($count).' '.static::about($accusative, $category).' '.$where.'.');
+                ->description(static::phraseDescription($phrase.' '.$location->name, $category, $location, $count));
 
             $crumbs[] = [$location->name, $path];
             $indexable = $count >= static::placeMinListings();
@@ -416,7 +423,9 @@ class Seo
 
             $this->title($category->seo_title ?: ($own !== '' ? static::fitTitle($own.' Loznica') : static::withSuffix(static::text('category.title', $vars))))
                 ->h1($category->seo_h1 ?: ($own !== '' ? $own.' Loznica' : static::text('category.h1', $vars)))
-                ->description($category->seo_description ?: (static::clean((string) $category->description) ?: static::text('category.description', $vars)), (bool) $category->seo_description);
+                ->description($category->seo_description
+                    ?: ($own !== '' ? static::phraseDescription($own.' Loznica', $category, null, $count)
+                        : (static::clean((string) $category->description) ?: static::text('category.description', $vars))), (bool) $category->seo_description);
 
             $indexable = $count >= static::categoryMinListings();
         }
@@ -897,6 +906,27 @@ class Seo
     {
         return Listing::query()->published()
             ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()));
+    }
+
+    /**
+     * „Prodaja stanova Lešnica: 8 oglasa, cene od 25.000 € do 120.000 €. Pogledajte i postavite oglas besplatno.”
+     * The price range only where listings have prices (not jobs or free things) and at least two differ.
+     */
+    public static function phraseDescription(string $phrase, Category $category, ?Location $location, int $count): string
+    {
+        $range = '';
+        $top = static::topCategory($category);
+        if (! in_array($top->slug, ['poslovi', 'besplatne-stvari'], true) && $count >= 2) {
+            $ids = Category::query()->where('parent_id', $category->id)->pluck('id')->push($category->id);
+            $row = static::activeListings()->whereIn('category_id', $ids)->where('price_eur', '>', 0)
+                ->when($location, fn ($q) => $q->where('location_id', $location->id))
+                ->selectRaw('MIN(price_eur) as low, MAX(price_eur) as high, COUNT(*) as n')->first();
+            if ($row && (int) $row->n >= 2 && (float) $row->low < (float) $row->high) {
+                $range = ', cene od '.Price::label((float) $row->low, Currency::EUR).' do '.Price::label((float) $row->high, Currency::EUR);
+            }
+        }
+
+        return $phrase.': '.static::countLabel($count).$range.'. Pogledajte i postavite oglas besplatno.';
     }
 
     /** Name of the category as people search it („Prodaja stanova”, „Polovni automobili”). */
