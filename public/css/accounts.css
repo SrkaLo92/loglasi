@@ -538,3 +538,7 @@ a.lga-stat:hover { border-color: var(--lg-green); }
 	.lga > .lga-stats { order: 2; }
 	.lga > .lga-card { order: 3; }
 }
+
+.lga-blocked { display: grid; gap: 4px; margin: 12px 0 0; padding: 0; list-style: none; }
+.lga-blocked li { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; border-bottom: 1px solid var(--lg-line, #e3e7e4); }
+.lga-blocked li:last-child { border-bottom: 0; }

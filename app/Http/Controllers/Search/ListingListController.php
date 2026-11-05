@@ -8,6 +8,7 @@ use App\Models\Location;
 use App\Services\Catalog;
 use App\Services\ListingFields;
 use App\Services\ListingSearch;
+use App\Services\Users\UserBlocks;
 use App\Support\Search\ImageUrls;
 use App\Support\Search\WebFilters;
 use App\Support\Seo;
@@ -77,7 +78,7 @@ class ListingListController extends Controller
             return redirect()->to($filters, 302);
         }
 
-        $results = $this->search->paginate($filters->params);
+        $results = $this->search->paginate(['exclude_users' => app(UserBlocks::class)->blockedIds($request->user())] + $filters->params);
         if ($request->headers->get('X-Lg-Count') === '1') {
             // "Prikaži 123 oglasa" on the filter button while the filters change.
             return response()->json(['count' => $results->total()])

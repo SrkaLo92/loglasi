@@ -95,6 +95,7 @@
 		<div class="lgp-firm__main">
 			@include('listing.profile.listings', ['title' => 'Oglasi firme'])
 			@include('ratings.partials.brief', ['summary' => $ratingSummary, 'latest' => $ratingLatest])
+			@include('listing.profile.block')
 		</div>
 		<aside class="lgp-firm__side" aria-label="Podaci o firmi">
 			<details class="lgp-firm__more" open data-lgp-collapse>

@@ -5,6 +5,7 @@ use App\Http\Controllers\Accounts\LoginController;
 use App\Http\Controllers\Accounts\MyAccountController;
 use App\Http\Controllers\Accounts\PasswordController;
 use App\Http\Controllers\Accounts\RegistrationController;
+use App\Http\Controllers\Users\BlockController;
 use Illuminate\Support\Facades\Route;
 
 // Accounts: login, registration, password, email confirmation, "Moj nalog".
@@ -50,4 +51,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('/moj-nalog/slika', [MyAccountController::class, 'destroyAvatar'])->name('account.avatar.delete');
         Route::delete('/moj-nalog/brisanje', [MyAccountController::class, 'destroy'])->name('account.delete');
     });
+
+    // Blocking a user (profile, settings list).
+    Route::post('/moj-nalog/blokirani/{user}', [BlockController::class, 'store'])->whereNumber('user')->middleware('throttle:messages-favorites')->name('users.block');
+    Route::delete('/moj-nalog/blokirani/{user}', [BlockController::class, 'destroy'])->whereNumber('user')->middleware('throttle:messages-favorites')->name('users.unblock');
 });

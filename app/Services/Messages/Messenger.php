@@ -7,6 +7,7 @@ use App\Models\Conversation;
 use App\Models\Listing;
 use App\Models\Message;
 use App\Models\User;
+use App\Services\Users\UserBlocks;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -79,23 +80,20 @@ class Messenger
         return $listing->isActive();
     }
 
-    /** $blocker stops all messages with $blockedId (both directions). Idempotent. */
+    /** $blocker stops all messages with $blockedId (both directions). Idempotent. See UserBlocks. */
     public function block(User $blocker, int $blockedId): void
     {
-        if ($blocker->id === $blockedId) {
-            return;
-        }
-        DB::table('user_blocks')->insertOrIgnore(['blocker_id' => $blocker->id, 'blocked_id' => $blockedId, 'created_at' => now()]);
+        app(UserBlocks::class)->block($blocker, $blockedId);
     }
 
     public function unblock(User $blocker, int $blockedId): void
     {
-        DB::table('user_blocks')->where('blocker_id', $blocker->id)->where('blocked_id', $blockedId)->delete();
+        app(UserBlocks::class)->unblock($blocker, $blockedId);
     }
 
     public function hasBlocked(int $blockerId, int $blockedId): bool
     {
-        return DB::table('user_blocks')->where('blocker_id', $blockerId)->where('blocked_id', $blockedId)->exists();
+        return app(UserBlocks::class)->hasBlocked($blockerId, $blockedId);
     }
 
     /** Marks everything in the conversation as read for $user (read receipt + unread counter). */
@@ -124,8 +122,13 @@ class Messenger
     /** Unread messages across all of $user's conversations (header and bottom nav). Cached, reset on send/read. */
     public function unreadTotal(User $user): int
     {
-        return (int) Cache::remember(self::unreadKey($user->id), (int) config('messages.unread_cache_seconds'), fn () => (int) Conversation::query()->where('buyer_id', $user->id)->sum('buyer_unread')
-                + (int) Conversation::query()->where('seller_id', $user->id)->sum('seller_unread'));
+        $hidden = app(UserBlocks::class)->blockedIds($user);
+
+        // Conversations with users I blocked do not count (they are not in my inbox either).
+        return (int) Cache::remember(self::unreadKey($user->id), (int) config('messages.unread_cache_seconds'), fn () => (int) Conversation::query()->where('buyer_id', $user->id)
+            ->when($hidden !== [], fn ($q) => $q->whereNotIn('seller_id', $hidden))->sum('buyer_unread')
+                + (int) Conversation::query()->where('seller_id', $user->id)
+                    ->when($hidden !== [], fn ($q) => $q->whereNotIn('buyer_id', $hidden))->sum('seller_unread'));
     }
 
     public function forgetUnread(int $userId): void
@@ -150,9 +153,13 @@ class Messenger
         // Contract `page`: without a cursor, page N needs the first N*perPage rows of each side (small per user).
         $take = $after ? $perPage + 1 : $perPage * max(1, $page) + 1;
 
-        $side = function (string $column) use ($user, $after, $take) {
+        // Conversations with users I blocked are left out (they stay reachable by their address, to unblock).
+        $hidden = app(UserBlocks::class)->blockedIds($user);
+
+        $side = function (string $column) use ($user, $after, $take, $hidden) {
             return Conversation::query()
                 ->where($column, $user->id)
+                ->when($hidden !== [], fn ($q) => $q->whereNotIn($column === 'buyer_id' ? 'seller_id' : 'buyer_id', $hidden))
                 ->whereNotNull('last_message_at')
                 ->when($after, fn ($q) => $q->where(fn ($q) => $q
                     ->where('last_message_at', '<', $after['at'])

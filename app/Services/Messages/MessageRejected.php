@@ -42,7 +42,8 @@ class MessageRejected extends RuntimeException
 
     public static function blockedByRecipient(): self
     {
-        return new self('user_blocked', 'Ovaj korisnik ne prima vaše poruke.', 403);
+        // Same code as an unavailable recipient: the blocked user is not told that they were blocked.
+        return new self('recipient_unavailable', 'Ne možete poslati poruku ovom korisniku.', 403);
     }
 
     public static function youBlocked(): self

@@ -55,11 +55,11 @@ class BlockReportEventTest extends TestCase
             ->assertSee('Odblokiraj korisnika')
             ->assertDontSee('name="body"', false);
         $this->actingAs($buyer)->get('/moj-nalog/poruke/'.$conversation->id.'/')
-            ->assertSee('Ovaj korisnik ne prima vaše poruke.')
+            ->assertSee('Ne možete poslati poruku ovom korisniku.')
             ->assertDontSee('Odblokiraj korisnika');
 
         $this->actingAs($buyer)->post('/moj-nalog/poruke/'.$conversation->id.'/', ['body' => 'Halo?'])
-            ->assertSessionHasErrors(['body' => 'Ovaj korisnik ne prima vaše poruke.']);
+            ->assertSessionHasErrors(['body' => 'Ne možete poslati poruku ovom korisniku.']);
         $this->actingAs($seller)->post('/moj-nalog/poruke/'.$conversation->id.'/', ['body' => 'Ipak'])
             ->assertSessionHasErrors(['body' => 'Blokirali ste ovog korisnika. Odblokirajte ga da biste mu pisali.']);
 
@@ -69,7 +69,7 @@ class BlockReportEventTest extends TestCase
 
         Sanctum::actingAs($buyer);
         $this->postJson('/api/v1/conversations/'.$conversation->id.'/messages', ['body' => 'Halo?'])
-            ->assertStatus(403)->assertJsonPath('code', 'user_blocked');
+            ->assertStatus(403)->assertJsonPath('code', 'recipient_unavailable')->assertJsonPath('message', 'Ne možete poslati poruku ovom korisniku.');
 
         $this->assertDatabaseCount('messages', 1);
 

@@ -30,5 +30,5 @@
 	@include('listing.profile.actions', ['isFirm' => false, 'firm' => null])
 </section>
 @include('listing.profile.listings', ['title' => 'Oglasi korisnika'])
-<div class="lg-wrap">@include('ratings.partials.brief', ['summary' => $ratingSummary, 'latest' => $ratingLatest])</div>
+<div class="lg-wrap">@include('ratings.partials.brief', ['summary' => $ratingSummary, 'latest' => $ratingLatest])@include('listing.profile.block')</div>
 @endsection

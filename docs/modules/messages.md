@@ -45,7 +45,8 @@ Errors (`{code, message, fields}`):
 | 403 | `account_blocked` | sender is blocked (normally the token is already refused) |
 | 403 | `own_listing` | message to own listing |
 | 403 | `recipient_unavailable` | the other user is blocked by the moderators or deleted |
-| 403 | `user_blocked` | one participant blocked the other |
+| 403 | `user_blocked` | I blocked the other participant (unblock to write) |
+| 403 | `recipient_unavailable` | the recipient blocked me ("Ne možete poslati poruku ovom korisniku.", the block is not revealed), or the account is gone |
 | 404 | `not_found` | listing not live (new conversation), conversation of other users, unknown id |
 | 422 | `validation_failed` | `fields.body` (empty after removing HTML, over 2000 characters), `fields.listing_id` |
 | 429 | `too_many_requests` | rate limit (with `Retry-After`), same text to many sellers, too many new conversations |
@@ -139,3 +140,10 @@ DB_DATABASE=lb_messages_test php artisan test tests/Feature/Messages tests/Unit/
 ```
 
 Every route and rule: login and verification, own listing, live listing, blocked and deleted users, user blocks, reports, the `MessageSent` event (and that no mail is sent), body cleaning and length, links and escaping, rate limits per minute and day, spam guard, new conversations per day, read receipts, unread counters and the bottom nav badge, inbox grouping and keyset pages, polling, favourites (site toggle and API) with stats and sold/expired marks, contract shapes and error codes.
+
+## Blokiranje korisnika (UserBlocks)
+
+- Sajt: `POST`/`DELETE /moj-nalog/blokirani/{userId}/` (dugme na profilu `/korisnik/{slug}/`, lista u `/moj-nalog/podesavanja/#blokirani`), i dalje i iz razgovora.
+- API: `GET /me/blocks` → `{data: [{id, name, blocked_at}]}`; `POST`/`DELETE /users/{id}/block` → 204 (idempotentno; sebe ili nepostojeći nalog → 404).
+- `is_blocked` (ja sam njega blokirao): `other_user` u razgovorima, `seller` u detalju oglasa, `GET /firms/{id}` (uz `user_id`).
+- Posledice za onoga ko blokira: razgovori sa blokiranim nestaju iz inboxa i broja nepročitanih; oglasi blokiranog ne prikazuju se u pretrazi (sajt i API) i na početnoj; poruke ni u jednom smeru (pa ni push za poruke).

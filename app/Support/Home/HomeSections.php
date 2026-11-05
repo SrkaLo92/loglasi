@@ -7,6 +7,7 @@ use App\Enums\UserStatus;
 use App\Models\Firm;
 use App\Services\Catalog;
 use App\Services\ListingSearch;
+use App\Services\Users\UserBlocks;
 use App\Support\Firms\FirmDirectory;
 use App\Support\PageCache;
 use App\Support\Search\CategorySheet;
@@ -86,7 +87,10 @@ class HomeSections
     {
         $data['premium'] ??= []; // cached before the section existed
         $ids = array_merge($data['premium'], $data['featured'], $data['latest'], ...array_column($data['tabs'], 'ids'));
-        $listings = $this->search->listings(array_values(array_unique($ids)))->keyBy('id');
+        // The cache is shared; sellers the signed-in viewer blocked are left out here.
+        $hidden = app(UserBlocks::class)->blockedIds(auth()->user());
+        $listings = $this->search->listings(array_values(array_unique($ids)))
+            ->reject(fn ($l) => in_array((int) $l->user_id, $hidden, true))->keyBy('id');
         $pick = fn (array $ids) => (new Collection(array_map(fn (int $id) => $listings->get($id), $ids)))->filter()->values();
 
         // Premium XL + početna ended within the cache minute: left out.

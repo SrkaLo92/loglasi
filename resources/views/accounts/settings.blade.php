@@ -144,6 +144,31 @@
 		</details>
 	</section>
 
+	<section class="lga-card" aria-labelledby="lga-blokirani" id="blokirani">
+		<h2 id="lga-blokirani">Blokirani korisnici</h2>
+		@if ($blocked->isEmpty())
+			<p class="lga-help">Niste blokirali nikoga. Korisnika blokirate na njegovom profilu ili u razgovoru. Blokirani korisnik ne može da vam piše, a njegove oglase ne vidite u pretrazi.</p>
+		@else
+			<p class="lga-help">Ovi korisnici ne mogu da vam pišu, a njihove oglase ne vidite u pretrazi.</p>
+			<ul class="lga-blocked">
+				@foreach ($blocked as $row)
+					<li>
+						@if ($row->deleted_at || ! $row->slug)
+							<span>Obrisan korisnik</span>
+						@else
+							<a href="{{ url_slash('korisnik/'.$row->slug) }}">{{ $row->name }}</a>
+						@endif
+						<form method="post" action="{{ url_slash('moj-nalog/blokirani/'.$row->id) }}">
+							@csrf
+							@method('DELETE')
+							<button class="lga-link" type="submit">Odblokiraj</button>
+						</form>
+					</li>
+				@endforeach
+			</ul>
+		@endif
+	</section>
+
 	<section class="lga-card lga-card--links" aria-label="Ostalo">
 		<a class="lga-linkrow" href="{{ url_slash('moj-nalog/obavestenja/podesavanja') }}">
 			<span class="lga-task__icon">{{ SiteIcons::svg('bell', 20) }}</span>

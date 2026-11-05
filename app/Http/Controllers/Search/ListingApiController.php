@@ -6,6 +6,7 @@ use App\Http\Api\ApiResponse;
 use App\Http\Api\ListingFormatter;
 use App\Http\Controllers\Controller;
 use App\Services\ListingSearch;
+use App\Services\Users\UserBlocks;
 use Illuminate\Http\Request;
 
 /** GET /listings: search for the mobile app, {items, page, total} as in the contract. */
@@ -14,6 +15,7 @@ class ListingApiController extends Controller
     public function index(Request $request, ListingSearch $search)
     {
         $params = $search->validate($request->query());
+        $params['exclude_users'] = app(UserBlocks::class)->blockedIds(auth('sanctum')->user());
         $page = $search->paginate($params);
 
         $total = $page->total();

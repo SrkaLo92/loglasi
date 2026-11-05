@@ -6,6 +6,7 @@ use App\Http\Api\ListingFormatter;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
+use App\Services\Users\UserBlocks;
 
 /** Conversation and Message shapes from the contract, seen from $viewer. */
 class MessagesPresenter
@@ -21,6 +22,7 @@ class MessagesPresenter
                 'id' => $conversation->otherId($viewer),
                 'name' => $other && ! $other->trashed() ? $other->name : 'Obrisan korisnik',
                 'type' => $other?->isFirm() ? 'firm' : 'private',
+                'is_blocked' => app(UserBlocks::class)->hasBlocked($viewer->id, $conversation->otherId($viewer)), // I blocked them
             ],
             'last_message' => $conversation->lastMessage ? static::message($conversation->lastMessage, $conversation, $viewer) : null,
             'unread' => $conversation->unreadFor($viewer),

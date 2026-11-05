@@ -7,6 +7,7 @@ use App\Http\Api\ApiResponse;
 use App\Http\Api\ListingFormatter;
 use App\Http\Controllers\Controller;
 use App\Models\Firm;
+use App\Services\Users\UserBlocks;
 use App\Support\Home\HomeSections;
 use App\Support\Home\HomeSettings;
 use Illuminate\Http\Request;
@@ -24,7 +25,12 @@ class FirmApiController extends Controller
             throw ApiError::notFound('Firma ne postoji.');
         }
 
-        return ApiResponse::json($request, ListingFormatter::firm($firm), ApiResponse::CACHE_CATALOG);
+        $viewer = auth('sanctum')->user();
+
+        return ApiResponse::json($request, ListingFormatter::firm($firm) + [
+            'user_id' => (int) $user->id, // for POST /users/{id}/block
+            'is_blocked' => $viewer !== null && app(UserBlocks::class)->hasBlocked($viewer->id, (int) $user->id),
+        ], ApiResponse::CACHE_CATALOG);
     }
 
     /** The same cards as "Firme iz Loznice" on the site's home page; empty items = hide the section. */

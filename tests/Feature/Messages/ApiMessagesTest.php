@@ -50,7 +50,7 @@ class ApiMessagesTest extends TestCase
             ])
             ->assertJsonPath('listing.id', $listing->id)
             ->assertJsonPath('listing.status', 'active')
-            ->assertJsonPath('other_user', ['id' => $seller->id, 'name' => 'Firma Doo', 'type' => 'firm'])
+            ->assertJsonPath('other_user', ['id' => $seller->id, 'name' => 'Firma Doo', 'type' => 'firm', 'is_blocked' => false])
             ->assertJsonPath('last_message.body', 'Da li je stan slobodan?')
             ->assertJsonPath('last_message.mine', true)
             ->assertJsonPath('last_message.read', false)

@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\Catalog;
 use App\Services\FirmBenefits;
 use App\Services\Ratings\SellerRatings;
+use App\Services\Users\UserBlocks;
 use App\Support\Listing\Seller;
 use App\Support\Listing\SimilarListings;
 use App\Support\Listing\Stats;
@@ -82,6 +83,7 @@ class ProfileController extends Controller
             'total' => $total,
             'canEdit' => $canEdit,
             'isOwner' => $viewer !== null && $viewer->id === $user->id,
+            'iBlocked' => $viewer !== null && app(UserBlocks::class)->hasBlocked($viewer->id, $user->id),
             'editUrl' => url_slash($isFirm ? 'moj-nalog/firma' : (string) config('listing.profile_edit_path', 'moj-nalog')),
             'messageUrl' => $total > 0 ? Seller::profileMessageUrl($user->id) : null,
             'ratingSummary' => $ratings->summary($user->id),

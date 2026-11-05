@@ -1189,3 +1189,40 @@
 	flex: 1 1 auto;
 	min-width: 0;
 }
+
+/* Block the profile's owner */
+
+.lgp-block {
+	margin: 24px 0 8px;
+	font-size: 14px;
+	color: var(--lgp-muted);
+}
+
+.lgp-block form {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+
+.lgp-block__btn {
+	min-height: 44px;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	cursor: pointer;
+}
+
+.lgp-block__btn:hover {
+	color: #b42318;
+}
+
+.lgp-block__status {
+	margin: 0 0 4px;
+	color: #1f6f43;
+	font-weight: 600;
+}

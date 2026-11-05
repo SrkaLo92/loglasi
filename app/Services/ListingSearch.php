@@ -186,6 +186,7 @@ class ListingSearch
             'filters' => [],
             'featured_only' => false, // home page section, not an API parameter
             'featured_first' => true, // false: plain newest order (home page "latest" section)
+            'exclude_users' => [], // sellers the signed-in viewer blocked (UserBlocks), not an API parameter
             'sort' => 'newest',
             'page' => 1,
             'per_page' => self::PER_PAGE_DEFAULT,
@@ -213,6 +214,10 @@ class ListingSearch
 
         $this->applyPrice($query, $params['price_min'], $params['price_max'], $params['currency']);
         $this->applySeller($query, $params['seller_type'], $params['firm']);
+
+        if ($params['exclude_users'] !== []) {
+            $query->whereNotIn('listing_search.user_id', $params['exclude_users']);
+        }
 
         if ($params['filters'] !== []) {
             // One EXISTS per field on listing_field_values (field_id, value / value_num indexes).
@@ -265,6 +270,7 @@ class ListingSearch
         $key = 'search.count.'.SearchIndex::version().'.'.md5(serialize([
             $params['q'], $params['category'], $params['location'], $params['price_min'], $params['price_max'],
             $params['currency']->value, $params['seller_type'], $params['firm'], $params['filters'], $params['featured_only'],
+            $params['exclude_users'],
         ]));
 
         return (int) Cache::remember($key, self::COUNT_TTL, function () use ($params, $query) {

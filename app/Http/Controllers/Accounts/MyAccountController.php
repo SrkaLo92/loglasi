@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Location;
 use App\Rules\PhoneNumber;
 use App\Rules\PublicName;
+use App\Services\Users\UserBlocks;
 use App\Support\Account\AccountOverview;
 use App\Support\Auth\AccountDeletion;
 use App\Support\Auth\Accounts;
@@ -45,6 +46,7 @@ class MyAccountController extends Controller
         return view('accounts.settings', [
             'user' => $request->user()->load('location', 'firm'),
             'locations' => Location::query()->orderBy('sort')->orderBy('name')->get(['id', 'name']),
+            'blocked' => app(UserBlocks::class)->list($request->user()),
         ]);
     }
 

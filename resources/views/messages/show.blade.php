@@ -40,7 +40,7 @@
 	@if ($iBlocked)
 		<p class="lgm-alert lgm-alert--warn">Blokirali ste ovog korisnika. Ne možete da razmenjujete poruke dok ga ne odblokirate.</p>
 	@elseif ($blockedMe)
-		<p class="lgm-alert lgm-alert--warn">Ovaj korisnik ne prima vaše poruke.</p>
+		<p class="lgm-alert lgm-alert--warn">Ne možete poslati poruku ovom korisniku.</p>
 	@elseif ($otherAvailable)
 		<form class="lgm-form" method="post" action="{{ url_slash('moj-nalog/poruke/'.$conversation->id) }}" novalidate>
 			@csrf

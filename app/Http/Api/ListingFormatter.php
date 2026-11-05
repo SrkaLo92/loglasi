@@ -9,6 +9,7 @@ use App\Models\Listing;
 use App\Models\ListingImage;
 use App\Models\User;
 use App\Services\ListingFields;
+use App\Services\Users\UserBlocks;
 use App\Support\Firms\FirmPackage;
 use App\Support\Listing\Seller;
 use App\Support\Listing\WorkingHours;
@@ -77,7 +78,9 @@ class ListingFormatter
                 'highlight' => in_array($f['key'], $highlights, true),
             ], $fieldValues),
             'condition' => $fields->condition($listing),
-            'seller' => $listing->user ? static::seller($listing->user) : null,
+            'seller' => $listing->user ? static::seller($listing->user) + [
+                'is_blocked' => $viewer !== null && app(UserBlocks::class)->hasBlocked($viewer->id, (int) $listing->user_id), // I blocked the seller
+            ] : null,
             'views' => (int) $listing->views,
             'is_favorite' => $viewer !== null && DB::table('favorites')->where('user_id', $viewer->id)->where('listing_id', $listing->id)->exists(),
             'is_mine' => $mine,

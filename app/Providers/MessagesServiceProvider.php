@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\Messages\Messenger;
+use App\Services\Users\UserBlocks;
 use App\Support\ApiError;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ class MessagesServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(Messenger::class);
+        $this->app->scoped(UserBlocks::class);
     }
 
     public function boot(): void
